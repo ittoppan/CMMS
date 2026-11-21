@@ -9,8 +9,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { Grid, VStack } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, VStack, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -138,16 +137,22 @@ export default function AssetReliabilityProfilePage() {
 
   if (isLoading) {
     return (
-      <PageShell title={hero.title} description="กำลังโหลดโปรไฟล์..." breadcrumbs={[{ label: hero.title }]}>
+      <>
+      <PageHeader title={hero.title} description="กำลังโหลดโปรไฟล์..." breadcrumbs={[{ label: hero.title }]} />
+      <div className="space-y-6">
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
-      </PageShell>
+            </div>
+    </>
     );
   }
   if (error || !data) {
     return (
-      <PageShell title={hero.title} breadcrumbs={[{ label: hero.title }]}>
+      <>
+      <PageHeader title={hero.title} breadcrumbs={[{ label: hero.title }]} />
+      <div className="space-y-6">
         <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error?.message || "ไม่พบข้อมูล"} />
-      </PageShell>
+            </div>
+    </>
     );
   }
 
@@ -329,12 +334,13 @@ export default function AssetReliabilityProfilePage() {
   const trendTotalCost = (data.trend || []).reduce((s, m) => s + m.cost, 0);
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: displayName }]}
       title={displayName}
       description={`โปรไฟล์ความน่าเชื่อถือของเครื่องจักร — ข้อมูลจริงในระบบ ${data.generated_at ? `(อัปเดต ${new Date(data.generated_at).toLocaleString("th-TH")})` : ""}`}
-      actions={
+      actions={[
         <>
           <Button variant="secondary" onClick={() => window.history.back()}>
             <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> ย้อนกลับ
@@ -343,8 +349,9 @@ export default function AssetReliabilityProfilePage() {
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {globalMsg && <Alert variant="success" title="บันทึกสำเร็จ" description={globalMsg} />}
 
       {/* ── Summary ── */}
@@ -954,6 +961,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
         </div>
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }

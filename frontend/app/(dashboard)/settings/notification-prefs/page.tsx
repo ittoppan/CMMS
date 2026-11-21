@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -132,12 +132,12 @@ export default function NotificationPrefsPage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">NOTIFICATION PREFERENCES · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATION PREFERENCES · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "การแจ้งเตือนของฉัน" }]}
       title="การแจ้งเตือนของฉัน"
       description="เลือกว่าต้องการรับการแจ้งเตือนแต่ละประเภทผ่านช่องทางใด — ติ๊ก = รับการแจ้งเตือน (ค่าเริ่มต้นเปิดทั้งหมด)"
-      actions={
+      actions={[
         <>
           <Link href="/settings/push">
             <Button variant="secondary">
@@ -149,8 +149,8 @@ export default function NotificationPrefsPage() {
             {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="space-y-4 pb-24 lg:pb-8">
         {/* Quiet Hours */}
         <Card>
@@ -316,6 +316,7 @@ export default function NotificationPrefsPage() {
           </Button>
         </div>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

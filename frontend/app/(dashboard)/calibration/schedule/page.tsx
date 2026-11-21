@@ -5,7 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AndonLamp, { type AndonStatus } from "@/components/AndonLamp";
@@ -111,7 +111,8 @@ export default function CalibrationSchedulePage() {
   const overdueCount = (data?.items ?? []).filter((x) => x.date && x.date < new Date().toISOString().slice(0, 10) && x.status !== "approved" && x.status !== "completed" && x.status !== "cancelled").length;
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -120,7 +121,7 @@ export default function CalibrationSchedulePage() {
       ]}
       title="ตารางสอบเทียบ"
       description="รายการรอบสอบเทียบและแผนที่ถึงกำหนดในรอบมุมมอง — คำนวณจากข้อมูลจริง"
-      actions={
+      actions={[
         <div className="flex items-center gap-2">
           {overdueCount > 0 && (
             <Badge variant="danger" className="gap-1">
@@ -140,8 +141,9 @@ export default function CalibrationSchedulePage() {
             </SelectContent>
           </Select>
         </div>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -167,6 +169,7 @@ export default function CalibrationSchedulePage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -6,7 +6,7 @@ import { RefreshCw } from "lucide-react";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,7 +48,8 @@ function ConfigInner() {
   const defs = defsQ.data?.definitions ?? [];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -57,7 +58,7 @@ function ConfigInner() {
         { label: "วิศวกรรมความเสียหาย", href: relNavHref("/reliability", query) },
         { label: "การตั้งค่าและนิยาม" },
       ]}
-      actions={
+      actions={[
         <Button
           variant="outline"
           size="sm"
@@ -82,8 +83,9 @@ function ConfigInner() {
           <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {configQ.error && <RelError message={configQ.error.message} />}
       {configQ.isLoading && <RelLoading label="กำลังโหลดการตั้งค่าระบบ…" />}
 
@@ -199,7 +201,8 @@ function ConfigInner() {
           </div>
         )}
       </RelSection>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

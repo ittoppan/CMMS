@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import {
   Select,
   SelectContent,
@@ -119,18 +119,18 @@ export default function SupervisorQueuePage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
-        actions={
-          <>
-            <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> รีเฟรช
-            </Button>
-            {can.plan && selectedIds.length > 0 && (
-              <Button size="sm" onClick={() => setAssignOpen(true)}>
-                <UserPlus className="h-4 w-4" /> มอบหมาย {selectedIds.length} ใบ
-              </Button>
-            )}
-          </>
-        }
+        actions={[
+          <Button key="refresh" variant="secondary" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> รีเฟรช
+          </Button>,
+          ...(can.plan && selectedIds.length > 0
+            ? [
+                <Button key="assign" size="sm" onClick={() => setAssignOpen(true)}>
+                  <UserPlus className="h-4 w-4" /> มอบหมาย {selectedIds.length} ใบ
+                </Button>,
+              ]
+            : []),
+        ]}
       />
 
 

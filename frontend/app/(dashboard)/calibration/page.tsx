@@ -3,8 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Plus,
   Scale,
@@ -166,7 +165,8 @@ export default function CalibrationPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -175,13 +175,14 @@ export default function CalibrationPage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <Button variant="primary" onClick={() => router.push("/calibration/create")}>
           <Plus className="w-4 h-4" />
           เพิ่มเครื่องมือ / แผนสอบเทียบ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">
@@ -278,6 +279,7 @@ export default function CalibrationPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

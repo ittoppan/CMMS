@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowLeft, SquarePen } from "lucide-react";
@@ -61,46 +61,55 @@ export default function CustomPageView() {
 
   if (permLoading) {
     return (
-      <PageShell
+    <>
+      <PageHeader
         eyebrow={<p className="cmms-eyebrow">CMS PAGES · CMMS-TOPPAN</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ดูหน้าที่สร้างเอง" }]}
         title="ดูหน้าที่สร้างเอง"
-      >
+      />
+      <div className="space-y-6">
         <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
-      </PageShell>
+      </div>
+    </>
     );
   }
 
   // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" (pages) — ลิงก์ตรงไม่มีสิทธิ์เปิดดูไม่ได้
   if (!canViewPages) {
     return (
-      <PageShell
+    <>
+      <PageHeader
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ดูหน้าที่สร้างเอง" }]}
         title="ดูหน้าที่สร้างเอง"
-      >
+      />
+      <div className="space-y-6">
         <Alert variant="danger" title="ไม่มีสิทธิ์เข้าถึงหน้านี้" description={`กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"`} />
         <div className="pt-2">
           <a href="/dashboard" className="text-sm font-semibold text-primary hover:underline">
             กลับไปหน้าแรก
           </a>
         </div>
-      </PageShell>
+      </div>
+    </>
     );
   }
 
   if (error) {
     return (
-      <PageShell
+    <>
+      <PageHeader
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ดูหน้าที่สร้างเอง" }]}
         title="ดูหน้าที่สร้างเอง"
-      >
+      />
+      <div className="space-y-6">
         <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
         <div className="pt-2">
           <a href="/pages" className="text-sm font-semibold text-primary hover:underline">
             กลับไปหน้ารายการหน้าเว็บ
           </a>
         </div>
-      </PageShell>
+      </div>
+    </>
     );
   }
 
@@ -112,7 +121,8 @@ export default function CustomPageView() {
   }, [page]);
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ระบบ & ตั้งค่า" },
@@ -120,7 +130,7 @@ export default function CustomPageView() {
       ]}
       title={page?.title || "กำลังโหลดหน้า..."}
       description={page ? `CUSTOM PAGE · /pages/${page.slug}` : undefined}
-      actions={
+      actions={[
         page ? (
           <>
             <a href="/pages" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground">
@@ -136,8 +146,9 @@ export default function CustomPageView() {
             )}
           </>
         ) : undefined
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <div className="pb-24 lg:pb-8">
         {/* เนื้อหาหน้าที่สร้างจาก GrapesJS */}
         {page ? (
@@ -149,6 +160,7 @@ export default function CustomPageView() {
           <p className="text-sm text-muted-foreground">กำลังโหลดหน้า...</p>
         )}
       </div>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -14,6 +14,7 @@ import { usePageHero } from "@/lib/i18n";
 import { usePageLayout } from "@/lib/pageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -164,19 +165,17 @@ export default function KnowledgeReviewsPage() {
       {error && <Alert variant="danger" title="ทำรายการไม่สำเร็จ" description={error} />}
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
 
-      <div style={layoutStyle("hero")} className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">
-            {hero.title}
-          </h1>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">
-            {hero.desc}
-          </p>
-        </div>
-        <Button variant="secondary" onClick={load} disabled={refreshing}>
-          <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-        </Button>
+      <div style={layoutStyle("hero")}>
+        <PageHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          actions={[
+            <Button key="refresh" variant="secondary" onClick={load} disabled={refreshing}>
+              <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
+            </Button>,
+          ]}
+        />
       </div>
 
       <div style={layoutStyle("filters")} className="flex flex-wrap items-center gap-2">

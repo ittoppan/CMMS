@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -115,17 +114,19 @@ export default function MtbfMttrCreatePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MTBF / MTTR · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
-        { label: "บันทึกข้อมูล" },
-      ]}
-      title="บันทึกข้อมูลดัชนีชี้วัด MTBF / MTTR"
-      description="บันทึกชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม — ระบบคำนวณ MTBF/MTTR อัตโนมัติ"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+          { label: "บันทึกข้อมูล" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MTBF / MTTR · CMMS-TOPPAN</p>}
+        title="บันทึกข้อมูลดัชนีชี้วัด MTBF / MTTR"
+        description="บันทึกชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม — ระบบคำนวณ MTBF/MTTR อัตโนมัติ"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>บันทึกข้อมูล</CardTitle>
           <CardDescription>เลือกเครื่องจักรและรอบเวลา แล้วกรอกตัวเลขการใช้งาน</CardDescription>
@@ -235,6 +236,7 @@ export default function MtbfMttrCreatePage() {
           </div>
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

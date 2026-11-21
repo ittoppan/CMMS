@@ -4,8 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { AlertTriangle, Boxes, CircleDollarSign, History, ShoppingCart, Wrench, Database, WifiOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -103,31 +102,33 @@ export default function SparePartsOverviewPage() {
   const monthlyMax = Math.max(1, ...(data.monthly_bars || []).map((b) => b.qty));
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MAINTENANCE SPARE PARTS OVERVIEW</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คลังอะไหล่", href: "/spare_parts" },
-        { label: "ภาพรวมสต็อก & การเบิก" },
-      ]}
-      title="ภาพรวมสต็อก & การเบิกอะไหล่"
-      description="สต็อกและต้นทุนอ้างอิงจาก Sage 300 (Last known stock) — การใช้จริงมาจากใบสั่งซ่อม/ใบเบิก Pending"
-      actions={
-        <div className="flex items-center gap-3">
-          {offline && (
-            <span className="cmms-status flex items-center gap-1.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-500" aria-hidden="true" />
-              <WifiOff className="w-3.5 h-3.5" aria-hidden="true" />
-              ออฟไลน์ — แสดงสต็อกล่าสุด (Last known stock)
-            </span>
-          )}
-          <Badge variant="info" className="gap-1.5">
-            <Database className="w-3.5 h-3.5" aria-hidden="true" />
-            {data.stock_source_label || "Stock from Sage 300"}
-          </Badge>
-        </div>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คลังอะไหล่", href: "/spare_parts" },
+          { label: "ภาพรวมสต็อก & การเบิก" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MAINTENANCE SPARE PARTS OVERVIEW</p>}
+        title="ภาพรวมสต็อก & การเบิกอะไหล่"
+        description="สต็อกและต้นทุนอ้างอิงจาก Sage 300 (Last known stock) — การใช้จริงมาจากใบสั่งซ่อม/ใบเบิก Pending"
+        actions={[
+          <div key="actions" className="flex items-center gap-3">
+            {offline && (
+              <span className="cmms-status flex items-center gap-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-500" aria-hidden="true" />
+                <WifiOff className="w-3.5 h-3.5" aria-hidden="true" />
+                ออฟไลน์ — แสดงสต็อกล่าสุด (Last known stock)
+              </span>
+            )}
+            <Badge variant="info" className="gap-1.5">
+              <Database className="w-3.5 h-3.5" aria-hidden="true" />
+              {data.stock_source_label || "Stock from Sage 300"}
+            </Badge>
+          </div>,
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ภาพรวมสต็อก & การเบิก"
         summary="มุมมองรวมของคงเหลือและต้นทุนอะไหล่ เทียบกับการใช้จริงจากใบสั่งซ่อม/ใบเบิกที่ยังค้าง"
@@ -330,7 +331,8 @@ export default function SparePartsOverviewPage() {
           </Grid>
         </>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }
 

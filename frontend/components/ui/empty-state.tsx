@@ -37,7 +37,7 @@ function EmptyState({
       )}
       <h3 className="max-w-full break-words text-balance text-[0.95rem] font-semibold text-[var(--cmms-text-primary)]">{title}</h3>
       {description && (
-        <p className="mt-1.5 max-w-[46ch] break-words text-[0.8125rem] leading-relaxed text-[var(--cmms-text-secondary)]">
+        <p className="mt-1.5 max-w-[46ch] break-words text-sm leading-relaxed text-[var(--cmms-text-secondary)]">
           {description}
         </p>
       )}

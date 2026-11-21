@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -104,21 +104,23 @@ export default function WorkPermitCreatePage() {
   const reqBy = (cat: string) => (selectedType?.requirements || []).filter((r) => r.category === cat && r.is_active);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · CREATE</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ใบอนุญาตทำงานเสี่ยง (PTW)", href: PATHS.list },
-        { label: "ออกใบอนุญาตใหม่" },
-      ]}
-      title="ออกใบอนุญาตทำงานเสี่ยง"
-      description="ข้อมูลจะถูกตรวจสอบและอนุมัติโดยระบบฝั่ง backend — ระบบจะสร้างสายอนุมัติตามประเภทงานโดยอัตโนมัติ"
-      actions={
-        <Button variant="secondary" onClick={() => router.push(PATHS.list)}>
-          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" /> กลับไปรายการ
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ใบอนุญาตทำงานเสี่ยง (PTW)", href: PATHS.list },
+          { label: "ออกใบอนุญาตใหม่" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · CREATE</p>}
+        title="ออกใบอนุญาตทำงานเสี่ยง"
+        description="ข้อมูลจะถูกตรวจสอบและอนุมัติโดยระบบฝั่ง backend — ระบบจะสร้างสายอนุมัติตามประเภทงานโดยอัตโนมัติ"
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push(PATHS.list)}>
+            <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" /> กลับไปรายการ
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="ไม่สามารถสร้างใบอนุญาตได้" description={error} />}
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -335,6 +337,7 @@ export default function WorkPermitCreatePage() {
           </Card>
         )}
       </div>
-    </PageShell>
+      </div>
+    </>
   );
 }

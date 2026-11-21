@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -85,22 +85,24 @@ export default function SupplierCreatePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ผู้จำหน่าย", href: "/suppliers" },
-        { label: t("form.manufacturer_create_title") },
-      ]}
-      title={t("form.manufacturer_create_title")}
-      description={t("hero.manufacturer_create_desc")}
-      actions={
-        <Button variant="secondary" onClick={() => router.push("/suppliers")}>
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.back")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ผู้จำหน่าย", href: "/suppliers" },
+          { label: t("form.manufacturer_create_title") },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
+        title={t("form.manufacturer_create_title")}
+        description={t("hero.manufacturer_create_desc")}
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push("/suppliers")}>
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.back")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         <CardContent className="space-y-5">
           {error && (
@@ -214,6 +216,7 @@ export default function SupplierCreatePage() {
           </Button>
         </CardFooter>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

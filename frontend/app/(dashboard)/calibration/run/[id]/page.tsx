@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -218,7 +218,8 @@ export default function RunDetailPage() {
       : null;
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION · WORKFLOW</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -233,7 +234,7 @@ export default function RunDetailPage() {
           ? `${data.asset_code ?? ""} · ${statusLabel[data.status] || data.status} · ใบรับรอง: ${data.certificate_number || "-"}`
           : "กำลังโหลด..."
       }
-      actions={
+      actions={[
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => router.push(`/calibration/instruments/${data?.asset_id}`)}>
             <ArrowLeft className="w-4 h-4" /> กลับ
@@ -242,8 +243,9 @@ export default function RunDetailPage() {
             <RefreshCw className="w-4 h-4" /> รีเฟรช
           </Button>
         </div>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -377,6 +379,7 @@ export default function RunDetailPage() {
           )}
         </>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }

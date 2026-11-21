@@ -8,8 +8,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { Grid, VStack } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, VStack, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -78,12 +77,13 @@ export default function AssetReliabilityPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <>
           <Button variant="secondary" onClick={() => router.push("/asset-reliability/reports")}>
             <Activity size={16} strokeWidth={1.75} aria-hidden="true" /> รายงาน
@@ -92,8 +92,9 @@ export default function AssetReliabilityPage() {
             <Gauge size={16} strokeWidth={1.75} aria-hidden="true" /> เครื่องสำคัญ
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ความน่าเชื่อถือสินทรัพย์ (Asset Reliability)"
@@ -261,6 +262,7 @@ export default function AssetReliabilityPage() {
           </Card>
         </>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

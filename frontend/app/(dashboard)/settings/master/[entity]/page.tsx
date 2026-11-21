@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -250,14 +250,15 @@ export default function MasterDataPage() {
 
   if (!def) {
     return (
-      <PageShell
-        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+      <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ระบบฐานข้อมูล" }]}
         title="ไม่พบ entity"
-        description="รายการนี้ไม่มีในระบบ"
-      >
+        description="รายการนี้ไม่มีในระบบ" />
+      <div className="space-y-6">
         <Alert variant="danger">entity ไม่ถูกต้อง: {entityKey}</Alert>
-      </PageShell>
+            </div>
+    </>
     );
   }
 
@@ -341,12 +342,12 @@ export default function MasterDataPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: def.label }]}
       title={def.label}
       description={def.desc}
-      actions={
+      actions={[
         <>
           <Button variant="secondary" onClick={fetchRows}>
             <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
@@ -357,8 +358,8 @@ export default function MasterDataPage() {
             เพิ่มรายการ
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
       <Card>
         <CardHeader>
@@ -415,6 +416,7 @@ export default function MasterDataPage() {
           </div>
         </div>
       </AnimatedDialog>
-    </PageShell>
+          </div>
+    </>
   );
 }

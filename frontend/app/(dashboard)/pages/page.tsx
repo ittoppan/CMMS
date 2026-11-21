@@ -7,7 +7,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Grid } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -57,12 +57,14 @@ export default function CustomPagesListPage() {
 
   if (permLoading) {
     return (
-      <PageShell
+      <>
+        <PageHeader
         eyebrow={<p className="cmms-eyebrow">CMS PAGES · CMMS-TOPPAN</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
         title="หน้าเว็บที่สร้างเอง"
         description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"
-      >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="จัดการหน้า (Pages)"
@@ -73,34 +75,39 @@ export default function CustomPagesListPage() {
         related={[{"href":"/editor/builder","label":"ตัวสร้างหน้า/Builder"},{"href":"/documents","label":"เอกสาร (ถ้าเกี่ยวข้อง)"}]}
       />
         <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
-      </PageShell>
+      </div>
+      </>
     );
   }
 
   // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" (pages)
   if (!canViewPages) {
     return (
-      <PageShell
+      <>
+        <PageHeader
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
         title="หน้าเว็บที่สร้างเอง"
         description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"
-      >
+      />
+      <div className="space-y-6">
         <Alert variant="danger" title="ไม่มีสิทธิ์เข้าถึงหน้านี้" description={`กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"`} />
         <div className="pt-2">
           <Link href="/dashboard" className="text-sm font-semibold text-primary hover:underline">
             กลับไปหน้าแรก
           </Link>
         </div>
-      </PageShell>
+      </div>
+      </>
     );
   }
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
       title="หน้าเว็บที่สร้างเอง"
       description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder — กดเพื่อเปิดดูหรือเข้าไปแก้ไข"
-      actions={
+      actions={[
         canBuild ? (
           <Link
             href="/editor/builder"
@@ -110,8 +117,8 @@ export default function CustomPagesListPage() {
             สร้างหน้าใหม่
           </Link>
         ) : undefined
-      }
-    >
+      ]}
+    />
       <div className="space-y-6 pb-24 lg:pb-8">
         {pages === null ? (
           <div className="space-y-3">
@@ -175,6 +182,6 @@ export default function CustomPagesListPage() {
           </Grid>
         )}
       </div>
-    </PageShell>
+    </>
   );
 }

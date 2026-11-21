@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import AndonBadge from "@/components/AndonBadge";
 import { usePageHero } from "@/lib/i18n";
@@ -55,7 +55,9 @@ export default function PredictiveMaintenancePage() {
   };
 
   return (
-    <PageShell eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc}>
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc} />
+      <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
         <label className="text-sm">Horizon (days)</label>
         <input type="number" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))} className="border rounded px-2 py-1 w-20" />
@@ -80,6 +82,7 @@ export default function PredictiveMaintenancePage() {
           ))}
         </div>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }

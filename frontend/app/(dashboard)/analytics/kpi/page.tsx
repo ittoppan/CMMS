@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { DetailHeader } from "@/components/layout";
 import {
   Banknote, CalendarDays,
   Zap, Clock, ChartBar, RefreshCw, TriangleAlert, Settings,
@@ -184,27 +185,17 @@ export default function KpiDashboardPage() {
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       <div style={layoutStyle("hero")}>
-        <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-              <span className="cmms-andon-chip" data-on-dark="true">
-                <ChartBar size={14} strokeWidth={2} aria-hidden="true" /> ช่วง {months} เดือนล่าสุด
-              </span>
-            </div>
-            <p className="cmms-hero-desc">{hero.desc}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setSettingsOpen(true)}>
-              <Settings size={16} strokeWidth={1.75} aria-hidden="true" />
-              ตั้งค่า KPI
-            </Button>
-            <Select value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
-              <SelectTrigger
-                aria-label="ช่วงเวลา"
-                className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
-              >
+        <DetailHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          status={<span className="cmms-andon-chip"><ChartBar size={14} strokeWidth={2} aria-hidden="true" /> ช่วง {months} เดือนล่าสุด</span>}
+          actions={[
+            <Button key="settings" variant="secondary" size="sm" className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setSettingsOpen(true)}>
+              <Settings size={16} strokeWidth={1.75} aria-hidden="true" /> ตั้งค่า KPI
+            </Button>,
+            <Select key="months" value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
+              <SelectTrigger aria-label="ช่วงเวลา" className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -212,9 +203,9 @@ export default function KpiDashboardPage() {
                 <SelectItem value="6">6 เดือน</SelectItem>
                 <SelectItem value="12">12 เดือน</SelectItem>
               </SelectContent>
-            </Select>
-          </div>
-        </div>
+            </Select>,
+          ]}
+        />
       </div>
 
       <ModuleGuide

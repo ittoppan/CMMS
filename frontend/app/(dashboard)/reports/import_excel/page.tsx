@@ -5,6 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { ModuleGuide } from "@/components/dashboard/module-guide";
@@ -379,20 +380,12 @@ export default function ImportExcelPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">REPORTS IMPORT EXCEL · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">นำเข้าข้อมูลจาก Excel (Import)</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Upload size={14} strokeWidth={1.75} aria-hidden="true" /> แม่แบบ + ตรวจสอบ + สรุปผลกระทบ + ยืนยัน
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            ดาวน์โหลดแม่แบบ เติมข้อมูล อัปโหลดเพื่อตรวจสอบทีละแถว ดูผลกระทบ (เพิ่ม/อัปเดต/ข้าม) แล้วนำเข้าเฉพาะแถวที่ผ่าน — รองรับโหมดจัดการข้อมูลซ้ำสำหรับชุดที่มีรหัสอ้างอิง
-          </p>
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">REPORTS IMPORT EXCEL · CMMS-TOPPAN</p>}
+        title="นำเข้าข้อมูลจาก Excel (Import)"
+        description="ดาวน์โหลดแม่แบบ เติมข้อมูล อัปโหลดเพื่อตรวจสอบทีละแถว ดูผลกระทบ (เพิ่ม/อัปเดต/ข้าม) แล้วนำเข้าเฉพาะแถวที่ผ่าน — รองรับโหมดจัดการข้อมูลซ้ำสำหรับชุดที่มีรหัสอ้างอิง"
+        status={<span className="cmms-andon-chip"><Upload size={14} strokeWidth={1.75} aria-hidden="true" /> แม่แบบ + ตรวจสอบ + สรุปผลกระทบ + ยืนยัน</span>}
+      />
 
       <ModuleGuide
         name="นำเข้าข้อมูลจาก Excel (Import)"

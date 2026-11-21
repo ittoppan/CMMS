@@ -4,6 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { BarChart3, FileDown, Table, ChartPie, Upload } from "lucide-react";
 
 export default function ReportsHubPage() {
@@ -11,30 +12,24 @@ export default function ReportsHubPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              ISO 9001 / ISO 55000
-            </span>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<span className="cmms-andon-chip">ISO 9001 / ISO 55000</span>}
+      />
 
       {/* CTA → Report Center ใหม่ */}
       <div
-        className="cmms-page-hero flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
+        className="flex flex-col justify-between gap-4 rounded-xl bg-[var(--cmms-primary)] p-6 text-white sm:flex-row sm:items-center"
       >
         <div className="flex items-start gap-4">
           <div className="cmms-icon-tile on-dark h-12 w-12 shrink-0 rounded-xl">
             <BarChart3 size={24} strokeWidth={1.75} aria-hidden="true" />
           </div>
           <div>
-            <h2 className="cmms-hero-title text-lg font-bold">ศูนย์ออกรายงานใหม่ (Report Center)</h2>
-            <p className="cmms-hero-desc">
+            <h2 className="text-lg font-bold text-white">ศูนย์ออกรายงานใหม่ (Report Center)</h2>
+            <p className="text-sm text-white/80">
               12 หมวดรายงานจากข้อมูลจริง — กรองช่วงเวลา/เครื่องจักร/แผนก แล้วส่งออก CSV, Excel หรือพิมพ์ PDF ได้ทันที
             </p>
           </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Activity } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -189,12 +189,12 @@ export default function ShutdownBoardPage() {
   if (error) {
     const st = (error as { status?: number }).status;
     return (
-      <PageShell
-        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+      <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: hero.title }]}
         title={hero.title}
-        description={hero.desc}
-      >
+        description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="งานปิดโรง (Shutdown)"
@@ -220,25 +220,26 @@ export default function ShutdownBoardPage() {
               : "เกิดข้อผิดพลาดในการดึงข้อมูลจากเซิร์ฟเวอร์"
           }
         />
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         can?.plan ? (
           <Button onClick={() => setOpen(true)}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             สร้างการหยุดเครื่อง
           </Button>
         ) : null
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard label="ทั้งหมด" value={dash?.total ?? 0} unit="งาน" sub="ทุกสถานะ" />
@@ -534,6 +535,7 @@ export default function ShutdownBoardPage() {
           </div>
         </div>
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }

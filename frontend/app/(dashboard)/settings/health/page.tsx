@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { AccessDenied } from "@/components/access-denied";
 
 type Group = {
@@ -134,12 +134,13 @@ export default function SystemHealthPage() {
     (d?.cmms?.data && ((d.cmms.data as { repair?: { open_stale_gt_30d?: number } })?.repair?.open_stale_gt_30d ?? 0) > 0);
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">SYSTEM HEALTH · PHASE 22 MONITORING</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "สุขภาพระบบ" }]}
       title="Production Health Dashboard"
       description="สถานะระบบจากข้อมูลจริง ณ เวลานี้ — API, Sage 300, พื้นที่จัดเก็บ, ข้อผิดพลาด, Sync, งานซ่อม, การแจ้งเตือน และคุณภาพข้อมูล"
-      actions={
+      actions={[
         <>
           <span
             className="cmms-andon-chip"
@@ -164,8 +165,9 @@ export default function SystemHealthPage() {
             {loading ? "กำลังโหลด..." : "รีเฟรช"}
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <VStack gap={6}>
         {error && error !== "FORBIDDEN" && <Alert variant="danger" title="เกิดข้อผิดพลาด">{error}</Alert>}
         {(d?.warnings ?? []).map((w, i) => (
@@ -325,6 +327,7 @@ export default function SystemHealthPage() {
           </VStack>
         )}
       </VStack>
-    </PageShell>
+      </div>
+    </>
   );
 }

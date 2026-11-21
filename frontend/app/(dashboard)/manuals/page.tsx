@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { assetUrl } from "@/lib/utils";
 import { Grid } from "@/components/layout";
 import {
@@ -172,22 +172,24 @@ export default function ManualsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คู่มือ & SOP", href: "/manuals" },
-        { label: "คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)" },
-      ]}
-      title="คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)"
-      description="ระบบจัดการเอกสารคู่มือเครื่องจักร และขั้นตอนการปฏิบัติงานมาตรฐาน"
-      actions={
-        <Button variant="primary" onClick={() => router.push("/manuals/create")}>
-          <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          อัปโหลดเอกสารใหม่
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คู่มือ & SOP", href: "/manuals" },
+          { label: "คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
+        title="คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)"
+        description="ระบบจัดการเอกสารคู่มือเครื่องจักร และขั้นตอนการปฏิบัติงานมาตรฐาน"
+        actions={[
+          <Button key="create" variant="primary" onClick={() => router.push("/manuals/create")}>
+            <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            อัปโหลดเอกสารใหม่
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">
@@ -252,6 +254,7 @@ export default function ManualsPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

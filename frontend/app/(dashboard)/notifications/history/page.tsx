@@ -6,8 +6,7 @@ import { usePageHero } from "@/lib/i18n";
 // logic ครบเดิม: โหลด notification_logs + ตัวกรอง + export CSV
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -211,12 +210,12 @@ export default function LineDeliveryHistoryPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">NOTIFICATION HISTORY · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATION HISTORY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ประวัติการส่ง LINE" }]}
       title="ประวัติการส่ง LINE"
       description="ตรวจสอบว่าใครส่งอะไร ถึงใคร เมื่อไหร่ ด้วยเทมเพลตไหน — บันทึกจริงจาก notification_logs"
-      actions={
+      actions={[
         <>
           <Button variant="outline" onClick={exportCsv}>
             <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -227,8 +226,8 @@ export default function LineDeliveryHistoryPage() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ประวัติการแจ้งเตือน (Notification History)"
@@ -376,6 +375,7 @@ export default function LineDeliveryHistoryPage() {
           แสดง {filteredCount} รายการล่าสุด (จำกัด 500) — ข้อมูลจากตาราง notification_logs โดยตรง
         </p>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

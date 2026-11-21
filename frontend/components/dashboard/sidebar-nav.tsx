@@ -42,6 +42,9 @@ import {
   MonitorCog,
   Users,
   UsersRound,
+  UserCheck,
+  Route,
+  QrCode,
   MessageSquareText,
   Bell,
   Settings,
@@ -159,9 +162,9 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "dashboard", labelKey: "menu.dashboard", href: "/dashboard", icon: Home },
       { perm: "repair", labelKey: "menu.repairs", href: "/repair", icon: Wrench },
       { perm: "repair/request", labelKey: "menu.repair_request", href: "/repair/request", icon: FilePlus2 },
-      { perm: "repair/assign", labelKey: "menu.repair_assign", href: "/repair/assign", icon: Map },
+      { perm: "repair/assign", labelKey: "menu.repair_assign", href: "/repair/assign", icon: UserCheck },
       { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
-      { perm: "repair/tracking", labelKey: "menu.tracking", href: "/repair/tracking", icon: Map },
+      { perm: "repair/tracking", labelKey: "menu.tracking", href: "/repair/tracking", icon: Route },
       { perm: "field", labelKey: "menu.field_work", href: "/field", icon: ScanLine, secondary: true },
       { perm: "repair/workload", labelKey: "menu.workload", href: "/repair/workload", icon: Activity, secondary: true },
       { perm: "repair/kanban", labelKey: "menu.kanban", href: "/repair/kanban", icon: LayoutGrid, secondary: true },
@@ -183,7 +186,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "inspections", labelKey: "menu.inspections", href: "/inspections", icon: ListChecks },
       { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
       { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
-      { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: Map },
+      { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: QrCode },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },
       { perm: "inspections/templates", labelKey: "menu.inspections_templates", href: "/inspections/templates", icon: ListChecks, secondary: true },
@@ -381,16 +384,30 @@ export function SidebarNav({
   const q = query.trim().toLowerCase();
   const searching = q.length > 0;
 
+  // จำกัดบล็อก "ใช้บ่อย" ไม่เกิน 5 รายการ
+  const freq = frequentItems.slice(0, 5);
+  const freqHrefSet = new Set(freq.map((i) => i.href));
+
   const groups = NAV_GROUPS.map((group) => ({
     ...group,
     visibleItems: group.items.filter(
       (item) =>
         canShow(item.perm) &&
-        (!q || (item.label ?? (item.labelKey ? t(item.labelKey) : "")).toLowerCase().includes(q))
+        (!q || (item.label ?? (item.labelKey ? t(item.labelKey) : "")).toLowerCase().includes(q)) &&
+        // เมื่อไม่ได้ค้นหา ตัด item ที่ href ตรงกับ frequentItems ออก
+        (searching || !freqHrefSet.has(item.href))
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
   const totalVisible = groups.reduce((n, g) => n + g.visibleItems.length, 0);
+
+  // Accordion: เปิดได้ทีละหมวด — เก็บ openKey ที่ SidebarNav
+  const [openKey, setOpenKey] = React.useState<string | null>(() => {
+    for (const g of NAV_GROUPS) {
+      if (g.items.some((it) => isSelected(it.href))) return g.titleKey;
+    }
+    return null;
+  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -438,13 +455,13 @@ export function SidebarNav({
         aria-label="เมนูหลัก"
         className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
       >
-        {!searching && frequentItems.length > 0 && (
+        {!searching && freq.length > 0 && (
           <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card/70 p-1.5 shadow-[var(--cmms-shadow-sm)]">
-            <p className="px-2.5 pb-1 pt-1.5 text-[0.66rem] font-extrabold uppercase tracking-[0.09em] text-muted-foreground">
+            <p className="px-2.5 pb-1 pt-1.5 text-sm font-semibold text-foreground">
               {t("nav.frequent")}
             </p>
             <ul className="space-y-0.5">
-              {frequentItems.map((item) => {
+              {freq.map((item) => {
                 const active = isSelected(item.href);
                 const Icon = item.icon;
                 return (
@@ -485,6 +502,8 @@ export function SidebarNav({
             isSelected={isSelected}
             onNavigate={onNavigate}
             searching={searching}
+            openKey={openKey}
+            setOpenKey={setOpenKey}
           />
         ))}
         {groups.length === 0 && (
@@ -503,14 +522,17 @@ function SidebarGroup({
   isSelected,
   onNavigate,
   searching,
+  openKey,
+  setOpenKey,
 }: {
   group: NavGroupDef & { visibleItems: NavItemDef[] };
   isSelected: (href: string) => boolean;
   onNavigate?: () => void;
   searching: boolean;
+  openKey: string | null;
+  setOpenKey: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
   const anyActive = group.items.some((item) => isSelected(item.href));
-  const [open, setOpen] = React.useState(anyActive);
   const [showAll, setShowAll] = React.useState(false);
 
   const primaryItems = group.visibleItems.filter((item) => !item.secondary);
@@ -519,8 +541,8 @@ function SidebarGroup({
 
   // Re-open automatically when the active route moves into this group.
   React.useEffect(() => {
-    if (anyActive) setOpen(true);
-  }, [anyActive]);
+    if (anyActive) setOpenKey(group.titleKey);
+  }, [anyActive, group.titleKey, setOpenKey]);
 
   // Reveal advanced items when the current page (or a search) needs them.
   React.useEffect(() => {
@@ -530,7 +552,7 @@ function SidebarGroup({
   const expanded = showAll || searching;
   const items = expanded ? group.visibleItems : primaryItems;
   const hiddenCount = secondaryItems.length;
-  const isOpen = open || searching;
+  const isOpen = searching || openKey === group.titleKey;
 
   return (
     <div
@@ -541,7 +563,10 @@ function SidebarGroup({
     >
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          if (searching) return;
+          setOpenKey((k) => (k === group.titleKey ? null : group.titleKey));
+        }}
         aria-expanded={isOpen}
         className="group flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
       >
@@ -560,7 +585,7 @@ function SidebarGroup({
             return <Icon size={14} strokeWidth={2} aria-hidden="true" />;
           })()}
         </span>
-        <span className="min-w-0 flex-1 truncate text-[0.66rem] font-extrabold uppercase tracking-[0.09em] text-muted-foreground">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
           {t(group.titleKey)}
         </span>
         <ChevronRight

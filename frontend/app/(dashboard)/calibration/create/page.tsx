@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -96,7 +96,8 @@ export default function CalibrationCreatePage() {
   }
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -105,7 +106,8 @@ export default function CalibrationCreatePage() {
       ]}
       title={t("form.cal_register_tool_title")}
       description={t("hero.cal_create_desc")}
-    >
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         <CardContent className="space-y-5">
           {error && <Alert variant="danger">{error}</Alert>}
@@ -183,6 +185,7 @@ export default function CalibrationCreatePage() {
           </Button>
         </CardFooter>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

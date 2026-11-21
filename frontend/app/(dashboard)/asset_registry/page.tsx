@@ -8,8 +8,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -288,26 +287,26 @@ export default function AssetRegistryPage() {
   const kpiIconChip = "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg";
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <>
-          <Button variant="secondary" onClick={() => router.push("/asset_registry/criticality")}>
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="criticality" variant="secondary" onClick={() => router.push("/asset_registry/criticality")}>
             <Network size={16} strokeWidth={1.75} aria-hidden="true" />
             วิเคราะห์ความสำคัญ
-          </Button>
-          {(can("create") || can("edit") || can("manage")) && (
-          <Button onClick={() => router.push("/asset_registry/create")}>
-            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            เพิ่มเครื่องจักรใหม่
-          </Button>
-          )}
-        </>
-      }
-    >
+          </Button>,
+          ...((can("create") || can("edit") || can("manage")) ? [
+            <Button key="create" onClick={() => router.push("/asset_registry/create")}>
+              <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+              เพิ่มเครื่องจักรใหม่
+            </Button>,
+          ] : []),
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ทะเบียนเครื่องจักร"
         summary="ข้อมูลหลักของเครื่องจักรที่ทุกโมดูลอ้างอิง — รหัส/ชื่อเครื่อง แผนก ตำแหน่ง สถานะ และข้อมูลประกอบการซ่อมบำรุง"
@@ -468,6 +467,7 @@ export default function AssetRegistryPage() {
           </div>
         )}
       </Dialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

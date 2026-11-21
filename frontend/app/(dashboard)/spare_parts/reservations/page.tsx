@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -93,18 +93,20 @@ export default function ReservationsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "อะไหล่", href: "/spare_parts" }, { label: "ระบบจองอะไหล่" }]}
-      title="Reservation Center"
-      description="ดูอะไหล่ที่ถูกจองไว้ล่วงหน้าและปริมาณที่ใช้ได้จริง (สต็อก − จอง)"
-      actions={
-        <Button variant="secondary" onClick={fetchData}>
-          <RefreshCw className="w-4 h-4" aria-hidden="true" />
-          {t("action.refresh")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "อะไหล่", href: "/spare_parts" }, { label: "ระบบจองอะไหล่" }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title="Reservation Center"
+        description="ดูอะไหล่ที่ถูกจองไว้ล่วงหน้าและปริมาณที่ใช้ได้จริง (สต็อก − จอง)"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -130,6 +132,7 @@ export default function ReservationsPage() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

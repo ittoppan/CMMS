@@ -6,6 +6,7 @@ import { RefreshCcw } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard, SectionHeading } from "@/components/dashboard/kit";
@@ -184,41 +185,38 @@ export function ReportPage({
       `}</style>
 
       {/* Hero */}
-      <div className="no-print cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">
-            {hero.eyebrow}
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
-              {hero.title}
-            </h1>
-            {scope && (
-              <span className="cmms-andon-chip" data-on-dark="true">
-                ขอบเขต: {scope}
-              </span>
-            )}
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="no-print flex flex-col items-start gap-2 sm:items-end">
-          {data && (
-            <span className="cmms-andon-chip" data-on-dark="true">
-              อัปเดตล่าสุด {fmtDateTime(data.generated_at)}
-            </span>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-white/25 bg-white/10 text-white hover:bg-white/20"
-            onClick={() => refetch()}
-            loading={isFetching}
-            loadingText="กำลังโหลด..."
-          >
-            {!isFetching && <RefreshCcw size={15} aria-hidden="true" />}
-            รีเฟรช
-          </Button>
-        </div>
+      <div className="no-print">
+        <DetailHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          status={
+            scope ? (
+              <span className="cmms-andon-chip">ขอบเขต: {scope}</span>
+            ) : undefined
+          }
+          primaryAction={
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              loading={isFetching}
+              loadingText="กำลังโหลด..."
+            >
+              {!isFetching && <RefreshCcw size={15} aria-hidden="true" />}
+              รีเฟรช
+            </Button>
+          }
+          actions={
+            data
+              ? [
+                  <span key="updated" className="cmms-andon-chip">
+                    อัปเดตล่าสุด {fmtDateTime(data.generated_at)}
+                  </span>,
+                ]
+              : []
+          }
+        />
       </div>
 
       {/* 403 / 401 — scope ตามบทบาท */}

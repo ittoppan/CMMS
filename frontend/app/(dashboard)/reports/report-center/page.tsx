@@ -5,6 +5,7 @@ import { Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeading } from "@/components/dashboard/kit";
 import { useApiQuery } from "@/lib/api";
@@ -42,25 +43,25 @@ export default function ReportCenterPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center" suppressHydrationWarning>
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            {data?.scope?.label && (
-              <span className="cmms-andon-chip" data-on-dark="true">
-                ขอบเขต: {data.scope.label}
-              </span>
-            )}
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        {data?.generated_at && (
-          <span className="cmms-andon-chip" data-on-dark="true">
-            อัปเดตล่าสุด {fmtDateTime(data.generated_at)}
-          </span>
-        )}
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          data?.scope?.label ? (
+            <span className="cmms-andon-chip">ขอบเขต: {data.scope.label}</span>
+          ) : undefined
+        }
+        actions={
+          data?.generated_at
+            ? [
+                <span key="updated" className="cmms-andon-chip">
+                  อัปเดตล่าสุด {fmtDateTime(data.generated_at)}
+                </span>,
+              ]
+            : []
+        }
+      />
 
       <ModuleGuide
         name="ศูนย์ออกรายงาน (Report Center)"

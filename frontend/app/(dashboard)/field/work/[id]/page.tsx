@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
+import { DetailHeader } from "@/components/layout";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -231,22 +232,26 @@ export default function WorkModePage() {
         <ConnectivityStatus variant="chip" />
       </div>
 
-      <Card>
-        <CardContent className="flex flex-col gap-2 p-4">
-          <p className="cmms-eyebrow m-0">WORK MODE · FIELD</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="m-0 text-xl font-bold">{wo.work_order_no}</h1>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">WORK MODE · FIELD</p>}
+        title={wo.work_order_no}
+        status={
+          <>
             <Badge variant={headerBadge.variant}>{headerBadge.label}</Badge>
             {wo.priority && <Badge variant={wo.priority === "urgent" || wo.priority === "emergency" ? "danger" : "warning"}>{wo.priority}</Badge>}
-          </div>
-          <p className="m-0 font-medium">{wo.title}</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--cmms-text-secondary)]">
-            {wo.asset_name && <span>เครื่อง: {wo.asset_name}</span>}
-            {wo.assigned_name && <span>ช่าง: {wo.assigned_name}</span>}
-            {wo.actual_start_at && <span>เริ่ม: {wo.actual_start_at}</span>}
-          </div>
-        </CardContent>
-      </Card>
+          </>
+        }
+        description={
+          <>
+            <p className="m-0 font-medium">{wo.title}</p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--cmms-text-secondary)]">
+              {wo.asset_name && <span>เครื่อง: {wo.asset_name}</span>}
+              {wo.assigned_name && <span>ช่าง: {wo.assigned_name}</span>}
+              {wo.actual_start_at && <span>เริ่ม: {wo.actual_start_at}</span>}
+            </div>
+          </>
+        }
+      />
 
       {/* ───── Action bar (ใหญ่ ใช้นิ้วกดสะดวก) ───── */}
       {!isDone && (

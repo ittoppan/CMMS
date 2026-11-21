@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -292,33 +293,37 @@ export default function DocumentDetailPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="min-w-0">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{d.title}</h1>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={d.title}
+        description={<span className="font-mono text-sm">{d.doc_no}</span>}
+        status={
+          <>
             <AndonBadge tone={lampOf(DOC_STATUS_TONE[d.status])}>{docStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.confidentiality === "confidential" ? "danger" : d.confidentiality === "restricted" ? "warning" : "neutral"}>
               {CONFIDENTIALITY_LABELS[d.confidentiality] ?? d.confidentiality}
             </Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 font-mono text-sm">{d.doc_no}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/documents" className={buttonVariants({ variant: "secondary" })}>
-            <ArrowLeft size={15} aria-hidden="true" /> ทะเบียน
-          </Link>
-          <Button variant="secondary" onClick={load}><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</Button>
-          {can?.revise && !["obsolete", "archived"].includes(d.status) && (
+          </>
+        }
+        primaryAction={
+          can?.revise && !["obsolete", "archived"].includes(d.status) ? (
             <Button onClick={() => setRevDlg(true)}><Plus size={15} aria-hidden="true" /> Revision ใหม่</Button>
-          )}
-          {can?.publish && (
-            <Button variant="outline" onClick={issueQr} disabled={busy === "ออก QR token"}>
-              <QrCode size={15} aria-hidden="true" /> ออก QR
-            </Button>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+        actions={[
+          <Link key="reg" href="/documents" className={buttonVariants({ variant: "secondary" })}>
+            <ArrowLeft size={15} aria-hidden="true" /> ทะเบียน
+          </Link>,
+          <Button key="refresh" variant="secondary" onClick={load}><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</Button>,
+          ...(can?.publish
+            ? [
+                <Button key="qr" variant="secondary" onClick={issueQr} disabled={busy === "ออก QR token"}>
+                  <QrCode size={15} aria-hidden="true" /> ออก QR
+                </Button>,
+              ]
+            : []),
+        ]}
+      />
 
       {/* Effective revision banner */}
       {effective ? (

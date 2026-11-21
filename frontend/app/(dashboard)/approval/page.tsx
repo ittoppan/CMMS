@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
-import { HStack, Grid } from "@/components/layout";
+import { HStack, Grid, PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -169,21 +168,23 @@ export default function ApprovalCenterPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">APPROVAL CENTER · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "อนุมัติ" },
-      ]}
-      title="ศูนย์อนุมัติเอกสารและคำขอ"
-      description="อนุมัติปิดงานซ่อม การเบิกอะไหล่ และใบอนุญาตทำงานเสี่ยงสำหรับหัวหน้างานและผู้จัดการ"
-      actions={
-        <Button variant="secondary" onClick={fetchApprovals}>
-          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-          รีเฟรช
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">APPROVAL CENTER · CMMS-TOPPAN</p>}
+        title="ศูนย์อนุมัติเอกสารและคำขอ"
+        description="อนุมัติปิดงานซ่อม การเบิกอะไหล่ และใบอนุญาตทำงานเสี่ยงสำหรับหัวหน้างานและผู้จัดการ"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchApprovals}>
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            รีเฟรช
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {actionMsg && (
@@ -260,6 +261,7 @@ export default function ApprovalCenterPage() {
           />
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

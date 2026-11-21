@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import AndonLamp from "@/components/AndonLamp";
 import { useRouter } from "next/navigation";
 import {
@@ -103,23 +104,23 @@ export default function PMDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={() => router.push("/pm_am/plans")}>
-            <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />
-            แผน PM ทั้งหมด
-          </Button>
-          <Button variant="outline" onClick={() => router.push("/pm_am/create")}>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        primaryAction={
+          <Button onClick={() => router.push("/pm_am/create")}>
             <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
             สร้างแผน PM ใหม่
           </Button>
-        </div>
-      </div>
+        }
+        actions={[
+          <Button key="plans" variant="secondary" onClick={() => router.push("/pm_am/plans")}>
+            <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />
+            แผน PM ทั้งหมด
+          </Button>,
+        ]}
+      />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <Card className="cmms-kpi-card red">

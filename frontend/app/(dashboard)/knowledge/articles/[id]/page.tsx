@@ -13,6 +13,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -262,17 +263,17 @@ export default function KnowledgeArticleDetailPage() {
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
-        <div className="min-w-0">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="mt-1 cmms-hero-title text-2xl font-bold tracking-tight">
-            {article.title}
-          </h1>
-          <p className="cmms-hero-desc mt-1 font-mono text-xs">
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={article.title}
+        description={
+          <span className="font-mono text-xs">
             {article.article_key} · v{article.version_no}
             {article.category_name_th ? ` · ${article.category_name_th}` : ""}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          </span>
+        }
+        status={
+          <>
             <span className={cn("cmms-status", lampTone(KN_STATUS_TONE[article.status]))}>
               <span className="cmms-status-dot" />
               {knStatusLabel(article.status)}
@@ -295,17 +296,17 @@ export default function KnowledgeArticleDetailPage() {
                 <CalendarClock size={12} aria-hidden="true" /> ทบทวนเกินกำหนด
               </span>
             )}
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button variant="secondary" onClick={load} disabled={busy !== ""}>
+          </>
+        }
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={load} disabled={busy !== ""}>
             <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-          </Button>
-          <Button variant="ghost" onClick={() => router.push("/knowledge/articles")}>
+          </Button>,
+          <Button key="back" variant="secondary" onClick={() => router.push("/knowledge/articles")}>
             <ArrowLeft size={15} aria-hidden="true" /> ทะเบียน
-          </Button>
-        </div>
-      </div>
+          </Button>,
+        ]}
+      />
 
       {/* แถบ action ตามสถานะจริง */}
       {(can?.edit || can?.submit || can?.approve || can?.publish || can?.review) && (

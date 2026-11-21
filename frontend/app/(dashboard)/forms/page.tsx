@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -218,28 +217,28 @@ export default function FormsPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">DIGITAL FORMS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "อนุมัติ & เอกสาร", href: "/forms" },
-        { label: "ศูนย์แบบฟอร์ม (Form Center)" },
-      ]}
-      title="ศูนย์แบบฟอร์ม (Form Center)"
-      description="แบบฟอร์มมาตรฐานของฝ่ายวิศวกรรม (F-EN / F-SF) — ดาวน์โหลดเพื่อพิมพ์ใช้หน้างานได้ทันที"
-      actions={
-        <>
-          <Button onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ & เอกสาร", href: "/forms" },
+          { label: "ศูนย์แบบฟอร์ม (Form Center)" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">DIGITAL FORMS · CMMS-TOPPAN</p>}
+        title="ศูนย์แบบฟอร์ม (Form Center)"
+        description="แบบฟอร์มมาตรฐานของฝ่ายวิศวกรรม (F-EN / F-SF) — ดาวน์โหลดเพื่อพิมพ์ใช้หน้างานได้ทันที"
+        actions={[
+          <Button key="upload" onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}>
             <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             อัปโหลดแบบฟอร์ม
-          </Button>
-          <Button variant="secondary" onClick={fetchForms}>
+          </Button>,
+          <Button key="refresh" variant="secondary" onClick={fetchForms}>
             <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
-          </Button>
-        </>
-      }
-    >
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {/* ═══ แบบฟอร์มดิจิทัล (formBuilder) ═══ */}
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
@@ -464,6 +463,7 @@ export default function FormsPage() {
           </div>
         </div>
       </AnimatedDialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

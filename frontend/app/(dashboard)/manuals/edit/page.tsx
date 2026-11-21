@@ -3,8 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -127,17 +126,19 @@ function EditManualContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คู่มือ & SOP", href: "/manuals" },
-        { label: "แก้ไขเอกสาร" },
-      ]}
-      title="แก้ไขข้อมูลเอกสาร"
-      description="แก้ไขรายละเอียดเอกสารคู่มือ — ชื่อ รายละเอียด เวอร์ชัน และลิงก์ไฟล์"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คู่มือ & SOP", href: "/manuals" },
+          { label: "แก้ไขเอกสาร" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
+        title="แก้ไขข้อมูลเอกสาร"
+        description="แก้ไขรายละเอียดเอกสารคู่มือ — ชื่อ รายละเอียด เวอร์ชัน และลิงก์ไฟล์"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>ข้อมูลเอกสาร</CardTitle>
           <CardDescription>ปรับแก้รายละเอียดของเอกสารที่มีอยู่</CardDescription>
@@ -224,7 +225,8 @@ function EditManualContent() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

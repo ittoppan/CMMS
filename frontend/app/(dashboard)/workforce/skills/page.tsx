@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GraduationCap, TriangleAlert } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -199,8 +199,8 @@ export default function WorkforceSkillsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
@@ -208,12 +208,12 @@ export default function WorkforceSkillsPage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         canManage && (
           <Button onClick={() => setEdit(null)}>เพิ่มทักษะ</Button>
         )
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ทักษะช่าง (Skill Matrix)"
@@ -414,7 +414,8 @@ export default function WorkforceSkillsPage() {
         onClose={() => setEdit(undefined)}
         onSubmit={(body) => saveSkill.mutate(body)}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

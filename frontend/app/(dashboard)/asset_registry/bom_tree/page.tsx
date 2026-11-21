@@ -8,8 +8,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -255,18 +254,20 @@ export default function BOMTreePage() {
   const selectedSpareObj = spareParts.find((p) => String(p.id) === selectedSpareId);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)" }]}
-      title="ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)"
-      description="ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง"
-      actions={
-        <Button disabled={machines.length === 0} onClick={() => setModalOpen(true)}>
-          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-          เพิ่มชิ้นส่วนเข้า BOM
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)" }]}
+        eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
+        title="ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)"
+        description="ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง"
+        actions={[
+          <Button key="add" disabled={machines.length === 0} onClick={() => setModalOpen(true)}>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            เพิ่มชิ้นส่วนเข้า BOM
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ผังอะไหล่ (BOM)"
         summary="โครงสร้างชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่อง พร้อมจำนวนที่ใช้ต่อเครื่องและจำนวนคงเหลือในคลัง — ใช้เตรียมของก่อน PM หรือซ่อม"
@@ -658,7 +659,8 @@ export default function BOMTreePage() {
         )}
       </Dialog>
 
-    </PageShell>
+      </div>
+    </>
   );
 }
 

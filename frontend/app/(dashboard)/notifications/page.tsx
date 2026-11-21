@@ -9,8 +9,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -220,8 +219,8 @@ export default function NotificationCenterPage() {
   }, [meta]);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">NOTIFICATIONS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATIONS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ศูนย์แจ้งเตือน" }]}
       title={
         <span className="inline-flex flex-wrap items-center gap-3">
@@ -234,7 +233,7 @@ export default function NotificationCenterPage() {
         </span>
       }
       description="ศูนย์กลางการแจ้งเตือนจากระบบ: งานซ่อม คำขอ SLA UML ตรวจเช็ค อะไหล่ และกระบวนการอัตโนมัติ"
-      actions={
+      actions={[
         <>
           <Button variant="outline" onClick={() => load()}>
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -245,8 +244,8 @@ export default function NotificationCenterPage() {
             อ่านแล้วทั้งหมด
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ศูนย์แจ้งเตือน (Notifications)"
@@ -442,6 +441,7 @@ export default function NotificationCenterPage() {
           />
         </section>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

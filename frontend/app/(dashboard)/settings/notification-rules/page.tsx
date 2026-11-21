@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { swalConfirm } from "@/lib/swal";
@@ -331,18 +331,18 @@ export default function NotificationRulesPage() {
   const eventOptions = useMemo(() => EVENTS_BY_MODULE[form.module] ?? ["*"], [form.module]);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">NOTIFICATION RULES · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATION RULES · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "กฎการแจ้งเตือนอัตโนมัติ" }]}
       title="กฎการแจ้งเตือนอัตโนมัติ"
       description="กฎ (rule) ที่ scheduler และ hook เหตุการณ์อ้างอิง: เลือกผู้รับ ช่องทาง ดีเลย์ วนซ้ำ และดีดัป — เฉพาะผู้ดูแล/หัวหน้างาน"
-      actions={
+      actions={[
         <Button onClick={openCreate}>
           <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
           สร้างกฎใหม่
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="space-y-4 pb-24 lg:pb-8">
         {(error || savedMsg) && (
           <Alert
@@ -528,6 +528,7 @@ export default function NotificationRulesPage() {
           </div>
         </Dialog>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

@@ -3,8 +3,7 @@
 // assets/create — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Select, Lucide)
 // ฟอร์มลงทะเบียนทรัพย์สิน (หน้านิ่ง — ไม่มี state/submit เดิม)
 
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,27 +37,28 @@ export default function CreateAssetPage() {
   const hero = usePageHero("assets/create");
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: t("form.assets_create_title") }]}
-      title={t("form.assets_create_title")}
-      description={t("hero.assets_create_desc")}
-      actions={
-        <>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: t("form.assets_create_title") }]}
+        eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
+        title={t("form.assets_create_title")}
+        description={t("hero.assets_create_desc")}
+        actions={[
+          <span key="reg" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" />
             {t("form.registration_form")}
-          </span>
+          </span>,
           <Link
+            key="reverse"
             href="/assets"
             className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 text-sm font-semibold text-[var(--cmms-text-primary)] transition-colors hover:bg-[var(--cmms-bg-wash)]"
           >
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
             {t("action.reverse_entry")}
-          </Link>
-        </>
-      }
-    >
+          </Link>,
+        ]}
+      />
+      <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>{t("form.assets_create_title")}</CardTitle>
@@ -163,6 +163,7 @@ export default function CreateAssetPage() {
           </Button>
         </CardFooter>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { useToast } from "@/components/ToastProvider";
 import { Dialog } from "@/components/ui/dialog";
 import { swalConfirm } from "@/lib/swal";
@@ -154,11 +154,11 @@ export default function SupervisorReviewPage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
-        actions={
-          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+        actions={[
+          <Button key="refresh" variant="secondary" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> รีเฟรช
-          </Button>
-        }
+          </Button>,
+        ]}
       />
 
 

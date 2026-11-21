@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Spinner } from "@/components/ui/spinner";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -361,27 +362,25 @@ export default function SageIssueCenterPage() {
     <div className="space-y-6">
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <ShoppingBag size={14} strokeWidth={1.75} aria-hidden="true" /> {totalQty} รายการในใบเบิก
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            {hero.desc}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={fetchData}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-        >
-          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.refresh")}
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <ShoppingBag size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> {totalQty} รายการในใบเบิก
+          </span>
+        }
+        primaryAction={
+          <button
+            type="button"
+            onClick={fetchData}
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+          >
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.refresh")}
+          </button>
+        }
+      />
 
       <ModuleGuide
         name="ศูนย์จ่ายอะไหล่"

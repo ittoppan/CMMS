@@ -8,8 +8,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery, apiJson } from "@/lib/api";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -109,12 +108,13 @@ export default function OverhaulPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description="งานยกเครื่องเครื่องจักร — วางแผน บันทึกผล และติดตามรอบการยกเครื่องตามคู่มือผู้ผลิต"
-      actions={
+      actions={[
         <>
           <Button variant="primary" onClick={() => setOpen(true)}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> สร้างแผนยกเครื่อง
@@ -160,8 +160,9 @@ export default function OverhaulPage() {
           </div>
         </Dialog>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}
@@ -203,6 +204,7 @@ export default function OverhaulPage() {
           </CardContent>
         </Card>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

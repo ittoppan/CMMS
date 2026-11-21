@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/cn";
 import { useToast } from "@/components/ToastProvider";
 import { AccessDenied } from "@/components/access-denied";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AndonLamp from "@/components/AndonLamp";
@@ -239,18 +239,18 @@ export default function PlanningCalendarPage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
-        actions={
-          <>
-            {canPlan && (
-              <Button size="sm" onClick={openBulk}>
-                <CheckSquare className="h-4 w-4" /> จองรอบเวลากลุ่ม (unscheduled)
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={() => setRefreshToken((n) => n + 1)} disabled={loading}>
-              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> รีเฟรช
-            </Button>
-          </>
-        }
+        actions={[
+          ...(canPlan
+            ? [
+                <Button key="bulk" size="sm" onClick={openBulk}>
+                  <CheckSquare className="h-4 w-4" /> จองรอบเวลากลุ่ม (unscheduled)
+                </Button>,
+              ]
+            : []),
+          <Button key="refresh" variant="secondary" size="sm" onClick={() => setRefreshToken((n) => n + 1)} disabled={loading}>
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> รีเฟรช
+          </Button>,
+        ]}
       />
 
 

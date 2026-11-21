@@ -22,7 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { useInlineValidation } from "@/lib/use-inline-validation";
 
@@ -336,13 +336,14 @@ function EditWorkOrderContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">REPAIR ORDER · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "บันทึกข้อมูลซ่อม" }]}
-      title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
-      description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"
-      className="max-w-4xl"
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "บันทึกข้อมูลซ่อม" }]}
+        eyebrow={<p className="cmms-eyebrow">REPAIR ORDER · CMMS-TOPPAN</p>}
+        title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
+        description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"
+      />
+      <div className="max-w-4xl space-y-6">
       {loadingData ? (
         <div className="flex items-center justify-center gap-3 p-12 text-muted-foreground">
           <Spinner size={24} />
@@ -670,7 +671,8 @@ function EditWorkOrderContent() {
           </div>
         </div>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }
 

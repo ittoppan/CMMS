@@ -8,8 +8,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
@@ -158,18 +157,20 @@ export default function AssetCriticalityPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ประเมินลำดับความสำคัญของเครื่องจักร" }]}
-      title="ประเมินลำดับความสำคัญของเครื่องจักร"
-      description="ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ"
-      actions={
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-          <Scale size={14} strokeWidth={1.75} aria-hidden="true" />
-          เมทริกซ์ความเสี่ยง
-        </span>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ประเมินลำดับความสำคัญของเครื่องจักร" }]}
+        eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
+        title="ประเมินลำดับความสำคัญของเครื่องจักร"
+        description="ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ"
+        actions={[
+          <span key="matrix" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+            <Scale size={14} strokeWidth={1.75} aria-hidden="true" />
+            เมทริกซ์ความเสี่ยง
+          </span>,
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ประเมินความสำคัญเครื่องจักร"
         summary="ให้คะแนนความเสี่ยงและผลกระทบของเครื่องตามเมทริกซ์ แล้วจัดเกรด A/B/C อัตโนมัติ — ใช้จัดลำดับความสำคัญของงานบำรุงรักษาและอะไหล่สำรอง"
@@ -336,6 +337,7 @@ export default function AssetCriticalityPage() {
         </div>
       )}
 
-    </PageShell>
+      </div>
+    </>
   );
 }

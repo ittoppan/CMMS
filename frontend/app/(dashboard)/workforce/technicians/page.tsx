@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { TriangleAlert, UserCog } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -150,16 +150,16 @@ export default function WorkforceTechniciansPage() {
     flag === "no_shift" ? totals.noShift : flag === "expired" ? totals.expired : flag === "unrecorded" ? totals.unrecorded : 0;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
         { label: "ข้อมูลช่าง" },
       ]}
       title={hero.title}
-      description={hero.desc}
-    >
+      description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ช่างและทีมงาน (กำลังคน)"
@@ -292,6 +292,7 @@ export default function WorkforceTechniciansPage() {
           </CardContent>
         </Card>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

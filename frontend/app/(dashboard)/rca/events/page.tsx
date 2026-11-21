@@ -6,6 +6,7 @@ import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,20 +85,16 @@ export default function RcaEventsPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            {data && <AndonLamp status="idle" size="sm" showLabel />}
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <a href="/rca" className={buttonVariants({ variant: "secondary" })}><Activity size={16} aria-hidden="true" /> ภาพรวม</a>
-          <a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={data ? <AndonLamp status="idle" size="sm" showLabel /> : undefined}
+        actions={[
+          <a key="overview" href="/rca" className={buttonVariants({ variant: "secondary" })}><Activity size={16} aria-hidden="true" /> ภาพรวม</a>,
+          <a key="new" href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>,
+        ]}
+      />
 
       <ModuleGuide
         name="เหตุการณ์ความเสียหาย (RCA Events)"

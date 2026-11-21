@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 
 interface HistoryWO extends Record<string, unknown> {
@@ -209,19 +209,17 @@ export default function RepairHistoryPage() {
       )}
 
       {/* Header */}
-      <div>
-        <p className="cmms-eyebrow">Repair History · CMMS-TOPPAN</p>
-        <PageHeader
-          title="ประวัติงานซ่อม"
-          description="รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด"
-          actions={
-            <Button variant="outline" onClick={fetchHistory} className="gap-2">
-              <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-              {t("action.refresh")}
-            </Button>
-          }
-        />
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">Repair History · CMMS-TOPPAN</p>}
+        title="ประวัติงานซ่อม"
+        description="รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchHistory} className="gap-2">
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import { Dialog } from "@/components/ui/dialog";
 import { getAssignCheck, type AssignCheckResponse } from "@/lib/planning";
@@ -468,19 +468,17 @@ export default function RepairAssignPage() {
       )}
 
       {/* Header */}
-      <div>
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <PageHeader
-          title={hero.title}
-          description={hero.desc}
-          actions={
-            <Button variant="outline" onClick={fetchData} className="gap-2">
-              <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-              {t("action.refresh")}
-            </Button>
-          }
-        />
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchData} className="gap-2">
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
 
       {/* Stat badges */}
       <div className="flex flex-wrap items-center gap-2">

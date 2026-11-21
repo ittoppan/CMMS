@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -146,16 +146,18 @@ function EditBorrowingContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
-        { label: "แก้ไขรายการยืม" },
-      ]}
-      title="แก้ไขรายการยืม-คืนอุปกรณ์"
-      description="แก้ไขรายละเอียดการยืม-คืน — วันที่ สภาพอุปกรณ์ และสถานะ"
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
+          { label: "แก้ไขรายการยืม" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
+        title="แก้ไขรายการยืม-คืนอุปกรณ์"
+        description="แก้ไขรายละเอียดการยืม-คืน — วันที่ สภาพอุปกรณ์ และสถานะ"
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         <CardContent className="space-y-5">
           {loadingData ? (
@@ -319,7 +321,8 @@ function EditBorrowingContent() {
           </CardFooter>
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,8 +217,8 @@ export default function WorkforceCrewsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
@@ -226,12 +226,12 @@ export default function WorkforceCrewsPage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         canManage && (
           <Button onClick={() => setEditCrew(null)}>เพิ่มทีมงาน</Button>
         )
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ทีมงาน (Crews)"
@@ -299,7 +299,8 @@ export default function WorkforceCrewsPage() {
         onClose={() => setMembersFor(null)}
         onSubmit={(body) => saveMembers.mutate(body)}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

@@ -34,7 +34,7 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { useToast } from "@/components/ToastProvider";
 import { AccessDenied } from "@/components/access-denied";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import AndonLamp from "@/components/AndonLamp";
@@ -536,18 +536,18 @@ export default function PlanningCenterPage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
-        actions={
-          <>
-            {canPlan && (
-              <Button size="sm" disabled={selected.size === 0} onClick={() => { setBulkPreview(null); runBulkPreview(); }}>
-                <CheckSquare className="h-4 w-4" /> ดูตัวอย่างวางแผนกลุ่ม ({selected.size})
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={refreshAll} disabled={loading}>
-              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> รีเฟรช
-            </Button>
-          </>
-        }
+        actions={[
+          ...(canPlan
+            ? [
+                <Button key="bulk" size="sm" disabled={selected.size === 0} onClick={() => { setBulkPreview(null); runBulkPreview(); }}>
+                  <CheckSquare className="h-4 w-4" /> ดูตัวอย่างวางแผนกลุ่ม ({selected.size})
+                </Button>,
+              ]
+            : []),
+          <Button key="refresh" variant="secondary" size="sm" onClick={refreshAll} disabled={loading}>
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> รีเฟรช
+          </Button>,
+        ]}
       />
 
 

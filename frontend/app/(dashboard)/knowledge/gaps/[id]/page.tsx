@@ -12,6 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -140,16 +141,16 @@ export default function KnowledgeGapDetailPage() {
       {error && <Alert variant="danger" title="ทำรายการไม่สำเร็จ" description={error} />}
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="mt-1 cmms-hero-title text-2xl font-bold tracking-tight">
-            {gap.search_term}
-          </h1>
-          <p className="cmms-hero-desc mt-1 font-mono text-xs">
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={gap.search_term}
+        description={
+          <span className="font-mono text-xs">
             พบ {gap.occurrences} ครั้ง · ล่าสุด {fmtKnDateTime(gap.last_seen_at)}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          </span>
+        }
+        status={
+          <>
             <span className={cn("cmms-status", lampTone(KN_GAP_STATUS_TONE[gap.status]))}>
               <span className="cmms-status-dot" />
               {knGapStatusLabel(gap.status)}
@@ -158,17 +159,17 @@ export default function KnowledgeGapDetailPage() {
               <span className="cmms-status-dot" />
               {knGapPriorityLabel(gap.priority)}
             </span>
-          </div>
-        </div>
-        <div className="flex shrink-0 gap-2">
-          <Button variant="secondary" onClick={load} disabled={busy !== ""}>
+          </>
+        }
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={load} disabled={busy !== ""}>
             <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-          </Button>
-          <Button variant="ghost" onClick={() => router.push("/knowledge/gaps")}>
+          </Button>,
+          <Button key="back" variant="secondary" onClick={() => router.push("/knowledge/gaps")}>
             <ArrowLeft size={15} aria-hidden="true" /> รายการ
-          </Button>
-        </div>
-      </div>
+          </Button>,
+        ]}
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">

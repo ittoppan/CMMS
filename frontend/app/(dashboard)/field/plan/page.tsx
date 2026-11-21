@@ -14,7 +14,7 @@ import {
 } from "@/lib/planning";
 import { cn } from "@/lib/cn";
 import { AccessDenied } from "@/components/access-denied";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AndonLamp from "@/components/AndonLamp";
@@ -121,11 +121,11 @@ export default function FieldMyPlanPage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={data?.display_name ? `${hero.desc} · ${data.display_name}` : hero.desc}
-        actions={
-          <Button variant="outline" size="sm" onClick={() => setRefreshToken((n) => n + 1)} disabled={loading}>
+        actions={[
+          <Button key="refresh" variant="secondary" size="sm" onClick={() => setRefreshToken((n) => n + 1)} disabled={loading}>
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> รีเฟรช
-          </Button>
-        }
+          </Button>,
+        ]}
       />
 
 

@@ -6,7 +6,7 @@ import { CircleHelp, RefreshCw } from "lucide-react";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -165,7 +165,8 @@ function FailureModesInner() {
   );
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -174,13 +175,14 @@ function FailureModesInner() {
         { label: "วิศวกรรมความเสียหาย", href: relNavHref("/reliability", query) },
         { label: "รูปแบบการเสีย & Pareto" },
       ]}
-      actions={
+      actions={[
         <Button variant="outline" size="sm" onClick={() => { paretoQ.refetch(); modesQ.refetch(); }}>
           <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="รูปแบบการเสีย & Pareto"
@@ -310,7 +312,8 @@ function FailureModesInner() {
           </CardContent>
         </Card>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }
 

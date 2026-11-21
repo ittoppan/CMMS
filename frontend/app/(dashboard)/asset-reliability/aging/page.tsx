@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -64,12 +64,14 @@ export default function AgingPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description="เครื่องจักรที่อายุ ≥ เกณฑ์พิจารณา — ใช้ร่วมกับข้อมูล reliability/cost/profit เพื่อตัดสินใจเชิงมนุษย์ ไม่ใช่ระบบแนะนำให้ปลดระวางอัตโนมัติ"
-    >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="เครื่องถึงกำหนดศึกษา (Aging)"
@@ -120,6 +122,7 @@ export default function AgingPage() {
           </CardContent>
         </Card>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

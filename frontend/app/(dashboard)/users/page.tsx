@@ -8,8 +8,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -479,28 +478,28 @@ export default function UsersPage() {
   });
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "บุคลากร", href: "/users" },
-        { label: hero.title },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <>
-          <Button variant="secondary" onClick={fetchUsers}>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "บุคลากร", href: "/users" },
+          { label: hero.title },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchUsers}>
             <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             {t("action.refresh")}
-          </Button>
-          <Button onClick={() => router.push("/users/create")}>
+          </Button>,
+          <Button key="create" onClick={() => router.push("/users/create")}>
             <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             เพิ่มผู้ใช้ใหม่
-          </Button>
-        </>
-      }
-    >
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ผู้ใช้งาน (Users)"
@@ -686,6 +685,7 @@ export default function UsersPage() {
           </div>
         )}
       </Dialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

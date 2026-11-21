@@ -3,12 +3,11 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { PageShell } from "@/components/PageShell";
 import {
   Image as ImageIcon,
   RefreshCw as ArrowPathIcon,
@@ -121,17 +120,17 @@ export default function PwaSettingsPage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">PWA SETTINGS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">PWA SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ไอคอน PWA (Mobile App)" }]}
       title="ตั้งค่าไอคอน PWA"
       description="เปลี่ยนไอคอนแอปพลิเคชันบนหน้าจอมือถือ (ติดตั้งจากเบราว์เซอร์) — อัปเดตให้ทั้ง PWA และเว็บ PHP พร้อมกัน"
-      actions={
+      actions={[
         <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
           Mobile App
         </span>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ตั้งค่า PWA"
@@ -315,6 +314,7 @@ export default function PwaSettingsPage() {
         </Card>
       </Grid>
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }

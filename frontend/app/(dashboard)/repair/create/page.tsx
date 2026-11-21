@@ -2,6 +2,7 @@
 
 import RepairRequestForm from "@/components/RepairRequestForm";
 import { usePageHero } from "@/lib/i18n";
+import { PageHeader } from "@/components/layout";
 
 /**
  * เปิดใบแจ้งซ่อม (dashboard) — ใช้ฟอร์มและข้อมูลชุดเดียวกับ /repair/request
@@ -12,7 +13,12 @@ export default function CreateWorkOrderPage() {
 
   return (
     <>
-      <p className="cmms-eyebrow sr-only">REPAIR REQUEST · CMMS-TOPPAN</p>
+      <PageHeader
+        className="sr-only"
+        eyebrow="REPAIR REQUEST · CMMS-TOPPAN"
+        title={hero.title}
+        description={hero.desc}
+      />
       <RepairRequestForm />
     </>
   );

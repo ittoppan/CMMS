@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Home, RefreshCw, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -25,13 +25,15 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "เกิดข้อผิดพลาด" },
       ]}
       title="เกิดข้อผิดพลาดในการแสดงหน้านี้"
-    >
+      />
+      <div className="space-y-6">
       <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)]">
           <TriangleAlert size={32} strokeWidth={1.75} aria-hidden="true" />
@@ -64,6 +66,7 @@ export default function DashboardError({
 
         <p className="mt-12 text-xs text-muted-foreground">CMMS-TOPPAN Enterprise Suite</p>
       </div>
-    </PageShell>
+      </div>
+    </>
   );
 }

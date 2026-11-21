@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Checkbox } from "@/components/ui/checkbox";
 import SuccessDialog from "@/components/SuccessDialog";
 
@@ -141,18 +142,11 @@ export default function PMCreatePage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">PM PLAN · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">สร้างแผนบำรุงรักษาเครื่องจักร</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">PM Plan</span>
-          </div>
-          <p className="cmms-hero-desc">
-            กำหนดแผนบำรุงรักษาเชิงป้องกัน (Preventive Maintenance) สำหรับเครื่องจักร
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">PM PLAN · CMMS-TOPPAN</p>}
+        title="สร้างแผนบำรุงรักษาเครื่องจักร"
+        description="กำหนดแผนบำรุงรักษาเชิงป้องกัน (Preventive Maintenance) สำหรับเครื่องจักร"
+      />
 
       <ModuleGuide
         name="สร้างแผน PM"

@@ -12,7 +12,7 @@ import { RefreshCw, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 
 export default function SupervisorVerifyPage() {
   const hero = usePageHero("supervisor/verify");
@@ -86,11 +86,11 @@ export default function SupervisorVerifyPage() {
         eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
-        actions={
-          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+        actions={[
+          <Button key="refresh" variant="secondary" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> รีเฟรช
-          </Button>
-        }
+          </Button>,
+        ]}
       />
 
 

@@ -5,8 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import AndonLamp, { type AndonStatus } from "@/components/AndonLamp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -199,7 +198,8 @@ export default function InstrumentDetailPage() {
   const status = instrument?.cal_status || "RED";
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION · INSTRUMENT</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -213,13 +213,14 @@ export default function InstrumentDetailPage() {
           ? `${[instrument.measurement_type, instrument.measurement_parameter].filter(Boolean).join(" · ") || "เครื่องมือวัด"} · กำหนดถัดไป: ${instrument.next_calibration_date || "-"}`
           : "กำลังโหลด..."
       }
-      actions={
+      actions={[
         <Button variant="secondary" onClick={() => router.push("/calibration/instruments")}>
           <ArrowLeft className="w-4 h-4" />
           กลับ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {err && <Alert variant="danger">{err}</Alert>}
       {isLoading ? (
         <div className="space-y-4">
@@ -325,6 +326,7 @@ export default function InstrumentDetailPage() {
           )}
         </>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }

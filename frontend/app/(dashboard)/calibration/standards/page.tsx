@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -108,7 +108,8 @@ export default function CalibrationStandardsPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -117,12 +118,13 @@ export default function CalibrationStandardsPage() {
       ]}
       title="มาตรฐานอ้างอิง"
       description="เครื่องมือ/เกจต้นแบบที่ใช้เป็นอ้างอิงการสอบเทียบ — ระบบแจ้งเตือนเมื่อใกล้หมดอายุ และกันการสอบเทียบกับมาตรฐานที่หมดอายุตามนโยบาย"
-      actions={
+      actions={[
         <Button variant="primary" onClick={() => setShowForm((v) => !v)}>
           <Plus className="w-4 h-4" /> เพิ่มมาตรฐาน
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -181,6 +183,7 @@ export default function CalibrationStandardsPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -8,8 +8,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { Grid, VStack } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, VStack, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -89,12 +88,14 @@ export default function CriticalAssetsPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description="อันดับความสำคัญจากคะแนน criticality (ข้อมูลจริงในระบบ) — เป็นสถิติประกอบการตัดสินใจ ไม่ใช่คำแนะนำอัตโนมัติ"
-    >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="เครื่องสำคัญ (Criticality A–D)"
@@ -193,6 +194,7 @@ export default function CriticalAssetsPage() {
           </Card>
         </>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

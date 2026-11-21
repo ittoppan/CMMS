@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -387,34 +387,36 @@ export default function FormRunPage() {
 
   if (loading) {
     return (
-      <PageShell
-        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-        breadcrumbs={[
-          { label: "หน้าแรก", href: "/dashboard" },
-          { label: "อนุมัติ & เอกสาร", href: "/forms" },
-          { label: hero.title },
-        ]}
-        title={hero.title}
-        description={hero.desc}
-      >
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          breadcrumbs={[
+            { label: "หน้าแรก", href: "/dashboard" },
+            { label: "อนุมัติ & เอกสาร", href: "/forms" },
+            { label: hero.title },
+          ]}
+          title={hero.title}
+          description={hero.desc}
+        />
         <div className="flex flex-col items-center gap-3 py-20">
           <Spinner size={28} label="" />
           <p className="text-sm text-muted-foreground">กำลังโหลดแบบฟอร์ม...</p>
         </div>
-      </PageShell>
+      </div>
     );
   }
 
   if (error || !tpl) {
     return (
-      <PageShell
-        breadcrumbs={[
-          { label: "หน้าแรก", href: "/dashboard" },
-          { label: "อนุมัติ & เอกสาร", href: "/forms" },
-          { label: "ไม่พบแบบฟอร์ม" },
-        ]}
-        title="ไม่พบแบบฟอร์ม"
-      >
+      <div className="space-y-6">
+        <PageHeader
+          breadcrumbs={[
+            { label: "หน้าแรก", href: "/dashboard" },
+            { label: "อนุมัติ & เอกสาร", href: "/forms" },
+            { label: "ไม่พบแบบฟอร์ม" },
+          ]}
+          title="ไม่พบแบบฟอร์ม"
+        />
         <div className="space-y-4">
           {/* หัวข้อหน้าเป็น "ไม่พบแบบฟอร์ม" แล้ว — alert ไม่ต้องพูดซ้ำคำเดียวกันทั้ง title และ description */}
           <Alert
@@ -426,38 +428,40 @@ export default function FormRunPage() {
             กลับไปศูนย์แบบฟอร์ม
           </a>
         </div>
-      </PageShell>
+      </div>
     );
   }
 
   return (
-    <PageShell
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "อนุมัติ & เอกสาร", href: "/forms" },
-        { label: tpl.title },
-      ]}
-      title={tpl.title}
-      description={tpl.description || hero.desc}
-      actions={
-        <>
-          <a href="/forms" className={buttonVariants({ variant: "ghost" })}>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ & เอกสาร", href: "/forms" },
+          { label: tpl.title },
+        ]}
+        title={tpl.title}
+        description={tpl.description || hero.desc}
+        actions={[
+          <a key="back" href="/forms" className={buttonVariants({ variant: "ghost" })}>
             <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             {t("action.back")}
-          </a>
-          {canDesign && (
-            <a href={`/forms/designer`} className={buttonVariants({ variant: "secondary" })}>
-              <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-              แก้ไขฟอร์ม
-            </a>
-          )}
-          <Button onClick={exportPdf} disabled={exporting}>
+          </a>,
+          ...(canDesign
+            ? [
+                <a key="design" href={`/forms/designer`} className={buttonVariants({ variant: "secondary" })}>
+                  <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  แก้ไขฟอร์ม
+                </a>,
+              ]
+            : []),
+          <Button key="export" onClick={exportPdf} disabled={exporting}>
             {exporting ? <Spinner size={16} label="" /> : <FileDown className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
             {t("action.download_pdf")}
-          </Button>
-        </>
-      }
-    >
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {msg && (
         <Alert
           variant={msg.isError ? "danger" : "success"}
@@ -539,6 +543,7 @@ export default function FormRunPage() {
           </Card>
         </div>
       </div>
-    </PageShell>
+      </div>
+    </>
   );
 }

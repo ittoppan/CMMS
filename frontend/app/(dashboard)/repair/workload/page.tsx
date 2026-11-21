@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 import { useTvRotate } from "@/lib/use-tv-rotate";
 
 interface WorkloadApiRow {
@@ -337,46 +337,44 @@ export default function WorkloadPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div>
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <PageHeader
-          title={hero.title}
-          description={hero.desc || "แดชบอร์ดแสดงพนักงานแต่ละคน กำลังทำงานใบไหนอยู่ พร้อมรูปผู้รับผิดชอบและตัวชี้วัดจากข้อมูลงานซ่อมจริง"}
-          actions={
-            <div className="flex items-center gap-3">
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc || "แดชบอร์ดแสดงพนักงานแต่ละคน กำลังทำงานใบไหนอยู่ พร้อมรูปผู้รับผิดชอบและตัวชี้วัดจากข้อมูลงานซ่อมจริง"}
+        actions={[
+          <div key="actions" className="flex items-center gap-3">
+            <span
+              className="cmms-andon-chip"
+              style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+            >
+              ข้อมูลจริงจากงานซ่อม
+            </span>
+            {tv.enabled && (
               <span
-                className="cmms-andon-chip"
+                className="cmms-andon-chip inline-flex items-center gap-2"
                 style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                title="สลับหน้าอัตโนมัติ (โหมดจอ TV)"
               >
-                ข้อมูลจริงจากงานซ่อม
-              </span>
-              {tv.enabled && (
-                <span
-                  className="cmms-andon-chip inline-flex items-center gap-2"
-                  style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
-                  title="สลับหน้าอัตโนมัติ (โหมดจอ TV)"
+                {tv.paused ? "หยุดสลับหน้า" : `สลับหน้าอีก ${tv.secondsLeft}s`}
+                <button
+                  type="button"
+                  onClick={tv.togglePaused}
+                  aria-pressed={tv.paused}
+                  aria-label={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
+                  title={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
+                  className="inline-flex items-center"
                 >
-                  {tv.paused ? "หยุดสลับหน้า" : `สลับหน้าอีก ${tv.secondsLeft}s`}
-                  <button
-                    type="button"
-                    onClick={tv.togglePaused}
-                    aria-pressed={tv.paused}
-                    aria-label={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
-                    title={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
-                    className="inline-flex items-center"
-                  >
-                    {tv.paused ? <Play size={12} aria-hidden="true" /> : <Pause size={12} aria-hidden="true" />}
-                  </button>
-                </span>
-              )}
-              <Button variant="outline" onClick={fetchWorkload} className="gap-2" disabled={loading}>
-                <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" className={loading ? "animate-spin" : ""} />
-                {t("action.refresh") || "รีเฟรช"}
-              </Button>
-            </div>
-          }
-        />
-      </div>
+                  {tv.paused ? <Play size={12} aria-hidden="true" /> : <Pause size={12} aria-hidden="true" />}
+                </button>
+              </span>
+            )}
+            <Button variant="secondary" onClick={fetchWorkload} className="gap-2" disabled={loading}>
+              <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" className={loading ? "animate-spin" : ""} />
+              {t("action.refresh") || "รีเฟรช"}
+            </Button>
+          </div>,
+        ]}
+      />
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">

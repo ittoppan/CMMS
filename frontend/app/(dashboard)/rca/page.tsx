@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { useCan } from "@/lib/useCan";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -100,21 +101,17 @@ export default function RcaDashboardPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <Badge variant="primary" dot><FlaskConical size={13} aria-hidden="true" /> Phase 27 · RCA</Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <a href="/rca/events" className={buttonVariants({ variant: "secondary" })}><History size={16} aria-hidden="true" /> เหตุการณ์</a>
-          <a href="/rca/taxonomy" className={buttonVariants({ variant: "secondary" })}><ListChecks size={16} aria-hidden="true" /> Taxonomy</a>
-          {can("create") && (<a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>)}
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<Badge variant="primary" dot><FlaskConical size={13} aria-hidden="true" /> Phase 27 · RCA</Badge>}
+        actions={[
+          <a key="events" href="/rca/events" className={buttonVariants({ variant: "secondary" })}><History size={16} aria-hidden="true" /> เหตุการณ์</a>,
+          <a key="taxonomy" href="/rca/taxonomy" className={buttonVariants({ variant: "secondary" })}><ListChecks size={16} aria-hidden="true" /> Taxonomy</a>,
+          ...(can("create") ? [<a key="new" href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>] : []),
+        ]}
+      />
 
       <ModuleGuide
         name="RCA (วิเคราะห์สาเหตุราก)"

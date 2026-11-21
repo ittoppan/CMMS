@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AndonLamp from "@/components/AndonLamp";
@@ -92,7 +92,8 @@ export default function CalibrationProceduresPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -101,12 +102,13 @@ export default function CalibrationProceduresPage() {
       ]}
       title="ขั้นตอนสอบเทียบ"
       description="กำหนดขั้นตอนการสอบเทียบต่อเครื่องมือ — เก็บเป็นเวอร์ชันต่อเนื่อง (ห้ามลบเวอร์ชันเก่า)"
-      actions={
+      actions={[
         <Button variant="primary" onClick={() => { setShowForm(true); }}>
           <Plus className="w-4 h-4" /> เพิ่มขั้นตอน
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -161,6 +163,7 @@ export default function CalibrationProceduresPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

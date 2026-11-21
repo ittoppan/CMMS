@@ -17,7 +17,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,7 +144,9 @@ export default function ShutdownDetailPage() {
   if (error) {
     const st = (error as { status?: number }).status;
     return (
-      <PageShell title="การหยุดเครื่อง">
+      <>
+        <PageHeader title="การหยุดเครื่อง" />
+        <div className="space-y-6">
         <Alert
           variant="danger"
           title={st === 404 ? "ไม่พบงาน" : st === 403 ? "ไม่มีสิทธิ์เข้าถึง" : "โหลดไม่สำเร็จ"}
@@ -161,20 +163,24 @@ export default function ShutdownDetailPage() {
             </Button>
           }
         />
-      </PageShell>
+      </div>
+      </>
     );
   }
 
   if (isLoading || !data) {
     return (
-      <PageShell title="กำลังโหลด…">
+      <>
+        <PageHeader title="กำลังโหลด…" />
+        <div className="space-y-6">
         <Card>
           <CardContent className="space-y-3">
             <div className="h-5 w-1/3 animate-pulse rounded bg-secondary" />
             <div className="h-4 w-2/3 animate-pulse rounded bg-secondary" />
           </CardContent>
         </Card>
-      </PageShell>
+      </div>
+      </>
     );
   }
 
@@ -195,7 +201,8 @@ export default function ShutdownDetailPage() {
   });
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -210,7 +217,7 @@ export default function ShutdownDetailPage() {
         </span>
       }
       description={`${d.shutdown_no} · ${opt?.shutdown_types[d.shutdown_type] ?? d.shutdown_type}${d.facility ? ` · ${d.facility}` : ""}`}
-      actions={
+      actions={[
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => router.push("/shutdown")}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -234,8 +241,9 @@ export default function ShutdownDetailPage() {
             </Button>
           ))}
         </div>
-      }
-    >
+      ]}
+    />
+      <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="ความคืบหน้า"
@@ -689,7 +697,8 @@ columns={[
         onAct={act}
         onClose={() => setDlg(null)}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

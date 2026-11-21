@@ -4,8 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect } from "react";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Undo2, Clock3, History, Save } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 import { useCan } from "@/lib/useCan";
@@ -83,16 +82,18 @@ export default function SpareReturnsPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SPARE PART RETURNS</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คลังอะไหล่", href: "/spare_parts" },
-        { label: "รับคืนซากอะไหล่" },
-      ]}
-      title="สต็อกอะไหล่คืนซาก"
-      description="บันทึกการคืนซากอะไหล่ที่เบิกใช้แล้ว (ทิ้งซาก ไม่เข้าคลังใหม่) ตามใบแจ้งซ่อม"
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คลังอะไหล่", href: "/spare_parts" },
+          { label: "รับคืนซากอะไหล่" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SPARE PART RETURNS</p>}
+        title="สต็อกอะไหล่คืนซาก"
+        description="บันทึกการคืนซากอะไหล่ที่เบิกใช้แล้ว (ทิ้งซาก ไม่เข้าคลังใหม่) ตามใบแจ้งซ่อม"
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="รับคืนซากอะไหล่"
         summary="บันทึกการคืนซากอะไหล่ที่เบิกไปใช้แล้ว (ทิ้งซาก ไม่กลับเข้าคลัง) พร้อมประวัติย้อนหลังตามใบแจ้งซ่อม"
@@ -239,7 +240,8 @@ export default function SpareReturnsPage() {
           )}
         </TabsContent>
       </Tabs>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

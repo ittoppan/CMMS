@@ -13,8 +13,7 @@ import { usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { fetchKnRelated } from "@/lib/knowledge";
 import type { KnArticle } from "@/lib/knowledge";
-import { Grid, VStack, HStack } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, VStack, HStack, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -674,39 +673,45 @@ export default function AssetRegistryViewPage() {
   // ── loading skeleton ──
   if (loading) {
     return (
-      <PageShell
-        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "รายละเอียดเครื่องจักร" }]}
-        title="รายละเอียดเครื่องจักร"
-        description="กำลังโหลดข้อมูล..."
-      >
-        <Card>
-          <CardContent className="flex items-center justify-center p-10">
-            <Spinner label="กำลังโหลดข้อมูลเครื่องจักร..." />
-          </CardContent>
-        </Card>
-      </PageShell>
+      <>
+        <PageHeader
+          breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "รายละเอียดเครื่องจักร" }]}
+          title="รายละเอียดเครื่องจักร"
+          description="กำลังโหลดข้อมูล..."
+        />
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="flex items-center justify-center p-10">
+              <Spinner label="กำลังโหลดข้อมูลเครื่องจักร..." />
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
   if (error || !asset) {
     return (
-      <PageShell
-        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "รายละเอียดเครื่องจักร" }]}
-        title="รายละเอียดเครื่องจักร"
-      >
-        {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
-        <EmptyState
-          icon={<Building2 size={32} strokeWidth={1.5} />}
-          title="ไม่พบเครื่องจักร"
-          description="อาจถูกแก้ไขหรือลบไปแล้ว ลองเลือกเครื่องจักรจากรายการ"
-          action={
-            <Button onClick={() => router.push("/asset_registry")}>
-              <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-              กลับไปหน้ารายการเครื่องจักร
-            </Button>
-          }
+      <>
+        <PageHeader
+          breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "รายละเอียดเครื่องจักร" }]}
+          title="รายละเอียดเครื่องจักร"
         />
-      </PageShell>
+        <div className="space-y-6">
+          {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
+          <EmptyState
+            icon={<Building2 size={32} strokeWidth={1.5} />}
+            title="ไม่พบเครื่องจักร"
+            description="อาจถูกแก้ไขหรือลบไปแล้ว ลองเลือกเครื่องจักรจากรายการ"
+            action={
+              <Button onClick={() => router.push("/asset_registry")}>
+                <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+                กลับไปหน้ารายการเครื่องจักร
+              </Button>
+            }
+          />
+        </div>
+      </>
     );
   }
 
@@ -801,12 +806,14 @@ export default function AssetRegistryViewPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
-      title={`${asset.code} — ${asset.name}`}
-      description={asset.description || "รายละเอียดเครื่องจักร"}
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={`${asset.code} — ${asset.name}`}
+        description={asset.description || "รายละเอียดเครื่องจักร"}
+      />
+      <div className="space-y-6">
       {/* Quick actions (stack บนมือถือ) */}
       <Card>
         <CardContent className="p-4">{quickActions}</CardContent>
@@ -1381,6 +1388,7 @@ export default function AssetRegistryViewPage() {
           </Button>
         </div>
       </Dialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

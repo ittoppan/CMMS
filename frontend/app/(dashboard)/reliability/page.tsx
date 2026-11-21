@@ -20,7 +20,7 @@ import {
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -115,12 +115,13 @@ function OverviewInner() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "วิศวกรรมความเสียหาย" }]}
-      actions={
+      actions={[
         <>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -130,8 +131,9 @@ function OverviewInner() {
             งานวิเคราะห์
           </Link>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ภาพรวมวิศวกรรมความเสียหาย (Reliability)"
@@ -262,7 +264,8 @@ function OverviewInner() {
           </RelSection>
         </>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }
 

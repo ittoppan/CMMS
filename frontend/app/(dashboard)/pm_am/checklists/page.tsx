@@ -7,6 +7,7 @@ import { swalConfirm } from "@/lib/swal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -178,24 +179,21 @@ export default function PMChecklistsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">Master Checklist</span>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => router.push("/pm_am/plans")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />แผน PM
-          </Button>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        primaryAction={
           <Button onClick={() => { setFormOpen(true); setFormEditId(0); setForm({ code: "", name: "", category: "pm_am", description: "", is_active: 1 }); }}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />สร้าง Template ใหม่
           </Button>
-        </div>
-      </div>
+        }
+        actions={[
+          <Button key="plans" variant="secondary" onClick={() => router.push("/pm_am/plans")}>
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />แผน PM
+          </Button>,
+        ]}
+      />
 
       {msg && <Alert variant="success" description={msg} />}
       {error && <Alert variant="danger" description={error} />}

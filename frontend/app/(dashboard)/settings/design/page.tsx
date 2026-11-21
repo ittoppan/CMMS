@@ -4,7 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@/components/layout";
+import { VStack, HStack, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageShell } from "@/components/PageShell";
 import { THEME_PRESETS, buildGradient } from "../../../../components/ThemeProvider";
 import AndonLamp from "../../../../components/AndonLamp";
 import { ALL_PAGES, isWired } from "../../../../lib/pageLayout";
@@ -810,11 +809,11 @@ export default function PageDesignerPage() {
   // ── Mobile: master → detail ──
   if (isNarrow && mobileView === "nav") {
     return (
-      <PageShell
-        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
+      <>
+      <PageHeader breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
         title="ปรับแต่งหน้าตาระบบทั้งหมด"
-        description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึก"
-      >
+        description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึก" />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ตั้งค่าการออกแบบ (Design/Theme)"
@@ -845,16 +844,17 @@ export default function PageDesignerPage() {
             {navList}
           </CardContent>
         </Card>
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
+    <>
+      <PageHeader breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
       title="ปรับแต่งหน้าตาระบบทั้งหมด"
       description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึกลงฐานข้อมูล"
-      actions={
+      actions={[
         <>
           {dirtyCount > 0 && (
             <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
@@ -869,8 +869,8 @@ export default function PageDesignerPage() {
             {saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {saveMsg && (
         <Alert variant="success" title="สำเร็จ" description={saveMsg} />
       )}
@@ -912,6 +912,7 @@ export default function PageDesignerPage() {
           </div>
         </div>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

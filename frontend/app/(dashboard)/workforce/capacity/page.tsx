@@ -4,7 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import { Activity, TriangleAlert } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -193,16 +193,16 @@ export default function WorkforceCapacityPage() {
   if (error) {
     const status = (error as { status?: number }).status;
     return (
-      <PageShell
-        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+      <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         breadcrumbs={[
           { label: "หน้าแรก", href: "/dashboard" },
           { label: hero.title, href: "/workforce" },
           { label: "ความจุ" },
         ]}
         title={hero.title}
-        description={hero.desc}
-      >
+        description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="กำลังคน (Capacity)"
@@ -228,21 +228,22 @@ export default function WorkforceCapacityPage() {
               : "โหลดกระดานความจุไม่สำเร็จ"}
           </div>
         </Alert>
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
         { label: "ความจุ" },
       ]}
       title={hero.title}
-      description={hero.desc}
-    >
+      description={hero.desc} />
+      <div className="space-y-6">
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard label="ช่างในกระดาน" value={totals.headcount} unit="คน" sub={`ช่วง ${from} → ${to}`} />
@@ -335,6 +336,7 @@ export default function WorkforceCapacityPage() {
           </CardContent>
         </Card>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

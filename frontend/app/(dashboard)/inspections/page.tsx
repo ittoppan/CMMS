@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { swalConfirm } from "@/lib/swal";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -212,39 +213,40 @@ export default function InspectionsPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
-            </span>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <a href="/inspections/history" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
+          </span>
+        }
+        actions={[
+          <a key="history" href="/inspections/history" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
             <History size={16} strokeWidth={1.75} aria-hidden="true" /> ประวัติตรวจเช็ค
-          </a>
-          <a href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+          </a>,
+          <a key="templates" href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
             <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" /> จัดการ Template
-          </a>
-          {canManage === false ? (
-            <span className="inline-flex items-center rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white">
-              เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) สร้างหรือลบรอบตรวจ — คุณยังทำรายการตรวจและดูประวัติได้
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={() => { setShowCreate((v) => !v); setError(null); }}
-              className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-5 py-2.5 text-sm font-semibold text-white"
-            >
-              <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> สร้างรอบตรวจ
-            </button>
-          )}
-        </div>
-      </div>
+          </a>,
+          ...(canManage === false
+            ? [
+                <span key="readonly" className="inline-flex items-center rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-xs font-semibold text-[var(--cmms-text-secondary)]">
+                  เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) สร้างหรือลบรอบตรวจ — คุณยังทำรายการตรวจและดูประวัติได้
+                </span>,
+              ]
+            : [
+                <button
+                  key="create"
+                  type="button"
+                  onClick={() => { setShowCreate((v) => !v); setError(null); }}
+                  className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-5 py-2.5 text-sm font-semibold text-white"
+                >
+                  <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> สร้างรอบตรวจ
+                </button>,
+              ]),
+        ]}
+      />
 
       <ModuleGuide
         name="ตรวจเช็ค"

@@ -3,8 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -125,18 +124,20 @@ function EditProductionHoursContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">PRODUCTION HOURS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
-        { label: "ชั่วโมงการผลิต", href: "/mtbf_mttr/production_hours" },
-        { label: "แก้ไขข้อมูล" },
-      ]}
-      title="แก้ไขชั่วโมงการผลิต"
-      description="ปรับแก้ชั่วโมงการทำงานจริงของเครื่องจักรในรอบวันที่นี้"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+          { label: "ชั่วโมงการผลิต", href: "/mtbf_mttr/production_hours" },
+          { label: "แก้ไขข้อมูล" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">PRODUCTION HOURS · CMMS-TOPPAN</p>}
+        title="แก้ไขชั่วโมงการผลิต"
+        description="ปรับแก้ชั่วโมงการทำงานจริงของเครื่องจักรในรอบวันที่นี้"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>ข้อมูลบันทึก</CardTitle>
           <CardDescription>ปรับแก้ตัวเลขการใช้งานของวันนี้</CardDescription>
@@ -227,7 +228,8 @@ function EditProductionHoursContent() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

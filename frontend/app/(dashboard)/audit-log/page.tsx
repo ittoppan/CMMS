@@ -3,7 +3,7 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero, t, useLang } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,18 +217,18 @@ export default function AuditLogPage() {
   const currentPage = Math.min(page, pages);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={crumbs}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <Button variant="secondary" onClick={fetchList}>
           <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.refresh")}
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="บันทึกการใช้งาน (Audit Log)"
@@ -517,6 +517,7 @@ export default function AuditLogPage() {
           </div>
         )}
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }

@@ -6,7 +6,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Trophy, RefreshCw } from "lucide-react";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,18 +117,20 @@ export default function LeaderboardPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ผู้ใช้", href: "/users" }, { label: "KPI Leaderboard" }]}
-      title={hero.title || "KPI Leaderboard"}
-      description="จัดอันดับช่างตามงานที่เสร็จและคะแนนประเมินจากหัวหน้า (เฉพาะผู้ใช้ที่ active)"
-      actions={
-        <Button variant="secondary" onClick={fetchBoard}>
-          <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.refresh")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ผู้ใช้", href: "/users" }, { label: "KPI Leaderboard" }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title || "KPI Leaderboard"}
+        description="จัดอันดับช่างตามงานที่เสร็จและคะแนนประเมินจากหัวหน้า (เฉพาะผู้ใช้ที่ active)"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchBoard}>
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -179,6 +181,7 @@ export default function LeaderboardPage() {
           ) : null}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

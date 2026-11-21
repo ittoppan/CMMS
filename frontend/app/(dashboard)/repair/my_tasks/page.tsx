@@ -26,7 +26,7 @@ import {
 
 import SagePartAddModal from "@/components/spare/SagePartAddModal";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -709,16 +709,18 @@ export default function MyTasksPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "งานซ่อมบำรุง", href: "/repair" },
-        { label: hero.title },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "งานซ่อมบำรุง", href: "/repair" },
+          { label: hero.title },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+      />
+      <div className="space-y-6">
       {/* Filter: status tabs + outsource segmented control */}
       <Card>
         <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -1057,6 +1059,7 @@ export default function MyTasksPage() {
         workOrderId={spareModalTask?.kind === "repair" ? spareModalTask.rawId : null}
         woNumber={spareModalTask?.woNumber}
       />
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Checkbox } from "@/components/ui/checkbox";
 import SuccessDialog from "@/components/SuccessDialog";
 import { swalConfirm } from "@/lib/swal";
@@ -219,16 +220,12 @@ function EditPMContent() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">PM PLAN · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">อัปเดตสถานะงานซ่อมบำรุง</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">{pmNumber || "PM Plan"}</span>
-          </div>
-          <p className="cmms-hero-desc">แก้ไขข้อมูลแผน/รอบ PM และอัปเดตสถานะการดำเนินงาน</p>
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">PM PLAN · CMMS-TOPPAN</p>}
+        title="อัปเดตสถานะงานซ่อมบำรุง"
+        description="แก้ไขข้อมูลแผน/รอบ PM และอัปเดตสถานะการดำเนินงาน"
+        status={<span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">{pmNumber || "PM Plan"}</span>}
+      />
 
       <Card>
         <CardContent className="p-6">

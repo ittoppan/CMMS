@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
@@ -599,53 +600,51 @@ export default function PMChecksheetPage() {
         />
       )}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">PM CHECKSHEET · CMMS-TOPPAN</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{tliff("liff.checksheet_title")}</h1>
-
-          {pending > 0 && (
-            <div
-              className="w-fit max-w-full space-y-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold"
-              style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">PM CHECKSHEET · CMMS-TOPPAN</p>}
+        title={tliff("liff.checksheet_title")}
+        description={tliff("liff.checksheet_desc")}
+        primaryAction={
+          plans.length > 0 ? (
+            <button
+              type="button"
+              disabled={!selectedPlan}
+              onClick={handleCheckAll}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-success disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="cmms-status-dot warn inline-block" />
-                {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
-                <button
-                  type="button"
-                  disabled={flushing || !navigator.onLine}
-                  onClick={handleSendNow}
-                  className="ml-1 rounded-lg border-none px-3 py-1.5 text-[0.78rem] font-bold"
-                  style={{
-                    cursor: flushing ? "wait" : "pointer",
-                    background: "var(--cmms-primary)",
-                    color: "var(--cmms-text-on-primary, #fff)",
-                    opacity: flushing || !navigator.onLine ? 0.6 : 1,
-                  }}
-                >
-                  {flushing ? "..." : tliff("liff.checksheet_send_now")}
-                </button>
-              </div>
-              {flushMsg && <div className="text-[0.75rem] opacity-85">{flushMsg}</div>}
-            </div>
-          )}
-          <p className="cmms-hero-desc">
-            {tliff("liff.checksheet_desc")}
-          </p>
+              <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
+              {tliff("liff.checksheet_check_all")}
+            </button>
+          ) : undefined
+        }
+      />
+
+      {pending > 0 && (
+        <div
+          className="w-fit max-w-full space-y-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold"
+          style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="cmms-status-dot warn inline-block" />
+            {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
+            <button
+              type="button"
+              disabled={flushing || !navigator.onLine}
+              onClick={handleSendNow}
+              className="ml-1 rounded-lg border-none px-3 py-1.5 text-xs font-bold"
+              style={{
+                cursor: flushing ? "wait" : "pointer",
+                background: "var(--cmms-primary)",
+                color: "var(--cmms-text-on-primary, #fff)",
+                opacity: flushing || !navigator.onLine ? 0.6 : 1,
+              }}
+            >
+              {flushing ? "..." : tliff("liff.checksheet_send_now")}
+            </button>
+          </div>
+          {flushMsg && <div className="text-xs opacity-85">{flushMsg}</div>}
         </div>
-        {plans.length > 0 && (
-          <button
-            type="button"
-            disabled={!selectedPlan}
-            onClick={handleCheckAll}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-success disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            {tliff("liff.checksheet_check_all")}
-          </button>
-        )}
-      </div>
+      )}
 
       {/* เลือกแผน */}
       <ModuleGuide

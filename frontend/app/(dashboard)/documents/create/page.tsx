@@ -7,6 +7,7 @@ import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -119,16 +120,16 @@ export default function CreateDocumentPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
-        </div>
-        <Link href="/documents" className={buttonVariants({ variant: "secondary" })}>
-          <ArrowLeft size={15} aria-hidden="true" /> ทะเบียนเอกสาร
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        primaryAction={
+          <Link href="/documents" className={buttonVariants({ variant: "secondary" })}>
+            <ArrowLeft size={15} aria-hidden="true" /> ทะเบียนเอกสาร
+          </Link>
+        }
+      />
 
       {error && <Alert variant="danger" title="ไม่สามารถสร้างเอกสาร" description={error} />}
 

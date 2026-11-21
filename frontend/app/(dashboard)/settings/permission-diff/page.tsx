@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
@@ -51,8 +51,8 @@ export default function PermissionDiffPage() {
   const totalDrift = roles.reduce((s, r) => s + r.drift_count, 0);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">PERMISSION DRIFT · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">PERMISSION DRIFT · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ตั้งค่า", href: "/settings" },
@@ -60,12 +60,12 @@ export default function PermissionDiffPage() {
       ]}
       title="ตรวจความไม่ตรงกันของสิทธิ์เมนู vs API"
       description="เมนูที่ role เห็น (menu_permissions) แต่ API module ไม่มีสิทธิ์ view → ผู้ใช้จะเห็นเมนูแต่ข้อมูลเป็น 403 (ปัญหาที่เคยเกิดกับ Foreman/Officer)"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={load} disabled={loading}>
           รีเฟรช
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {!loading && totalDrift === 0 && (
@@ -141,6 +141,7 @@ export default function PermissionDiffPage() {
           ))}
         </div>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

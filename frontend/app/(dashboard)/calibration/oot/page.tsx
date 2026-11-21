@@ -3,7 +3,7 @@
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { useApiQuery } from "@/lib/api";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -78,7 +78,8 @@ export default function CalibrationOotPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -87,7 +88,8 @@ export default function CalibrationOotPage() {
       ]}
       title="เหตุการณ์ Out-of-Tolerance (OOT)"
       description="ผลการวัดที่เกินเกณฑ์ — ประเมินผลกระทบโดยผู้เชี่ยวชาญและเชื่อมโยง RCA ได้จากที่นี่"
-    >
+      />
+      <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -110,6 +112,7 @@ export default function CalibrationOotPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

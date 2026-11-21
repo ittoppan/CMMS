@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { ClipboardCheck, History, Wrench, FileText, ArrowLeft } from "lucide-react";
 
@@ -85,23 +86,23 @@ export default function InspectionHistoryPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ประวัติการตรวจเช็ค{assetName ? ` — ${assetName}` : ""}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <History size={14} strokeWidth={1.75} aria-hidden="true" /> ดูรอบที่เสร็จสิ้น = MR/WO อัตโนมัติ
-            </span>
-          </div>
-          <p className="cmms-hero-desc">ตรวจสอบรอบที่ผ่านมา ผลการตรวจ และงานซ่อมที่ถูกสร้างจากผลตรวจไม่ผ่าน</p>
-        </div>
-        {assetId && (
-          <a href={`/asset_registry/view?id=${assetId}`} className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
-            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> กลับหน้าบันทึกเครื่องจักร
-          </a>
-        )}
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={`ประวัติการตรวจเช็ค${assetName ? ` — ${assetName}` : ""}`}
+        description="ตรวจสอบรอบที่ผ่านมา ผลการตรวจ และงานซ่อมที่ถูกสร้างจากผลตรวจไม่ผ่าน"
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <History size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> ดูรอบที่เสร็จสิ้น = MR/WO อัตโนมัติ
+          </span>
+        }
+        primaryAction={
+          assetId ? (
+            <a href={`/asset_registry/view?id=${assetId}`} className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
+              <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> กลับหน้าบันทึกเครื่องจักร
+            </a>
+          ) : undefined
+        }
+      />
 
       {stats && (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

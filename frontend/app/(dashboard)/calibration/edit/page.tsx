@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -169,7 +169,8 @@ function EditCalibrationContent() {
   }
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -178,7 +179,8 @@ function EditCalibrationContent() {
       ]}
       title={t("form.cal_edit_full")}
       description={t("hero.cal_edit_desc")}
-    >
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         <CardContent className="space-y-5">
           {loadingData ? (
@@ -348,7 +350,8 @@ function EditCalibrationContent() {
           </CardFooter>
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

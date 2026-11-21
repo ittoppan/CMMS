@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -132,25 +133,25 @@ export default function EngineeringChangesPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div style={layoutStyle("hero")} className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <Badge variant="primary" dot><GitPullRequest size={13} aria-hidden="true" /> Phase 32</Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" onClick={load} disabled={refreshing}>
-            <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-          </Button>
-          {can?.create && (
-            <Link href="/engineering-changes/create" className={buttonVariants({ variant: "primary" })}>
-              <Plus size={16} aria-hidden="true" /> เปิด ECR ใหม่
-            </Link>
-          )}
-        </div>
+      <div style={layoutStyle("hero")}>
+        <DetailHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          status={<Badge variant="primary" dot><GitPullRequest size={13} aria-hidden="true" /> Phase 32</Badge>}
+          primaryAction={
+            can?.create ? (
+              <Link href="/engineering-changes/create" className={buttonVariants({ variant: "primary" })}>
+                <Plus size={16} aria-hidden="true" /> เปิด ECR ใหม่
+              </Link>
+            ) : undefined
+          }
+          actions={[
+            <Button key="refresh" variant="secondary" onClick={load} disabled={refreshing}>
+              <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
+            </Button>,
+          ]}
+        />
       </div>
 
       {/* KPI */}

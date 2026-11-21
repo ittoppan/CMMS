@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { ShieldAlert, TriangleAlert } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -231,16 +231,16 @@ export default function WorkforceConflictsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
         { label: "ความพร้อมและช่วงชน" },
       ]}
       title={hero.title}
-      description={hero.desc}
-    >
+      description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ความขัดแย้งกำลังคน"
@@ -435,7 +435,8 @@ export default function WorkforceConflictsPage() {
         onClose={() => setAssignFor(null)}
         onSubmit={(body) => assign.mutate(body)}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -89,18 +89,18 @@ export default function TcoPage() {
   const totalRepairs = rows.reduce((s, r) => s + r.totalRepairs, 0);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "วิเคราะห์", href: "/analytics" }, { label: "TCO" }]}
       title="ต้นทุนรวมตลอดอายุเครื่อง (TCO)"
       description="เปรียบเทียบต้นทุนซ่อมสะสมต่อปี เพื่อประกอบการตัดสินใจซ่อมต่อหรือเปลี่ยนเครื่อง"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={fetchData}>
           <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.refresh")}
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -128,6 +128,7 @@ export default function TcoPage() {
             : <SimpleDataTable columns={columns} data={rows} />}
         </CardContent>
       </Card>
-    </PageShell>
+          </div>
+    </>
   );
 }

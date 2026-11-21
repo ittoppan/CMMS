@@ -3,8 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { ChevronLeft, ChevronRight, CalendarDays, Clock, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -103,7 +102,8 @@ export default function CalibrationCalendar() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION CALENDAR</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -112,12 +112,13 @@ export default function CalibrationCalendar() {
       ]}
       title="ปฏิทินสอบเทียบเครื่องมือวัด"
       description="ดูกำหนดสอบเทียบ (Next Due) รายเดือน พร้อมสถานะติดตามงานแต่ละเครื่อง"
-      actions={
+      actions={[
         <Button variant="primary" onClick={() => router.push("/calibration/po")}>
           ไปที่ PO งานสอบเทียบ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">
           <div className="flex items-center gap-3">
@@ -290,6 +291,7 @@ export default function CalibrationCalendar() {
         )}
         {error && <p className="mt-2 text-sm text-[var(--cmms-danger)]">{error}</p>}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

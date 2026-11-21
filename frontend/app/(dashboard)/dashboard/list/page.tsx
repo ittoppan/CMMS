@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -193,17 +193,17 @@ export default function DashboardListPage() {
       : undefined;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "วิเคราะห์ลงลึก" }]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <Button variant="outline" size="sm" onClick={() => router.push("/dashboard")}>
           กลับแดชบอร์ด
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <Card>
         <CardContent className="space-y-3 p-4">
           <RangePicker value={q.range ?? ""} onRange={applyRange} onCustom={applyCustom} />
@@ -419,7 +419,8 @@ export default function DashboardListPage() {
           </CardContent>
         </Card>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }
 

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout";
 
 export interface KanbanItem {
   id: string;
@@ -223,25 +223,21 @@ export default function RepairKanbanPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <PageHeader
-          title={hero.title}
-          description={hero.desc}
-          actions={
-            <>
-              <Button variant="outline" onClick={fetchKanban} className="gap-2">
-                <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-                {t("action.refresh")}
-              </Button>
-              <Button onClick={() => (window.location.href = "/repair/request")} className="gap-2">
-                <Plus size={16} strokeWidth={2} aria-hidden="true" />
-                {t("action.create_wo")}
-              </Button>
-            </>
-          }
-        />
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchKanban} className="gap-2">
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+          <Button key="create" onClick={() => (window.location.href = "/repair/request")} className="gap-2">
+            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+            {t("action.create_wo")}
+          </Button>,
+        ]}
+      />
 
       {/* Toolbar Filter */}
       <Card>

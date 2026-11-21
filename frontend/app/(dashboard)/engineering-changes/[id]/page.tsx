@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -207,25 +208,25 @@ export default function EngineeringChangeDetailPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="min-w-0">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{d.title}</h1>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={d.title}
+        description={<span className="font-mono text-sm">{d.ecr_no}</span>}
+        status={
+          <>
             <AndonBadge tone={lampOf(ECR_STATUS_TONE[d.status])}>{ecrStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.priority === "critical" ? "danger" : d.priority === "high" ? "warning" : "neutral"}>
               {ecrPriorityLabel(d.priority)}
             </Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 font-mono text-sm">{d.ecr_no}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/engineering-changes" className={buttonVariants({ variant: "secondary" })}>
+          </>
+        }
+        actions={[
+          <Link key="list" href="/engineering-changes" className={buttonVariants({ variant: "secondary" })}>
             <ArrowLeft size={15} aria-hidden="true" /> รายการ ECR
-          </Link>
-          <Button variant="secondary" onClick={load}><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</Button>
-        </div>
-      </div>
+          </Link>,
+          <Button key="refresh" variant="secondary" onClick={load}><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</Button>,
+        ]}
+      />
 
       {/* Blockers from engine — แสดงตรง ๆ ไม่ซ่อน */}
       {d.approval_blockers?.length > 0 && d.status === "impact_assessment" && (

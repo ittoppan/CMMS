@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -190,7 +190,8 @@ function StudiesInner() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -199,7 +200,7 @@ function StudiesInner() {
         { label: "วิศวกรรมความเสียหาย", href: "/reliability" },
         { label: "งานวิเคราะห์เชิงวิศวกรรม" },
       ]}
-      actions={
+      actions={[
         <>
           {canWrite && (
             <Button size="sm" onClick={() => setCreating(true)}>
@@ -212,8 +213,9 @@ function StudiesInner() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="งานวิเคราะห์เชิงวิศวกรรม (Studies)"
@@ -370,7 +372,8 @@ function StudiesInner() {
           />
         </div>
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

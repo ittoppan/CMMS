@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Layers, Search } from "lucide-react";
@@ -155,20 +156,11 @@ export default function BatchSchedulePage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">PM SCHEDULER · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              กำหนดเช็คชีทเดียว ให้หลายเครื่องพร้อมกัน
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">PM SCHEDULER · CMMS-TOPPAN</p>}
+        title="สร้างแผน PM แบบกลุ่ม (Batch Scheduling)"
+        description="กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน"
+      />
 
       <ModuleGuide
         name="สร้างแผน PM แบบกลุ่ม"

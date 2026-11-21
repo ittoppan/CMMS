@@ -3,7 +3,7 @@
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { useApiQuery } from "@/lib/api";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -48,7 +48,8 @@ export default function CalibrationDataQualityPage() {
     }));
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -57,7 +58,8 @@ export default function CalibrationDataQualityPage() {
       ]}
       title="คุณภาพข้อมูลสอบเทียบ"
       description="ตรวจสุขภาพข้อมูลสอบเทียบ — ทุกข้อแก้ได้ด้วยข้อมูลจริง ไม่มีการเดา/เติมข้อมูลปลอม"
-    >
+      />
+      <div className="space-y-6">
       {!isLoading && (
         <div className="flex flex-wrap gap-2 mb-4">
           <Badge variant={errorCount > 0 ? "danger" : "success"}>
@@ -97,6 +99,7 @@ export default function CalibrationDataQualityPage() {
           )}
         </Card>
       ))}
-    </PageShell>
+      </div>
+    </>
   );
 }

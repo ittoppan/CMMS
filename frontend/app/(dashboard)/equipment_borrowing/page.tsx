@@ -5,8 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Plus,
   Search,
@@ -174,24 +173,26 @@ export default function EquipmentBorrowingPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
-        { label: "ระบบยืม-คืนเครื่องมือช่างและอุปกรณ์พิเศษ" },
-      ]}
-      title="ระบบยืม-คืนเครื่องมือช่างและอุปกรณ์พิเศษ"
-      description="ควบคุมการยืม-คืนเครื่องมือช่างราคาสูง อุปกรณ์วัดค่า และเครื่องตรวจวัดพิเศษ"
-      actions={
-        canIssue ? (
-        <Button variant="primary" onClick={() => router.push("/equipment_borrowing/create")}>
-          <Plus className="w-4 h-4" />
-          ขอยืมอุปกรณ์ใหม่
-        </Button>
-        ) : null
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
+          { label: "ระบบยืม-คืนเครื่องมือช่างและอุปกรณ์พิเศษ" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
+        title="ระบบยืม-คืนเครื่องมือช่างและอุปกรณ์พิเศษ"
+        description="ควบคุมการยืม-คืนเครื่องมือช่างราคาสูง อุปกรณ์วัดค่า และเครื่องตรวจวัดพิเศษ"
+        actions={
+          canIssue ? [
+            <Button key="issue" variant="primary" onClick={() => router.push("/equipment_borrowing/create")}>
+              <Plus className="w-4 h-4" />
+              ขอยืมอุปกรณ์ใหม่
+            </Button>,
+          ] : undefined
+        }
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ยืม-คืนอุปกรณ์"
         summary="ควบคุมการยืม-คืนเครื่องมือช่างราคาสูง อุปกรณ์วัดค่า และเครื่องตรวจวัดพิเศษ — ใครยืมอะไร เมื่อไร และคืนแล้วหรือยัง"
@@ -303,6 +304,7 @@ export default function EquipmentBorrowingPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

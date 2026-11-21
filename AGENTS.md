@@ -34,6 +34,12 @@
     git push origin main
     ```
 
+## UI Migration Rules (บังคับใช้เสมอ)
+- งาน UI ทั้งหมดให้ทำตาม `docs/UI_MIGRATION.md` และอัปเดตตารางความคืบหน้าทุกครั้ง
+- ห้ามแก้ logic/API/state/validation/permission/export/navigation, ห้ามเปลี่ยน route/URL, ห้ามลบหน้า
+- หน้า redirect/re-export (12 หน้า) ข้าม; หน้านอก dashboard shell ข้ามไว้ทำท้ายสุด; หน้ารูปแบบพิเศษ (kanban, bom_tree, editor/builder, forms/designer, plant_map, andon-board, calendar) เปลี่ยนแค่หัวหน้าและระยะห่าง
+- หัวหน้าทุกหน้าต้องมาจาก PageHeader/DetailHeader เท่านั้น (เลิก cmms-page-hero และ ui/page-header ในหน้าที่ย้าย)
+
 ## Security Rules (บังคับใช้เสมอ)
 - **ห้าม commit secrets** (API token, password, .env) ลงใน repo
 - ตัวแปรลับทั้งหมดอ่านจาก `.env` (อยู่ใน .gitignore) หรือ environment variables

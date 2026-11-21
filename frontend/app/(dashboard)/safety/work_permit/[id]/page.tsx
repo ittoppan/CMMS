@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useParams, useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { DetailHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -137,32 +137,34 @@ export default function PermitDetailPage() {
   const canEdit = !!can?.edit;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · DETAIL</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ใบอนุญาตทำงานเสี่ยง (PTW)", href: PATHS.list },
-        { label: p?.permit_no || `#${id}` },
-      ]}
-      title={
-        <span className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-primary">{p?.permit_no || `#${id}`}</span>
-          {p?.status && (
-            <span className="inline-flex items-center gap-1.5">
-              <AndonLamp status={permAndon(p.status)} size="sm" />
-              <Badge variant={permTone(p.status)} dot>{p.status_label || statusLabel(p.status)}</Badge>
-            </span>
-          )}
-          {p?.risk_level && <Badge variant={RISK_LEVEL_TONE[p.risk_level]} dot>เสี่ยง {RISK_LEVEL_LABELS[p.risk_level]}</Badge>}
-        </span>
-      }
-      description={p ? `${typeName(p.permit_type_code, opts?.permit_types)} · ${p.work_description || "—"}` : "..."}
-      actions={
-        <Button variant="secondary" onClick={() => router.push(PATHS.list)}>
-          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" /> รายการ
-        </Button>
-      }
-    >
+    <>
+      <DetailHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ใบอนุญาตทำงานเสี่ยง (PTW)", href: PATHS.list },
+          { label: p?.permit_no || `#${id}` },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · DETAIL</p>}
+        title={
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-primary">{p?.permit_no || `#${id}`}</span>
+            {p?.status && (
+              <span className="inline-flex items-center gap-1.5">
+                <AndonLamp status={permAndon(p.status)} size="sm" />
+                <Badge variant={permTone(p.status)} dot>{p.status_label || statusLabel(p.status)}</Badge>
+              </span>
+            )}
+            {p?.risk_level && <Badge variant={RISK_LEVEL_TONE[p.risk_level]} dot>เสี่ยง {RISK_LEVEL_LABELS[p.risk_level]}</Badge>}
+          </span>
+        }
+        description={p ? `${typeName(p.permit_type_code, opts?.permit_types)} · ${p.work_description || "—"}` : "..."}
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push(PATHS.list)}>
+            <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" /> รายการ
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {loading && !p && (
@@ -648,7 +650,8 @@ export default function PermitDetailPage() {
         modal={modal} setModal={setModal} p={p} cfg={cfg} opts={opts} run={run}
         users={users} userById={userById} canRunWork={canRunWork} id={id}
       />}
-    </PageShell>
+      </div>
+    </>
   );
 }
 

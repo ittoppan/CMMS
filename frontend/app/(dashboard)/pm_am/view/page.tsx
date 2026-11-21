@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DetailHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import AndonLamp from "@/components/AndonLamp";
@@ -141,25 +143,23 @@ export default function PMDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow} · PM Detail</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{pm?.title || "รอบ PM"}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">#{pmId}</span>
-          </div>
-          <p className="cmms-hero-desc">{pm?.description || "รายละเอียดรอบการบำรุงรักษาเชิงป้องกัน"}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => router.back()} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />กลับ
-          </Button>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow} · PM Detail</p>}
+        title={pm?.title || "รอบ PM"}
+        description={pm?.description || "รายละเอียดรอบการบำรุงรักษาเชิงป้องกัน"}
+        status={<Badge variant="neutral">#{pmId}</Badge>}
+        primaryAction={
           <Button disabled={busy} onClick={generateWO}>
             <FilePlus2 size={16} strokeWidth={1.75} aria-hidden="true" />
             {busy ? "กำลังสร้าง..." : "สร้าง Work Order"}
           </Button>
-        </div>
-      </div>
+        }
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.back()}>
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />กลับ
+          </Button>,
+        ]}
+      />
 
       {loading ? (
         <p className="p-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>

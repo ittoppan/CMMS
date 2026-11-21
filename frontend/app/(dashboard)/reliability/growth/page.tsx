@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -199,7 +199,8 @@ function GrowthInner() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -208,7 +209,7 @@ function GrowthInner() {
         { label: "วิศวกรรมความเสียหาย", href: relNavHref("/reliability", query) },
         { label: "ผลหลังการเปลี่ยนแปลง" },
       ]}
-      actions={
+      actions={[
         <>
           {canWrite && (
             <Button size="sm" onClick={() => setAdding(true)}>
@@ -221,8 +222,9 @@ function GrowthInner() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="Reliability Growth"
@@ -367,7 +369,8 @@ function GrowthInner() {
           />
         </div>
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { useToast } from "../../../../components/ToastProvider";
 import { swalConfirm } from "@/lib/swal";
 import { useCan } from "@/lib/useCan";
@@ -225,32 +226,30 @@ export default function StockTakePage() {
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">STOCK TAKE · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">นับสต็อกจริง</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> {rounds.length} รอบ
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            สร้างรอบนับ → กรอกจำนวนที่พบจริงบนมือถือ → ปิดรอบเพื่อปรับ stock_qty ตามจริง
-          </p>
-        </div>
-        {canPlan ? (
-          <button
-            type="button"
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            สร้างรอบนับใหม่
-          </button>
-        ) : (
-          <span className="text-xs font-semibold text-[var(--cmms-text-secondary)]">อ่านอย่างเดียว</span>
-        )}
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">STOCK TAKE · CMMS-TOPPAN</p>}
+        title="นับสต็อกจริง"
+        description="สร้างรอบนับ → กรอกจำนวนที่พบจริงบนมือถือ → ปิดรอบเพื่อปรับ stock_qty ตามจริง"
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> {rounds.length} รอบ
+          </span>
+        }
+        primaryAction={
+          canPlan ? (
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
+            >
+              <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+              สร้างรอบนับใหม่
+            </button>
+          ) : (
+            <span className="text-xs font-semibold text-[var(--cmms-text-secondary)]">อ่านอย่างเดียว</span>
+          )
+        }
+      />
 
       {activeId && round ? (
         /* ═══════ รายละเอียดรอบที่กำลังนับ ═══════ */

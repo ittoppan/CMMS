@@ -3,7 +3,7 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
 import AnimatedDialog from "@/components/AnimatedDialog";
-import { PageShell } from "@/components/PageShell";
 import { apiJson, apiFetch } from "@/lib/api";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -686,12 +685,12 @@ export default function RepairOptionsPage() {
   }, [tabParam]);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">REPAIR & MASTER SETTINGS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">REPAIR & MASTER SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง" }]}
       title="ตัวเลือกแจ้งซ่อม · แผนก · ที่ตั้ง/สถานที่"
-      description="จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน"
-    >
+      description="จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน" />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง"
@@ -731,6 +730,7 @@ export default function RepairOptionsPage() {
         {tab === "departments" && <MasterEntitySection entityKey="departments" />}
         {tab === "locations" && <MasterEntitySection entityKey="locations" />}
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }

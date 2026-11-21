@@ -8,8 +8,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -357,18 +356,20 @@ export default function AssetsPage() {
   const kpiIconChip = "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg";
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ทะเบียนเครื่องจักรและทรัพย์สิน" }]}
-      title="ทะเบียนเครื่องจักรและทรัพย์สิน"
-      description="ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว"
-      actions={
-        <Button onClick={() => (window.location.href = "/assets/create")}>
-          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-          เพิ่มเครื่องจักร
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ทะเบียนเครื่องจักรและทรัพย์สิน" }]}
+        eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
+        title="ทะเบียนเครื่องจักรและทรัพย์สิน"
+        description="ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว"
+        actions={[
+          <Button key="create" onClick={() => (window.location.href = "/assets/create")}>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            เพิ่มเครื่องจักร
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
         <Card>
@@ -550,6 +551,7 @@ export default function AssetsPage() {
           </label>
         </div>
       </Dialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

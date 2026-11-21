@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { setUserLang } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { useCan } from "@/lib/useCan";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
-import { PageShell } from "@/components/PageShell";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
   CheckCircle2 as CheckCircleIcon,
@@ -771,12 +770,12 @@ export default function SettingsPage() {
   const totalDirty = Object.values(groupDirtyCount).reduce((a, b) => a + b, 0);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <>
           <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
             {settings.length} keys
@@ -789,8 +788,8 @@ export default function SettingsPage() {
             ประวัติการแก้ไข
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ตั้งค่าระบบ (System Settings)"
@@ -1513,6 +1512,7 @@ export default function SettingsPage() {
           </HStack>
         </div>
       </AnimatedDialog>
-    </PageShell>
+          </div>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { swalConfirm } from "@/lib/swal";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import AndonLamp from "@/components/AndonLamp";
@@ -169,33 +170,35 @@ export default function PMPlanViewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow} · PM Master</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{plan.name}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">{plan.code}</span>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow} · PM Master</p>}
+        title={plan.name}
+        description={plan.description || "แผนบำรุงรักษาเชิงป้องกัน (PM Master)"}
+        status={
+          <>
+            <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">{plan.code}</span>
             {plan.status && plan.status !== "active" && (
-              <span className="cmms-andon-chip" data-on-dark="true" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
                 {plan.status === "cancelled" ? "ยกเลิก" : plan.status === "draft" ? "ฉบับร่าง" : plan.status}
               </span>
             )}
-          </div>
-          <p className="cmms-hero-desc">{plan.description || "แผนบำรุงรักษาเชิงป้องกัน (PM Master)"}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => router.push("/pm_am/plans")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />กลับ
-          </Button>
-          <Button variant="outline" onClick={() => router.push(`/pm_am/plans/create?edit=${planId}`)} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />แก้ไข
-          </Button>
+          </>
+        }
+        primaryAction={
           <Button disabled={busy} onClick={handleGenerate}>
             <Play size={16} strokeWidth={1.75} aria-hidden="true" />
             {busy ? "กำลังสร้าง..." : "สร้างรอบ PM"}
           </Button>
-        </div>
-      </div>
+        }
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push("/pm_am/plans")}>
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />กลับ
+          </Button>,
+          <Button key="edit" variant="secondary" onClick={() => router.push(`/pm_am/plans/create?edit=${planId}`)}>
+            <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />แก้ไข
+          </Button>,
+        ]}
+      />
 
       {actionMsg && <Alert variant="success" description={actionMsg} />}
       {actionErr && <Alert variant="danger" description={actionErr} />}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -208,24 +209,21 @@ export default function PMPlansPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">PM Master</span>
-          </div>
-          <p className="cmms-hero-desc">แผนแม่แบบบำรุงรักษา (กำหนดความถี่/เครื่องจักร/เช็คชีท) และสถานะรอบถัดไปจากข้อมูลจริง</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description="แผนแม่แบบบำรุงรักษา (กำหนดความถี่/เครื่องจักร/เช็คชีท) และสถานะรอบถัดไปจากข้อมูลจริง"
+        primaryAction={
           <Button onClick={() => router.push("/pm_am/plans/create")}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />สร้างแผน PM ใหม่
           </Button>
-          <Button variant="outline" onClick={() => router.push("/pm_am")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+        }
+        actions={[
+          <Button key="cycles" variant="secondary" onClick={() => router.push("/pm_am")}>
             <Layers size={16} strokeWidth={1.75} aria-hidden="true" />รอบงาน PM (PM Cycles)
-          </Button>
-        </div>
-      </div>
+          </Button>,
+        ]}
+      />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
         <Card className="cmms-kpi-card blue">

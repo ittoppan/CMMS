@@ -8,6 +8,7 @@ import { usePageHero } from "@/lib/i18n";
 import { useParams } from "next/navigation";
 import { Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 
@@ -78,7 +79,11 @@ export default function RepairPrintPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6 print:p-0">
-      <p className="cmms-eyebrow no-print">repair / พิมพ์ใบบันทึกงานซ่อม</p>
+      <PageHeader
+        className="no-print"
+        eyebrow="repair / พิมพ์ใบบันทึกงานซ่อม"
+        title="พิมพ์ใบบันทึกงานซ่อม"
+      />
       <div className="no-print mb-4 flex items-center justify-between">
         <Button variant="secondary" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4" aria-hidden="true" /> ย้อนกลับ

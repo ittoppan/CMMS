@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageShell } from "@/components/PageShell";
 import { useToast } from "../../../components/ToastProvider";
 import {
   User,
@@ -225,15 +224,15 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">USER PROFILE · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">USER PROFILE · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "โปรไฟล์" },
       ]}
       title="โปรไฟล์ของฉัน"
-      description="จัดการข้อมูลส่วนตัว เปลี่ยนรูปโปรไฟล์ รหัสผ่าน และการผูกบัญชี LINE สำหรับการแจ้งเตือน"
-    >
+      description="จัดการข้อมูลส่วนตัว เปลี่ยนรูปโปรไฟล์ รหัสผ่าน และการผูกบัญชี LINE สำหรับการแจ้งเตือน" />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       <Grid columns={{ minWidth: 300 }} gap={6} style={{ alignItems: "start" }}>
@@ -461,6 +460,7 @@ export default function ProfilePage() {
           </Card>
         </VStack>
       </Grid>
-    </PageShell>
+          </div>
+    </>
   );
 }

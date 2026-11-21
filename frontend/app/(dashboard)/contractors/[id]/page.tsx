@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -154,24 +155,26 @@ export default function ContractorDetailPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="min-w-0">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{c.company_name}</h1>
-            {c.code && <Badge variant="primary">{c.code}</Badge>}
-            <Badge variant={tone} dot>{CTR_STATUS_LABELS[c.status] || c.status}</Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={c.company_name}
+        description={
+          <span className="flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span>{catsStr.map((k) => categoryLabel(k, cats)).join(" · ") || "ยังไม่ระบุหมวดงาน"}</span>
             {c.tax_id && <span>TAX {c.tax_id}</span>}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <a href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ExternalLink size={15} aria-hidden="true" /> Work Board</a>
-          <a href="/contractors" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={15} aria-hidden="true" /> กลับ</a>
-        </div>
-      </div>
+          </span>
+        }
+        status={
+          <>
+            {c.code && <Badge variant="primary">{c.code}</Badge>}
+            <Badge variant={tone} dot>{CTR_STATUS_LABELS[c.status] || c.status}</Badge>
+          </>
+        }
+        actions={[
+          <a key="work" href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ExternalLink size={15} aria-hidden="true" /> Work Board</a>,
+          <a key="back" href="/contractors" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={15} aria-hidden="true" /> กลับ</a>,
+        ]}
+      />
 
       {/* status change */}
       <Card>

@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
-import { HStack, VStack, Grid } from "@/components/layout";
+import { HStack, VStack, Grid, PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,8 +71,8 @@ export default function IotMonitorPage() {
   const alarmDevices = sensors.filter(s => s.status === "alarm");
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">IOT MONITOR · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">IOT MONITOR · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "IoT Monitor", href: "/iot/monitor" },
@@ -81,7 +80,7 @@ export default function IotMonitorPage() {
       ]}
       title="มอนิเตอร์เซนเซอร์ IoT"
       description="แสดงสถานะเซนเซอร์ IoT จากฐานข้อมูล (อัปเดตทุก 30 วินาที)"
-      actions={
+      actions={[
         <>
           <Badge variant={alarmDevices.length > 0 ? "danger" : "neutral"}>
             <Zap size={12} strokeWidth={1.75} aria-hidden="true" />
@@ -92,8 +91,8 @@ export default function IotMonitorPage() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Alert Banner — แสดงเฉพาะเมื่อมีอุปกรณ์สถานะ alarm จริงใน DB */}
@@ -165,6 +164,7 @@ export default function IotMonitorPage() {
           ))}
         </Grid>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

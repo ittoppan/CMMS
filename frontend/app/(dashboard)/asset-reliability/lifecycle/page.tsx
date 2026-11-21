@@ -8,8 +8,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { Grid, VStack } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, VStack, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -60,12 +59,14 @@ export default function LifecyclePage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description="สถานะวงจรชีวิตของเครื่องจักรทั้งหมดในระบบ — การเปลี่ยนสถานะมีประวัติและบันทึกผู้แก้ไขเสมอ"
-    >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="สถานะวงจรชีวิตสินทรัพย์"
@@ -160,6 +161,7 @@ export default function LifecyclePage() {
           </Card>
         </Grid>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { SectionHeading, KpiCard, LoadingGrid } from "@/components/dashboard/kit";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { describeReason, fmtMinutes, fmtPct, getConfig, getDashboard } from "@/lib/workforce";
 import type { CapabilityMap, ConfigResponse, Dashboard } from "@/lib/workforce";
 import AndonLamp from "@/components/AndonLamp";
@@ -81,16 +81,16 @@ export default function WorkforcePage() {
   const over = cfg?.config.capacity_over_pct ?? 100;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <Button variant="outline" size="sm" onClick={() => setToken((t) => t + 1)} disabled={loading}>
           รีเฟรช
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ภาพรวมกำลังคน"
@@ -296,6 +296,7 @@ export default function WorkforcePage() {
           )}
         </>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

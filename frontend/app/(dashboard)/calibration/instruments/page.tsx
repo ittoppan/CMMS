@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { Plus, Ruler, Search, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -120,7 +119,8 @@ export default function CalibrationInstrumentsPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -129,13 +129,14 @@ export default function CalibrationInstrumentsPage() {
       ]}
       title="เครื่องมือวัด (Instrument Master)"
       description="ทะเบียนเครื่องมือวัดและสถานะสอบเทียบ — ข้อมูลมาจาก asset master (asset_registry) เดิมบนระบบ"
-      actions={
+      actions={[
         <Button variant="primary" onClick={() => router.push("/calibration/plans")}>
           <Plus className="w-4 h-4" />
           เพิ่มแผนสอบเทียบ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 py-4">
           <div className="relative min-w-[240px] flex-1">
@@ -184,6 +185,7 @@ export default function CalibrationInstrumentsPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

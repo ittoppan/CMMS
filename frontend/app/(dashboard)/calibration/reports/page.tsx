@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -81,7 +81,8 @@ export default function CalibrationReportsPage() {
   const summary = data?.summary;
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -90,14 +91,15 @@ export default function CalibrationReportsPage() {
       ]}
       title={`รายงาน: ${meta.label}`}
       description={meta.desc}
-      actions={
+      actions={[
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" disabled={!data?.rows.length} onClick={downloadCsv} title="ดาวน์โหลด CSV (UTF-8 BOM รองรับ Excel)">
             <Download className="w-4 h-4" /> CSV
           </Button>
         </div>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <div className="mb-4 flex flex-wrap gap-2">
         {(Object.keys(REPORT_META) as ReportType[]).map((t) => (
           <a key={t} href={`/calibration/reports?type=${t}`} aria-current={type === t ? "page" : undefined}>
@@ -146,6 +148,7 @@ export default function CalibrationReportsPage() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

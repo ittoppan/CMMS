@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Dialog } from "@/components/ui/dialog";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -552,29 +553,29 @@ export default function PMSchedulePage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Wrench size={14} strokeWidth={1.75} aria-hidden="true" /> งานที่ต้องติดตาม {stats.actionable} / ทั้งหมด {stats.total}
-            </span>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => router.push("/pm_am/calendar")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <Calendar size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.open_calendar")}
-          </Button>
-          <Button variant="outline" onClick={() => router.push("/pm_am/plans")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <List size={16} strokeWidth={1.75} aria-hidden="true" />แผนแม่แบบ
-          </Button>
-          <Link href="/pm_am/create" className="cmms-btn-primary inline-flex items-center gap-2">
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <Wrench size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> งานที่ต้องติดตาม {stats.actionable} / ทั้งหมด {stats.total}
+          </span>
+        }
+        primaryAction={
+          <Link href="/pm_am/create" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] bg-[var(--cmms-primary)] px-4 py-2 text-sm font-semibold text-white shadow-[var(--cmms-shadow-sm)] hover:bg-[var(--cmms-primary-hover)]">
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.create_pm")}
           </Link>
-        </div>
-      </div>
+        }
+        actions={[
+          <Button key="calendar" variant="secondary" onClick={() => router.push("/pm_am/calendar")}>
+            <Calendar size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.open_calendar")}
+          </Button>,
+          <Button key="plans" variant="secondary" onClick={() => router.push("/pm_am/plans")}>
+            <List size={16} strokeWidth={1.75} aria-hidden="true" />แผนแม่แบบ
+          </Button>,
+        ]}
+      />
 
         <ModuleGuide
           name="ตารางแผน PM"

@@ -3,8 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Search, FileCheck2, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -227,7 +226,8 @@ export default function CalibrationTrackingPage() {
     filter === key ? "bg-[var(--cmms-primary)] text-white" : "bg-muted text-muted-foreground hover:bg-accent";
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION TRACKING</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -236,13 +236,14 @@ export default function CalibrationTrackingPage() {
       ]}
       title="ติดตามงานสอบเทียบเครื่องมือวัด"
       description="สถานะตาม Pipeline: รอออก PO → มี PO → แจ้งซัพพลายเออร์ → รอใบรับรอง → เสร็จสิ้น"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={() => router.push("/calibration/po")}>
           <FileCheck2 className="h-4 w-4" />
           ไปที่ PO งานสอบเทียบ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <Grid columns={{ minWidth: 160, max: 6 }} gap={3}>
         {[
           { key: "ready", label: "รอออก PO", value: stageCounts.ready ?? 0, cls: "text-[var(--cmms-primary-hover)]" },
@@ -337,6 +338,7 @@ export default function CalibrationTrackingPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -44,18 +44,20 @@ export default function OeePage() {
   const oee: number | null = null; // perf × qual ยังไม่มีข้อมูลจริง
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ทะเบียนเครื่องจักร", href: "/asset_registry" }, { label: "OEE" }]}
-      title="OEE Realtime"
-      description="Overall Equipment Effectiveness จาก downtime งานซ่อมจริง 30 วันล่าสุด"
-      actions={
-        <Button variant="secondary" onClick={fetchStats}>
-          <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.refresh")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ทะเบียนเครื่องจักร", href: "/asset_registry" }, { label: "OEE" }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title="OEE Realtime"
+        description="Overall Equipment Effectiveness จาก downtime งานซ่อมจริง 30 วันล่าสุด"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchStats}>
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {loading ? (
         <p className="text-sm text-muted-foreground">กำลังคำนวณ...</p>
@@ -117,6 +119,7 @@ export default function OeePage() {
           </div>
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

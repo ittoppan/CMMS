@@ -11,13 +11,12 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { PageShell } from "@/components/PageShell";
 import { swalConfirm } from "@/lib/swal";
 import {
   pushSupport,
@@ -258,12 +257,12 @@ export default function PushDevicePage() {
   useEffect(() => { setHost(window.location.host); }, []);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">PUSH NOTIFICATIONS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">PUSH NOTIFICATIONS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "การแจ้งเตือนบนอุปกรณ์" }]}
       title="การแจ้งเตือนบนอุปกรณ์ (Web Push)"
       description="เปิดรับแจ้งเตือนแบบ Pop-up บนมือถือและเดสก์ท็อป — ทำ 1 ครั้งต่ออุปกรณ์"
-      actions={
+      actions={[
         <HStack gap={3} wrap="wrap">
           <Badge variant={phase === "active" ? "success" : "neutral"}>
             {phase === "active" ? "เปิดอยู่" : "ยังปิด"}
@@ -273,8 +272,8 @@ export default function PushDevicePage() {
             รีเฟรช
           </Button>
         </HStack>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <VStack gap={6}>
         {flash && <Alert variant={flash.ok ? "success" : "danger"} title={flash.ok ? "สำเร็จ" : "ยังไม่สำเร็จ"} description={flash.text} />}
 
@@ -350,7 +349,8 @@ export default function PushDevicePage() {
           </Card>
         </Grid>
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

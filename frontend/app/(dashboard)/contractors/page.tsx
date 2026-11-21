@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -114,20 +115,16 @@ export default function ContractorsPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <Badge variant="primary" dot><HardHat size={13} aria-hidden="true" /> Phase 31</Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <a href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ClipboardList size={16} aria-hidden="true" /> งานภายนอก</a>
-          {canCreate && <a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> สร้างผู้รับเหมาใหม่</a>}
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<Badge variant="primary" dot><HardHat size={13} aria-hidden="true" /> Phase 31</Badge>}
+        actions={[
+          <a key="work" href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ClipboardList size={16} aria-hidden="true" /> งานภายนอก</a>,
+          ...(canCreate ? [<a key="create" href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> สร้างผู้รับเหมาใหม่</a>] : []),
+        ]}
+      />
 
       <ModuleGuide
         name="ผู้รับเหมา"

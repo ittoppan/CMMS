@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -149,7 +149,8 @@ function AssetDetailInner({ assetId }: { assetId: number }) {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={row ? `${row.asset_code} · ${row.asset_name}` : `เครื่องจักร #${assetId}`}
       description={
@@ -165,7 +166,7 @@ function AssetDetailInner({ assetId }: { assetId: number }) {
         { label: "ความเสียหายรายเครื่อง", href: relNavHref("/reliability/assets", query) },
         { label: row?.asset_code ?? `#${assetId}` },
       ]}
-      actions={
+      actions={[
         <>
           <Link
             href={relNavHref("/reliability/assets", query)}
@@ -179,8 +180,9 @@ function AssetDetailInner({ assetId }: { assetId: number }) {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {error && <RelError message={error.message} />}
       {isLoading && <RelLoading label="กำลังโหลดความเสียหายของเครื่องนี้…" />}
 
@@ -343,7 +345,8 @@ function AssetDetailInner({ assetId }: { assetId: number }) {
           }
         />
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }
 
@@ -365,7 +368,7 @@ export default function ReliabilityAssetDetailPage() {
       {Number.isFinite(assetId) && assetId > 0 ? (
         <AssetDetailInner assetId={assetId} />
       ) : (
-        <PageShell title="รหัสเครื่องไม่ถูกต้อง" description="ไม่สามารถเปิดข้อมูลความเสียหายของเครื่องนี้ได้" />
+        <PageHeader title="รหัสเครื่องไม่ถูกต้อง" description="ไม่สามารถเปิดข้อมูลความเสียหายของเครื่องนี้ได้" />
       )}
     </Suspense>
   );

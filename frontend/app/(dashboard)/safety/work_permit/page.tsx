@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -99,22 +99,24 @@ export default function WorkPermitPage() {
   const highRisk = (ds?.high_risk || 0) + (ds?.critical_risk || 0);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · PHASE 30</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
-      ]}
-      title="ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO"
-      description="วินิจฉัยความเสี่ยง ควบคุมการตัดพลังงาน (LOTO) และอนุมัติก่อนเริ่มงาน — ทุกขั้นตอนถูกบันทึกเป็นหลักฐานในระบบ"
-      actions={
-        cfg?.can.create ? (
-          <Link href={PATHS.create}>
-            <Button><Plus size={16} strokeWidth={1.75} aria-hidden="true" /> ออกใบอนุญาตใหม่</Button>
-          </Link>
-        ) : undefined
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · PHASE 30</p>}
+        title="ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO"
+        description="วินิจฉัยความเสี่ยง ควบคุมการตัดพลังงาน (LOTO) และอนุมัติก่อนเริ่มงาน — ทุกขั้นตอนถูกบันทึกเป็นหลักฐานในระบบ"
+        primaryAction={
+          cfg?.can.create ? (
+            <Link href={PATHS.create}>
+              <Button><Plus size={16} strokeWidth={1.75} aria-hidden="true" /> ออกใบอนุญาตใหม่</Button>
+            </Link>
+          ) : undefined
+        }
+      />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {loading && !dashboard && (
@@ -244,7 +246,8 @@ export default function WorkPermitPage() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

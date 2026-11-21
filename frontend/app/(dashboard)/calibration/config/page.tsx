@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -55,10 +55,11 @@ export default function CalibrationConfigPage() {
   const groups = Object.keys(FIELD_META);
   const groupNames = [...new Set(groups.map((k) => FIELD_META[k].group))];
 
-  if (isLoading) return <PageShell title="ตั้งค่าสอบเทียบ" description="กำลังโหลด..."><Skeleton className="h-48 w-full" /></PageShell>;
+  if (isLoading) return <><PageHeader title="ตั้งค่าสอบเทียบ" description="กำลังโหลด..." /><div className="space-y-6"><Skeleton className="h-48 w-full" /></div></>;
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -67,12 +68,13 @@ export default function CalibrationConfigPage() {
       ]}
       title="ตั้งค่าสอบเทียบ"
       description="นโยบายการสอบเทียบของระบบ — ใช้ร่วมกับการตั้งค่าระบบอื่น"
-      actions={
+      actions={[
         <Button variant="primary" disabled={isPending} onClick={() => save()}>
           <Save className="w-4 h-4" /> {isPending ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -118,6 +120,7 @@ export default function CalibrationConfigPage() {
           </CardContent>
         </Card>
       ))}
-    </PageShell>
+      </div>
+    </>
   );
 }

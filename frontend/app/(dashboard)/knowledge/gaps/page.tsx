@@ -14,6 +14,7 @@ import { usePageLayout } from "@/lib/pageLayout";
 import AndonBadge from "@/components/AndonBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -141,19 +142,17 @@ export default function KnowledgeGapsPage() {
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
 
-      <div style={layoutStyle("hero")} className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">
-            {hero.title}
-          </h1>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">
-            {hero.desc}
-          </p>
-        </div>
-        <Button variant="secondary" onClick={load} disabled={refreshing}>
-          <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-        </Button>
+      <div style={layoutStyle("hero")}>
+        <PageHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          actions={[
+            <Button key="refresh" variant="secondary" onClick={load} disabled={refreshing}>
+              <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
+            </Button>,
+          ]}
+        />
       </div>
 
       {/* KPI จาก search_log จริง */}

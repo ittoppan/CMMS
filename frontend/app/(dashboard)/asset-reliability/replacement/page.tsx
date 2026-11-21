@@ -8,7 +8,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery } from "@/lib/api";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -71,12 +71,14 @@ export default function ReplacementPage() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description="ประวัติการเปลี่ยนชิ้นส่วนสำคัญของเครื่องจักรทุกเครื่อง — บันทึกผ่านโปรไฟล์เครื่อง (แท็บ Components)"
-    >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ประวัติเปลี่ยนชิ้นส่วน (Replacement)"
@@ -134,6 +136,7 @@ export default function ReplacementPage() {
           </CardContent>
         </Card>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

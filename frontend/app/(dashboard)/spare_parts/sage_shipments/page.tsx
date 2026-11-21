@@ -5,7 +5,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -265,21 +265,23 @@ export default function SageShipmentsPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SAGE 300 I/C SHIPMENTS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คลังอะไหล่", href: "/spare_parts" },
-        { label: "Sage 300 I/C Shipments" },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <Button variant="secondary" size="sm" onClick={fetchData} disabled={loading}>
-          <RefreshCw size={14} strokeWidth={1.75} className={loading ? "animate-spin" : ""} /> รีเฟรช
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คลังอะไหล่", href: "/spare_parts" },
+          { label: "Sage 300 I/C Shipments" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SAGE 300 I/C SHIPMENTS · CMMS-TOPPAN</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="refresh" variant="secondary" size="sm" onClick={fetchData} disabled={loading}>
+            <RefreshCw size={14} strokeWidth={1.75} className={loading ? "animate-spin" : ""} /> รีเฟรช
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="Sage 300 I/C Shipments"
         summary="ตรวจใบตัดสต็อก (I/C Shipments) จาก Sage 300 เทียบกับงานที่เบิกจริง — ดูว่าตัดครบ ตัดบางส่วน หรือยังไม่ตัด"
@@ -573,7 +575,8 @@ export default function SageShipmentsPage() {
           <ItemShipmentModal item={modal.item!} onSubmit={modal.onSubmit} onCancel={closeModal} />
         </Dialog>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }
 

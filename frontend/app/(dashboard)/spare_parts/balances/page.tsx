@@ -4,8 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 
 import { useMemo, useState, useEffect } from "react";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Search, Boxes, TriangleAlert, CircleDollarSign, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,21 +135,23 @@ export default function SpareBalancesPage() {
   const fmt = (n: number) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SPARE PARTS BALANCE</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คลังอะไหล่", href: "/spare_parts" },
-        { label: "ยอดคงเหลือ" },
-      ]}
-      title="ยอดคงเหลืออะไหล่"
-      description="ภาพรวมยอดคงเหลือและมูลค่าคลัง กดแถวเพื่อดูประวัติเบิก-จ่ายย้อนหลังต่อชิ้น"
-      actions={
-        <Button variant="secondary" onClick={() => { loadParts(); setSearch(""); }}>
-          รีโหลดข้อมูล
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คลังอะไหล่", href: "/spare_parts" },
+          { label: "ยอดคงเหลือ" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SPARE PARTS BALANCE</p>}
+        title="ยอดคงเหลืออะไหล่"
+        description="ภาพรวมยอดคงเหลือและมูลค่าคลัง กดแถวเพื่อดูประวัติเบิก-จ่ายย้อนหลังต่อชิ้น"
+        actions={[
+          <Button key="reload" variant="secondary" onClick={() => { loadParts(); setSearch(""); }}>
+            รีโหลดข้อมูล
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ยอดคงเหลืออะไหล่"
         summary="สรุปยอดคงเหลือและมูลค่าคลังของทุกอะไหล่ พร้อมทางเข้าดูประวัติเบิก-จ่ายรายชิ้น"
@@ -408,6 +409,7 @@ export default function SpareBalancesPage() {
           )}
         </SheetContent>
       </Sheet>
-    </PageShell>
+      </div>
+    </>
   );
 }

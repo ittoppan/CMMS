@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -117,7 +116,8 @@ export default function CalibrationDashboardPage() {
   );
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -126,7 +126,7 @@ export default function CalibrationDashboardPage() {
       ]}
       title="แดชบอร์ดสอบเทียบ"
       description="สรุปสถานะเครื่องมือวัด สายสอบเทียบ และมาตรฐานอ้างอิงจากข้อมูลจริง ณ ขณะนี้"
-      actions={
+      actions={[
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4" />
@@ -137,8 +137,9 @@ export default function CalibrationDashboardPage() {
             จัดการเครื่องมือวัด
           </Button>
         </div>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {error && (error instanceof ApiError && error.status === 403 ? (
         <PermissionDeniedState description="คุณไม่มีสิทธิ์ดูแดชบอร์ดสอบเทียบ — ติดต่อผู้ดูแลระบบ" />
       ) : (
@@ -269,6 +270,7 @@ export default function CalibrationDashboardPage() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

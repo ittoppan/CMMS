@@ -1,21 +1,21 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { usePageHero, t } from "@/lib/i18n";
-import { normalizeRepairStatus, isRepairOverdue } from "@/lib/repair-status";
-import { useToast } from "@/components/ToastProvider";
-import { useRouter } from "next/navigation";
-import { type ColumnDef } from "@tanstack/react-table";
-import { Star, Wrench } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
-import { DataTable, type UiTableFeatures } from "@/components/ui/table";
-import { Dialog } from "@/components/ui/dialog";
-
+"use client";
+
+import { useState, useEffect } from "react";
+import { usePageHero, t } from "@/lib/i18n";
+import { normalizeRepairStatus, isRepairOverdue } from "@/lib/repair-status";
+import { useToast } from "@/components/ToastProvider";
+import { useRouter } from "next/navigation";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Star, Wrench } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/layout";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import { Dialog } from "@/components/ui/dialog";
+
 type TrackWO = Record<string, unknown> & {
   id: string;
   rawId: number;
@@ -29,14 +29,14 @@ type TrackWO = Record<string, unknown> & {
   etaDate?: string;
   ratingScore?: number | null;
   ratingComment?: string | null;
-};
-
-export default function RepairTrackingPage() {
-  const hero = usePageHero("repair/tracking");
-  const router = useRouter();
-  const [data, setData] = useState<TrackWO[]>([]);
-  const [error, setError] = useState<boolean>(false);
-
+};
+
+export default function RepairTrackingPage() {
+  const hero = usePageHero("repair/tracking");
+  const router = useRouter();
+  const [data, setData] = useState<TrackWO[]>([]);
+  const [error, setError] = useState<boolean>(false);
+
     useEffect(() => {
     (async () => {
       try {
@@ -82,15 +82,15 @@ export default function RepairTrackingPage() {
         setError(true);
       }
     })();
-  }, []);
-
-  // Evaluation Dialog
-  const [evalModalOpen, setEvalModalOpen] = useState(false);
-  const [selectedWo, setSelectedWo] = useState<TrackWO | null>(null);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
-  const { showToast } = useToast();
-
+  }, []);
+
+  // Evaluation Dialog
+  const [evalModalOpen, setEvalModalOpen] = useState(false);
+  const [selectedWo, setSelectedWo] = useState<TrackWO | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const { showToast } = useToast();
+
     const handleEvaluate = (wo: TrackWO) => {
     setSelectedWo(wo);
     setRating(wo.ratingScore && wo.ratingScore >= 1 && wo.ratingScore <= 5 ? wo.ratingScore : 5);
@@ -123,56 +123,56 @@ export default function RepairTrackingPage() {
       console.error("Submit evaluation error:", e);
       showToast("error", e?.message || "บันทึกการประเมินไม่สำเร็จ");
     }
-  };
-
-  const getStatusDisplay = (wo: TrackWO) => {
-    // เกินกำหนด (กำหนดเสร็จผ่านไปแล้ว ยังไม่จบ) → ไฟแดง สำคัญสุดเสมอ
-    if (wo.overdue) {
-      return <span className="cmms-status down"><span className="cmms-status-dot" />เกินกำหนด</span>;
-    }
-    switch(wo.status) {
-      case 'pending_assign': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>รอมอบหมายงาน</span>;
-      case 'pending_accept': return <span className="cmms-status warn"><span className="cmms-status-dot" />รอช่างรับงาน</span>;
-      case 'in_progress': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>กำลังดำเนินการซ่อม</span>;
-      case 'pending_parts': return <span className="cmms-status warn"><span className="cmms-status-dot" />รออะไหล่</span>;
-      case 'pending_eval': return <span className="cmms-status down"><span className="cmms-status-dot" />รอการประเมินจากผู้แจ้ง</span>;
-      case 'completed': return <span className="cmms-status ok"><span className="cmms-status-dot" />เสร็จสมบูรณ์</span>;
-      default: return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{wo.status}</span>;
-    }
-  };
-
-  const columns: ColumnDef<UiTableFeatures, TrackWO>[] = [
-    {
-      accessorKey: "woNumber",
-      header: t("tbl.work_order_no"),
-      meta: { cardTitle: true },
-      cell: ({ row }: { row: { original: TrackWO } }) => (
-        <strong>{row.original.woNumber}</strong>
-      ),
-    },
-    { accessorKey: "machine", header: t("tbl.asset_full") },
-    { accessorKey: "symptoms", header: t("tbl.issue_desc") },
-    {
-      accessorKey: "status",
-      header: t("tbl.repair_status"),
-      cell: ({ row }: { row: { original: TrackWO } }) => getStatusDisplay(row.original),
-    },
-    {
-      accessorKey: "technician",
-      header: t("tbl.tech_assignee"),
-      cell: ({ row }: { row: { original: TrackWO } }) => row.original.technician || "-",
-    },
-    {
-      accessorKey: "requestDate",
-      header: t("tbl.request_date"),
-      cell: ({ row }: { row: { original: TrackWO } }) => (
-        <span className="text-[var(--cmms-text-secondary)]">{row.original.requestDate}</span>
-      ),
-    },
-    {
-      id: "actions",
-      header: t("tbl.actions"),
-      enableSorting: false,
+  };
+
+  const getStatusDisplay = (wo: TrackWO) => {
+    // เกินกำหนด (กำหนดเสร็จผ่านไปแล้ว ยังไม่จบ) → ไฟแดง สำคัญสุดเสมอ
+    if (wo.overdue) {
+      return <span className="cmms-status down"><span className="cmms-status-dot" />เกินกำหนด</span>;
+    }
+    switch(wo.status) {
+      case 'pending_assign': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>รอมอบหมายงาน</span>;
+      case 'pending_accept': return <span className="cmms-status warn"><span className="cmms-status-dot" />รอช่างรับงาน</span>;
+      case 'in_progress': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>กำลังดำเนินการซ่อม</span>;
+      case 'pending_parts': return <span className="cmms-status warn"><span className="cmms-status-dot" />รออะไหล่</span>;
+      case 'pending_eval': return <span className="cmms-status down"><span className="cmms-status-dot" />รอการประเมินจากผู้แจ้ง</span>;
+      case 'completed': return <span className="cmms-status ok"><span className="cmms-status-dot" />เสร็จสมบูรณ์</span>;
+      default: return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{wo.status}</span>;
+    }
+  };
+
+  const columns: ColumnDef<UiTableFeatures, TrackWO>[] = [
+    {
+      accessorKey: "woNumber",
+      header: t("tbl.work_order_no"),
+      meta: { cardTitle: true },
+      cell: ({ row }: { row: { original: TrackWO } }) => (
+        <strong>{row.original.woNumber}</strong>
+      ),
+    },
+    { accessorKey: "machine", header: t("tbl.asset_full") },
+    { accessorKey: "symptoms", header: t("tbl.issue_desc") },
+    {
+      accessorKey: "status",
+      header: t("tbl.repair_status"),
+      cell: ({ row }: { row: { original: TrackWO } }) => getStatusDisplay(row.original),
+    },
+    {
+      accessorKey: "technician",
+      header: t("tbl.tech_assignee"),
+      cell: ({ row }: { row: { original: TrackWO } }) => row.original.technician || "-",
+    },
+    {
+      accessorKey: "requestDate",
+      header: t("tbl.request_date"),
+      cell: ({ row }: { row: { original: TrackWO } }) => (
+        <span className="text-[var(--cmms-text-secondary)]">{row.original.requestDate}</span>
+      ),
+    },
+    {
+      id: "actions",
+      header: t("tbl.actions"),
+      enableSorting: false,
             cell: ({ row }: { row: { original: TrackWO } }) => {
         const item = row.original;
         if (item.status === 'pending_eval' && !item.ratingScore) {
@@ -196,108 +196,109 @@ export default function RepairTrackingPage() {
             </Button>
           </div>
         );
-      },
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <PageHeader title={hero.title} description={hero.desc} />
-      </div>
-
-      {error ? (
-        <Alert variant="danger" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
-                <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
-              </span>
-              รายการงานซ่อมที่แจ้งไว้
-              <span className="cmms-count-pill">{data.length} รายการ</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              exportFileName="repair-tracking"
-              variant="cards"
-              columns={columns}
-              data={data}
-              getRowId={(row) => row.id}
-              emptyTitle="ไม่พบข้อมูล"
-              emptyDescription="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้"
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Evaluation Modal */}
-      <Dialog
-        open={evalModalOpen}
-        onClose={() => setEvalModalOpen(false)}
-        title="ประเมินผลความพึงพอใจงานซ่อม"
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setEvalModalOpen(false)}>
-              ยกเลิก
-            </Button>
-            <Button onClick={submitEvaluation}>บันทึกการประเมิน</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="space-y-2 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-muted)] p-4 text-sm">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--cmms-text-secondary)]">ใบงาน:</span>
-              <span className="font-bold">{selectedWo?.woNumber}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--cmms-text-secondary)]">เครื่องจักร:</span>
-              <span className="font-bold">{selectedWo?.machine}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--cmms-text-secondary)]">ช่างซ่อม:</span>
-              <span className="font-semibold text-[var(--cmms-primary)]">{selectedWo?.technician}</span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-semibold">ให้คะแนนความพึงพอใจ:</p>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                  aria-pressed={star <= rating}
-                  onClick={() => setRating(star)}
-                  className="rounded p-1 transition-colors hover:bg-[var(--cmms-bg-muted)]"
-                >
-                  <Star
-                    size={20}
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                    className={star <= rating ? "text-[var(--cmms-warning)]" : "text-[var(--cmms-text-muted)]"}
-                    fill={star <= rating ? "currentColor" : "none"}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <Textarea
-            label="ข้อเสนอแนะเพิ่มเติม"
-            placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={3}
-          />
-        </div>
-      </Dialog>
-    </div>
-  );
-}
+      },
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+      />
+
+      {error ? (
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+                <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              รายการงานซ่อมที่แจ้งไว้
+              <span className="cmms-count-pill">{data.length} รายการ</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              exportFileName="repair-tracking"
+              variant="cards"
+              columns={columns}
+              data={data}
+              getRowId={(row) => row.id}
+              emptyTitle="ไม่พบข้อมูล"
+              emptyDescription="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้"
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Evaluation Modal */}
+      <Dialog
+        open={evalModalOpen}
+        onClose={() => setEvalModalOpen(false)}
+        title="ประเมินผลความพึงพอใจงานซ่อม"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setEvalModalOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button onClick={submitEvaluation}>บันทึกการประเมิน</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-muted)] p-4 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">ใบงาน:</span>
+              <span className="font-bold">{selectedWo?.woNumber}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">เครื่องจักร:</span>
+              <span className="font-bold">{selectedWo?.machine}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">ช่างซ่อม:</span>
+              <span className="font-semibold text-[var(--cmms-primary)]">{selectedWo?.technician}</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">ให้คะแนนความพึงพอใจ:</p>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                  aria-pressed={star <= rating}
+                  onClick={() => setRating(star)}
+                  className="rounded p-1 transition-colors hover:bg-[var(--cmms-bg-muted)]"
+                >
+                  <Star
+                    size={20}
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                    className={star <= rating ? "text-[var(--cmms-warning)]" : "text-[var(--cmms-text-muted)]"}
+                    fill={star <= rating ? "currentColor" : "none"}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Textarea
+            label="ข้อเสนอแนะเพิ่มเติม"
+            placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={3}
+          />
+        </div>
+      </Dialog>
+    </div>
+  );
+}

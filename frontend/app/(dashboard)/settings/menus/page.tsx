@@ -3,12 +3,11 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useMemo, type ComponentType } from "react";
-import { VStack, HStack } from "@/components/layout";
+import { VStack, HStack, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { PageShell } from "@/components/PageShell";
 import {
   CheckCircle2 as CheckCircleIcon,
   ShieldCheck as ShieldCheckIcon,
@@ -243,12 +242,12 @@ export default function MenuPermissionsPage() {
     : { fg: "var(--cmms-text-secondary)", bg: "var(--cmms-bg-muted)" };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MENU SETTINGS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">MENU SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "สิทธิ์เมนูตามบทบาท" }]}
       title="สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)"
       description="เลือกว่าแต่ละบทบาทเห็นเมนูใดในแอป และปุ่มล่างมือถือแบบไหน — พรีวิวทางขวาจะอัปเดตสดทุกครั้งที่แก้"
-      actions={
+      actions={[
         <>
           <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
             {menus.length} เมนู × {roles.length} บทบาท
@@ -260,8 +259,8 @@ export default function MenuPermissionsPage() {
             {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="จัดการเมนู (Menu Settings)"
@@ -706,6 +705,7 @@ export default function MenuPermissionsPage() {
         </CardContent>
       </Card>
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }

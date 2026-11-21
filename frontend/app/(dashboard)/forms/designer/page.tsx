@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -266,28 +266,28 @@ export default function FormDesignerPage() {
   }, [fetchTemplates]);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "อนุมัติ & เอกสาร", href: "/forms" },
-        { label: hero.title },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <>
-          <a href="/forms" className={buttonVariants({ variant: "secondary" })}>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ & เอกสาร", href: "/forms" },
+          { label: hero.title },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <a key="back" href="/forms" className={buttonVariants({ variant: "secondary" })}>
             <ArrowRight className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             {t("action.back")}
-          </a>
-          <Button onClick={saveForm} disabled={saving}>
+          </a>,
+          <Button key="save" onClick={saveForm} disabled={saving}>
             {saving ? <Spinner size={16} label="" /> : <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
             {t("action.save")}
-          </Button>
-        </>
-      }
-    >
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {msg && (
         <Alert
           variant={msg.isError ? "danger" : "success"}
@@ -391,6 +391,7 @@ export default function FormDesignerPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

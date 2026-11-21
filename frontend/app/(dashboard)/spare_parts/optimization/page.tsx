@@ -5,6 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -256,28 +257,26 @@ export default function InventoryOptimizationPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">AI วิเคราะห์คลังอะไหล่</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" /> ขับเคลื่อนด้วย AI
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={fetchData}
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-          ประมวลผล AI ใหม่
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>}
+        title="AI วิเคราะห์คลังอะไหล่"
+        description="คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)"
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> ขับเคลื่อนด้วย AI
+          </span>
+        }
+        primaryAction={
+          <button
+            type="button"
+            onClick={fetchData}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
+          >
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            ประมวลผล AI ใหม่
+          </button>
+        }
+      />
 
       <ModuleGuide
         name="วิเคราะห์คลังอะไหล่"

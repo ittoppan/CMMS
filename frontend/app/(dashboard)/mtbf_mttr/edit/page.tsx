@@ -3,8 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -143,17 +142,19 @@ function EditMtbfMttrContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MTBF / MTTR · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
-        { label: "แก้ไขข้อมูล" },
-      ]}
-      title="แก้ไขข้อมูลดัชนีชี้วัด MTBF / MTTR"
-      description="แก้ไขข้อมูลชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+          { label: "แก้ไขข้อมูล" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MTBF / MTTR · CMMS-TOPPAN</p>}
+        title="แก้ไขข้อมูลดัชนีชี้วัด MTBF / MTTR"
+        description="แก้ไขข้อมูลชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>ข้อมูลบันทึก</CardTitle>
           <CardDescription>ปรับแก้ตัวเลขการใช้งานของรอบเวลานี้</CardDescription>
@@ -268,7 +269,8 @@ function EditMtbfMttrContent() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

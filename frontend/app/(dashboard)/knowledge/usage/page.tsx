@@ -13,6 +13,7 @@ import { usePageHero } from "@/lib/i18n";
 import { usePageLayout } from "@/lib/pageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -142,26 +143,24 @@ export default function KnowledgeUsagePage() {
         <Alert variant="warning" title="คุณไม่มีสิทธิ์ดูสถิติการใช้งาน" description="หน้านี้ต้องมีสิทธิ์ knowledge.usage_view" />
       )}
 
-      <div style={layoutStyle("hero")} className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">
-            {hero.title}
-          </h1>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">
-            {hero.desc}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={load} disabled={refreshing}>
-            <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-          </Button>
-          {can?.export && (
-            <Button variant="primary" onClick={doExport} disabled={busy}>
-              <FileDown size={15} aria-hidden="true" /> ส่งออก CSV
-            </Button>
-          )}
-        </div>
+      <div style={layoutStyle("hero")}>
+        <PageHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title={hero.title}
+          description={hero.desc}
+          actions={[
+            <Button key="refresh" variant="secondary" onClick={load} disabled={refreshing}>
+              <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
+            </Button>,
+            ...(can?.export
+              ? [
+                  <Button key="export" variant="primary" onClick={doExport} disabled={busy}>
+                    <FileDown size={15} aria-hidden="true" /> ส่งออก CSV
+                  </Button>,
+                ]
+              : []),
+          ]}
+        />
       </div>
 
       {/* KPI */}

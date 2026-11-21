@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -152,25 +153,21 @@ export default function KnowledgeArticleCreatePage() {
         <Alert variant="warning" title="คุณไม่มีสิทธิ์เขียนบทความ" description="หน้านี้สำหรับผู้ที่ได้รับสิทธิ์ knowledge.create เท่านั้น" />
       )}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">
-              {hero.title}
-            </h1>
-            <Badge variant="primary" dot>
-              <GraduationCap size={13} aria-hidden="true" /> Draft
-            </Badge>
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">
-            {hero.desc}
-          </p>
-        </div>
-        <Link href="/knowledge/articles" className={buttonVariants({ variant: "secondary" })}>
-          <ArrowLeft size={15} aria-hidden="true" /> กลับไปทะเบียน
-        </Link>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          <Badge variant="primary" dot>
+            <GraduationCap size={13} aria-hidden="true" /> Draft
+          </Badge>
+        }
+        primaryAction={
+          <Link href="/knowledge/articles" className={buttonVariants({ variant: "secondary" })}>
+            <ArrowLeft size={15} aria-hidden="true" /> กลับไปทะเบียน
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* เนื้อหาหลัก */}

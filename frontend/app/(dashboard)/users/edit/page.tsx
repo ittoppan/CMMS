@@ -5,7 +5,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -199,22 +199,24 @@ function EditUserContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">USERS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "บุคลากร", href: "/users" },
-        { label: t("form.profile_edit_title") },
-      ]}
-      title={t("form.profile_edit_title")}
-      description={t("hero.profile_edit_desc")}
-      actions={
-        <Button variant="secondary" onClick={() => router.push("/users")}>
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.back")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "บุคลากร", href: "/users" },
+          { label: t("form.profile_edit_title") },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">USERS · CMMS-TOPPAN</p>}
+        title={t("form.profile_edit_title")}
+        description={t("hero.profile_edit_desc")}
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push("/users")}>
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.back")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[880px]">
         {loading ? (
           <CardContent>
@@ -450,7 +452,8 @@ function EditUserContent() {
           </>
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

@@ -7,8 +7,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useApiQuery, apiJson } from "@/lib/api";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -74,12 +73,14 @@ export default function ConfigPage() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "Reliability", href: "/asset-reliability" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}
-    >
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ตั้งค่า Reliability & Criticality"
@@ -154,6 +155,7 @@ export default function ConfigPage() {
           </Card>
         </Grid>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

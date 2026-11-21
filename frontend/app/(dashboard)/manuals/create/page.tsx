@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -100,17 +99,19 @@ export default function ManualCreatePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คู่มือ & SOP", href: "/manuals" },
-        { label: "อัปโหลดเอกสาร" },
-      ]}
-      title="อัปโหลดเอกสาร/คู่มือใหม่"
-      description="อัปโหลดคู่มือเครื่องจักร หรือขั้นตอนการปฏิบัติงานมาตรฐาน (SOP)"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คู่มือ & SOP", href: "/manuals" },
+          { label: "อัปโหลดเอกสาร" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
+        title="อัปโหลดเอกสาร/คู่มือใหม่"
+        description="อัปโหลดคู่มือเครื่องจักร หรือขั้นตอนการปฏิบัติงานมาตรฐาน (SOP)"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>ข้อมูลเอกสาร</CardTitle>
           <CardDescription>กรอกรายละเอียดคู่มือ/SOP ที่ต้องการเพิ่มเข้าระบบ</CardDescription>
@@ -194,6 +195,7 @@ export default function ManualCreatePage() {
           </div>
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePageHero, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/cn";
@@ -410,12 +410,12 @@ export default function ProcessFlowsPage() {
   ];
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: lang === "th" ? "หน้าแรก" : "Home", href: "/dashboard" }, { label: hero.title }]}
+    <>
+      <PageHeader breadcrumbs={[{ label: lang === "th" ? "หน้าแรก" : "Home", href: "/dashboard" }, { label: hero.title }]}
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
-      description={hero.desc}
-    >
+      description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ผังขั้นตอนกระบวนการ (Process Flows)"
@@ -471,6 +471,7 @@ export default function ProcessFlowsPage() {
           ))}
         </div>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

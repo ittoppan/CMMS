@@ -6,7 +6,7 @@ import { RefreshCw } from "lucide-react";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -82,7 +82,8 @@ function TrendInner() {
   ];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -91,13 +92,14 @@ function TrendInner() {
         { label: "วิศวกรรมความเสียหาย", href: relNavHref("/reliability", query) },
         { label: "แนวโน้ม" },
       ]}
-      actions={
+      actions={[
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="แนวโน้มความน่าเชื่อถือ (Trend)"
@@ -171,7 +173,8 @@ function TrendInner() {
           </RelSection>
         </>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }
 

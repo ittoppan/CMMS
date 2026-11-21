@@ -6,6 +6,7 @@ import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -232,32 +233,36 @@ export default function RcaDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">
+      <DetailHeader
+        eyebrow={
+          <p className="cmms-eyebrow">
             <a href="/rca" className="no-underline" style={{ color: "inherit" }}>{hero.eyebrow}</a>
           </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{rca.rca_code} {/* title */}</h1>
+        }
+        title={rca.rca_code}
+        description={rca.title}
+        status={
+          <>
             {statusBadge(rca.status)}
             {rca.due_date && rca.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10) && !["closed", "cancelled"].includes(rca.status) ? <AndonLamp status="down" size="sm" showLabel /> : null}
-          </div>
-          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{rca.title}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <a href="/rca" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={16} aria-hidden="true" /> ภาพรวม</a>
-          {canEdit && allowed.length > 0 && (
-            <Select value="" onValueChange={(v) => v && transition(v)}>
-              <SelectTrigger className="w-44 bg-white/10 text-white border-white/20 h-10"><SelectValue placeholder="เปลี่ยนสถานะ…" /></SelectTrigger>
-              <SelectContent>
-                {allowed.map((to) => (
-                  <SelectItem key={to} value={to}>{RCA_STATUS_LABELS[to]?.th || to}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      </div>
+          </>
+        }
+        actions={[
+          <a key="overview" href="/rca" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={16} aria-hidden="true" /> ภาพรวม</a>,
+          ...(canEdit && allowed.length > 0
+            ? [
+                <Select key="status" value="" onValueChange={(v) => v && transition(v)}>
+                  <SelectTrigger className="w-44 h-10"><SelectValue placeholder="เปลี่ยนสถานะ…" /></SelectTrigger>
+                  <SelectContent>
+                    {allowed.map((to) => (
+                      <SelectItem key={to} value={to}>{RCA_STATUS_LABELS[to]?.th || to}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>,
+              ]
+            : []),
+        ]}
+      />
 
       {/* info strip */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

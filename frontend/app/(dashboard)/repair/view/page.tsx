@@ -42,7 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageShell } from "@/components/PageShell";
+import { DetailHeader } from "@/components/layout";
 
 interface PartRow {
   id: number;
@@ -673,45 +673,48 @@ export default function RepairViewDetailsPage() {
   const ratingScore = Math.max(0, Math.min(5, Math.round(Number(wo.ratingScore ?? 0))));
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">WORK ORDER DETAIL · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "งานซ่อมบำรุง", href: "/repair" },
-        { label: "ใบสั่งงานซ่อม" },
-      ]}
-      title="ใบสั่งงานซ่อม"
-      description="WORK ORDER DETAIL · CMMS-TOPPAN"
-      actions={
-        <>
+    <>
+      <DetailHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "งานซ่อมบำรุง", href: "/repair" },
+          { label: "ใบสั่งงานซ่อม" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">WORK ORDER DETAIL · CMMS-TOPPAN</p>}
+        title="ใบสั่งงานซ่อม"
+        description="WORK ORDER DETAIL · CMMS-TOPPAN"
+        actions={[
           <Button
-            variant="outline"
+            key="back"
+            variant="secondary"
             onClick={() => (window.location.href = "/repair/tracking")}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>กลับ</span>
-          </Button>
+          </Button>,
           <Button
-            variant="outline"
+            key="pdf"
+            variant="secondary"
             disabled={downloading}
             onClick={handleDownloadPdf}
             className="gap-2"
           >
             <FileDown className="w-4 h-4" />
             <span>{downloading ? t("action.building_pdf") : t("action.download_pdf_fen03")}</span>
-          </Button>
+          </Button>,
           <Button
+            key="print"
             variant="primary"
             onClick={handlePrint}
             className="gap-2"
           >
             <Printer className="w-4 h-4" />
             <span>{t("action.print_closure_doc")}</span>
-          </Button>
-        </>
-      }
-    >
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
       {offline && (
         <Alert
@@ -1485,6 +1488,7 @@ export default function RepairViewDetailsPage() {
           </div>
         </div>
       </AnimatedDialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

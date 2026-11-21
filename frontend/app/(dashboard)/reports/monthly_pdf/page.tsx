@@ -4,6 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
@@ -201,53 +202,49 @@ export default function MonthlyPdfReportPage() {
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Header + Controls */}
-      <div className="cmms-page-hero flex flex-col xl:flex-row xl:items-end justify-between gap-6 print:hidden">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">MONTHLY REPORT · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">รายงานสรุปงานซ่อมบำรุงประจำเดือน</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Printer size={14} strokeWidth={1.75} aria-hidden="true" /> พิมพ์เอกสาร A4 (ISO)
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ
-          </p>
-        </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))} aria-label="ปี">
-            <SelectTrigger className="w-auto">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {yearOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))} aria-label="เดือน">
-            <SelectTrigger className="w-auto">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline" onClick={fetchData} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-            รีเฟรช
-          </Button>
-          <Button variant="outline" disabled={downloading} onClick={handleDownload} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
-            {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
-          </Button>
-          <Button onClick={handlePrint}>
-            <Printer size={16} strokeWidth={1.75} aria-hidden="true" />
-            พิมพ์เอกสาร A4
-          </Button>
-        </div>
+      <div className="print:hidden">
+        <DetailHeader
+          eyebrow={<p className="cmms-eyebrow">MONTHLY REPORT · CMMS-TOPPAN</p>}
+          title="รายงานสรุปงานซ่อมบำรุงประจำเดือน"
+          description="รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ"
+          status={<span className="cmms-andon-chip"><Printer size={14} strokeWidth={1.75} aria-hidden="true" /> พิมพ์เอกสาร A4 (ISO)</span>}
+          actions={[
+            <div key="controls" className="flex flex-wrap items-end gap-3">
+              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))} aria-label="ปี">
+                <SelectTrigger className="w-auto">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))} aria-label="เดือน">
+                <SelectTrigger className="w-auto">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {monthOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={fetchData}>
+                <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+                รีเฟรช
+              </Button>
+              <Button variant="outline" disabled={downloading} onClick={handleDownload}>
+                <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
+                {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
+              </Button>
+              <Button onClick={handlePrint}>
+                <Printer size={16} strokeWidth={1.75} aria-hidden="true" />
+                พิมพ์เอกสาร A4
+              </Button>
+            </div>,
+          ]}
+        />
       </div>
 
 

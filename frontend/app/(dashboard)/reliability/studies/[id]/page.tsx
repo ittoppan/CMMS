@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -297,23 +297,31 @@ function StudyInner({ studyId }: { studyId: number }) {
 
   if (studyQ.error) {
     return (
-      <PageShell title={hero.title} description={hero.desc}>
+      <>
+      <PageHeader title={hero.title} description={hero.desc} />
+      <div className="space-y-6">
         <RelError message={studyQ.error.message} />
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   if (studyQ.isLoading) {
     return (
-      <PageShell title={hero.title} description={hero.desc}>
+      <>
+      <PageHeader title={hero.title} description={hero.desc} />
+      <div className="space-y-6">
         <RelLoading />
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   if (!study) {
     return (
-      <PageShell title={hero.title} description={hero.desc}>
+      <>
+      <PageHeader title={hero.title} description={hero.desc} />
+      <div className="space-y-6">
         <RelEmpty
           title="ไม่พบงานวิเคราะห์"
           description="งานวิเคราะห์อาจถูกลบ หรือคุณไม่มีสิทธิ์เข้าถึง"
@@ -322,14 +330,16 @@ function StudyInner({ studyId }: { studyId: number }) {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           กลับไปรายการงานวิเคราะห์
         </Button>
-      </PageShell>
+            </div>
+    </>
     );
   }
 
   const nextStatuses = RL_STUDY_FLOW[study.status] ?? [];
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{study.study_code}</span>}
       title={study.title}
       description={study.scope_description ?? hero.desc}
@@ -339,7 +349,7 @@ function StudyInner({ studyId }: { studyId: number }) {
         { label: "งานวิเคราะห์", href: "/reliability/studies" },
         { label: study.study_code },
       ]}
-      actions={
+      actions={[
         <>
           {canWrite && (
             <Button size="sm" onClick={() => setActionOpen(true)}>
@@ -369,8 +379,9 @@ function StudyInner({ studyId }: { studyId: number }) {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       {configQ.data && !canWrite && (
         <RelRestricted message="บทบาทของคุณอ่านได้อย่างเดียว — การแก้ไข เปลี่ยนสถานะ และตั้งงานถูกปิดใช้งาน" />
       )}
@@ -740,7 +751,8 @@ function StudyInner({ studyId }: { studyId: number }) {
           </div>
         </div>
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }
 
@@ -774,12 +786,15 @@ export default function ReliabilityStudyDetailPage() {
   const id = Number(params?.id);
   if (!Number.isFinite(id) || id <= 0) {
     return (
-      <PageShell title="งานวิเคราะห์" description="รหัสงานวิเคราะห์ไม่ถูกต้อง">
+      <>
+      <PageHeader title="งานวิเคราะห์" description="รหัสงานวิเคราะห์ไม่ถูกต้อง" />
+      <div className="space-y-6">
         <RelEmpty
           title="รหัสงานวิเคราะห์ไม่ถูกต้อง"
           description="กรุณาเปิดงานวิเคราะห์จากรายการ"
         />
-      </PageShell>
+            </div>
+    </>
     );
   }
   return (

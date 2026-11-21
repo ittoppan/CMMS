@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -108,16 +108,18 @@ export default function BorrowingCreatePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
-        { label: "ขอยืมอุปกรณ์" },
-      ]}
-      title="แบบฟอร์มขอยืมอุปกรณ์ / เครื่องมือพิเศษ"
-      description="กรอกรายละเอียดการยืม — อุปกรณ์ ผู้ยืม วันที่ และวัตถุประสงค์"
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
+          { label: "ขอยืมอุปกรณ์" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
+        title="แบบฟอร์มขอยืมอุปกรณ์ / เครื่องมือพิเศษ"
+        description="กรอกรายละเอียดการยืม — อุปกรณ์ ผู้ยืม วันที่ และวัตถุประสงค์"
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         <CardContent className="space-y-5">
           {error && <Alert variant="danger">{error}</Alert>}
@@ -233,6 +235,7 @@ export default function BorrowingCreatePage() {
           </Button>
         </CardFooter>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

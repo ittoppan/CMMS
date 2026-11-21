@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -236,7 +236,8 @@ function BadActorsInner() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
       title={hero.title}
       description={hero.desc}
@@ -245,7 +246,7 @@ function BadActorsInner() {
         { label: "วิศวกรรมความเสียหาย", href: relNavHref("/reliability", query) },
         { label: "เครื่องที่มีปัญหาเป็นระบบ" },
       ]}
-      actions={
+      actions={[
         <>
           {canAdmin && (
             <Button size="sm" onClick={() => setEditing({ ...EMPTY_CRITERION })}>
@@ -279,8 +280,9 @@ function BadActorsInner() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} showBasis={false} />
 
       {scoresQ.error && <RelError message={scoresQ.error.message} />}
@@ -520,7 +522,8 @@ function BadActorsInner() {
           </div>
         )}
       </Dialog>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

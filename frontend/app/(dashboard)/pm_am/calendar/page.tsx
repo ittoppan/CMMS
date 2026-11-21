@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -356,32 +357,25 @@ export default function PMCalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">รอบ PM จริง (PM Cycles)</span>
-          </div>
-          <p className="cmms-hero-desc">แสดงรอบงาน PM/AM จากข้อมูลจริง พร้อมสถานะตามกำหนด (due/overdue) และการเข้าถึงเช็คชีท/รายละเอียด</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setViewAll((v) => !v)}
-            className={viewAll ? "border-white bg-white text-[var(--cmms-primary)] hover:bg-white/90" : "border-white/20 bg-white/10 text-white hover:bg-white/20"}
-          >
-            <Clock size={16} strokeWidth={1.75} aria-hidden="true" />
-            {viewAll ? "กลับไปดูตามวันที่" : "ดูแผนทั้งหมด"}
-          </Button>
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description="แสดงรอบงาน PM/AM จากข้อมูลจริง พร้อมสถานะตามกำหนด (due/overdue) และการเข้าถึงเช็คชีท/รายละเอียด"
+        primaryAction={
           <Button onClick={() => router.push("/pm_am/create")}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.create_pm")}
           </Button>
-          <Button variant="outline" onClick={() => window.open("/api/v1/pm_ical.php", "_blank")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+        }
+        actions={[
+          <Button key="viewall" variant="secondary" onClick={() => setViewAll((v) => !v)}>
+            <Clock size={16} strokeWidth={1.75} aria-hidden="true" />
+            {viewAll ? "กลับไปดูตามวันที่" : "ดูแผนทั้งหมด"}
+          </Button>,
+          <Button key="ical" variant="secondary" onClick={() => window.open("/api/v1/pm_ical.php", "_blank")}>
             <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />ส่งออก iCal
-          </Button>
-        </div>
-      </div>
+          </Button>,
+        ]}
+      />
 
       <ModuleGuide
         name="ปฏิทินแผน PM"

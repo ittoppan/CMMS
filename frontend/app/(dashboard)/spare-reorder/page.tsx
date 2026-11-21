@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import AndonBadge from "@/components/AndonBadge";
 import { usePageHero } from "@/lib/i18n";
@@ -39,7 +39,9 @@ export default function SpareReorderPage() {
   }, []);
 
   return (
-    <PageShell eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc}>
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc} />
+      <div className="space-y-6">
       <div className="mb-4 text-sm">Estimated total cost: {total.toLocaleString()} ฿ · {items.length} items</div>
       {loading ? (
         <p>Loading...</p>
@@ -60,6 +62,7 @@ export default function SpareReorderPage() {
           ))}
         </div>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }

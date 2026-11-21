@@ -7,7 +7,7 @@
  * พื้นที่เก็บรูป offline และปุ่ม "ซิงก์เดี๋ยวนี้"
  */
 import { useCallback, useEffect, useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -137,11 +137,11 @@ export default function SyncCenterPage() {
   const offline = net === "OFFLINE";
 
   return (
-    <PageShell
-      title={t("sync.menu")}
+    <>
+      <PageHeader title={t("sync.menu")}
       description={t("sync.status.offline")}
-      eyebrow={<p className="cmms-eyebrow">SYNC CENTER · CMMS-TOPPAN</p>}
-    >
+      eyebrow={<p className="cmms-eyebrow">SYNC CENTER · CMMS-TOPPAN</p>} />
+      <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-3">
         {/* สถานะเครือข่าย */}
         <Card>
@@ -315,6 +315,7 @@ export default function SyncCenterPage() {
         <Clock3 size={12} className="mr-1 inline" aria-hidden="true" />
         {offline ? t("sync.status.offline") : t("sync.retrying_in").replace("{s}", String(Math.round(RETRY_SCHEDULE_MS[0] / 1000)))}
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

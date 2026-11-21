@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { VStack, HStack, Grid } from "@/components/layout";
+import { VStack, HStack, Grid, PageHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageShell } from "@/components/PageShell";
 import EmailNotifySettings from "@/components/EmailNotifySettings";
 import PushTemplateEditor from "@/components/settings/PushTemplateEditor";
 import {
@@ -388,8 +387,8 @@ export default function NotificationsSettingsPage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">NOTIFICATION SETTINGS · CMMS-TOPPAN</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATION SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ตั้งค่า", href: "/settings" },
@@ -397,7 +396,7 @@ export default function NotificationsSettingsPage() {
       ]}
       title="ตั้งค่าการแจ้งเตือน"
       description="เลือกว่ามีงานหรือเหตุการณ์ใด จะให้แจ้งเตือนไปที่ช่องทางไหน แล้วทดสอบส่งได้ทันที"
-      actions={
+      actions={[
         <HStack gap={3} vAlign="center">
           {message && <span className="text-sm text-[var(--cmms-success)]">{message}</span>}
           {hasChanges && <Badge variant="neutral">มีการแก้ไขที่ยังไม่บันทึก</Badge>}
@@ -406,8 +405,8 @@ export default function NotificationsSettingsPage() {
             {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
           </Button>
         </HStack>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <VStack gap={5}>
         {error && <Alert variant="danger" title="เกิดข้อผิดพลาด">{error}</Alert>}
 
@@ -502,7 +501,8 @@ export default function NotificationsSettingsPage() {
           <NtfyTab settings={settings} onSetting={setSetting} />
         )}
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

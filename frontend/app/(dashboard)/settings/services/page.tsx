@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 
 interface ServiceInfo {
   key: string;
@@ -153,12 +153,13 @@ export default function SystemServicesPage() {
   const liffUrl = cfUrl || ngrokUrl || zrokUrl || "";
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">SERVICES · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "บริการและสถานะการรันระบบ" }]}
       title="Service & การรันระบบ"
       description="เช็คว่า service ตัวไหนรันหรือยัง และรัน/หยุดได้จากที่นี่ (เฉพาะผู้ดูแลระบบ)"
-      actions={
+      actions={[
         <>
           <span
             className="cmms-andon-chip"
@@ -185,8 +186,9 @@ export default function SystemServicesPage() {
             {loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
           </Button>
         </>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <VStack gap={6}>
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด">{error}</Alert>}
       {notice && <Alert variant="info" title="ผลลัพธ์">{notice}</Alert>}
@@ -303,6 +305,7 @@ export default function SystemServicesPage() {
         </VStack>
       )}
       </VStack>
-    </PageShell>
+      </div>
+    </>
   );
 }

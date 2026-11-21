@@ -7,8 +7,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
-import { HStack, VStack, Grid } from "@/components/layout";
+import { HStack, VStack, Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -174,8 +173,8 @@ export default function IotConditionPage() {
     : [];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "IoT", href: "/iot/monitor" },
@@ -183,7 +182,7 @@ export default function IotConditionPage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <>
           <Badge variant={severityVariant(worst)}>
             <Gauge size={12} strokeWidth={1.75} aria-hidden="true" />
@@ -194,8 +193,8 @@ export default function IotConditionPage() {
             รีเฟรช
           </Button>
         </>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       <Card>
@@ -401,6 +400,7 @@ export default function IotConditionPage() {
           )}
         </VStack>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

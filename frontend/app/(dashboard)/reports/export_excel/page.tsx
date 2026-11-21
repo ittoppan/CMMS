@@ -4,6 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -64,23 +65,17 @@ export default function ExportExcelReportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">REPORTS EXPORT EXCEL · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ศูนย์ส่งออกข้อมูล Excel &amp; CSV</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Table size={14} strokeWidth={1.75} aria-hidden="true" /> รองรับ Excel &amp; Sage 300
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน
-          </p>
-          <Button variant="ghost" size="sm" className="self-start" onClick={() => (window.location.href = "/reports/import_excel")}>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">REPORTS EXPORT EXCEL · CMMS-TOPPAN</p>}
+        title="ศูนย์ส่งออกข้อมูล Excel & CSV"
+        description="ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน"
+        status={<span className="cmms-andon-chip"><Table size={14} strokeWidth={1.75} aria-hidden="true" /> รองรับ Excel & Sage 300</span>}
+        primaryAction={
+          <Button variant="secondary" onClick={() => (window.location.href = "/reports/import_excel")}>
             <Upload size={14} strokeWidth={1.75} aria-hidden="true" /> นำเข้าข้อมูล Excel
           </Button>
-        </div>
-      </div>
+        }
+      />
 
 
       <ModuleGuide

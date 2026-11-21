@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -206,17 +206,17 @@ export default function MyDashboardPage() {
   ];
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "My Dashboard", href: "/dashboard/my" }]}
+    <>
+      <PageHeader breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "My Dashboard", href: "/dashboard/my" }]}
       eyebrow={<p className="cmms-eyebrow">MY DASHBOARD · CMMS-TPT</p>}
       title={hero?.title || "My Dashboard"}
       description="แดชบอร์ดส่วนบุคคลจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน (ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงแสดง N/A)"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" /> รีเฟรช
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="space-y-6">
         {error && <Alert variant="danger" description={error} />}
 
@@ -410,6 +410,7 @@ export default function MyDashboardPage() {
           หมายเหตุ: หน้า My Dashboard นี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอินตาม API) ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ
         </p>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

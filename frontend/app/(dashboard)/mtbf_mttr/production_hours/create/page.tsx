@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -100,18 +99,20 @@ export default function ProductionHoursCreatePage() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">PRODUCTION HOURS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
-        { label: "ชั่วโมงการผลิต", href: "/mtbf_mttr/production_hours" },
-        { label: "บันทึกข้อมูล" },
-      ]}
-      title="บันทึกชั่วโมงการผลิต"
-      description="บันทึกเวลาทำงานจริงของเครื่องจักร — ใช้เป็นฐานคำนวณ MTBF / MTTR / OEE / Availability"
-    >
-      <Card>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+          { label: "ชั่วโมงการผลิต", href: "/mtbf_mttr/production_hours" },
+          { label: "บันทึกข้อมูล" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">PRODUCTION HOURS · CMMS-TOPPAN</p>}
+        title="บันทึกชั่วโมงการผลิต"
+        description="บันทึกเวลาทำงานจริงของเครื่องจักร — ใช้เป็นฐานคำนวณ MTBF / MTTR / OEE / Availability"
+      />
+      <div className="space-y-6">
+        <Card>
         <CardHeader>
           <CardTitle>บันทึกข้อมูล</CardTitle>
           <CardDescription>เลือกเครื่องจักรและวันที่ แล้วกรอกชั่วโมงการทำงานจริง</CardDescription>
@@ -201,6 +202,7 @@ export default function ProductionHoursCreatePage() {
           </div>
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

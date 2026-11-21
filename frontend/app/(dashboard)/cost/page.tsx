@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { DetailHeader } from "@/components/layout";
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -166,21 +167,13 @@ export default function CostPage() {
     <div className="space-y-6">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <Badge variant="primary" dot>
-              <CircleDollarSign size={13} aria-hidden="true" /> ค่าแรง + อะไหล่ + จ้างภายนอก
-            </Badge>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <button type="button" onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
-          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<Badge variant="primary" dot><CircleDollarSign size={13} aria-hidden="true" /> ค่าแรง + อะไหล่ + จ้างภายนอก</Badge>}
+        actions={[<button key="refresh" type="button" onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"><RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช</button>]}
+      />
 
 
       <ModuleGuide

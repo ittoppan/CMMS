@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { DetailHeader } from "@/components/layout";
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -124,26 +125,16 @@ export default function BudgetPage() {
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
       {toast && <Alert variant="success" title="สำเร็จ" description={toast} />}
 
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <Badge variant="primary" dot><Wallet size={13} aria-hidden="true" /> ปีงบ {year || "ทั้งหมด"}</Badge>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={load} className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
-            <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
-          </button>
-          {manage && (
-            <button type="button" onClick={() => setModal({ kind: "create" })} className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90">
-              <Plus size={15} aria-hidden="true" /> สร้างงบประมาณ
-            </button>
-          )}
-        </div>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<Badge variant="primary" dot><Wallet size={13} aria-hidden="true" /> ปีงบ {year || "ทั้งหมด"}</Badge>}
+        actions={[
+          <button key="refresh" type="button" onClick={load} className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</button>,
+          ...(manage ? [<button key="create" type="button" onClick={() => setModal({ kind: "create" })} className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"><Plus size={15} aria-hidden="true" /> สร้างงบประมาณ</button>] : []),
+        ]}
+      />
 
 
       <ModuleGuide

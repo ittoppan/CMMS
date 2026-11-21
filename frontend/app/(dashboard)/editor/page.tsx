@@ -5,8 +5,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -193,16 +192,16 @@ export default function InteractiveStylePageEditor() {
   };
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "สตูดิโอปรับแต่งสไตล์" }]}
+    <>
+      <PageHeader breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "สตูดิโอปรับแต่งสไตล์" }]}
       title="สตูดิโอปรับแต่งสไตล์ & โทนสีหน้าเว็บ"
       description="เลือกหน้า เปลี่ยนสีหลัก พื้นหลัง มุมมน และฟอนต์ แล้วบันทึกลงฐานข้อมูล — ดูตัวอย่างแบบเรียลไทม์ก่อนเผยแพร่"
-      actions={
+      actions={[
         <Badge variant="info">
           <Paintbrush size={14} strokeWidth={1.75} aria-hidden="true" /> Live Preview
         </Badge>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="flex flex-col gap-4 pb-24 lg:pb-8">
         {/* Header Notification Banner */}
         {saveSuccess && (
@@ -507,6 +506,7 @@ export default function InteractiveStylePageEditor() {
           </div>
         </div>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

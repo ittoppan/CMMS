@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import {
   Plus,
   ArrowLeft,
@@ -103,28 +104,26 @@ export default function CreateSparePartPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">SPARE PART REGISTER · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{t("form.parts_create_title")}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <Box size={14} strokeWidth={1.75} aria-hidden="true" /> Spare Part
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            {t("hero.parts_create_desc")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => router.push("/spare_parts")}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-        >
-          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-          {t("action.back")}
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">SPARE PART REGISTER · CMMS-TOPPAN</p>}
+        title={t("form.parts_create_title")}
+        description={t("hero.parts_create_desc")}
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <Box size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> Spare Part
+          </span>
+        }
+        primaryAction={
+          <button
+            type="button"
+            onClick={() => router.push("/spare_parts")}
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+          >
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("action.back")}
+          </button>
+        }
+      />
 
       <Card>
         <CardContent className="space-y-5 p-6">

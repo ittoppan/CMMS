@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { Spinner } from "@/components/ui/spinner";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -222,28 +223,26 @@ export default function SagePOReceiptPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <FileCheck2 size={14} strokeWidth={1.75} aria-hidden="true" /> {items.length} รายการ
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            {hero.desc}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={fetchParts}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-        >
-          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-          รีเฟรช
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <FileCheck2 size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> {items.length} รายการ
+          </span>
+        }
+        primaryAction={
+          <button
+            type="button"
+            onClick={fetchParts}
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+          >
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            รีเฟรช
+          </button>
+        }
+      />
 
       <ModuleGuide
         name="รับอะไหล่จาก PO"

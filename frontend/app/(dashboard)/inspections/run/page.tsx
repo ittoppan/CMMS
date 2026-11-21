@@ -12,6 +12,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { assetUrl } from "@/lib/utils";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -418,31 +419,31 @@ export default function InspectionRunPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">INSPECTION RUN · CMMS-TOPPAN</p>
-          {!online && (
-            <div className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-              <span className="cmms-status-dot warn inline-block" /> ออฟไลน์ — กรอกข้อมูลได้ รอออนไลน์แล้วกดบันทึกผล
-            </div>
-          )}
-          {pending > 0 && (
-            <div className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-              <span className="cmms-status-dot warn inline-block" /> มี {pending} รายการค้างส่งในเครื่อง
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ทำรายการตรวจเช็ค</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
+      {!online && (
+        <div className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+          <span className="cmms-status-dot warn inline-block" /> ออฟไลน์ — กรอกข้อมูลได้ รอออนไลน์แล้วกดบันทึกผล
+        </div>
+      )}
+      {pending > 0 && (
+        <div className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+          <span className="cmms-status-dot warn inline-block" /> มี {pending} รายการค้างส่งในเครื่อง
+        </div>
+      )}
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">INSPECTION RUN · CMMS-TOPPAN</p>}
+        title="ทำรายการตรวจเช็ค"
+        description={
+          <>
             ตรวจแบบมือถือ — ถ่ายรูปหลักฐาน วัดค่า และบันทึกร่างอัตโนมัติทุกครั้งที่แก้
             {savedAt && <> · บันทึกร่างเมื่อ {savedAt}</>}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
+          </span>
+        }
+      />
 
       {/* เลือกรอบ */}
       <ModuleGuide

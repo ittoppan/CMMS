@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -583,18 +583,18 @@ export default function FacilityLayoutPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">FACILITY & LAYOUT</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">FACILITY & LAYOUT</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ผังอาคารและพอร์ต" }]}
       title="ผังอาคาร / ชั้น / ห้อง และพอร์ต"
       description="กำหนดโครงสร้างอาคาร ผูกเครื่องจักรกับห้อง จัดการตู้ไฟ/ตู้ควบคุม และทะเบียนพอร์ตทุกรูปแบบ (LAN/ไฟฟ้า/เบรกเกอร์/I-O/Sensor/Utility ฯลฯ) — กรอกข้อมูลภายหลังได้ พร้อมมุมมอง 2D/3D"
-      actions={
+      actions={[
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={fetchData}><RefreshCw className="w-4 h-4" /> รีเฟรช</Button>
           {canManage && <Button onClick={save} disabled={saving}><Save className="w-4 h-4" /> {saving?"กำลังบันทึก...":"บันทึกผัง/พอร์ต"}</Button>}
         </div>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error && <Alert variant="danger">{error}</Alert>}
       {savedMsg && <Alert variant="success">{savedMsg}</Alert>}
 
@@ -1538,7 +1538,8 @@ export default function FacilityLayoutPage() {
           <p className="text-xs text-muted-foreground mt-3">หมายเหตุ: ผัง 2D/3D สร้างจากโครงสร้างอาคาร (locations), ตู้ไฟ/ตู้ควบคุม และพอร์ต/จุดเชื่อมต่อทุกรูปแบบที่บันทึกไว้ — ข้อมูลพอร์ต/ตู้ไฟสามารถใส่ทีหลังได้เสมอ และรองรับการแนบรูป floor plan จริง/ขยายเป็นผังตามพิกัดเมื่อมีแบบแปลน</p>
         </CardContent>
       </Card>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { DetailHeader } from "@/components/layout";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
@@ -127,29 +128,15 @@ export default function AnalyticsDashboardPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div>
-          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" /> ข้อมูลจริง
-            </span>
-          </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/analytics/advanced"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-          >
-            วิเคราะห์เจาะลึก 8 มุม
-          </Link>
-          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger
-              aria-label="ปี"
-              className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white"
-            >
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        status={<span className="cmms-andon-chip"><CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" /> ข้อมูลจริง</span>}
+        actions={[
+          <Link key="advanced" href="/analytics/advanced" className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">วิเคราะห์เจาะลึก 8 มุม</Link>,
+          <Select key="year" value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger aria-label="ปี" className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -159,17 +146,12 @@ export default function AnalyticsDashboardPage() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
-          <button
-            type="button"
-            onClick={fetchAnalytics}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-          >
-            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
-            รีเฟรช
-          </button>
-        </div>
-      </div>
+          </Select>,
+          <button key="refresh" type="button" onClick={fetchAnalytics} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
+          </button>,
+        ]}
+      />
 
 
       <ModuleGuide

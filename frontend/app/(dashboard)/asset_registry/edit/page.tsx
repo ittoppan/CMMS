@@ -6,8 +6,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { Grid, PageHeader } from "@/components/layout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -137,18 +136,20 @@ function EditAssetContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
-      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "แก้ไขข้อมูลเครื่องจักร" }]}
-      title="แก้ไขข้อมูลเครื่องจักร"
-      description="แก้ไขประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)"
-      actions={
-        <Button variant="secondary" onClick={() => router.push("/asset_registry")}>
-          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-          ย้อนกลับ
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "แก้ไขข้อมูลเครื่องจักร" }]}
+        eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
+        title="แก้ไขข้อมูลเครื่องจักร"
+        description="แก้ไขประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)"
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push("/asset_registry")}>
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+            ย้อนกลับ
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>ข้อมูลเครื่องจักร</CardTitle>
@@ -301,7 +302,8 @@ function EditAssetContent() {
           </CardFooter>
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

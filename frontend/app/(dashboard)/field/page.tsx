@@ -13,6 +13,7 @@ import {
   History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
@@ -107,14 +108,12 @@ export default function FieldHomePage() {
   }, [load]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="cmms-eyebrow m-0">FIELD WORK · TECHNICIAN</p>
-          <h1 className="m-0 text-xl font-bold">โหมดภาคสนาม</h1>
-        </div>
-        <ConnectivityStatus variant="chip" />
-      </div>
+          <div className="flex flex-col gap-4">
+      <PageHeader
+        eyebrow={<p className="cmms-eyebrow">FIELD WORK · TECHNICIAN</p>}
+        title="โหมดภาคสนาม"
+        actions={[<ConnectivityStatus key="conn" variant="chip" />]}
+      />
 
       <Button
         onClick={() => (window.location.href = "/scan")}

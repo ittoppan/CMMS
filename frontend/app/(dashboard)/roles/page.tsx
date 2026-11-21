@@ -7,7 +7,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -118,22 +118,24 @@ export default function RolesPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">USER ROLES · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "บุคลากร", href: "/roles" },
-        { label: "จัดการสิทธิ์ (Roles & Permissions)" },
-      ]}
-      title="จัดการสิทธิ์ (Roles & Permissions)"
-      description="กำหนดบทบาทและจัดการสิทธิ์การเข้าถึงข้อมูลของระบบ"
-      actions={
-        <Button onClick={() => router.push("/roles/create")}>
-          <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          สร้าง Role ใหม่
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "บุคลากร", href: "/roles" },
+          { label: "จัดการสิทธิ์ (Roles & Permissions)" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">USER ROLES · CMMS-TOPPAN</p>}
+        title="จัดการสิทธิ์ (Roles & Permissions)"
+        description="กำหนดบทบาทและจัดการสิทธิ์การเข้าถึงข้อมูลของระบบ"
+        actions={[
+          <Button key="create" onClick={() => router.push("/roles/create")}>
+            <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            สร้าง Role ใหม่
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="บทบาทและสิทธิ์ (Roles)"
@@ -202,6 +204,7 @@ export default function RolesPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

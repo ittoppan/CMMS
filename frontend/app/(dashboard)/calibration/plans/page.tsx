@@ -6,7 +6,7 @@ import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { apiJson, useApiQuery } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -122,7 +122,8 @@ export default function CalibrationPlansPage() {
   const assetOptions = useMemo(() => instruments ?? [], [instruments]);
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -131,7 +132,8 @@ export default function CalibrationPlansPage() {
       ]}
       title="แผนสอบเทียบ"
       description="กำหนดรอบสอบเทียบต่อเครื่องมือวัด — ระบบคำนวณกำหนดถัดไปจากข้อมูลจริง ป้องกันการเปลี่ยนรอบโดยไม่มีเหตุผล"
-    >
+      />
+      <div className="space-y-6">
       {msg.type === "ok" && <Alert variant="success">{msg.text}</Alert>}
       {msg.type === "err" && <Alert variant="danger">{msg.text}</Alert>}
 
@@ -200,6 +202,7 @@ export default function CalibrationPlansPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

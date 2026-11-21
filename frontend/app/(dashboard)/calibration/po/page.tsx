@@ -3,8 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   FilePlus2,
   Send,
@@ -138,7 +137,8 @@ export default function CalibrationPoPage() {
   };
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">CALIBRATION PO</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
@@ -147,13 +147,14 @@ export default function CalibrationPoPage() {
       ]}
       title="PO งานสอบเทียบ"
       description="ออกหมายเลข PO / เลือกผู้ให้บริการ / ส่งอีเมลแจ้งงาน / บันทึกวันยืนยัน ครบในหน้าเดียว"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={() => router.push("/calibration/calendar")}>
           <CalendarCheck2 className="h-4 w-4" />
           ดูปฏิทินสอบเทียบ
         </Button>
-      }
-    >
+      ]}
+      />
+      <div className="space-y-6">
       <Grid columns={{ minWidth: 200, max: 4 }} gap={4}>
         <Card className="p-4">
           <div className="flex items-center gap-3">
@@ -240,7 +241,8 @@ export default function CalibrationPoPage() {
           ))}
         </div>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }
 

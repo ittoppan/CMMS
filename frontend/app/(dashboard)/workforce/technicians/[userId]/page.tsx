@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,8 +153,8 @@ export default function TechnicianDetailPage({
   if (error) {
     const status = (error as { status?: number }).status;
     return (
-      <PageShell
-        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+      <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         breadcrumbs={[
           { label: "หน้าแรก", href: "/dashboard" },
           { label: hero.title, href: "/workforce" },
@@ -162,8 +162,8 @@ export default function TechnicianDetailPage({
           { label: "ไม่พบข้อมูล" },
         ]}
         title="ไม่พบข้อมูลช่าง"
-        description=""
-      >
+        description="" />
+      <div className="space-y-6">
         <Alert variant="danger">
           <TriangleAlert className="h-4 w-4" aria-hidden="true" />
           <div>
@@ -181,7 +181,8 @@ export default function TechnicianDetailPage({
             กลับไปทะเบียนช่าง
           </Link>
         </div>
-      </PageShell>
+            </div>
+    </>
     );
   }
 
@@ -329,8 +330,8 @@ export default function TechnicianDetailPage({
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
@@ -345,12 +346,12 @@ export default function TechnicianDetailPage({
               .join(" · ")
           : ""
       }
-      actions={
+      actions={[
         canAssign && person ? (
           <Button onClick={() => setAssignOpen(true)}>บันทึกทักษะ</Button>
         ) : undefined
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 
@@ -534,7 +535,8 @@ export default function TechnicianDetailPage({
           removeSkill && doRemoveSkill.mutate({ action: "skill_remove", id: removeSkill.id, reason })
         }
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

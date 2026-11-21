@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { NAV_GROUPS, sectionAccent, sectionIcon, type NavItemDef } from "@/components/dashboard/sidebar-nav";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { getFrequentMenuItems } from "@/lib/frequent-menus";
@@ -152,12 +152,12 @@ export default function HomePage() {
   }, []);
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "หน้าแรก", href: "/home" }]}
+    <>
+      <PageHeader breadcrumbs={[{ label: "หน้าแรก", href: "/home" }]}
       eyebrow={<p className="cmms-eyebrow">จุดเริ่มการทำงานทุกวัน</p>}
       title="หน้าแรก"
-      description={`สวัสดี${userFullName ? ` คุณ${userFullName}` : ""}${nowLabel ? ` · ${nowLabel}` : ""}`}
-    >
+      description={`สวัสดี${userFullName ? ` คุณ${userFullName}` : ""}${nowLabel ? ` · ${nowLabel}` : ""}`} />
+      <div className="space-y-6">
       <div className="cmms-home p-5 sm:p-7 space-y-8">
         <section className="cmms-home-hero" aria-label="ยินดีต้อนรับ">
           <div className="cmms-home-hero-text">
@@ -255,6 +255,7 @@ export default function HomePage() {
           );
         })}
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }

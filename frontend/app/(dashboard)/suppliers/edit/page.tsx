@@ -5,7 +5,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
@@ -114,22 +114,24 @@ function EditSupplierContent() {
   }
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ผู้จำหน่าย", href: "/suppliers" },
-        { label: t("form.manufacturer_edit_title") },
-      ]}
-      title={t("form.manufacturer_edit_title")}
-      description={t("hero.manufacturer_edit_desc")}
-      actions={
-        <Button variant="secondary" onClick={() => router.push("/suppliers")}>
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.back")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ผู้จำหน่าย", href: "/suppliers" },
+          { label: t("form.manufacturer_edit_title") },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
+        title={t("form.manufacturer_edit_title")}
+        description={t("hero.manufacturer_edit_desc")}
+        actions={[
+          <Button key="back" variant="secondary" onClick={() => router.push("/suppliers")}>
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.back")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       <Card className="mx-auto w-full max-w-[640px]">
         {loadingData ? (
           <CardContent>
@@ -244,7 +246,8 @@ function EditSupplierContent() {
           </>
         )}
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }
 

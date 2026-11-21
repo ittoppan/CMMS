@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CloudOff, Wifi, RefreshCw, UserCog } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,8 +73,8 @@ export default function MyWorkforcePage() {
   const availability = data?.availability;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
@@ -82,7 +82,7 @@ export default function MyWorkforcePage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <Buttonish
           online={online}
           isFetching={isFetching}
@@ -92,8 +92,8 @@ export default function MyWorkforcePage() {
             void qc.invalidateQueries({ queryKey: ["workforce"] });
           }}
         />
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ข้อมูลงานของฉัน (กำลังคน)"
@@ -356,7 +356,8 @@ export default function MyWorkforcePage() {
           </Card>
         </div>
       </div>
-    </PageShell>
+          </div>
+    </>
   );
 }
 

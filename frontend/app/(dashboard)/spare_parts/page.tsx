@@ -10,7 +10,7 @@ import { useState, useEffect, useMemo, useCallback, type CSSProperties } from "r
 import { usePageHero, t } from "@/lib/i18n";
 import { useCan } from "@/lib/useCan";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -1132,24 +1132,24 @@ export default function SparePartsPage() {
   );
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "คลังอะไหล่", href: "/spare_parts" },
-        { label: hero.title },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <>
-          <Badge variant="primary">{kpis.total} รายการในคลัง</Badge>
-          <Badge variant="neutral">แหล่งข้อมูล: Sage 300 (I/C)</Badge>
-          {!isNarrow && canSageSync && sageSyncButton}
-          {!isNarrow && canEdit && createButton}
-        </>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "คลังอะไหล่", href: "/spare_parts" },
+          { label: hero.title },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Badge key="total" variant="primary">{kpis.total} รายการในคลัง</Badge>,
+          <Badge key="source" variant="neutral">แหล่งข้อมูล: Sage 300 (I/C)</Badge>,
+          ...(!isNarrow && canSageSync ? [sageSyncButton] : []),
+          ...(!isNarrow && canEdit ? [createButton] : []),
+        ]}
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="คลังสต็อกอะไหล่"
         summary="ทะเบียนอะไหล่หลัก — ดู/เพิ่ม/แก้ไขรายการ รูปอะไหล่ จุดสั่งซื้อ และดึงยอดคงเหลือจาก Sage 300"
@@ -1424,6 +1424,7 @@ export default function SparePartsPage() {
           </div>
         )}
       </Dialog>
-    </PageShell>
+      </div>
+    </>
   );
 }

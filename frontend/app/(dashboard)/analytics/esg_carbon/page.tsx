@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Leaf, RefreshCw, Zap, CloudCog } from "lucide-react";
 import { usePageHero, t } from "@/lib/i18n";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -41,18 +41,18 @@ export default function EsgCarbonPage() {
   const co2Ton = Math.round((co2Kg / 1000) * 1000) / 1000;
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "วิเคราะห์", href: "/analytics" }, { label: "ESG Carbon" }]}
       title="Carbon & Energy Tracking (ISO 14001)"
       description="ประเมินพลังงานสูญเสียจาก downtime การทำงานที่ไม่มีการผลิตและค่าประเมินการปล่อย CO2"
-      actions={
+      actions={[
         <Button variant="secondary" onClick={fetchData}>
           <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.refresh")}
         </Button>
-      }
-    >
+      ]} />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {loading ? (
         <p className="text-sm text-muted-foreground">กำลังคำนวณ...</p>
@@ -112,6 +112,7 @@ export default function EsgCarbonPage() {
           เพื่อผลลัพธ์แม่นยำขึ้นควรเชื่อมข้อมูลมิเตอร์จริงต่อไปแบบ min-max รายเครื่อง
         </CardContent>
       </Card>
-    </PageShell>
+          </div>
+    </>
   );
 }

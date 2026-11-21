@@ -5,6 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -272,27 +273,28 @@ export default function SageSyncConfigPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">SAGE SYNC · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ตั้งค่าการดึงสต็อก Sage 300 ERP</h1>
-            <span className="cmms-andon-chip" style={sageConnected ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" } : { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
-              <Database size={14} strokeWidth={1.75} aria-hidden="true" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            เลือกประเภทสต็อก กำหนดรูปแบบการดึง และซิงค์ข้อมูลกับฐานข้อมูล Sage 300 ERP (Inventory Control Module)
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => (window.location.href = "/spare_parts")}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
-        >
-          กลับไปยังคลังอะไหล่
-        </button>
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">SAGE SYNC · CMMS-TOPPAN</p>}
+        title="ตั้งค่าการดึงสต็อก Sage 300 ERP"
+        description="เลือกประเภทสต็อก กำหนดรูปแบบการดึง และซิงค์ข้อมูลกับฐานข้อมูล Sage 300 ERP (Inventory Control Module)"
+        status={
+          <span
+            className="rounded-full px-3 py-1 text-sm"
+            style={sageConnected ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" } : { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
+          >
+            <Database size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
+          </span>
+        }
+        primaryAction={
+          <button
+            type="button"
+            onClick={() => (window.location.href = "/spare_parts")}
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+          >
+            กลับไปยังคลังอะไหล่
+          </button>
+        }
+      />
 
       <ModuleGuide
         name="ตั้งค่าดึงสต็อกจาก Sage 300"

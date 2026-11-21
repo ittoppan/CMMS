@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -349,16 +349,16 @@ export default function WorkforceShiftsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
         { label: "กะและวันลา" },
       ]}
       title={hero.title}
-      description={hero.desc}
-    >
+      description={hero.desc} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="กะทำงาน"
@@ -553,7 +553,8 @@ export default function WorkforceShiftsPage() {
         onClose={() => setLeaveOpen(false)}
         onSubmit={(body) => saveLeave.mutate({ ...body, user_id: Number(leaveUser) })}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 

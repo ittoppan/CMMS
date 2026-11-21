@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairDueSoon, isRepairOverdue } from "@/lib/repair-status";
 import { Grid } from "@/components/layout";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -663,12 +663,13 @@ export default function WorkOrdersPage() {
   const tableKey = `${search}|${statusFilter}|${priorityFilter}|${outsourceFilter}`;
 
   return (
-    <PageShell
+    <>
+      <PageHeader
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         <>
           <Button
             variant="secondary"
@@ -695,8 +696,9 @@ export default function WorkOrdersPage() {
             <PlusIcon className="h-4 w-4" />{t("action.create_wo")}
           </Button>
         </>
-      }
-    >
+      ]}
+    />
+      <div className="space-y-6">
       {error && (
         <div role="alert" className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)]/30 bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-text-primary)]">
           <strong>Error:</strong> {error}
@@ -1013,6 +1015,7 @@ export default function WorkOrdersPage() {
           })}
         </div>
       )}
-    </PageShell>
+          </div>
+    </>
   );
 }

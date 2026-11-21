@@ -4,8 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -170,22 +169,24 @@ export default function MtbfMttrPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
-        { label: hero.title },
-      ]}
-      title={hero.title}
-      description={hero.desc}
-      actions={
-        <Button variant="primary" onClick={() => router.push("/mtbf_mttr/create")}>
-          <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          บันทึกข้อมูล MTBF/MTTR
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+          { label: hero.title },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title={hero.title}
+        description={hero.desc}
+        actions={[
+          <Button key="create" variant="primary" onClick={() => router.push("/mtbf_mttr/create")}>
+            <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            บันทึกข้อมูล MTBF/MTTR
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="MTBF / MTTR"
@@ -296,6 +297,7 @@ export default function MtbfMttrPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DetailHeader } from "@/components/layout";
 import { swalConfirm } from "@/lib/swal";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -208,30 +209,28 @@ export default function InspectionTemplatesPage() {
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="cmms-eyebrow" data-on-dark="true">INSPECTIONS TEMPLATES · CMMS-TOPPAN</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">จัดการ Template ตรวจเช็ค</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" /> ครอบคลุม F-EN-07~63
-            </span>
-          </div>
-          <p className="cmms-hero-desc">
-            สร้างหัวข้อตรวจเช็ครอบ (รายวัน/สัปดาห์/เดือน/ปี) — กำหนดข้อตรวจ ค่าเกณฑ์ และความถี่
-          </p>
-        </div>
-        {editingId === null && (
-          <button
-            type="button"
-            onClick={() => { setError(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-6 py-3 text-sm font-semibold text-white"
-          >
-            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            สร้าง Template ใหม่
-          </button>
-        )}
-      </div>
+      <DetailHeader
+        eyebrow={<p className="cmms-eyebrow">INSPECTIONS TEMPLATES · CMMS-TOPPAN</p>}
+        title="จัดการ Template ตรวจเช็ค"
+        description="สร้างหัวข้อตรวจเช็ครอบ (รายวัน/สัปดาห์/เดือน/ปี) — กำหนดข้อตรวจ ค่าเกณฑ์ และความถี่"
+        status={
+          <span className="rounded-full bg-[var(--cmms-bg-muted)] px-3 py-1 text-sm text-[var(--cmms-text-secondary)]">
+            <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" className="inline mr-1" /> ครอบคลุม F-EN-07~63
+          </span>
+        }
+        primaryAction={
+          editingId === null ? (
+            <button
+              type="button"
+              onClick={() => { setError(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-6 py-3 text-sm font-semibold text-white"
+            >
+              <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+              สร้าง Template ใหม่
+            </button>
+          ) : undefined
+        }
+      />
 
       <ModuleGuide
         name="Template ตรวจเช็ค"

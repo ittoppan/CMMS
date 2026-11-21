@@ -3,11 +3,10 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack } from "@/components/layout";
+import { VStack, HStack, PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
-import { PageShell } from "@/components/PageShell";
 
 interface FeedbackItem {
   id: number;
@@ -135,12 +134,12 @@ export default function FeedbackPage() {
   };
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">USER FEEDBACK · PHASE 22</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">USER FEEDBACK · PHASE 22</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ส่งความคิดเห็น / แจ้งปัญหา" }]}
       title="Feedback & Issues"
-      description={scope === "all" ? "ฟีดแบ็กทั้งหมด — admin ปรับสถานะได้" : "แจ้งปัญหาและเสนอความคิดเห็น — ผู้ดูแลระบบจะนำไปพิจารณาในการปรับปรุง"}
-    >
+      description={scope === "all" ? "ฟีดแบ็กทั้งหมด — admin ปรับสถานะได้" : "แจ้งปัญหาและเสนอความคิดเห็น — ผู้ดูแลระบบจะนำไปพิจารณาในการปรับปรุง"} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ข้อเสนอแนะ/Feedback"
@@ -280,6 +279,7 @@ export default function FeedbackPage() {
           </CardContent>
         </Card>
       </VStack>
-    </PageShell>
+          </div>
+    </>
   );
 }

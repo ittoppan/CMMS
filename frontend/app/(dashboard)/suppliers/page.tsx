@@ -9,8 +9,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
-import { Grid } from "@/components/layout";
+import { Grid, PageHeader } from "@/components/layout";
 import {
   Card,
   CardContent,
@@ -341,24 +340,26 @@ export default function SuppliersPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
-      breadcrumbs={[
-        { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ผู้จำหน่าย", href: "/suppliers" },
-        { label: "ข้อมูลผู้ผลิต (Suppliers)" },
-      ]}
-      title="ข้อมูลผู้ผลิต (Suppliers)"
-      description="จัดการข้อมูลผู้ผลิต/ผู้จำหน่ายอะไหล่ คะแนน และมูลค่าสต็อก"
-      actions={
-        can("create") ? (
-        <Button onClick={() => router.push("/suppliers/create")}>
-          <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          เพิ่ม Supplier ใหม่
-        </Button>
-        ) : null
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "ผู้จำหน่าย", href: "/suppliers" },
+          { label: "ข้อมูลผู้ผลิต (Suppliers)" },
+        ]}
+        eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
+        title="ข้อมูลผู้ผลิต (Suppliers)"
+        description="จัดการข้อมูลผู้ผลิต/ผู้จำหน่ายอะไหล่ คะแนน และมูลค่าสต็อก"
+        primaryAction={
+          can("create") ? (
+            <Button onClick={() => router.push("/suppliers/create")}>
+              <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+              เพิ่ม Supplier ใหม่
+            </Button>
+          ) : undefined
+        }
+      />
+      <div className="space-y-6">
       <ModuleGuide
         name="ผู้จำหน่าย (Suppliers)"
         summary="ทะเบียนผู้ผลิต/ผู้จำหน่ายอะไหล่ — เก็บข้อมูลติดต่อ คะแนนผู้ขาย และมูลค่าสต็อกที่ซื้อจากแต่ละราย"
@@ -515,6 +516,7 @@ export default function SuppliersPage() {
           />
         </CardContent>
       </Card>
-    </PageShell>
+      </div>
+    </>
   );
 }

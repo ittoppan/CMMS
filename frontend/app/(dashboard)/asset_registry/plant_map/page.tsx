@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -67,18 +67,20 @@ export default function PlantMapPage() {
   }, [rows]);
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
-      breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ทะเบียนเครื่องจักร", href: "/asset_registry" }, { label: "Plant Map" }]}
-      title="แผนผังโรงงาน 2D"
-      description="สถานะเครื่องจักรตามโซน/ตำแหน่งพร้อมจำนวนงานที่เปิดอยู่ — คลิกเครื่องเพื่อดูรายละเอียด"
-      actions={
-        <Button variant="secondary" onClick={fetchData}>
-          <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-          {t("action.refresh")}
-        </Button>
-      }
-    >
+    <>
+      <PageHeader
+        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ทะเบียนเครื่องจักร", href: "/asset_registry" }, { label: "Plant Map" }]}
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+        title="แผนผังโรงงาน 2D"
+        description="สถานะเครื่องจักรตามโซน/ตำแหน่งพร้อมจำนวนงานที่เปิดอยู่ — คลิกเครื่องเพื่อดูรายละเอียด"
+        actions={[
+          <Button key="refresh" variant="secondary" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>,
+        ]}
+      />
+      <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {loading ? (
         <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
@@ -146,6 +148,7 @@ export default function PlantMapPage() {
           ) : null}
         </div>
       )}
-    </PageShell>
+      </div>
+    </>
   );
 }

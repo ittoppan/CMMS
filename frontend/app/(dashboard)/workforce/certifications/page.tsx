@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, TriangleAlert } from "lucide-react";
 
-import { PageShell } from "@/components/PageShell";
+import { PageHeader } from "@/components/layout";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,8 +151,8 @@ export default function WorkforceCertificationsPage() {
   ];
 
   return (
-    <PageShell
-      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+    <>
+      <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: hero.title, href: "/workforce" },
@@ -160,12 +160,12 @@ export default function WorkforceCertificationsPage() {
       ]}
       title={hero.title}
       description={hero.desc}
-      actions={
+      actions={[
         canManage && (
           <Button onClick={() => setAddOpen(true)}>บันทึกใบรับรอง</Button>
         )
-      }
-    >
+      ]} />
+      <div className="space-y-6">
 
       <ModuleGuide
         name="ใบรับรอง/วุฒิบัตร"
@@ -248,7 +248,8 @@ export default function WorkforceCertificationsPage() {
         onClose={() => setAddOpen(false)}
         onSubmit={(body) => saveCert.mutate(body)}
       />
-    </PageShell>
+          </div>
+    </>
   );
 }
 
