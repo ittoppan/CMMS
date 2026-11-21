@@ -281,17 +281,17 @@
 | /(dashboard)/workforce/technicians/[userId] | detail | done |  |
 | /(dashboard)/workforce/technicians | list | done |  |
 | /(dashboard)/workforce/training | list | done |  |
-| /change-password | form | todo-last | นอก dashboard shell — ทำท้ายสุด |
-| /install | form | todo-last | นอก dashboard shell — ทำท้ายสุด |
-| /login | form | todo-last | นอก dashboard shell — ทำท้ายสุด |
-| /my-repairs | list | todo-last | นอก dashboard shell — ทำท้ายสุด |
+| /change-password | form | done | outside shell — auth gate (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header; PageHeader ไม่เหมาะกับ gate layout |
+| /install | form | done | outside shell — public PWA install page (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
+| /login | form | done | outside shell — full-screen auth (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
+| /my-repairs | list | done | outside shell — standalone component (MyRepairs); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
 | / | redirect | skipped | redirect/re-export — ข้าม |
-| /qr-sheet | detail | todo-last | นอก dashboard shell — ทำท้ายสุด |
-| /register | form | todo-last | นอก dashboard shell — ทำท้ายสุด |
+| /qr-sheet | detail | done | outside shell — print page (standalone); ลบ usePageHero ที่ไม่ได้ใช้; ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
+| /register | form | done | outside shell — auth gate (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
 | /repair-request | redirect | skipped | redirect/re-export — ข้าม |
 | /repair/request | form | done | standalone (no shell) |
-| /scan | hub | todo-last | นอก dashboard shell — ทำท้ายสุด |
-| /tv | settings | todo-last | นอก dashboard shell — ทำท้ายสุด |
+| /scan | hub | done | outside shell — field scan (standalone); ลบ usePageHero ที่ไม่ได้ใช้; ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
+| /tv | settings | done | outside shell — kiosk rotator (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
 
 ## (จ) ลำดับโมดูล (ตามที่ผู้ใช้ใช้บ่อยก่อน)
 

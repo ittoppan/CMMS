@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePageHero } from "@/lib/i18n";
 import LiffBridge from "../../components/LiffBridge";
 import LiffLangToggle from "../../components/LiffLangToggle";
 import { QrScanner } from "../../components/field/QrScanner";
@@ -27,7 +26,6 @@ type ScanResponse = {
 type Status = "idle" | "loading" | "done" | "error";
 
 export default function ScanLandingPage() {
-  const hero = usePageHero("scan");
 
   useLiffLang();
   const { showToast } = useToast();

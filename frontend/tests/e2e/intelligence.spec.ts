@@ -110,7 +110,7 @@ test.describe("intelligence center (authed)", () => {
     const search = page.getByLabel("ค้นหาเครื่อง");
     await expect(search).toBeVisible({ timeout: 15_000 });
     await search.fill("PMP");
-    await page.getByRole("button", { name: /ค้นหา/i }).first().click();
+    await page.getByRole("button", { name: "ค้นหา", exact: true }).click();
     await page.getByRole("tab", { name: "ภาพรวมผู้บริหาร" }).click();
     await page.getByText("MTBF", { exact: true }).first().waitFor({ timeout: 15_000 });
   });

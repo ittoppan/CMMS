@@ -1,7 +1,6 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
-import { usePageHero } from "@/lib/i18n";
 
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
@@ -23,7 +22,6 @@ type Asset = {
 };
 
 export default function QrSheetPage() {
-  const hero = usePageHero("qr-sheet");
 
   const [machines, setMachines] = useState<Asset[]>([]);
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
