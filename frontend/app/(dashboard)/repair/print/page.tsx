@@ -81,7 +81,7 @@ export default function RepairPrintPage() {
     <div className="mx-auto max-w-4xl p-6 print:p-0">
       <PageHeader
         className="no-print"
-        eyebrow="repair / พิมพ์ใบบันทึกงานซ่อม"
+        eyebrow={<p className="cmms-eyebrow">repair / พิมพ์ใบบันทึกงานซ่อม</p>}
         title="พิมพ์ใบบันทึกงานซ่อม"
       />
       <div className="no-print mb-4 flex items-center justify-between">

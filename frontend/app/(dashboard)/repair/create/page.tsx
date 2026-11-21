@@ -15,7 +15,7 @@ export default function CreateWorkOrderPage() {
     <>
       <PageHeader
         className="sr-only"
-        eyebrow="REPAIR REQUEST · CMMS-TOPPAN"
+        eyebrow={<p className="cmms-eyebrow">REPAIR REQUEST · CMMS-TOPPAN</p>}
         title={hero.title}
         description={hero.desc}
       />

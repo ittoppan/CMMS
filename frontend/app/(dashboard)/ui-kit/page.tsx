@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus, Wrench, ClipboardList, Package } from "lucide-react";
 import {
   DetailHeader,
   InfoGrid,
@@ -13,6 +13,7 @@ import {
 } from "@/components/layout";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
+import AndonBadge from "@/components/AndonBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,7 @@ export default function UiKitDemoPage() {
         eyebrow={<p className="cmms-eyebrow">ตัวอย่าง component</p>}
         title="ชุด component กลาง (Detail/Form/Hub)"
         description="หน้านี้เป็นตัวอย่างชั่วคราวของ DetailHeader, InfoGrid, FormPage/FormSection/FormActions, HubGrid/HubCard, EmptyState — ข้อมูลปลอม ไม่ได้ต่อ API"
-        status={<Badge variant="success">พร้อมใช้งาน</Badge>}
+        status={<AndonBadge tone="success">พร้อมใช้งาน</AndonBadge>}
         primaryAction={
           <Button variant="primary">
             <Plus className="h-4 w-4" strokeWidth={1.75} />
@@ -99,19 +100,19 @@ export default function UiKitDemoPage() {
         <h2 className="text-base font-semibold text-foreground">HubGrid / HubCard</h2>
         <HubGrid>
           <HubCard
-            icon={<span className="text-lg">🔧</span>}
+            icon={<Wrench className="h-5 w-5" />}
             title="งานซ่อม"
             description="ติดตามและจัดการใบสั่งงานซ่อมทั้งหมด"
             href="/repair"
           />
           <HubCard
-            icon={<span className="text-lg">📋</span>}
+            icon={<ClipboardList className="h-5 w-5" />}
             title="PM/AM"
             description="แผนบำรุงรักษาเชิงป้องกัน"
             href="/pm_am"
           />
           <HubCard
-            icon={<span className="text-lg">📦</span>}
+            icon={<Package className="h-5 w-5" />}
             title="อะไหล่"
             description="จัดการสต็อกและเบิกจ่าย"
             href="/spare_parts"
