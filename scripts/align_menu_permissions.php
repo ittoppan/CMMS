@@ -1,214 +1,820 @@
 <?php
 /**
- * align_menu_permissions.php — ปรับ menu_permissions ให้ตรงกับ API permission matrix
+ * align_menu_permissions.php — ปรับ menu_permissions ตาม ROLE_MENUS.md (curated roles)
  *
- * CLI เท่านั้น (ไม่ถูกเสิร์ฟผ่าน HTTP) และ "ย้อนกลับได้":
- *   php scripts/align_menu_permissions.php                 # dry-run (ค่าเริ่มต้น) แสดงแผน
- *   php scripts/align_menu_permissions.php --apply         # เขียนลง DB + สำรองค่าเดิมเป็น JSON
- *   php scripts/align_menu_permissions.php --restore=backups/menu_permissions_....json
+ * CLI only.
+ *   php scripts/align_menu_permissions.php            # dry-run (default) แสดงส่วนต่างต่อ role
+ *   php scripts/align_menu_permissions.php --apply     # เขียนจริง (upsert is_granted 1/0 ครบทุก key ใน catalog)
  *
- * หลักการของระบบเมนู: ไม่มีแถว = เห็นเมนู (1) → การ "ตัดสิทธิ์" คือ upsert is_granted = 0
- *
- * กลุ่มที่ปรับ (ตาม docs/API_PERMISSION_MATRIX.md):
- *   - roles                 → roles:view        (1,2,6)
- *   - reports/import_excel  → report:export     (1,2,6)
- *   - spare_parts/sage_sync → sage:view/write   (1,2,6)
- *   - spare_parts/sage_shipments → sage:view/write (1,2,6,8) + Foreman 7 อ่านอย่างเดียว
- *   - spare_parts/sage_po   → sage:view         (1,2,6,7)  [Foreman ออก PO หน้างาน]
+ * หลักการ:
+ *   - แก้เฉพาะ role ที่ curated: User, Operate, Foreman, Asst.Manager, Manager, Viewer
+ *   - ทุก key ใน src/menu_catalog.php จะถูก seed ชัดเจน (1 หรือ 0)
+ *   - ไม่แตะ key ที่ไม่อยู่ใน catalog (orphan) และไม่แตะ Admin/Officer/Officer-Read
+ *   - ไม่ลบแถวเก่า
  */
-
-if (PHP_SAPI !== 'cli') {
-    http_response_code(404);
-    exit;
-}
-
+if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/../src/config/db.php';
+$pdo = getDb();
+$catalog = require __DIR__ . '/../src/menu_catalog.php';
+$catalogKeys = array_column($catalog, 'key');
 
-/** menu_key => role_id ที่อนุญาต (บทบาทอื่นจะถูกตั้งเป็น 0) */
-const TARGET_GRANTS = [
-    'roles'                       => [1, 2, 6],
-    'reports/import_excel'        => [1, 2, 6],
-    'reports/export_excel'        => [1, 2, 6],
-    'spare_parts/sage_sync'       => [1, 2, 6, 8], // 8 = Office (ดึงสต็อกจาก Sage 300)
-    'spare_parts/sage_shipments'  => [1, 2, 6, 7, 8], // 8 = Office (ตัดสต็อกใน Sage 300), 7 = Foreman (ติดตาม)
-    'spare_parts/sage_po'         => [1, 2, 6, 7, 8], // 8 = Office (ดูแลใบสั่งซื้อ/รับของ)
-    'spare_parts/stock_take'      => [1, 2, 6, 8],     // นับ/ปิดรอบสต็อก (ต้องมี spare_parts:plan ด้วย)
-    'pm_am'                       => [1, 2, 3, 5, 6, 7],   // pm_am:view (Officer 8 ไม่มีสิทธิ์ PM)
-    'approval'                    => [1, 2, 3, 6, 7],       // request:view/approve
-    'planning'                    => [1, 2, 6, 7],           // repair:view/schedule
-    'supervisor'                  => [1, 2, 6, 7],           // repair:view/verify
-    'calibration'                 => [1, 2, 3, 5, 6, 7],     // calibration:view
-    'contractor'                  => [1, 2, 5, 6, 7],        // contractor:view
-    'safety'                      => [1, 2, 3, 5, 6, 7],       // safety:view
-    'document'                    => [1, 2, 3, 5, 6, 7, 8],     // document:view
-    'engineering_change'          => [1, 2, 3, 6, 7],         // engineering_change:view
-    'shutdown'                    => [1, 2, 3, 5, 6, 7],       // shutdown:view
-    'suppliers'                   => [1, 2, 5, 6, 7],         // supplier:view
-    'knowledge'                   => [1, 2, 3, 5, 6, 7],       // knowledge:read
-    'iot/monitor'                 => [1, 2],                   // iot:view
-    'iot/devices'                 => [1, 2],
-    'iot/alarms'                  => [1, 2],
-    'iot/thresholds'              => [1, 2],
-    'iot/condition'               => [1, 2],
-    'iot/integrations'            => [1, 2],
-    // Phase 3: ปรับเมนูให้ตรง PERMISSION_MATRIX (module:action)
-    'analytics'                   => [1, 2, 3, 5, 6, 7, 8], // report:view
-    'cost'                        => [1, 2, 3, 5, 6, 7, 8], // report:view
-    'workforce'                   => [1, 2, 5, 6, 7],       // workforce:view
-    'inspections'                 => [1, 2, 3, 5, 6, 7],    // inspection:view
-    'asset_registry'              => [1, 2, 3, 5, 6, 7],    // asset:view
-    'repair/workload'             => [1, 2, 3, 6, 7],       // repair:view
-    'settings'                    => [1, 2, 6, 8],          // settings:view
-    'rca'                         => [1, 2, 3, 5, 6, 7],   // failure:view
-    'failure'                     => [1, 2, 3, 5, 6, 7],    // failure:view
+// desired granted keys per curated role (role name => [keys])
+$desired = [
+
+    9 => [
+
+        'knowledge',
+
+        'knowledge/articles',
+
+        'knowledge/search',
+
+        'manuals',
+
+        'notifications',
+
+        'profile',
+
+        'register',
+
+        'repair/request',
+
+        'repair/tracking',
+
+    ],
+
+    3 => [
+
+        'equipment_borrowing',
+
+        'field',
+
+        'field/plan',
+
+        'inspections/run',
+
+        'knowledge',
+
+        'knowledge/articles',
+
+        'knowledge/search',
+
+        'manuals',
+
+        'notifications',
+
+        'pm_am/checksheet',
+
+        'profile',
+
+        'register',
+
+        'repair/my_tasks',
+
+        'repair/request',
+
+        'repair/tracking',
+
+        'safety/work_permit',
+
+        'scan',
+
+        'spare_parts/issue_center',
+
+    ],
+
+    7 => [
+
+        'approval',
+
+        'equipment_borrowing',
+
+        'field',
+
+        'field/plan',
+
+        'inspections/run',
+
+        'knowledge',
+
+        'knowledge/articles',
+
+        'knowledge/search',
+
+        'manuals',
+
+        'notifications',
+
+        'planning',
+
+        'planning/calendar',
+
+        'pm_am',
+
+        'pm_am/calendar',
+
+        'pm_am/checksheet',
+
+        'pm_am/create',
+
+        'profile',
+
+        'register',
+
+        'repair',
+
+        'repair/assign',
+
+        'repair/kanban',
+
+        'repair/my_tasks',
+
+        'repair/request',
+
+        'repair/tracking',
+
+        'repair/workload',
+
+        'safety/work_permit',
+
+        'scan',
+
+        'spare_parts',
+
+        'spare_parts/balances',
+
+        'spare_parts/issue_center',
+
+        'spare_parts/overview',
+
+        'supervisor',
+
+        'supervisor/plan',
+
+        'supervisor/queue',
+
+        'supervisor/review',
+
+        'supervisor/verify',
+
+        'workforce',
+
+        'workforce/capacity',
+
+        'workforce/skills',
+
+        'workforce/technicians',
+
+    ],
+
+    6 => [
+
+        'analytics',
+
+        'analytics/kpi',
+
+        'andon-board',
+
+        'approval',
+
+        'asset_registry',
+
+        'asset_registry/bom_tree',
+
+        'asset_registry/criticality',
+
+        'asset_reliability',
+
+        'asset_reliability/aging',
+
+        'asset_reliability/config',
+
+        'asset_reliability/critical',
+
+        'asset_reliability/dashboard',
+
+        'asset_reliability/data-quality',
+
+        'asset_reliability/lifecycle',
+
+        'asset_reliability/overhaul',
+
+        'asset_reliability/replacement',
+
+        'asset_reliability/reports',
+
+        'budget',
+
+        'calibration',
+
+        'calibration/calendar',
+
+        'calibration/certificates',
+
+        'calibration/config',
+
+        'calibration/dashboard',
+
+        'calibration/data-quality',
+
+        'calibration/instruments',
+
+        'calibration/mobile',
+
+        'calibration/oot',
+
+        'calibration/plans',
+
+        'calibration/po',
+
+        'calibration/procedures',
+
+        'calibration/reports',
+
+        'calibration/schedule',
+
+        'calibration/standards',
+
+        'calibration/tracking',
+
+        'contractor',
+
+        'contractor/overview',
+
+        'contractor/work',
+
+        'cost',
+
+        'dashboard',
+
+        'document_control/overview',
+
+        'engineering_change/overview',
+
+        'equipment_borrowing',
+
+        'feedback',
+
+        'field',
+
+        'field/plan',
+
+        'forms',
+
+        'forms/designer',
+
+        'inspections',
+
+        'inspections/run',
+
+        'inspections/templates',
+
+        'knowledge',
+
+        'knowledge/articles',
+
+        'knowledge/articles/create',
+
+        'knowledge/categories',
+
+        'knowledge/config',
+
+        'knowledge/gaps',
+
+        'knowledge/reviews',
+
+        'knowledge/search',
+
+        'knowledge/tags',
+
+        'knowledge/usage',
+
+        'manuals',
+
+        'mtbf_mttr',
+
+        'notifications',
+
+        'notifications/history',
+
+        'planning',
+
+        'planning/calendar',
+
+        'pm_am',
+
+        'pm_am/batch_schedule',
+
+        'pm_am/calendar',
+
+        'pm_am/checksheet',
+
+        'pm_am/create',
+
+        'process_flows',
+
+        'profile',
+
+        'qr-sheet',
+
+        'rca',
+
+        'rca/events',
+
+        'rca/taxonomy',
+
+        'register',
+
+        'reliability',
+
+        'reliability/assets',
+
+        'reliability/bad-actors',
+
+        'reliability/config',
+
+        'reliability/data-quality',
+
+        'reliability/failure-modes',
+
+        'reliability/growth',
+
+        'reliability/pm-effectiveness',
+
+        'reliability/studies',
+
+        'reliability/trend',
+
+        'reliability/weibull',
+
+        'repair',
+
+        'repair/assign',
+
+        'repair/history',
+
+        'repair/kanban',
+
+        'repair/my_tasks',
+
+        'repair/request',
+
+        'repair/tracking',
+
+        'repair/workload',
+
+        'reports',
+
+        'reports/export_excel',
+
+        'reports/import_excel',
+
+        'reports/monthly_pdf',
+
+        'safety/work_permit',
+
+        'scan',
+
+        'shutdown',
+
+        'spare_parts',
+
+        'spare_parts/balances',
+
+        'spare_parts/issue_center',
+
+        'spare_parts/optimization',
+
+        'spare_parts/overview',
+
+        'spare_parts/returns',
+
+        'spare_parts/sage_po',
+
+        'spare_parts/sage_shipments',
+
+        'spare_parts/sage_sync',
+
+        'spare_parts/stock_take',
+
+        'supervisor',
+
+        'supervisor/plan',
+
+        'supervisor/queue',
+
+        'supervisor/review',
+
+        'supervisor/verify',
+
+        'suppliers',
+
+        'workforce',
+
+        'workforce/capacity',
+
+        'workforce/certifications',
+
+        'workforce/conflicts',
+
+        'workforce/crews',
+
+        'workforce/mine',
+
+        'workforce/shifts',
+
+        'workforce/skills',
+
+        'workforce/technicians',
+
+        'workforce/training',
+
+    ],
+
+    2 => [
+
+        'analytics',
+
+        'analytics/kpi',
+
+        'andon-board',
+
+        'approval',
+
+        'asset_registry',
+
+        'asset_registry/bom_tree',
+
+        'asset_registry/criticality',
+
+        'asset_reliability',
+
+        'asset_reliability/aging',
+
+        'asset_reliability/config',
+
+        'asset_reliability/critical',
+
+        'asset_reliability/dashboard',
+
+        'asset_reliability/data-quality',
+
+        'asset_reliability/lifecycle',
+
+        'asset_reliability/overhaul',
+
+        'asset_reliability/replacement',
+
+        'asset_reliability/reports',
+
+        'budget',
+
+        'calibration',
+
+        'calibration/calendar',
+
+        'calibration/certificates',
+
+        'calibration/config',
+
+        'calibration/dashboard',
+
+        'calibration/data-quality',
+
+        'calibration/instruments',
+
+        'calibration/mobile',
+
+        'calibration/oot',
+
+        'calibration/plans',
+
+        'calibration/po',
+
+        'calibration/procedures',
+
+        'calibration/reports',
+
+        'calibration/schedule',
+
+        'calibration/standards',
+
+        'calibration/tracking',
+
+        'contractor',
+
+        'contractor/overview',
+
+        'contractor/work',
+
+        'cost',
+
+        'dashboard',
+
+        'document_control/overview',
+
+        'engineering_change/overview',
+
+        'equipment_borrowing',
+
+        'feedback',
+
+        'field',
+
+        'field/plan',
+
+        'forms',
+
+        'forms/designer',
+
+        'inspections',
+
+        'inspections/run',
+
+        'inspections/templates',
+
+        'iot/condition',
+
+        'iot/monitor',
+
+        'knowledge',
+
+        'knowledge/articles',
+
+        'knowledge/articles/create',
+
+        'knowledge/categories',
+
+        'knowledge/config',
+
+        'knowledge/gaps',
+
+        'knowledge/reviews',
+
+        'knowledge/search',
+
+        'knowledge/tags',
+
+        'knowledge/usage',
+
+        'manuals',
+
+        'mtbf_mttr',
+
+        'notifications',
+
+        'notifications/history',
+
+        'planning',
+
+        'planning/calendar',
+
+        'pm_am',
+
+        'pm_am/batch_schedule',
+
+        'pm_am/calendar',
+
+        'pm_am/checksheet',
+
+        'pm_am/create',
+
+        'process_flows',
+
+        'profile',
+
+        'qr-sheet',
+
+        'rca',
+
+        'rca/events',
+
+        'rca/taxonomy',
+
+        'register',
+
+        'reliability',
+
+        'reliability/assets',
+
+        'reliability/bad-actors',
+
+        'reliability/config',
+
+        'reliability/data-quality',
+
+        'reliability/failure-modes',
+
+        'reliability/growth',
+
+        'reliability/pm-effectiveness',
+
+        'reliability/studies',
+
+        'reliability/trend',
+
+        'reliability/weibull',
+
+        'repair',
+
+        'repair/assign',
+
+        'repair/history',
+
+        'repair/kanban',
+
+        'repair/my_tasks',
+
+        'repair/request',
+
+        'repair/tracking',
+
+        'repair/workload',
+
+        'reports',
+
+        'reports/export_excel',
+
+        'reports/import_excel',
+
+        'reports/monthly_pdf',
+
+        'safety/work_permit',
+
+        'scan',
+
+        'shutdown',
+
+        'spare_parts',
+
+        'spare_parts/balances',
+
+        'spare_parts/issue_center',
+
+        'spare_parts/optimization',
+
+        'spare_parts/overview',
+
+        'spare_parts/returns',
+
+        'spare_parts/sage_po',
+
+        'spare_parts/sage_shipments',
+
+        'spare_parts/sage_sync',
+
+        'spare_parts/stock_take',
+
+        'supervisor',
+
+        'supervisor/plan',
+
+        'supervisor/queue',
+
+        'supervisor/review',
+
+        'supervisor/verify',
+
+        'suppliers',
+
+        'workforce',
+
+        'workforce/capacity',
+
+        'workforce/certifications',
+
+        'workforce/conflicts',
+
+        'workforce/crews',
+
+        'workforce/mine',
+
+        'workforce/shifts',
+
+        'workforce/skills',
+
+        'workforce/technicians',
+
+        'workforce/training',
+
+    ],
+
+    5 => [
+
+        'analytics',
+
+        'analytics/kpi',
+
+        'andon-board',
+
+        'dashboard',
+
+        'notifications',
+
+        'profile',
+
+        'register',
+
+        'reports',
+
+        'reports/export_excel',
+
+        'reports/monthly_pdf',
+
+    ],
+
 ];
 
-/** role ทั้งหมดที่มีในระบบ (ใช้คำนวณว่าใครต้องถูกตั้ง 0) */
-function allRoleIds(PDO $pdo): array
-{
-    return array_map('intval', $pdo->query('SELECT id FROM roles ORDER BY id')->fetchAll(PDO::FETCH_COLUMN));
+// ปรับตามคำสั่งผู้ใช้ (2026-11-21): User คง scan; Operate/Foreman คง repair/history + asset_registry
+$desired[9] = array_values(array_unique(array_merge($desired[9], ['scan'])));
+$desired[3] = array_values(array_unique(array_merge($desired[3], ['repair/history', 'asset_registry'])));
+$desired[7] = array_values(array_unique(array_merge($desired[7], ['repair/history', 'asset_registry'])));
+
+$apply = in_array('--apply', $argv ?? [], true);
+
+// Build target grant map: role_id => key => 0/1
+$targets = [];
+foreach ($desired as $rid => $grantedList) {
+    $set = array_flip($grantedList);
+    foreach ($catalogKeys as $k) {
+        $targets[$rid][$k] = isset($set[$k]) ? 1 : 0;
+    }
 }
 
-function currentRows(PDO $pdo, string $menuKey): array
-{
-    $st = $pdo->prepare('SELECT id, role_id, is_granted FROM menu_permissions WHERE menu_key = ?');
-    $st->execute([$menuKey]);
+$roles = array_keys($targets);
+
+// current rows for these roles
+function currentFor(PDO $pdo, int $rid): array {
+    $st = $pdo->prepare('SELECT menu_key, is_granted FROM menu_permissions WHERE role_id = ?');
+    $st->execute([$rid]);
     $out = [];
-    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
-        $out[(int)$r['role_id']] = ['id' => (int)$r['id'], 'is_granted' => (int)$r['is_granted']];
-    }
+    foreach ($st->fetchAll() as $r) $out[$r['menu_key']] = (int)$r['is_granted'];
     return $out;
 }
 
-$args = $argv ?? [];
-$apply = in_array('--apply', $args, true);
-$restoreArg = '';
-foreach ($args as $a) {
-    if (str_starts_with($a, '--restore=')) {
-        $restoreArg = substr($a, strlen('--restore='));
-    }
-}
-
-$pdo = getDb();
-
-/* ---------- โหมด restore ---------- */
-if ($restoreArg !== '') {
-    $path = $restoreArg;
-    if (!is_file($path)) {
-        fwrite(STDERR, "ไม่พบไฟล์สำรอง: {$path}\n");
-        exit(1);
-    }
-    $data = json_decode((string)file_get_contents($path), true);
-    if (!is_array($data['rows'] ?? null)) {
-        fwrite(STDERR, "ไฟล์สำรองไม่ถูกต้อง (ต้องมี key rows)\n");
-        exit(1);
-    }
-    $pdo->beginTransaction();
-    $upd = $pdo->prepare('UPDATE menu_permissions SET is_granted = ? WHERE id = ?');
-    $del = $pdo->prepare('DELETE FROM menu_permissions WHERE id = ?');
-    $n = 0;
-    foreach ($data['rows'] as $row) {
-        if (!empty($row['existed'])) {
-            $upd->execute([(int)$row['is_granted'], (int)$row['id']]);
-        } else {
-            $del->execute([(int)$row['id']]); // แถวที่ระบบสร้างใหม่ตอน apply → ลบทิ้ง
-        }
-        $n++;
-    }
-    $pdo->commit();
-    echo "restore เสร็จ: {$n} แถว\n";
-    exit(0);
-}
-
-/* ---------- คำนวณแผน ---------- */
-$roles = allRoleIds($pdo);
 $plan = [];
-foreach (TARGET_GRANTS as $menuKey => $allowed) {
-    $rows = currentRows($pdo, $menuKey);
+$totalChanges = 0;
+foreach ($roles as $rid) {
+    $cur = currentFor($pdo, $rid);
     $changes = [];
-    foreach ($roles as $rid) {
-        $has = $rows[$rid] ?? null;
-        $wantGrant = in_array($rid, $allowed, true) ? 1 : 0;
-        $cur = $has !== null ? $has['is_granted'] : 1; // ไม่มีแถว = 1
-        if ($has === null ? $wantGrant === 0 : $cur !== $wantGrant) {
-            $changes[] = ['role_id' => $rid, 'to' => $wantGrant, 'existed' => $has !== null, 'id' => $has['id'] ?? 0, 'from' => $cur];
+    foreach ($catalogKeys as $k) {
+        $curVal = array_key_exists($k, $cur) ? $cur[$k] : 1; // default unseen = 1
+        $want = $targets[$rid][$k];
+        if ($curVal !== $want) {
+            $changes[] = ['key'=>$k,'from'=>$curVal,'to'=>$want,'existed'=>array_key_exists($k,$cur)];
+            $totalChanges++;
         }
     }
-    $plan[$menuKey] = ['allowed' => $allowed, 'changes' => $changes, 'rows' => $rows];
+    $plan[$rid] = $changes;
 }
 
-echo "== แผนปรับ menu_permissions ==\n";
-$total = 0;
-foreach ($plan as $menuKey => $p) {
-    echo "\n[{$menuKey}] อนุญาต role: " . implode(',', $p['allowed']) . "\n";
-    if (!$p['changes']) {
-        echo "  (ตรงอยู่แล้ว)\n";
-        continue;
+// role name lookup
+$roleNames = [];
+foreach ($pdo->query('SELECT id, name FROM roles') as $r) $roleNames[(int)$r['id']] = $r['name'];
+
+echo "== แผนปรับ menu_permissions (curated roles) ==
+";
+foreach ($roles as $rid) {
+    echo "
+[Role {$rid} " . ($roleNames[$rid] ?? '') . "] changes=" . count($plan[$rid]) . "
+";
+    // summary add/remove
+    $add=[]; $rem=[];
+    foreach ($plan[$rid] as $c) {
+        if ($c['to']===1) $add[]=$c['key']; else $rem[]=$c['key'];
     }
-    foreach ($p['changes'] as $c) {
-        echo "  role {$c['role_id']}: {$c['from']} → {$c['to']}" . ($c['existed'] ? '' : ' (สร้างแถวใหม่)') . "\n";
-        $total++;
-    }
+    echo "  จะเพิ่ม (" . count($add) . "): " . implode(', ', $add) . "
+";
+    echo "  จะซ่อน (" . count($rem) . "): " . implode(', ', $rem) . "
+";
 }
-echo "\nรวมการเปลี่ยนแปลง: {$total} แถว\n";
+echo "
+รวมการเปลี่ยนแปลง: {$totalChanges} แถว
+";
 
 if (!$apply) {
-    echo "\n(dry-run) ยังไม่เขียนลง DB — ใส่ --apply เพื่อใช้งานจริง\n";
+    echo "
+(dry-run) ยังไม่เขียนลง DB — ใส่ --apply เพื่อใช้งานจริง
+";
     exit(0);
 }
-if ($total === 0) {
-    echo "ไม่มีอะไรต้องเปลี่ยน\n";
-    exit(0);
-}
-
-/* ---------- สำรอง + เขียน ---------- */
-if (!is_dir(__DIR__ . '/../backups')) {
-    @mkdir(__DIR__ . '/../backups', 0755, true);
-}
-$backupPath = __DIR__ . '/../backups/menu_permissions_' . date('Ymd_His') . '.json';
-$backup = ['created_at' => date('c'), 'target' => TARGET_GRANTS, 'rows' => []];
-foreach ($plan as $menuKey => $p) {
-    foreach ($roles as $rid) {
-        if (!empty($p['rows'][$rid])) {
-            $backup['rows'][] = ['menu_key' => $menuKey, 'role_id' => $rid, 'id' => $p['rows'][$rid]['id'], 'is_granted' => $p['rows'][$rid]['is_granted'], 'existed' => true];
-        } else {
-            // ต้องรู้ id ของแถวใหม่หลัง insert เพื่อ rollback — เก็บภายหลัง
-            $backup['rows'][] = ['menu_key' => $menuKey, 'role_id' => $rid, 'id' => 0, 'is_granted' => 1, 'existed' => false];
-        }
-    }
-}
-file_put_contents($backupPath, json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-echo "\nสำรองค่าเดิมไว้ที่: {$backupPath}\n";
 
 $pdo->beginTransaction();
 try {
-    $ins = $pdo->prepare('INSERT INTO menu_permissions (role_id, menu_key, is_granted) VALUES (?, ?, ?)');
-    $upd = $pdo->prepare('UPDATE menu_permissions SET is_granted = ? WHERE id = ?');
-    $newIds = [];
-    foreach ($plan as $menuKey => $p) {
-        foreach ($p['changes'] as $c) {
-            if ($c['existed']) {
-                $upd->execute([$c['to'], $c['id']]);
-            } else {
-                $ins->execute([$c['role_id'], $menuKey, $c['to']]);
-                $newIds[] = (int)$pdo->lastInsertId();
-            }
+    $upsert = $pdo->prepare('INSERT INTO menu_permissions (role_id, menu_key, is_granted) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE is_granted = VALUES(is_granted)');
+    $n=0;
+    foreach ($roles as $rid) {
+        foreach ($catalogKeys as $k) {
+            $upsert->execute([$rid, $k, $targets[$rid][$k]]);
+            $n++;
         }
     }
-    // เติม id ของแถวใหม่ลง backup เพื่อให้ --restore ลบได้ถูกตัว
-    $i = 0;
-    foreach ($backup['rows'] as &$row) {
-        if (empty($row['existed'])) {
-            $row['id'] = $newIds[$i++] ?? 0;
-        }
-    }
-    unset($row);
-    file_put_contents($backupPath, json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     $pdo->commit();
-    echo "apply เสร็จ: {$total} แถว\n";
-    echo "ย้อนกลับ: php scripts/align_menu_permissions.php --restore={$backupPath}\n";
+    echo "apply เสร็จ: {$n} แถว (upsert)
+";
 } catch (Throwable $e) {
     $pdo->rollBack();
-    fwrite(STDERR, 'ล้มเหลว: ' . $e->getMessage() . "\n");
+    fwrite(STDERR, 'ล้มเหลว: ' . $e->getMessage() . "
+");
     exit(1);
 }

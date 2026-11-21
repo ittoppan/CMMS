@@ -84,10 +84,20 @@ try {
 
     audit_log($pdo, 'LOGIN', 'auth', (int)$user['id'], 'เข้าสู่ระบบสำเร็จ: ' . $user['full_name'], null, ['role_id' => (int)$user['role_id']]);
 
+    // ชื่อบทบาท (สำหรับ frontend mapping หน้าแรกต่อ role)
+    $roleName = '';
+    try {
+        $rs = $pdo->prepare('SELECT name FROM roles WHERE id = ?');
+        $rs->execute([(int)$user['role_id']]);
+        $roleName = (string)($rs->fetchColumn() ?: '');
+    } catch (Throwable $e) { $roleName = ''; }
+
     echo json_encode(['success' => true, 'must_change_password' => (int)$user['must_change_password'] === 1, 'code' => 'OK', 'user' => [
-        'id'       => $user['id'],
-        'username' => $user['username'],
-        'full_name'=> $user['full_name'],
+        'id'        => $user['id'],
+        'username'  => $user['username'],
+        'full_name' => $user['full_name'],
+        'role_id'   => (int)$user['role_id'],
+        'role_name' => $roleName,
     ]]);
 } catch (Exception $e) {
     error_log('[login.php] ' . $e->getMessage());
