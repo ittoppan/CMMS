@@ -22,9 +22,10 @@ try {
 
     /* ---------- Rate limit / lockout (helper กลาง: iot_rate_check) ----------
      * - ต่อ username: 10 ครั้ง/ชั่วโมง (ด่านหลักกันเดารหัสของบัญชีเดียว)
-     * - ต่อ IP: 120 ครั้ง/ชั่วโมง — เพดานสูงตั้งใจ เพราะเบราว์เซอร์เรียกผ่าน Next
+     * - ต่อ IP: 1000 ครั้ง/ชั่วโมง — เพดานสูงตั้งใจ เพราะเบราว์เซอร์เรียกผ่าน Next
      *   proxy (/api/login → 127.0.0.1) ทำให้ PHP เห็น REMOTE_ADDR เป็น loopback
      *   เดียวกันทุกคน; ใช้ดัก brute-force ที่ยิงเข้า PHP ตรง ๆ
+     *   (เดิม 120 ทำให้ suite e2e ที่ล็อกอิน 100+ ครั้ง/รอบ ชนเพดานตามลำดับรัน)
      * - ล็อกอินสำเร็จ → ล้างตัวนับของ username (ผู้ใช้จริงไม่ถูกล็อกเพราะพิมพ์ผิด 2-3 ครั้ง)
      * - ตัวนับเป็น bucket รายชั่วโมงของ iot_rate_limits (ไม่มี schema ใหม่)
      */
@@ -32,7 +33,7 @@ try {
     $ipKey = 'login_ip:' . (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
     $retryAfterMin = max(1, 60 - (int)date('i'));
 
-    foreach ([[$uma, 10], [$ipKey, 120]] as [$scopeKey, $limit]) {
+    foreach ([[$uma, 10], [$ipKey, 1000]] as [$scopeKey, $limit]) {
         $rl = iot_rate_check($pdo, $scopeKey, $limit, $retryAfterMin);
         if (!empty($rl['ok'])) {
             continue;

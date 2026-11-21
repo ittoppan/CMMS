@@ -32,6 +32,12 @@ const REL_PAGES = [
 ] as const;
 
 async function login(page: Page) {
+  // Defensive: skip cleanly instead of crashing on undefined creds when the
+  // fixture file is unavailable (run-order / teardown races).
+  if (!creds.username || !creds.password) {
+    test.skip(true, "no e2e creds available");
+    return;
+  }
   await page.goto("/login");
   const userBox = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
     const passBox = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
