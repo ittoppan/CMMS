@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { EmployeeAvatar } from "@/components/ui/employee-avatar";
 import { Alert } from "@/components/ui/alert";
 import {
   ClipboardList,
@@ -16,7 +17,6 @@ import {
   AlertTriangle,
   ArrowRight,
   RefreshCw,
-  UserCircle2,
   PieChart as PieChartIcon,
   ExternalLink,
   ListChecks,
@@ -236,14 +236,7 @@ export default function MyDashboardPage() {
             <div className="absolute inset-0 bg-blue-900" aria-hidden="true" />
             <div className="relative flex flex-1 items-center gap-4 p-5">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-md">
-                {avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt={displayName} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-slate-200">
-                    <UserCircle2 className="h-12 w-12 text-slate-400" aria-hidden="true" />
-                  </div>
-                )}
+                <EmployeeAvatar name={displayName} photoUrl={avatar} size={80} />
               </div>
               <div className="min-w-0 text-white">
                 <h2 className="text-xl font-bold sm:text-2xl">{displayName}</h2>
