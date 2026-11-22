@@ -50,7 +50,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "sidebar.search": { th: "ค้นหาเมนู...", en: "Search menu..." },
 
   // ── เมนูหลัก (SideNav items) ──
-  "menu.dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
+  "menu.dashboard": { th: "ศูนย์รวม Dashboard", en: "Dashboard Hub" },
   "menu.repairs": { th: "ใบสั่งงานซ่อมทั้งหมด", en: "All Work Orders" },
   "menu.repair_request": { th: "แจ้งซ่อมด่วน", en: "Quick Repair Request" },
   "menu.repair_assign": { th: "มอบหมายงาน", en: "Assign Jobs" },

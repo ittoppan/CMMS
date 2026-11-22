@@ -11,7 +11,7 @@
  */
 return [
     // ---- 1. งานซ่อมบำรุง ----
-    ['key' => 'dashboard',                 'href' => '/dashboard',                 'label' => 'แดชบอร์ดภาพรวม',       'section' => 'งานซ่อมบำรุง'],
+    ['key' => 'dashboard',                 'href' => '/dashboard',                 'label' => 'ศูนย์รวม Dashboard',       'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair',                    'href' => '/repair',                    'label' => 'ใบสั่งงานซ่อมทั้งหมด',      'section' => 'งานซ่อมบำรุง'],
     ['key' => 'field',                     'href' => '/field',                     'label' => 'โหมดภาคสนาม',             'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/workload',           'href' => '/repair/workload',           'label' => 'ภาระงานช่าง',             'section' => 'งานซ่อมบำรุง'],
