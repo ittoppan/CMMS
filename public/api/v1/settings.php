@@ -21,7 +21,11 @@ try {
         if (isset($_GET['defaults']) || isset($_GET['audit']) || isset($_GET['id'])) {
             api_fail(401, 'UNAUTHENTICATED', 'ต้องเข้าสู่ระบบก่อนใช้งาน');
         }
-        $public = ['theme_preset', 'theme_primary_hex', 'theme_secondary_hex', 'site_name', 'company_name'];
+        $public = ['theme_preset', 'theme_primary_hex', 'theme_secondary_hex', 'site_name', 'company_name',
+            'company_tagline', 'iso_header_title', 'login_welcome_text', 'support_phone', 'support_email',
+            'lang_default', 'date_format', 'animations_enabled', 'design_andon_ok', 'design_andon_warn',
+            'design_andon_down', 'kpi_sla_target_minutes', 'kpi_pm_ontime_target', 'kpi_mtbf_target_hours',
+            'kpi_mttr_target_minutes'];
         $ph = implode(',', array_fill(0, count($public), '?'));
         $stmt = $pdo->prepare("SELECT * FROM settings WHERE setting_key IN ($ph)");
         $stmt->execute($public);
@@ -31,8 +35,9 @@ try {
 
     requireLogin($pdo);
 
-    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ทุกคนที่ login
+    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ settings:view ขึ้นไป
     if (isset($_GET['defaults'])) {
+        requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
         echo json_encode(settingsDefaultValues(), JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -57,6 +62,7 @@ try {
 
     switch ($method) {
         case 'GET':
+            requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
                 $stmt = $pdo->prepare('SELECT * FROM settings WHERE id = ?');
@@ -88,11 +94,17 @@ try {
             };
 
             if ($method === 'PUT') {
+                $oldRow = $pdo->prepare('SELECT setting_key, setting_value FROM settings WHERE id = ?');
+                $oldRow->execute([$id]);
+                $old = $oldRow->fetch() ?: null;
+                $effKey = (string)($data['setting_key'] ?? ($old['setting_key'] ?? ''));
+                $isSecret = apiIsSecretKey($effKey);
+
                 $allowed = ['setting_key', 'setting_value', 'setting_group', 'description'];
                 $fields = []; $values = [];
                 foreach ($allowed as $col) {
                     if (isset($data[$col])) {
-                        if ($col === 'setting_value' && $skipMasked((string)($data['setting_key'] ?? ''), $data[$col])) {
+                        if ($col === 'setting_value' && $skipMasked($effKey, $data[$col])) {
                             continue; // ผู้ใช้ไม่ได้แตะค่าลับนี้ — อย่าเขียนทับด้วย "••••••••"
                         }
                         $fields[] = "$col = ?"; $values[] = $data[$col];
@@ -100,25 +112,24 @@ try {
                 }
                 if (!empty($fields)) {
                     $values[] = $id;
-                    $oldRow = $pdo->prepare('SELECT setting_key, setting_value FROM settings WHERE id = ?');
-                    $oldRow->execute([$id]);
-                    $old = $oldRow->fetch();
                     $stmt = $pdo->prepare("UPDATE settings SET " . implode(',', $fields) . " WHERE id = ?");
                     $stmt->execute($values);
 
                     if (isset($data['setting_value']) && $old && $old['setting_value'] !== (string)$data['setting_value']
-                        && !$skipMasked((string)($data['setting_key'] ?? $old['setting_key'] ?? ''), $data['setting_value'])) {
+                        && !$skipMasked($effKey, $data['setting_value'])) {
+                        $oldVal = $isSecret ? SETTING_MASKED : $old['setting_value'];
+                        $newVal = $isSecret ? SETTING_MASKED : (string)$data['setting_value'];
                         try {
                             $pdo->prepare("INSERT INTO settings_audit_log (user_id, user_name, setting_key, old_value, new_value) VALUES (?, ?, ?, ?, ?)")
                                 ->execute([
                                     $userId ?: null,
                                     $userName ?: null,
-                                    mb_substr((string)($data['setting_key'] ?? $old['setting_key'] ?? ''), 0, 100),
-                                    $old['setting_value'],
-                                    (string)$data['setting_value'],
+                                    mb_substr($effKey, 0, 100),
+                                    $oldVal,
+                                    $newVal,
                                 ]);
                         } catch (Exception $e) { /* audit ไม่ควรทำให้บันทึกหลักล้ม */ }
-                        audit_log($pdo, 'SETTING_CHANGE', 'settings', (string)($data['setting_key'] ?? $old['setting_key'] ?? ''), 'แก้ไขการตั้งค่าระบบ', ['key' => $data['setting_key'] ?? $old['setting_key'] ?? '', 'value' => apiIsSecretKey((string)($data['setting_key'] ?? '')) ? SETTING_MASKED : ($data['setting_value'] ?? null)], null);
+                        audit_log($pdo, 'SETTING_CHANGE', 'settings', $effKey, 'แก้ไขการตั้งค่าระบบ', ['key' => $effKey, 'value' => $isSecret ? SETTING_MASKED : ($data['setting_value'] ?? null)], null);
                     }
                 }
                 echo json_encode(['success' => true]);

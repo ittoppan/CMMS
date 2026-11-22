@@ -204,7 +204,7 @@
     },
     "approval.php": {
       "get": 200,
-      "post": 403
+      "post": 400
     },
     "sage_shipments.php": {
       "get": 200,
@@ -325,7 +325,7 @@
   },
   "Viewer": {
     "repair.php": {
-      "get": 200,
+      "get": 403,
       "post": 403
     },
     "spare_parts.php": {
@@ -357,11 +357,11 @@
       "post": 403
     },
     "planning.php": {
-      "get": 400,
+      "get": 403,
       "post": 403
     },
     "supervisor.php": {
-      "get": 400,
+      "get": 403,
       "post": 403
     },
     "approval.php": {

@@ -58,6 +58,8 @@ interface SettingRow {
   setting_group: string;
   description: string;
   updated_at?: string;
+  is_set?: boolean;
+  masked?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -280,9 +282,17 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
 };
 
 // คีย์ที่เป็นความลับ — แสดงเป็นจุด ต้องป้อนค่าใหม่เพื่อเปลี่ยน (ไม่โชว์ค่าจริง)
-const SENSITIVE_KEYS = new Set([
-  "line_channel_access_token", "line_channel_secret", "vapid_private_key", "smtp_pass",
-]);
+// mirror ของ apiIsSecretKey() ใน src/helpers/api.php (heuristic + รายการที่รู้จัก)
+function isSensitiveKey(key: string): boolean {
+  const k = key.toLowerCase().trim();
+  const explicit = new Set([
+    "line_channel_access_token", "line_channel_secret", "line_liff_register_id", "line_notify_token",
+    "vapid_private_key", "vapid_public_key", "smtp_pass", "telegram_bot_token", "telegram_chat_id",
+    "teams_webhook_url", "sage300_db_pass", "sage300_db_user", "sage300_odbc_dsn", "ntfy_token",
+  ]);
+  if (explicit.has(k)) return true;
+  return k.includes("token") || k.includes("secret") || k.endsWith("_pass") || k.endsWith("password") || k.includes("private");
+}
 
 // คีย์ที่เป็น JSON — แสดงแบบอ่านอย่างเดียว (กันแก้พลาดทำระบบพัง)
 const JSON_KEYS = new Set([
@@ -554,7 +564,7 @@ export default function SettingsPage() {
   const groupDirtyCount = useMemo(() => {
     const m: Record<string, number> = {};
     for (const s of settings) {
-      const dirty = isDirty(s) || (SENSITIVE_KEYS.has(s.setting_key) && Boolean(newSecrets[s.setting_key]?.trim()));
+      const dirty = isDirty(s) || (isSensitiveKey(s.setting_key) && Boolean(newSecrets[s.setting_key]?.trim()));
       if (dirty) m[s.setting_group] = (m[s.setting_group] || 0) + 1;
     }
     return m;
@@ -577,7 +587,7 @@ export default function SettingsPage() {
   const changedRows = useMemo(
     () =>
       (searchRows ?? currentRows).filter((s) => {
-        if (SENSITIVE_KEYS.has(s.setting_key)) return Boolean(newSecrets[s.setting_key]?.trim());
+        if (isSensitiveKey(s.setting_key)) return Boolean(newSecrets[s.setting_key]?.trim());
         return isDirty(s);
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -623,7 +633,7 @@ export default function SettingsPage() {
   const diffRows = useMemo(() => {
     return changedRows.map((row) => {
       const oldVal = settings.find((x) => x.id === row.id)?.setting_value ?? "";
-      const newVal = SENSITIVE_KEYS.has(row.setting_key)
+      const newVal = isSensitiveKey(row.setting_key)
         ? (newSecrets[row.setting_key]?.trim() || oldVal)
         : (form[row.setting_key] ?? "");
       return { row, oldVal, newVal };
@@ -632,7 +642,7 @@ export default function SettingsPage() {
 
   const valuePreview = (row: SettingRow, value: string): string => {
     const s = String(value ?? "");
-    if (SENSITIVE_KEYS.has(row.setting_key)) {
+    if (isSensitiveKey(row.setting_key)) {
       return s ? `•••••••• (ความยาว ${s.length} ตัวอักษร)` : "(ว่าง)";
     }
     if (s.length > 220) return s.slice(0, 220) + "…";
@@ -653,7 +663,7 @@ export default function SettingsPage() {
   const handleResetDefault = (row: SettingRow) => {
     const d = defaults[row.setting_key];
     if (d === null || d === undefined) return;
-    if (SENSITIVE_KEYS.has(row.setting_key)) {
+    if (isSensitiveKey(row.setting_key)) {
       setNewSecrets((f) => ({ ...f, [row.setting_key]: d }));
     } else {
       setForm((f) => ({ ...f, [row.setting_key]: d }));
@@ -703,7 +713,7 @@ export default function SettingsPage() {
     setShowDiff(false);
     for (const row of changedRows) {
       if (NUMBER_KEYS.has(row.setting_key)) {
-        const v = SENSITIVE_KEYS.has(row.setting_key) ? newSecrets[row.setting_key] : form[row.setting_key];
+        const v = isSensitiveKey(row.setting_key) ? newSecrets[row.setting_key] : form[row.setting_key];
         if (!/^\d+(\.\d+)?$/.test(String(v).trim())) {
           setError(`${KEY_META[row.setting_key]?.label || row.setting_key} ต้องเป็นตัวเลขเท่านั้น`);
           return;
@@ -725,7 +735,7 @@ export default function SettingsPage() {
     try {
       let saved = 0;
       for (const row of changedRows) {
-        const value = SENSITIVE_KEYS.has(row.setting_key)
+        const value = isSensitiveKey(row.setting_key)
           ? newSecrets[row.setting_key].trim()
           : (form[row.setting_key] ?? "");
         const res = await fetch(`/api/v1/settings.php?id=${row.id}`, {
@@ -1126,7 +1136,7 @@ export default function SettingsPage() {
                     const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
                     const isBool = BOOLEAN_KEYS.has(row.setting_key);
                     const isReadonly = READONLY_KEYS.has(row.setting_key);
-                    const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
+                    const isSensitive = isSensitiveKey(row.setting_key);
                     const isJson = JSON_KEYS.has(row.setting_key);
                     const selectOptions = SELECT_OPTIONS[row.setting_key];
                     const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
@@ -1209,8 +1219,8 @@ export default function SettingsPage() {
                         {isSensitive ? (
                           <VStack gap={1}>
                             <div style={{ fontSize: 13, color: "var(--cmms-text-muted)", background: "var(--cmms-bg-muted)", padding: "8px 12px", borderRadius: 8, border: "1px dashed var(--cmms-border)" }}>
-                              {String(form[row.setting_key] || "").length > 0
-                                ? `•••••••• (ตั้งค่าแล้ว ความยาว ${String(form[row.setting_key]).length} ตัวอักษร)`
+                              {row.is_set
+                                ? "•••••••• (ตั้งค่าแล้ว)"
                                 : "ยังไม่ได้ตั้งค่า"}
                             </div>
                             <Input
@@ -1408,7 +1418,7 @@ export default function SettingsPage() {
                     <CardContent className="space-y-1.5 p-3">
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
-                          {SENSITIVE_KEYS.has(row.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
+                          {isSensitiveKey(row.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
                           <span className="text-sm font-bold">{meta.label}</span>
                           <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {row.setting_group}
@@ -1479,7 +1489,7 @@ export default function SettingsPage() {
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
                           <span className="text-sm font-bold">{meta.label}</span>
-                          {SENSITIVE_KEYS.has(a.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
+                          {isSensitiveKey(a.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
                           <span className="font-mono text-sm text-muted-foreground">{a.setting_key}</span>
                         </HStack>
                         <span className="text-sm text-muted-foreground">

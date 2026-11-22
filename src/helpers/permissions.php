@@ -39,6 +39,8 @@ const PERMISSION_MATRIX = [
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
         'request'    => ['view', 'create', 'edit', 'approve', 'reject', 'close', 'convert_to_wo'],
         'asset'      => ['view', 'create', 'edit', 'deactivate', 'delete'],
+        
+'asset_registry' => ['view', 'edit', 'create', 'deactivate', 'delete'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close', 'delete'],
         'inspection' => ['view', 'create', 'execute', 'approve', 'close'],
         'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve', 'edit'],
@@ -82,6 +84,8 @@ const PERMISSION_MATRIX = [
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
         'request'    => ['view', 'create', 'edit', 'approve', 'reject', 'close', 'convert_to_wo'],
         'asset'      => ['view', 'create', 'edit', 'deactivate', 'delete'],
+        
+'asset_registry' => ['view', 'edit', 'create', 'deactivate', 'delete'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close', 'delete'],
         'inspection' => ['view', 'create', 'execute', 'approve', 'close'],
         'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve', 'edit'],
@@ -124,6 +128,8 @@ const PERMISSION_MATRIX = [
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
         'request'    => ['view', 'create', 'approve', 'reject'],
         'asset'      => ['view', 'edit'],
+        
+        'asset_registry' => ['view', 'edit'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close'],
         'inspection' => ['view', 'create', 'execute'],
         'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit', 'plan'],
@@ -161,7 +167,9 @@ const PERMISSION_MATRIX = [
     3 => [ // Technician — ช่าง (Operate)
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
         'request'    => ['view', 'create'],
-        'asset'      => ['view'],
+        'asset'      => ['view', 'edit'],
+        
+        'asset_registry' => ['view'],
         'pm_am'      => ['view', 'execute'],
         'inspection' => ['view', 'execute'],
         'spare_parts'=> ['view', 'request'],
@@ -216,6 +224,8 @@ const PERMISSION_MATRIX = [
         'pm_am'      => ['view'],
         'inspection' => ['view', 'create'],
         'asset'      => ['view', 'edit'],
+        
+        'asset_registry' => ['view', 'edit'],
         'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'feedback'],
         // home KPI tile (supervisor.php?action=kpis) — อ่านสรุปได้เท่านั้น
         'repair'     => ['view'],
@@ -281,6 +291,7 @@ const PERMISSION_MATRIX_BY_ROLE_NAME = [
         'pm_am'      => ['view'],
         'inspection' => ['view'],
         'asset'      => ['view'],
+        'asset_registry' => ['view'],
         'repair'     => ['view'],
         'knowledge'  => ['read', 'search', 'feedback'],
         'training'   => ['view'],
@@ -379,7 +390,6 @@ function permModuleAliases(string $module): string {
         'work_orders'    => 'repair',
         'maintenance_request' => 'request',
         'maint_request'  => 'request',
-        'asset_registry' => 'asset',
         'asset'          => 'asset',
         'pm'             => 'pm_am',
         'inspection'     => 'inspection',

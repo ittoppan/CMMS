@@ -2,7 +2,7 @@
   "Admin": {
     "cost": {
       "status": 200,
-      "size": 879
+      "size": 877
     },
     "kpi_dashboard": {
       "status": 200,
@@ -14,7 +14,7 @@
     },
     "analytics_monthly": {
       "status": 200,
-      "size": 6008
+      "size": 6006
     },
     "reports": {
       "status": 200,
@@ -26,7 +26,7 @@
     },
     "notifications_log": {
       "status": 200,
-      "size": 66560
+      "size": 65572
     },
     "global_search": {
       "status": 200,
@@ -104,7 +104,7 @@
   "Manager": {
     "cost": {
       "status": 200,
-      "size": 879
+      "size": 877
     },
     "kpi_dashboard": {
       "status": 200,
@@ -116,7 +116,7 @@
     },
     "analytics_monthly": {
       "status": 200,
-      "size": 6008
+      "size": 6006
     },
     "reports": {
       "status": 200,
@@ -128,7 +128,7 @@
     },
     "notifications_log": {
       "status": 200,
-      "size": 66560
+      "size": 65572
     },
     "global_search": {
       "status": 200,
@@ -206,7 +206,7 @@
   "Asst.Manager": {
     "cost": {
       "status": 200,
-      "size": 879
+      "size": 877
     },
     "kpi_dashboard": {
       "status": 200,
@@ -218,7 +218,7 @@
     },
     "analytics_monthly": {
       "status": 200,
-      "size": 6008
+      "size": 6006
     },
     "reports": {
       "status": 200,
@@ -230,7 +230,7 @@
     },
     "notifications_log": {
       "status": 200,
-      "size": 66560
+      "size": 65572
     },
     "global_search": {
       "status": 200,
@@ -323,8 +323,8 @@
       "size": 93
     },
     "reports": {
-      "status": 200,
-      "size": 2601
+      "status": 403,
+      "size": 91
     },
     "workload": {
       "status": 200,
@@ -425,8 +425,8 @@
       "size": 93
     },
     "reports": {
-      "status": 200,
-      "size": 2478
+      "status": 403,
+      "size": 91
     },
     "workload": {
       "status": 403,
@@ -481,8 +481,8 @@
       "size": 71
     },
     "feedback": {
-      "status": 200,
-      "size": 52
+      "status": 403,
+      "size": 92
     },
     "departments": {
       "status": 200,
@@ -626,7 +626,7 @@
     },
     "analytics_monthly": {
       "status": 200,
-      "size": 6008
+      "size": 6006
     },
     "reports": {
       "status": 200,
@@ -649,12 +649,12 @@
       "size": 9051
     },
     "intelligence": {
-      "status": 403,
-      "size": 96
+      "status": 200,
+      "size": 4973
     },
     "predictive_maintenance": {
-      "status": 403,
-      "size": 96
+      "status": 200,
+      "size": 13355
     },
     "pm_reminders": {
       "status": 200,
@@ -705,8 +705,8 @@
       "size": 87
     },
     "repair_options": {
-      "status": 200,
-      "size": 12203
+      "status": 403,
+      "size": 90
     },
     "asset_hub": {
       "status": 400,

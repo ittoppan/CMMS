@@ -14,6 +14,7 @@ import { useMenuPermission } from "@/lib/useMenuPermission";
 import { fetchKnRelated } from "@/lib/knowledge";
 import type { KnArticle } from "@/lib/knowledge";
 import { Grid, VStack, HStack, PageHeader } from "@/components/layout";
+import { KpiStrip } from "@/components/layout/kpi-strip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -763,11 +764,11 @@ export default function AssetRegistryViewPage() {
   // ── 13 ฟิลด์ที่ต้องแสดง ──
   const infoFields: { label: string; icon: typeof MapPin; value: React.ReactNode }[] = [
     { label: "รหัสเครื่องจักร", icon: Building2, value: <span className="font-semibold">{asset.code}</span> },
-    { label: "ชื่อเครื่องจักร", icon: Building2, value: asset.name || "-" },
-    { label: "ประเภท", icon: Layers, value: asset.category || "-" },
-    { label: "Serial Number", icon: Timer, value: asset.serial_number || "-" },
-    { label: "รุ่น (Model)", icon: Layers, value: asset.model || "-" },
-    { label: "ผู้ผลิต", icon: Building2, value: asset.manufacturer || "-" },
+    { label: "ชื่อเครื่องจักร", icon: Building2, value: asset.name || "ยังไม่ได้กรอก" },
+    { label: "ประเภท", icon: Layers, value: asset.category || "ยังไม่ได้กรอก" },
+    { label: "Serial Number", icon: Timer, value: asset.serial_number || "ยังไม่ได้กรอก" },
+    { label: "รุ่น (Model)", icon: Layers, value: asset.model || "ยังไม่ได้กรอก" },
+    { label: "ผู้ผลิต", icon: Building2, value: asset.manufacturer || "ยังไม่ได้กรอก" },
     {
       label: "ตำแหน่งที่ตั้ง",
       icon: MapPin,
@@ -775,16 +776,16 @@ export default function AssetRegistryViewPage() {
         <button className="text-left text-primary hover:underline inline-flex items-center gap-1" onClick={() => router.push(`/facility-layout?room=${asset.location_id}&asset=${assetId}`)}>
           {asset.location || `ห้อง #${asset.location_id}`} <ArrowRight size={14} aria-hidden="true" />
         </button>
-      ) : (asset.location || "-"),
+      ) : (asset.location || "ยังไม่ได้กรอก"),
     },
-    { label: "แผนก", icon: User, value: asset.department || "-" },
-    { label: "วันที่ติดตั้ง", icon: CalendarClock, value: asset.purchase_date ? String(asset.purchase_date).slice(0, 10) : "-" },
-    { label: "ประกันหมดอายุ", icon: CalendarClock, value: asset.warranty_expiry ? String(asset.warranty_expiry).slice(0, 10) : "-" },
+    { label: "แผนก", icon: User, value: asset.department || "ยังไม่ได้กรอก" },
+    { label: "วันที่ติดตั้ง", icon: CalendarClock, value: asset.purchase_date ? String(asset.purchase_date).slice(0, 10) : "ยังไม่ได้กรอก" },
+    { label: "ประกันหมดอายุ", icon: CalendarClock, value: asset.warranty_expiry ? String(asset.warranty_expiry).slice(0, 10) : "ยังไม่ได้กรอก" },
     {
       label: "ความสำคัญ", icon: ShieldAlert,
       value: asset.criticality ? (
         <Badge variant={criticalityBadgeVariant[asset.criticality] || "neutral"}>เกรด {asset.criticality}</Badge>
-      ) : "-",
+      ) : "ยังไม่ได้กรอก",
     },
     {
       label: "สถานะปัจจุบัน", icon: Network,
@@ -794,15 +795,15 @@ export default function AssetRegistryViewPage() {
         </Badge>
       ),
     },
-    { label: "สภาพ", icon: Timer, value: Number(asset.in_place_edit) === 1 ? "ซ่อมได้ในสถานที่ (In-place)" : asset.description || "-" },
+    { label: "สภาพ", icon: Timer, value: Number(asset.in_place_edit) === 1 ? "ซ่อมได้ในสถานที่ (In-place)" : asset.description || "ยังไม่ได้กรอก" },
   ];
 
   const extraFields: { label: string; value: React.ReactNode }[] = [
-    { label: "ผู้รับผิดชอบ", value: responsibleUser || "-" },
+    { label: "ผู้รับผิดชอบ", value: responsibleUser || "ยังไม่ได้กรอก" },
     { label: "โซนทำงาน / Work Zone", value: String(asset.work_zone_id ?? "-") },
     { label: "ชั่วโมงเดินเครื่อง/เดือน", value: String(asset.running_hours_month ?? "-") },
-    { label: "Barcode", value: asset.barcode || "-" },
-    { label: "คู่มือ/เอกสารแนบ", value: asset.instruction_manual ? String(asset.instruction_manual) : "-" },
+    { label: "Barcode", value: asset.barcode || "ยังไม่ได้กรอก" },
+    { label: "คู่มือ/เอกสารแนบ", value: asset.instruction_manual ? String(asset.instruction_manual) : "ยังไม่ได้กรอก" },
   ];
 
   return (
@@ -817,6 +818,28 @@ export default function AssetRegistryViewPage() {
       {/* Quick actions (stack บนมือถือ) */}
       <Card>
         <CardContent className="p-4">{quickActions}</CardContent>
+
+      {canShow("asset_registry") && (() => {
+        const fields = [
+          asset.manufacturer, asset.model, asset.serial_number, asset.location || asset.location_id,
+          asset.department, asset.responsible_user_id, asset.purchase_date, asset.warranty_expiry,
+          asset.category, asset.criticality,
+        ];
+        const filled = fields.filter((v) => v != null && String(v).trim() !== "" && String(v) !== "ยังไม่ได้กรอก").length;
+        return (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">ข้อมูลเครื่องครบ {filled}/10 ช่อง</span>
+                <Button variant="secondary" onClick={() => router.push(`/asset_registry/edit?id=${assetId}`)}>ไปหน้าแก้ไขเครื่องนี้</Button>
+              </div>
+              <div className="mt-2 h-2 w-full rounded-full bg-[var(--cmms-bg-muted)] overflow-hidden">
+                <div className="h-full bg-[var(--cmms-primary)]" style={{ width: `${(filled/10)*100}%` }} />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
       </Card>
 
       {/* KPI strip */}
@@ -870,8 +893,12 @@ export default function AssetRegistryViewPage() {
       <Tabs defaultValue="overview">
         <TabsList className="w-full overflow-x-auto">
           <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
-          <TabsTrigger value="history">ประวัติ ({timeline.length})</TabsTrigger>
-          <TabsTrigger value="relationship">ความสัมพันธ์</TabsTrigger>
+          <TabsTrigger value="history">ประวัติซ่อม</TabsTrigger>
+          <TabsTrigger value="pm">PM & ตรวจเช็ค</TabsTrigger>
+          <TabsTrigger value="spare">อะไหล่ & BOM</TabsTrigger>
+          <TabsTrigger value="docs">เอกสาร</TabsTrigger>
+          <TabsTrigger value="reliability">ความน่าเชื่อถือ</TabsTrigger>
+          <TabsTrigger value="technical">เทคนิค</TabsTrigger>
         </TabsList>
 
         {/* ═══ ภาพรวม ═══ */}
@@ -1097,7 +1124,7 @@ export default function AssetRegistryViewPage() {
                             <tr key={r.id} className="border-t border-[var(--cmms-border)]">
                               <td className="px-3 py-2 whitespace-nowrap">{String(r.measured_at || r.created_at || "-").replace("T", " ").slice(0, 16)}</td>
                               <td className="px-3 py-2">{r.parameter || "-"}</td>
-                              <td className="px-3 py-2 font-semibold tabular-nums">{r.value_numeric != null ? Number(r.value_numeric).toLocaleString("th-TH") : "-"}</td>
+                              <td className="px-3 py-2 font-semibold tabular-nums">{r.value_numeric != null ? Number(r.value_numeric).toLocaleString("th-TH") : "ยังไม่ได้กรอก"}</td>
                               <td className="px-3 py-2">
                                 <span className="inline-flex items-center gap-1">{r.unit || "-"}{matched && <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--cmms-success-dark)]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--cmms-success-dark)]" aria-hidden="true" />ตรงแผน</span>}</span>
                               </td>
@@ -1284,7 +1311,7 @@ export default function AssetRegistryViewPage() {
         </TabsContent>
 
         {/* ═══ ความสัมพันธ์ ═══ */}
-        <TabsContent value="relationship" className="space-y-5">
+        <TabsContent value="spare" className="space-y-5">
           <Grid columns={isNarrow ? 1 : { minWidth: 260, max: 2 }} gap={4}>
             {/* BOM */}
             <Card>
@@ -1366,6 +1393,43 @@ export default function AssetRegistryViewPage() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="pm" className="space-y-5">
+          <Card>
+            <CardContent className="p-4">
+              <EmptyState title="ยังไม่มีแผน PM สำหรับเครื่องนี้" description="สร้างแผน PM/AM ที่หน้า PM & AM แล้วผูกกับเครื่องนี้" />
+              {canShow("pm_am/checksheet") && (
+                <div className="mt-3">
+                  <Button variant="secondary" onClick={() => router.push("/pm_am")}><ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />ไปหน้า PM & AM</Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="docs" className="space-y-5">
+          <Card>
+            <CardContent className="p-4">
+              <EmptyState title="ยังไม่มีเอกสารสำหรับเครื่องนี้" description="อัปโหลดคู่มือ/SOP/LOTO ที่หน้าเอกสาร" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reliability" className="space-y-5">
+          <Card>
+            <CardContent className="p-4">
+              <EmptyState title="ยังไม่มีข้อมูลความน่าเชื่อถือ" description="บันทึกประวัติวงจรชีวิต/MTBF/MTTR เมื่อมีข้อมูลซ่อมที่ปิดแล้ว" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="technical" className="space-y-5">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">บันทึกค่ามิเตอร์/CBM และจุดหล่อลื่นอยู่ในแท็บภาพรวม (ส่วนบันทึกค่ามิเตอร์)</p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
