@@ -35,9 +35,9 @@ try {
 
     requireLogin($pdo);
 
-    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ settings:view ขึ้นไป
+    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — Admin เท่านั้น
     if (isset($_GET['defaults'])) {
-        requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
+        requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่ดูค่าเริ่มต้น');
         echo json_encode(settingsDefaultValues(), JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -62,9 +62,10 @@ try {
 
     switch ($method) {
         case 'GET':
-            requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
+                // ?id= ต้อง Admin (settings:manage) เท่านั้น
+                requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้น');
                 $stmt = $pdo->prepare('SELECT * FROM settings WHERE id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
@@ -72,7 +73,17 @@ try {
                 $rows = apiMaskSettingsRows([$row]);
                 echo json_encode($rows[0], JSON_UNESCAPED_UNICODE);
             } else {
-                $rows = $pdo->query('SELECT * FROM settings ORDER BY setting_group, setting_key')->fetchAll();
+                // รายการเต็ม = Admin เท่านั้น; role อื่นได้เฉพาะระดับ B (ไม่อ่อนไหว)
+                if (canPerm($pdo, 'settings', 'manage')) {
+                    $rows = $pdo->query('SELECT * FROM settings ORDER BY setting_group, setting_key')->fetchAll();
+                } else {
+                    $all = $pdo->query('SELECT * FROM settings ORDER BY setting_group, setting_key')->fetchAll();
+                    $rows = [];
+                    foreach ($all as $r) {
+                        if (apiSettingsAdminOnlyKey((string)($r['setting_key'] ?? ''))) continue;
+                        $rows[] = $r;
+                    }
+                }
                 echo json_encode(apiMaskSettingsRows($rows), JSON_UNESCAPED_UNICODE);
             }
             break;

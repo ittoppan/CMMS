@@ -34,7 +34,7 @@ require_once __DIR__ . '/audit.php';
  *              6 ASST Manager, 7 Foreman
  */
 const PERMISSION_MATRIX = [
-    1 => [], // Admin: มอบสิทธิ์เต็ม (เร่งผ่านใน perm_default_granted)
+    1 => ['settings' => ['view', 'manage']], // Admin: มอบสิทธิ์เต็ม (เร่งผ่านใน perm_default_granted); คง action ให้ my_permissions ใช้
     2 => [
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
         'request'    => ['view', 'create', 'edit', 'approve', 'reject', 'close', 'convert_to_wo'],
@@ -61,7 +61,6 @@ const PERMISSION_MATRIX = [
         'users'      => ['view'],
         'roles'      => ['view'],
         'audit_log'  => ['view'],
-        'settings'   => ['view'],
         'notification'=> ['view'],
         'sage'       => ['view', 'write'],
         'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
@@ -106,7 +105,6 @@ const PERMISSION_MATRIX = [
         'users'      => ['view'],
         'roles'      => ['view'],
         'audit_log'  => ['view'],
-        'settings'   => ['view'],
         'notification'=> ['view'],
         'sage'       => ['view', 'write'],
         'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
@@ -162,7 +160,6 @@ const PERMISSION_MATRIX = [
         // approver: startup restores equipment, so it is not a foreman-level action.
         'shutdown'   => ['view', 'plan', 'readiness_manage', 'execute'],
         // Foreman ต้องอ่าน departments/facility_layout (ตัวกรองแผนก + ผังอาคาร) แต่ไม่จัดการ settings
-        'settings'   => ['view'],
     ],
     3 => [ // Technician — ช่าง (Operate)
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -211,7 +208,6 @@ const PERMISSION_MATRIX = [
         'sage'       => ['view'],
         'spare_parts'=> ['view', 'request', 'issue', 'return'],
         'users'      => ['view'],
-        'settings'   => ['view'],
         'audit_log'  => ['view'],
         'document'   => ['view'],
         'report'     => ['view', 'export'],
@@ -279,7 +275,6 @@ const PERMISSION_MATRIX_BY_ROLE_NAME = [
         'sage'       => ['view'],
         'spare_parts'=> ['view'],
         'users'      => ['view'],
-        'settings'   => ['view'],
         'audit_log'  => ['view'],
         'document'   => ['view'],
         'report'     => ['view', 'export'],

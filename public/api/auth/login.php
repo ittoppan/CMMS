@@ -21,6 +21,19 @@ try {
 
     $pdo = getDb();
 
+    // ดึง IP ของผู้ใช้ (เชื่อ X-Forwarded-For/CF-Connecting-IP เฉพาะเมื่อมาจาก proxy ที่รู้จัก)
+    $remoteAddr = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $trustedProxies = ['127.0.0.1', '::1'];
+    $clientIp = $remoteAddr;
+    if (in_array($remoteAddr, $trustedProxies, true)) {
+        foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_CF_CONNECTING_IP'] as $h) {
+            if (!empty($_SERVER[$h])) {
+                $first = trim(explode(',', (string)$_SERVER[$h])[0]);
+                if (filter_var($first, FILTER_VALIDATE_IP)) { $clientIp = $first; break; }
+            }
+        }
+    }
+
     /* ---------- Rate limit / lockout (helper กลาง: iot_rate_check) ----------
      * - ต่อ username: 10 ครั้ง/ชั่วโมง (ด่านหลักกันเดารหัสของบัญชีเดียว)
      * - ต่อ IP: 1000 ครั้ง/ชั่วโมง — เพดานสูงตั้งใจ เพราะเบราว์เซอร์เรียกผ่าน Next
@@ -31,7 +44,7 @@ try {
      * - ตัวนับเป็น bucket รายชั่วโมงของ iot_rate_limits (ไม่มี schema ใหม่)
      */
     $uma = 'login_user:' . mb_strtolower(mb_substr($username, 0, 60));
-    $ipKey = 'login_ip:' . (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $ipKey = 'login_ip:' . $clientIp;
     $retryAfterMin = max(1, 60 - (int)date('i'));
 
     foreach ([[$uma, 10], [$ipKey, 1000]] as [$scopeKey, $limit]) {
@@ -57,7 +70,7 @@ try {
     // ---------- Lockout หลังผิดเกิน max_login_attempts (ค่าเริ่มต้น 5, ล็อก 15 นาที ต่อ username+IP) ----------
     $maxLoginAttempts = (int)setting_value('max_login_attempts', '5');
     if ($maxLoginAttempts < 1) $maxLoginAttempts = 5;
-    $lockScope = 'login_lock:' . mb_strtolower(mb_substr($username, 0, 60)) . ':' . (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $lockScope = 'login_lock:' . mb_strtolower(mb_substr($username, 0, 60)) . ':' . $clientIp;
     $lockScope = mb_substr($lockScope, 0, 120);
     $minute = (int)date('i');
     $bucketMin = (int)(floor($minute / 15) * 15);
@@ -81,7 +94,14 @@ try {
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    if (!$user || ((int)$user['is_active'] !== 1) || !password_verify($password, $user['password'])) {
+    // ตรวจสอบรหัสผ่าน (timing-safe: บัญชีที่ไม่มีจริงก็รัน password_verify ต่อดัมมี่ hash)
+    $passwordOk = false;
+    if ($user && (int)$user['is_active'] === 1) {
+        $passwordOk = password_verify($password, (string)$user['password']);
+    } else {
+        password_verify($password, '$2y$10$W91WRG7myKnzNdKHz.euHuiDVu1HJXmVBIGvZ1ig.Eq6VkFDplXja');
+    }
+    if (!$user || (int)($user['is_active'] ?? 0) !== 1 || !$passwordOk) {
         // บันทึก failed login (severity=security) — ไม่ระบุว่าชื่อผู้ใช้ถูกหรือไม่ (กัน user enumeration)
         audit_log($pdo, 'LOGIN_FAIL', 'auth', $username, 'เข้าสู่ระบบไม่สำเร็จ (ชื่อผู้ใช้/รหัสผ่านไม่ถูกต้อง)', null, ['username' => $username], 'security');
         // เพิ่มตัวนับล็อก (ต่อ username+IP, ช่วง 15 นาที) — ไม่เปิดเผยว่าบัญชีมีอยู่หรือไม่

@@ -52,6 +52,20 @@ function apiMaskSecret(string $value): string {
     return ($value === '') ? '' : SETTING_MASKED;
 }
 
+/** คีย์ที่เป็นการตั้งค่าระดับ Admin เท่านั้น (การเชื่อมต่อ/ความลับ/ค่าระบบ) — ไม่ส่งให้ role อื่น */
+function apiSettingsAdminOnlyKey(string $key): bool {
+    $k = strtolower(trim($key));
+    if (apiIsSecretKey($k)) return true;
+    $prefixes = ['ntfy_', 'smtp_', 'telegram_', 'line_', 'vapid_', 'sage', 'iot_', 'teams_', 'webhook'];
+    foreach ($prefixes as $p) {
+        if (str_starts_with($k, $p)) return true;
+    }
+    $exact = ['public_base_url', 'allowed_origins', 'cost_external_source', 'cost_labor_rate_source',
+        'max_login_attempts', 'session_timeout_mins', 'default_warehouse'];
+    if (in_array($k, $exact, true)) return true;
+    return false;
+}
+
 /** mask คอลัมน์ secrets ในแถว settings (ถอดตาม key ชื่อ) — ใช้กับผลลัพธ์ GET/DETAIL */
 function apiMaskSettingsRows(array $rows): array {
     foreach ($rows as $i => $r) {

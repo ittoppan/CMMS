@@ -121,12 +121,12 @@ const API_ENDPOINT_PERMISSIONS = [
     // read เปิดให้ผู้ใช้ที่ login ทุกบทบาท (ค่า secret ถูก mask แล้ว; matrix ทั้งหมดยัง admin-only ในไฟล์)
     // write ยังบังคับ settings:manage ตามเดิม
     'settings.php'               => ['read' => null,                      'write' => ['settings', 'manage']],
-    'master_data.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    'master_data.php'            => ['read' => null,                      'write' => ['settings', 'manage']],
     'menu_permissions.php'       => ['read' => null,                      'write' => ['settings', 'manage']],
     // ใช้ตัดสินการแสดงปุ่มใน UI: คืนเฉพาะสิทธิ์ของตัวเอง (ไม่มี PII) จึงเปิดให้ผู้ที่ล็อกอินทุกคน
     'my_permissions.php'         => ['read' => null,                      'write' => null],
     'repair_options.php'         => ['read' => ['repair', 'view'],       'write' => ['settings', 'manage']],
-    'departments.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    'departments.php'            => ['read' => null,                      'write' => ['settings', 'manage']],
     'pwa_settings.php'           => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'page_editor.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'custom_pages.php'           => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],

@@ -626,8 +626,12 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
+    if (canManage) {
+      fetchSettings();
+    } else {
+      setLoading(false);
+    }
+  }, [canManage]);
 
   // ค่าที่จะบันทึก (หลัง) เทียบกับค่าปัจจุบันใน DB (ก่อน) — สำหรับหน้าต่างเปรียบเทียบ
   const diffRows = useMemo(() => {
@@ -776,6 +780,12 @@ export default function SettingsPage() {
         <Spinner size={20} />
         <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าระบบ...</p>
       </div>
+    );
+  }
+
+  if (!loading && !canManage) {
+    return (
+      <div className="p-8 text-center text-sm text-red-600">403 ไม่มีสิทธิ์เข้าถึงการตั้งค่า</div>
     );
   }
 
