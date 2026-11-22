@@ -1,5 +1,26 @@
 # TESTING.md — ฐานข้อมูลแยกสำหรับเทส (Phase 10)
 
+## คำเตือนสำคัญ (Phase 11)
+- เทส Playwright/PHP ยังใช้ฐานข้อมูลจริง (`cmms_tpt`) ในสภาพปัจจุบัน (ยังไม่แยก backend ทดสอบ)
+- **ห้ามรันเทสขณะมีผู้ใช้จริงใช้งาน** — รันนอกเวลาทำงานเท่านั้น
+- เทสจะ toggle `is_active` ของบัญชี `e2e_*` และ seed/ลบข้อมูล — อาจกระทบผู้ใช้จริง
+
+## ตรวจสอบก่อน/หลังรันเทส
+```powershell
+# ก่อนรัน: ตรวจว่าไม่มีผู้ใช้จริง active ผิดปกติ (ควรเป็น 0 e2e_ active ก่อนเริ่ม)
+# หลังรัน: ยืนยัน e2e_* ทั้งหมดปิด
+mysql -u root -p -e "SELECT COUNT(*) FROM cmms_tpt.users WHERE username LIKE 'e2e_%' AND is_active=1;"
+```
+expected: `0`
+
+## เปิด/ปิดบัญชี e2e_* เอง (ฉุกเฉิน)
+```sql
+-- ปิดทั้งหมด (หลังรันเทส/ก่อน production ใช้งาน)
+UPDATE cmms_tpt.users SET is_active=0 WHERE username LIKE 'e2e_%';
+-- เปิด (เฉพาะตอนรันเทส)
+UPDATE cmms_tpt.users SET is_active=1 WHERE username LIKE 'e2e_%';
+```
+
 ## สถานะปัจจุบัน
 - สร้างฐานข้อมูล `cmms_tpt_test` แล้ว (โครงสร้างจาก `database/ci_schema_structure.sql`)
 - สร้างผู้ใช้ MySQL `cmms_test`@`localhost` (สิทธิ์เฉพาะ `cmms_tpt_test.*`) แล้ว
@@ -23,3 +44,7 @@
 
 ## ยืนยัน
 - หลังจบ ต้องตรวจ: `SELECT COUNT(*) FROM cmms_tpt.users WHERE username LIKE 'e2e_%' AND is_active=1` = 0 ขณะเทสรัน (เทสต้องใช้ cmms_tpt_test แทน)
+
+## Guard ใน globalSetup (Phase 11)
+- ยังไม่เพิ่มการปฏิเสธการรันเมื่อมีผู้ใช้ไม่ใช่ e2e_* มีเซสชันใช้งานใน 10 นาทีล่าสุด เพราะระบบไม่เก็บ session table/last_activity (PHP session เป็นไฟล์) — การตรวจจะเสี่ยง/ไม่แม่นยำ
+- ใช้ขั้นตอน manual ด้านบนแทน
