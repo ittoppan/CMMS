@@ -57,5 +57,4 @@
 - Playwright: 172 passed, 0 failed (6.3m)
 - e2e_* active = 0
 ### 5. BUILD_ID / commit hash
-- รอบก่อน deploy: BUILD_ID TmG1DPnVeuQzeN09b0p5F (commit 2b1a3fc5) — ยังไม่ deploy รอบใหม่
-- commit ใหม่: (ดู git log หลัง commit นี้)
+- deploy รอบนี้: BUILD_ID X2MVXatUUBEJyIa1pvHqR (commit b7f0c6e4) — deploy สำเร็จ 30/30 checks, URL ทั้งหมด 200
