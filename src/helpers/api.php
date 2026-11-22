@@ -55,10 +55,16 @@ function apiMaskSecret(string $value): string {
 /** mask คอลัมน์ secrets ในแถว settings (ถอดตาม key ชื่อ) — ใช้กับผลลัพธ์ GET/DETAIL */
 function apiMaskSettingsRows(array $rows): array {
     foreach ($rows as $i => $r) {
-        if (is_array($r) && apiIsSecretKey((string)($r['setting_key'] ?? '')) && !empty($r['setting_value'])) {
-            $rows[$i]['setting_value'] = apiMaskSecret((string)$r['setting_value']);
+        if (!is_array($r) || !isset($r['setting_key'])) continue;
+        $isSecret = apiIsSecretKey((string)$r['setting_key']);
+        $hasValue = isset($r['setting_value']) && $r['setting_value'] !== '' && $r['setting_value'] !== null;
+        if ($isSecret) {
+            // ค่า secret ห้ามส่งออกทาง API เลย - ส่งแค่ is_set (true/false)
+            $rows[$i]['is_set'] = $hasValue;
+            $rows[$i]['setting_value'] = '';
             $rows[$i]['masked'] = true;
-        } elseif (is_array($r) && isset($r['setting_key'])) {
+        } else {
+            $rows[$i]['is_set'] = $hasValue;
             $rows[$i]['masked'] = false;
         }
     }
