@@ -182,3 +182,42 @@
 - BUILD_ID: zas0iAWtk1_cexWsd8WXJ
 - commit: (ดู git log ล่าสุด)
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
+
+---
+
+## Phase 9 — ต่อจากเฟส 8 (2026-11-22)
+
+### (1) แก้แล้ว
+- ขั้น 1: ล้างรหัสผ่านเดิม "Test@Cmms2026" ออกจาก docs/SECURITY_FIX_REPORT.md (แทนด้วย "[redacted]"); ตรวจ tracked files ด้วยรูปแบบ password=/secret/token/api_key/Bearer — พบเฉพาะตัวอย่าง/placeholder (เช่น YOUR_LINE_CHANNEL_SECRET, password= ในตัวอย่าง redact) ไม่มีค่าจริง commit อยู่
+- ขั้น 1: ตรวจ users table ด้วย password_verify กับรหัสเดิม → พบ 0 บัญชีที่ตรง (ไม่ต้องบังคับเปลี่ยนรหัส)
+- ขั้น 2: git remote = https://github.com/ittoppan/CMMS.git (ไม่มี token ฝังใน URL); ไม่แน่ใจว่า public — รายงานให้ทราบ ไม่แก้ history
+- ขั้น 3: สร้างตาราง probe สด (GET ด้วยบัญชี e2e_* ทั้ง 9 role) สำหรับ ~60 endpoint; พบ under-permission gap 2 จุดและแก้แล้ว:
+  - Operate (role 3) เห็นเมนู contractor แต่ API contractor.php ตอบ 403 → เพิ่ม 'contractor' => ['view'] ใน PERMISSION_MATRIX role 3
+  - Operate เห็น facility-layout (ภายใต้ asset_registry perm) แต่ facility_layout.php read ต้อง settings:view → เปลี่ยน read เป็น asset:view (write ยัง settings:manage)
+- ขั้น 4: ตรวจ fetch ตรงใน frontend → พบ 440 จุดใน 160 ไฟล์ (ไม่ผ่าน frontend/lib/api.ts); ไม่ย้ายทั้งหมดเพราะเสี่ยงเปลี่ยน logic; ตัวกลาง apiFetch/apiJson มีแล้วและหน้าใหม่ใช้อยู่
+- ขั้น 5: scripts/test_*.php ทั้งหมด (40 ไฟล์) ถูกอ้างอิงโดย scripts/php-db-tests.sh / php-unit-tests.sh; ไม่มีไฟล์ orphan; ทั้งหมดอยู่ใน scripts/ (นอก web root public/) แล้ว → ไม่ต้องย้าย; เสนอแผน: ยืนยัน IIS site root = public/ (ปัจจุบันเป็น) และห้าม serve scripts/ (web.config hardened แล้ว)
+- ขั้น 6: เทส Playwright (e2e) รันกับฐานข้อมูลเดียวกับ production (cmms_tpt) — toggle is_active บัญชี e2e_* และ seed ข้อมูลจริง; เสนอแยก: สร้าง DB สำหรับเทส (เช่น cmms_tpt_test) + ตัวแปร env (DB_NAME_TEST / E2E_DB_NAME) + ชี้ php-db-tests.sh ไป scratch DB ที่แยก; ยังไม่ลงมือ
+- ขั้น 7: tsc PASS; design-audit PASS (0 fail/0 warn); Playwright 151 passed, 0 failed, 0 not run (workers=1, 5.5m); deploy 30/30 checks passed
+
+### (2) ยังไม่แก้และเหตุผล
+- Over-permission (API 200 แต่ role ไม่เห็นเมนู): reports.php (Operate/Foreman 200), repair.php (Viewer 200), pm_ical.php (Operate/User/Viewer/Officer 200), machine_bom/feedback/notifications_log/analytics/intelligence (role ต่ำกว่า) — เป็นข้อมูลอ่านได้ทั้งโรงงาน; รายงานแทนการปิดเอง รอตัดสิน (อาจกระทบ flow รายงาน/PM calendar)
+- global_search.php: ยังเปิดทุก role (scoped ตาม canPerm แล้ว) — ไม่กรองราคาอะไหล่ (ยังไม่มี spare_price ใน search)
+- pm_ical token-based external access: ยังใช้ session cookie — การเพิ่ม random token จะกระทบ flow
+- fetch ตรง 440 จุด: ไม่ย้ายทั้งหมด (เสี่ยงเปลี่ยน logic); ย้ายเฉพาะจุดใหม่ให้ใช้ตัวกลาง
+
+### (3) ให้ตัดสินใจ
+- Over-permission ข้างต้น: จะปิด ( stricter) หรือคงไว้ (UX ซ่อนเมนูพอ)? รายงานแทนการปิดเอง
+- User ควรเห็น repair ที่ assigned ให้ตัวเองด้วยหรือไม่ (ปัจจุบัน scope เฉพาะ created_by)
+- แยก DB สำหรับเทส: จะทำเมื่อไหร่ (มีค่าใช้จ่าย setup)
+
+### (4) ผลเทสทั้งชุดรอบเดียว
+- tsc --noEmit: PASS
+- python scripts/design-audit.py: PASS (0 fail / 0 warn)
+- Playwright: 151 passed, 0 failed, 0 not run (workers=1, NODE_OPTIONS=--max-old-space-size=4096, 5.5m)
+- test_approval_service.php: 31/31 PASS
+- Deploy: 30/30 checks passed
+
+### (5) BUILD_ID / commit
+- BUILD_ID: dTtE7rmEVxsJOQX7jqCt9
+- commit: c200eda2fccb6ab5e2bf546e6cc109154f1892c4
+- URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
