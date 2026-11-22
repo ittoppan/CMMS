@@ -256,3 +256,36 @@
 - commit: c54af46c3535f77655b3bf9c77f0a6b02f6d7659 (code/deploy); BUILD_ID fUjRm76EZLOo3AErkSQrS
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
 - e2e_* accounts: 0 active
+
+---
+
+## Phase 11 — ตัวดัก 401/403 ปลอดภัยต่อหน้าสาธารณะ (2026-11-22)
+
+### (1) แก้แล้ว
+- `frontend/components/ApiFetchInterceptor.tsx`:
+  - เพิ่มรายการยกเว้นหน้าสาธารณะ (path): `/login`, `/register`, `/repair/request`, `/repair-request`, `/my-repairs`, `/scan`, `/tv`, `/qr-sheet`, `/install`, `/change-password` → 401 บนหน้าเหล่านี้ไม่ redirect ไป `/login`
+  - เพิ่มรายการ endpoint สาธารณะ: `auth/login`, `health`, `asset_hub`, `csrf`, `line_register`, `my_repairs`, `repair_form_attachment`, `repair_video`, `user_lookup` → ไม่ redirect/toast ตามปกติ, response คงเดิม
+  - 401 จาก `auth/login` เอง (รหัสผ่านผิด) ไม่ redirect — ฟอร์มแสดงข้อความเดิม
+  - toast 403: จำกัดข้อความเดียวกันไม่เกินหนึ่งครั้งต่อ 10 วินาที (dedup)
+  - ยกเว้น toast สำหรับ endpoint ที่ "คาดว่าจะ 403 อยู่แล้ว": `my_permissions`, `menu_permissions`, `planning` (permission probe/feature gating) — caller จัดการเอง
+  - 403 บนหน้าสาธารณะไม่ toast
+- `docs/TESTING.md`: เพิ่มคำเตือนรันเทสนอกเวลาทำงาน, คำสั่งเปิด/ปิดบัญชี `e2e_*`, ตรวจ 0 active หลังรัน; บันทึกว่า globalSetup guard ข้าม (ไม่มี session table/last_activity)
+- Deploy ผ่าน `scripts/deploy-next.ps1` (30/30 checks passed)
+
+### (2) ยังไม่แก้และเหตุผล
+- แยกฐานข้อมูลเทส (`cmms_tpt_test`) ยังไม่ได้ชี้ Playwright ไปที่นั่น (ต้องมี backend ทดสอบแยก) — ตาม `docs/TESTING.md`
+- pm_ical token-based external access: ยังใช้ session cookie (ไม่เพิ่ม random token เพราะกระทบ flow)
+
+### (3) ให้ตัดสินใจ (เฉพาะที่ค้างจริง)
+- (ไม่มีรายการใหม่)
+
+### (4) ผลเทสทั้งชุดรอบเดียว
+- tsc --noEmit: PASS
+- python scripts/design-audit.py: PASS (0 fail / 0 warn)
+- Playwright: 166 passed, 0 failed, 0 not run (workers=1, NODE_OPTIONS=--max-old-space-size=4096, 6.2m)
+- e2e_* accounts: 0 active (ยืนยันแล้ว)
+
+### (5) BUILD_ID / commit
+- BUILD_ID: qqH9x4-PQXqfRTdXtPtDL
+- commit: 41e62e9d6cfb790a58bbebbd9942c481c6cb159f
+- URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
