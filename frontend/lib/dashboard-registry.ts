@@ -66,7 +66,7 @@ export const DASHBOARD_REGISTRY: DashboardItem[] = [
   { id: "shift-handover", group: "A", titleTh: "Shift Handover สรุปส่งกะ", titleEn: "Shift Handover", descriptionTh: "งานค้างส่งต่อ เหตุการณ์กะ เครื่องที่ต้องจับตา โน้ตส่งกะ", href: "/dashboard/shift-handover", perm: "dashboard", icon: CalendarClock, tier: 2, status: "ready" },
 
   // ---- กลุ่ม B ปฏิบัติการซ่อมบำรุง ----
-  { id: "pm-compliance", group: "B", titleTh: "PM Compliance & Planned vs Unplanned", titleEn: "PM Compliance", descriptionTh: "ทำทันกี่ % สัดส่วนงานตั้งรับต่องานแผน", href: "/pm_am", perm: "pm_am", icon: ClipboardCheck, tier: 1, status: "partial" },
+  { id: "pm-compliance", group: "B", titleTh: "PM Compliance & Planned vs Unplanned", titleEn: "PM Compliance", descriptionTh: "ทำทันกี่ % สัดส่วนงานตั้งรับต่องานแผน", href: "/dashboard/pm-compliance", perm: "dashboard", icon: ClipboardCheck, tier: 1, status: "ready" },
   { id: "breakdown-downtime", group: "B", titleTh: "Breakdown & Downtime", titleEn: "Breakdown & Downtime", descriptionTh: "เวลาหยุดเครื่องและสาเหตุ", href: "/reports/downtime", perm: "reports", icon: Activity, tier: 1, status: "ready" },
   { id: "maintenance-calendar", group: "B", titleTh: "Maintenance Calendar", titleEn: "Maintenance Calendar", descriptionTh: "ปฏิทินงานซ่อมบำรุง", href: "/planning/calendar", perm: "planning/calendar", icon: CalendarClock, tier: 2, status: "ready" },
   { id: "maintenance-planning", group: "B", titleTh: "Maintenance Planning", titleEn: "Maintenance Planning", descriptionTh: "วางแผนงานซ่อมบำรุง", href: "/planning", perm: "planning", icon: CalendarClock, tier: 2, status: "ready" },
