@@ -78,6 +78,16 @@ try {
             echo json_encode(['status' => 'error', 'message' => 'ประเภทไฟล์ไม่รองรับ (อนุญาต: ' . implode(', ', $ALLOWED_EXT) . ')'], JSON_UNESCAPED_UNICODE);
             exit;
         }
+        // ตรวจชนิดไฟล์จริงด้วย finfo (ไม่เชื่อ extension/MIME ที่ client ส่ง)
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = $finfo ? finfo_file($finfo, $_FILES['file']['tmp_name']) : '';
+        if ($finfo) finfo_close($finfo);
+        $ALLOWED_MIME = ['application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.oasis.opendocument.spreadsheet','application/msword','text/csv','text/plain','application/vnd.openxmlformats-officedocument.presentationml.presentation','application/zip','application/octet-stream'];
+        if ($mime !== '' && !in_array($mime, $ALLOWED_MIME, true)) {
+            http_response_code(415);
+            echo json_encode(['status' => 'error', 'message' => 'ชนิดไฟล์จริงไม่ตรงกับที่อนุญาต (' . $mime . ')'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         // ถ้าให้ code/rev/title มา → สร้างชื่อตามมาตรฐาน F-EN-xx REV.xx ชื่อ.ext
         $code  = trim((string)($_POST['code'] ?? ''));
