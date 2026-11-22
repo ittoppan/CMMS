@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
  * Breadcrumb — docs/DESIGN_SYSTEM.md §5 step 1 (small, muted).
  */
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="breadcrumb" className={cn("text-xs", className)} {...props} />;
+  return <nav aria-label="Breadcrumb" className={cn("text-xs", className)} {...props} />;
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
@@ -63,7 +63,7 @@ function BreadcrumbSeparator({
       className={cn("[&>svg]:size-3 text-muted-foreground/60", className)}
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? <span className="text-[var(--cmms-text-muted)]">/</span>}
     </li>
   );
 }
