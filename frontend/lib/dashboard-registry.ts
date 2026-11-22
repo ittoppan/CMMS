@@ -91,7 +91,7 @@ export const DASHBOARD_REGISTRY: DashboardItem[] = [
   // ---- กลุ่ม E ความปลอดภัย เอกสาร ระบบ ----
   { id: "technical-document-knowledge", group: "E", titleTh: "Technical Document & Knowledge", titleEn: "Knowledge", descriptionTh: "ศูนย์ความรู้", href: "/knowledge", perm: "knowledge", icon: FileText, tier: 2, status: "ready" },
   { id: "safety-compliance", group: "E", titleTh: "Safety & Compliance", titleEn: "Safety", descriptionTh: "ใบอนุญาตทำงานเสี่ยง", href: "/safety/work_permit", perm: "safety/work_permit", icon: ShieldAlert, tier: 2, status: "ready" },
-  { id: "data-quality-adoption", group: "E", titleTh: "Data Quality & System Adoption", titleEn: "Data Quality", descriptionTh: "ความครบถ้วนข้อมูลใบงาน + ผู้ใช้ที่ยังไม่ใช้ระบบ", href: "/dashboard/data-quality", perm: "dashboard", icon: Database, tier: 2, status: "planned" },
+  { id: "data-quality-adoption", group: "E", titleTh: "Data Quality & System Adoption", titleEn: "Data Quality", descriptionTh: "ความครบถ้วนข้อมูลใบงาน + ผู้ใช้ที่ยังไม่ใช้ระบบ", href: "/dashboard/data-quality", perm: "dashboard", icon: Database, tier: 2, status: "ready" },
   { id: "integration-system-health", group: "E", titleTh: "Integration & System Health", titleEn: "System Health", descriptionTh: "เฉพาะ Admin: สุขภาพระบบ", href: "/settings/health", perm: "system_health", icon: Settings, tier: 3, status: "ready" },
 
   // ---- กลุ่ม F วางแผนระยะหน้า ----
