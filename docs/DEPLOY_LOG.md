@@ -8,7 +8,7 @@
 | TmG1DPnVeuQzeN09b0p5F | 2b1a3fc5 — feat(settings): security hardening step 1 | บันทึกไว้ใน commit 055644b5 | ยังรวม asset detail 706006c8 อยู่แล้ว |
 | X2MVXatUUBEJyIa1pvHqR | b7f0c6e4 — feat(asset): asset detail redesign + permissions hardening | บันทึกไว้ใน commit 82962f54 | asset detail round 2 (BOM perm, QR minimal, tests 172) |
 | MR9mCmyk0xiqG3WCV7UAf | 4868b01b — fix(settings): hide secrets, public allowlist, login lockout | บันทึกไว้ใน c7746eb3; `frontend/.next/BUILD_ID` = MR9mCmyk0xiqG3WCV7UAf และ 4868b01b คือ HEAD ตอน build | settings ขั้น 1 (186 tests) — กำลังรันอยู่ก่อนงานรอบนี้ |
-| — (รอ deploy รอบนี้) | — | — | เติมหลัง deploy สำเร็จ |
+| htWEsqvUdXnCZgebfn3yN | c9dbb3fd — feat(settings): explicit allowlist, secret write guards, proxy-safe login delay | `logs/deploy-run.log` (Deploying BUILD_ID=…, OK live server serves BUILD_ID=…), build จาก worktree สะอาดที่ c9dbb3fd | งานรอบนี้: allowlist, secret write guard, login delay, interceptor, 213 e2e |
 
 ## ทำไม hash ถึงดูขัดกัน (ตรวจด้วย `git reflog -40`, `git log --oneline --graph -25`)
 

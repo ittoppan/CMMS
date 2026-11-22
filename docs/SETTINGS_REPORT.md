@@ -65,3 +65,34 @@
 - BUILD_ID: MR9mCmyk0xiqG3WCV7UAf
 - commit hash (step 1): 4868b01b
 - commit hash (deploy log): 9afd145e
+
+## รอบที่ 2 (ขั้น 1–6) — 2026-11-22
+
+### 1. แก้แล้ว
+- **DEPLOY_LOG**: เขียนใหม่เป็นตาราง BUILD_ID ↔ commit เดียวต่อแถว พร้อมหลักฐาน; อธิบายว่า hash ต่างกันเพราะ **amend + reset** (ไม่ใช่ rebase/squash) — TmG1 ที่เคยคู่กับ 4868b01b เป็นการบันทึกผิด (commit นั้นเกิดหลัง deploy)
+- **allowlist settings**: `src/helpers/api.php` กำหนดระดับ ก = 20 key (public), ข = 317 key (login ทุก role), นอกนั้น = Admin อัตโนมัติ; `apiSettingsAdminOnlyKey()` ใช้ allowlist นี้ (เดิมเป็น heuristic) — key ใหม่ในอนาคตจึงเป็น Admin โดยปริยาย
+- **secret write**: `settings.php`, `line_notify.php`, `email_notify.php` ไม่เขียนทับ secret เมื่อได้รับค่าว่างหรือค่า mask (เดิมกันเฉพาะ mask); ไม่มี DELETE ใน settings (405) จึงลบค่าไม่ได้จากการบันทึกปกติ; audit เก็บ old/new เป็น mask เท่านั้น
+- **login lockout**: วัดจริงแล้วทุกเส้นทาง (localhost และ IIS :8081) PHP เห็น REMOTE_ADDR เป็น `::1`/`127.0.0.1` และไม่มี X-Forwarded-For/Forwarded → ระบุ IP ผู้ใช้ไม่ได้. ปรับเป็นหน่วงเวลาทวีคูณต่อ username (1,2,4,… สูงสุด 60 วิ) และ **ตัดเพดาน 10 ครั้ง/ชั่วโมงต่อ username เมื่อ IP ไม่ยืนยัน** (เดิมเป็นช่อง DoS ที่ล็อกบัญชีทั้งชั่วโมง) — ล็อกเต็ม 15 นาทียังใช้เฉพาะเมื่อ IP จริงระบุได้; บัญชีที่ไม่มีจริงนับและตอบเหมือนบัญชีจริง; สำเร็จล้างตัวนับ
+- **interceptor**: เพิ่ม `settings`/`settings.php` ในรายการ endpoint สาธารณะของ `ApiFetchInterceptor`
+- **เทสใหม่ 28**: allowlist/feature-read (8), secret write ก–ง (ฝังในชุดเดียวกัน), lockout (5), LOTO matrix 11 ตัว, interceptor (4) + fixture `frontend/tests/e2e/fixtures/security-probe.php` (สร้าง/ลบ key `e2e_probe_*` เอง)
+
+### 2. ยังไม่แก้และเหตุผล
+- **zrok**: ตรวจไม่ได้ — process zrok2 รันอยู่แต่ service ล่ม (log: DNS ไม่พบ host และ TLS certificate ไม่ถูกต้องสำหรับ netfoundry.io) จึงวัด REMOTE_ADDR ผ่าน zrok ไม่ได้; บันทึกผลวัดเฉพาะ localhost/IIS
+- **secret rotation**: ไม่ได้หมุนค่าใด ๆ ตามกติกา (ทดสอบด้วย key `e2e_probe_*` เท่านั้น)
+- **ไฟล์ `docs/phase7_read_raw.json`, `docs/security_matrix_raw.json`**: เป็น artifact ที่สคริปต์เทสเขียนทับทุกครั้ง ผลต่างกันทั้งสองทิศทาง (200↔403) ตามลำดับการรัน — คืนค่าเป็น HEAD เพื่อไม่ให้ commit ปนกับงานนี้
+- **LOTO/สิทธิ์อื่น**: `canApproveType()` ตรงสเปกอยู่แล้ว (loto/spare_issue/pm = Foreman+; repair/requisition/work_permit = Manager+) — ไม่แก้โค้ด เพิ่มเทสยืนยัน
+
+### 3. ให้ตัดสินใจ
+- ไม่มีรายการค้างที่ต้องตัดสินใจในรอบนี้; รอคำสั่งเรื่องการหมุน secret จริงผ่านหน้า /settings และ /settings/notifications
+
+### 4. ผลเทสทั้งชุด (รอบเดียว)
+- `tsc --noEmit`: PASS (0 errors)
+- `python scripts/design-audit.py`: PASS (0 FAIL, 0 WARN, 265 หน้า)
+- Playwright ทั้งชุด: **213 passed, 0 failed, 0 not run** (ก่อนงานรอบนี้ suite มี 185 — รายงานรอบก่อนบันทึก 186 ซึ่ง reproduces ไม่ได้; เทสใหม่ 28 ตัว)
+- ข้อมูลทดสอบ: `e2e_probe_*` settings = 0, E2E-LOTO = 0, audit probe = 0, `e2e_*` active = 0
+- git status: สะอาดก่อน deploy; deploy 30/30 checks
+
+### 5. BUILD_ID และ commit hash จริงของรุ่นที่ deploy
+- BUILD_ID: **htWEsqvUdXnCZgebfn3yN**
+- commit: **c9dbb3fd** (feat(settings): explicit allowlist, secret write guards, proxy-safe login delay), tree สะอาดตอน build
+- ตรวจหลัง deploy: /login /repair /repair/request /pm_am /spare_parts /dashboard /settings /asset_registry /asset_registry/view?id=91 = 200 ทุกตัว; JS chunk `/_next/static/chunks/3w6hr1d8ttui-.js` = 200 application/javascript
