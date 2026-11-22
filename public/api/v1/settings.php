@@ -99,9 +99,10 @@ try {
             if (!is_array($data)) { api_fail(400, 'VALIDATION_ERROR', 'ข้อมูลไม่ถูกต้อง'); }
             $id = $method === 'PUT' ? (int)($_GET['id'] ?? 0) : 0;
 
-            // ค่าลับที่ยังเป็น mask (••••••••) ใน payload = ผู้ใช้ไม่ได้ตั้งค่าใหม่ → ข้าม
+            // ค่าลับที่ยังเป็น mask (••••••••) หรือเว้นว่างใน payload = ผู้ใช้ไม่ได้ตั้งค่าใหม่ → ข้าม
+            // (กันการบันทึกหน้าตั้งค่าปกติทับ secret เดิมด้วยค่าว่าง; การลบค่าต้องเป็นคำสั่งแยกที่ยืนยันแล้ว)
             $skipMasked = function (string $key, $val) {
-                return apiIsSecretKey($key) && (string)$val === SETTING_MASKED;
+                return apiIsSecretKey($key) && ((string)$val === SETTING_MASKED || trim((string)$val) === '');
             };
 
             if ($method === 'PUT') {

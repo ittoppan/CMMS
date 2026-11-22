@@ -41,6 +41,8 @@ const PUBLIC_ENDPOINTS = new Set([
   "user_lookup.php",
   "login",
   "login.php",
+  "settings",
+  "settings.php",
 ]);
 
 // endpoint ที่ "คาดว่าจะ 403 อยู่แล้ว" (เช็คสิทธิ์ล่วงหน้า / feature probe) —

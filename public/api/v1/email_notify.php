@@ -150,8 +150,8 @@ try {
             ];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, EMAIL_SETTING_KEYS, true)) continue;
-                // mask ที่ UI ส่งกลับคืน = ผู้ใช้ไม่ได้ตั้ง password ใหม่ → ข้าม
-                if (apiIsSecretKey((string)$k) && (string)$v === SETTING_MASKED) continue;
+                // mask หรือค่าว่างที่ UI ส่งกลับคืน = ผู้ใช้ไม่ได้ตั้ง password ใหม่ → ข้าม
+                if (apiIsSecretKey((string)$k) && ((string)$v === SETTING_MASKED || trim((string)$v) === '')) continue;
                 $upsert->execute([$k, (string)$v, $desc[$k] ?? '']);
                 $count++;
             }

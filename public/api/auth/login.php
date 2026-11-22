@@ -35,7 +35,9 @@ try {
     }
 
     /* ---------- Rate limit / lockout (helper กลาง: iot_rate_check) ----------
-     * - ต่อ username: 10 ครั้ง/ชั่วโมง (ด่านหลักกันเดารหัสของบัญชีเดียว)
+     * - ต่อ username: 10 ครั้ง/ชั่วโมง — เฉพาะเมื่อระบุ IP จริงได้ (กันเดารหัสบัญชีเดียว)
+     *   ถ้า IP เป็น loopback/proxy (ระบุตัวผู้ใช้ไม่ได้) จะไม่ใช้เพดานนี้ เพราะจะกลายเป็น
+     *   ช่อง DoS ที่ล็อกบัญชีทั้งชั่วโมง — ใช้ตัวหน่วงเวลาแบบทวีคูณด้านล่างแทน
      * - ต่อ IP: 1000 ครั้ง/ชั่วโมง — เพดานสูงตั้งใจ เพราะเบราว์เซอร์เรียกผ่าน Next
      *   proxy (/api/login → 127.0.0.1) ทำให้ PHP เห็น REMOTE_ADDR เป็น loopback
      *   เดียวกันทุกคน; ใช้ดัก brute-force ที่ยิงเข้า PHP ตรง ๆ
@@ -46,8 +48,14 @@ try {
     $uma = 'login_user:' . mb_strtolower(mb_substr($username, 0, 60));
     $ipKey = 'login_ip:' . $clientIp;
     $retryAfterMin = max(1, 60 - (int)date('i'));
+    $hasRealIp = !in_array($clientIp, ['127.0.0.1', '::1', 'unknown'], true);
 
-    foreach ([[$uma, 10], [$ipKey, 1000]] as [$scopeKey, $limit]) {
+    // เพดาน hourly ต่อ username ใช้เฉพาะเมื่อรู้ IP จริง — ถ้าทุกคำขอมาจาก proxy/loopback
+    // เพดานนี้จะกลายเป็นช่อง DoS (ยิงผิด 10 ครั้ง = ล็อกบัญชีนั้นทั้งชั่วโมง แม้ใส่รหัสถูก)
+    // กรณี IP ไม่ยืนยัน: ปล่อยให้ตัวหน่วงเวลาแบบทวีคูณด้านล่างเป็นด่านแทน
+    $rateLimits = $hasRealIp ? [[$uma, 10], [$ipKey, 1000]] : [[$ipKey, 1000]];
+
+    foreach ($rateLimits as [$scopeKey, $limit]) {
         $rl = iot_rate_check($pdo, $scopeKey, $limit, $retryAfterMin);
         if (!empty($rl['ok'])) {
             continue;
@@ -75,16 +83,34 @@ try {
     $minute = (int)date('i');
     $bucketMin = (int)(floor($minute / 15) * 15);
     $lockBucket = date('Y-m-d H:') . sprintf('%02d', $bucketMin) . ':00';
+
     try {
-        $lst = $pdo->prepare('SELECT event_count FROM iot_rate_limits WHERE scope_key = ? AND window_start = ?');
+        $lst = $pdo->prepare('SELECT event_count, updated_at FROM iot_rate_limits WHERE scope_key = ? AND window_start = ?');
         $lst->execute([$lockScope, $lockBucket]);
-        $lockCount = (int)$lst->fetchColumn();
+        $lrow = $lst->fetch();
+        $lockCount = (int)($lrow['event_count'] ?? 0);
+        $lockUpdated = $lrow['updated_at'] ?? null;
         if ($lockCount >= $maxLoginAttempts) {
-            audit_log($pdo, 'LOGIN_LOCKED', 'auth', $username, 'ปฏิเสธการเข้าสู่ระบบ: ล็อกชั่วคราว (เกินจำนวนครั้งที่อนุญาต)', null, ['scope' => $lockScope], 'security');
-            header('Retry-After: 900');
-            http_response_code(429);
-            echo json_encode(['error' => 'พยายามเข้าสู่ระบบหลายครั้งเกินกำหนด กรุณารอ 15 นาทีแล้วลองใหม่', 'code' => 'ACCOUNT_LOCKED', 'retry_after_min' => 15], JSON_UNESCAPED_UNICODE);
-            exit;
+            if ($hasRealIp) {
+                audit_log($pdo, 'LOGIN_LOCKED', 'auth', $username, 'ปฏิเสธการเข้าสู่ระบบ: ล็อกชั่วคราว (เกินจำนวนครั้งที่อนุญาต)', null, ['scope' => $lockScope], 'security');
+                header('Retry-After: 900');
+                http_response_code(429);
+                echo json_encode(['error' => 'พยายามเข้าสู่ระบบหลายครั้งเกินกำหนด กรุณารอ 15 นาทีแล้วลองใหม่', 'code' => 'ACCOUNT_LOCKED', 'retry_after_min' => 15], JSON_UNESCAPED_UNICODE);
+                exit;
+            } else {
+                $over = $lockCount - $maxLoginAttempts + 1;
+                $delay = min(60, (int)pow(2, max(0, $over - 1)));
+                $lastTs = $lockUpdated ? strtotime((string)$lockUpdated) : 0;
+                $elapsed = time() - (int)$lastTs;
+                if ($elapsed < $delay) {
+                    $wait = $delay - $elapsed;
+                    audit_log($pdo, 'LOGIN_DELAYED', 'auth', $username, 'หน่วงเวลาการเข้าสู่ระบบ (IP ไม่ยืนยัน)', null, ['scope' => $lockScope, 'delay' => $delay], 'security');
+                    header('Retry-After: ' . $wait);
+                    http_response_code(429);
+                    echo json_encode(['error' => 'พยายามเข้าสู่ระบบหลายครั้งเกินกำหนด กรุณารอ ' . $wait . ' วินาทีแล้วลองใหม่', 'code' => 'ACCOUNT_DELAYED', 'retry_after_sec' => $wait], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
         }
     } catch (Throwable $e) {
         error_log('[login.php] lockout check failed: ' . $e->getMessage());
