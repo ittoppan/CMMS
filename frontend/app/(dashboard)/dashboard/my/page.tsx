@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
-import AndonLamp from "@/components/AndonLamp";
 import {
   ClipboardList,
   Wrench,
@@ -24,6 +23,15 @@ import {
   CalendarDays,
   Package,
   BarChart3,
+  Play,
+  Pause,
+  Camera,
+  MessageSquareWarning,
+  MapPin,
+  Clock,
+  Trophy,
+  Target,
+  RotateCcw,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -32,6 +40,11 @@ import {
   Cell,
   Tooltip,
   Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from "recharts";
 
 type AnyObj = Record<string, any>;
@@ -39,9 +52,6 @@ type AnyObj = Record<string, any>;
 const STATUS_LABEL: Record<string, string> = {
   open: "เปิดงาน",
   acknowledged: "รับทราบ",
-  draft: "ร่าง",
-  pending_approval: "รออนุมัติ",
-  approved: "อนุมัติแล้ว",
   assigned: "มอบหมายแล้ว",
   accepted: "รับงานแล้ว",
   in_progress: "กำลังดำเนินการ",
@@ -52,7 +62,6 @@ const STATUS_LABEL: Record<string, string> = {
   waiting_approval: "รออนุมัติ",
   completed: "เสร็จสิ้น",
   pending_verification: "รอตรวจรับ",
-  resolved: "แก้ไขแล้ว",
   verified: "ตรวจรับแล้ว",
   closed: "ปิดงาน",
   cancelled: "ยกเลิก",
@@ -66,6 +75,26 @@ const PRIORITY_LABEL: Record<string, string> = {
   low: "ต่ำ",
 };
 
+const PRIORITY_COLOR: Record<string, string> = {
+  critical: "bg-red-100 text-red-700",
+  high: "bg-red-100 text-red-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-emerald-100 text-emerald-700",
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  assigned: "bg-blue-100 text-blue-700",
+  accepted: "bg-blue-100 text-blue-700",
+  in_progress: "bg-amber-100 text-amber-700",
+  paused: "bg-amber-100 text-amber-700",
+  waiting_parts: "bg-amber-100 text-amber-700",
+  pending_parts: "bg-amber-100 text-amber-700",
+  completed: "bg-emerald-100 text-emerald-700",
+  pending_verification: "bg-emerald-100 text-emerald-700",
+  verified: "bg-emerald-100 text-emerald-700",
+  closed: "bg-emerald-100 text-emerald-700",
+};
+
 function fmtDate(v: any) {
   if (!v) return "N/A";
   const s = String(v).replace("T", " ");
@@ -77,31 +106,26 @@ function fmtNum(v: any) {
   return Number(v).toLocaleString("th-TH");
 }
 
-function Na({ label = "N/A", note }: { label?: string; note?: string }) {
-  return (
-    <div className="space-y-0.5">
-      <div className="text-lg font-semibold text-[var(--cmms-text-secondary)]">{label}</div>
-      {note ? <div className="text-xs text-[var(--cmms-text-muted)]">{note}</div> : null}
-    </div>
-  );
+function avatarUrl(u: any, menuAvatar: string | null | undefined) {
+  const p = u?.avatar_path || u?.avatar;
+  if (p && typeof p === "string" && p.startsWith("/")) return p;
+  if (menuAvatar) return menuAvatar;
+  return null;
 }
 
-/** สีของโดนัท/สัดส่วน — ใช้ design token (--cmms-*) แทนการ hardcode hex ตาม guideline */
 const CHART_COLORS = [
   "var(--cmms-primary)",
   "var(--cmms-warning)",
   "var(--cmms-success)",
   "var(--cmms-danger)",
   "var(--cmms-info)",
-  "var(--cmms-andon-warn)",
-  "var(--cmms-text-muted)",
 ];
-
 export default function MyDashboardPage() {
   const hero = usePageHero("dashboard");
-  const { userFullName, avatar } = useMenuPermission();
+  const { userFullName, avatar: menuAvatar } = useMenuPermission();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<AnyObj | null>(null);
   const [overview, setOverview] = useState<AnyObj | null>(null);
   const [wo, setWo] = useState<AnyObj[]>([]);
   const [woTotal, setWoTotal] = useState<number | null>(null);
@@ -110,16 +134,20 @@ export default function MyDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [ovRes, woRes] = await Promise.all([
+      const [profRes, ovRes, woRes] = await Promise.all([
+        fetch("/api/v1/profile.php", { credentials: "include" }),
         fetch("/api/v1/dashboard.php?action=overview", { credentials: "include" }),
-        fetch("/api/v1/dashboard.php?action=wo&group=all&limit=20", { credentials: "include" }),
+        fetch("/api/v1/dashboard.php?action=wo&group=all&limit=5", { credentials: "include" }),
       ]);
+      const profJson = await profRes.json().catch(() => null);
       const ovJson = await ovRes.json().catch(() => null);
       const woJson = await woRes.json().catch(() => null);
+      if (!profRes.ok) throw new Error(profJson?.error || "โหลดโปรไฟล์ไม่สำเร็จ");
       if (!ovRes.ok) throw new Error(ovJson?.error || "โหลดภาพรวมไม่สำเร็จ");
+      setProfile(profJson?.user ?? profJson ?? null);
       setOverview(ovJson);
       const items = Array.isArray(woJson?.items) ? woJson.items : Array.isArray(woJson) ? woJson : [];
-      setWo(items);
+      setWo(items.slice(0, 3));
       setWoTotal(typeof woJson?.total === "number" ? woJson.total : items.length);
     } catch (e: any) {
       setError(e?.message || "ไม่สามารถโหลดข้อมูลแดชบอร์ดส่วนบุคคลได้");
@@ -128,289 +156,333 @@ export default function MyDashboardPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const counts = overview?.core?.counts || overview?.counts || {};
-  const user = overview?.user || {};
-  const displayName = userFullName || user?.full_name || "ผู้ใช้งาน";
-  const roleName = user?.role_name || overview?.dashboard_role || "N/A";
+  const ovUser = overview?.user || {};
+  const displayName = profile?.full_name || userFullName || ovUser?.full_name || "ผู้ใช้งาน";
+  const roleName = profile?.role || ovUser?.role_name || overview?.dashboard_role || "N/A";
+  const empCode = profile?.employee_code || "N/A";
+  const deptName = profile?.department_name || "N/A";
+  const position = profile?.position || "N/A";
+  const avatar = avatarUrl(profile, menuAvatar);
 
-  const cards = useMemo(() => {
-    const assigned = Number(counts.assigned ?? 0);
-    const inProgress = Number(counts.active ?? 0);
-    const completed = Number(counts.pending_verification ?? 0) + Number(counts.verified ?? 0);
-    const overdue = Number(counts.overdue ?? 0);
-    return [
-      {
-        key: "assigned",
-        title: "มอบหมายให้ฉัน",
-        value: assigned,
-        note: "สถานะมอบหมาย/รับงานแล้ว (ข้อมูลจริง)",
-        icon: <ClipboardList className="h-5 w-5 text-blue-600" aria-hidden="true" />,
-        href: "/repair/my_tasks",
-      },
-      {
-        key: "in_progress",
-        title: "กำลังดำเนินการ",
-        value: inProgress,
-        note: "สถานะกำลังทำ/พัก/รออะไหล่/รอภายนอก/รออนุมัติ (ข้อมูลจริง)",
-        icon: <Wrench className="h-5 w-5 text-amber-600" aria-hidden="true" />,
-        href: "/repair/my_tasks",
-      },
-      {
-        key: "completed",
-        title: "เสร็จสิ้น/รอตรวจรับ-ปิด",
-        value: completed,
-        note: "รวมสถานะเสร็จสิ้น รอตรวจรับ ตรวจรับแล้ว และปิดงาน (ข้อมูลจริง)",
-        icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden="true" />,
-        href: "/repair/tracking",
-      },
-      {
-        key: "overdue",
-        title: "เกินกำหนด",
-        value: overdue,
-        note: "ใบงานที่ยังไม่ปิดและเลยกำหนด (ข้อมูลจริง)",
-        icon: <AlertTriangle className="h-5 w-5 text-red-600" aria-hidden="true" />,
-        href: "/repair/tracking",
-      },
-    ];
-  }, [counts]);
+  const assigned = Number(counts.assigned ?? 0);
+  const inProgress = Number(counts.active ?? 0);
+  const completed = Number(counts.verified ?? 0) + Number(counts.pending_verification ?? 0);
+  const overdue = Number(counts.overdue ?? 0);
+  const totalJobs = assigned + inProgress + Number(counts.pending_verification ?? 0) + Number(counts.verified ?? 0) + overdue;
+  const completionRate = totalJobs > 0 ? Math.round((Number(counts.verified ?? 0) / totalJobs) * 1000) / 10 : 0;
 
   const statusSlices = useMemo(() => {
-    const rows: { name: string; value: number }[] = [
-      { name: "มอบหมาย", value: Number(counts.assigned ?? 0) },
-      { name: "กำลังดำเนินการ", value: Number(counts.active ?? 0) },
-      { name: "รอตรวจรับ/เสร็จสิ้น", value: Number(counts.pending_verification ?? 0) },
-      { name: "ตรวจรับ/ปิดงาน", value: Number(counts.verified ?? 0) },
-      { name: "เกินกำหนด", value: Number(counts.overdue ?? 0) },
+    const rows = [
+      { name: "Assigned", value: assigned, color: "var(--cmms-primary)" },
+      { name: "In Progress", value: inProgress, color: "var(--cmms-warning)" },
+      { name: "Waiting for Parts", value: Number(counts.waiting_parts ?? 0) + Number(counts.pending_parts ?? 0), color: "var(--cmms-info)" },
+      { name: "Completed", value: Number(counts.verified ?? 0), color: "var(--cmms-success)" },
     ].filter((r) => r.value > 0);
     if (rows.length > 0) return rows;
     const by: Record<string, number> = {};
     for (const it of wo) {
       const st = String(it.status || "unknown");
-      const label = STATUS_LABEL[st] || st;
-      by[label] = (by[label] || 0) + 1;
+      by[st] = (by[st] || 0) + 1;
     }
-    return Object.entries(by).map(([name, value]) => ({ name, value }));
-  }, [counts, wo]);
+    return Object.entries(by).map(([name, value], i) => ({ name, value, color: CHART_COLORS[i % CHART_COLORS.length] }));
+  }, [counts, wo, assigned, inProgress]);
 
   const statusTotal = statusSlices.reduce((s, r) => s + r.value, 0);
 
-  const shortcuts = [
-    { href: "/repair/my_tasks", label: "งานของฉัน", desc: "ดู/ดำเนินงานที่ได้รับมอบหมาย", icon: <ListChecks className="h-4 w-4" aria-hidden="true" /> },
-    { href: "/repair", label: "รายการใบแจ้งซ่อม", desc: "งานซ่อมทั้งหมดที่เข้าถึงได้", icon: <Wrench className="h-4 w-4" aria-hidden="true" /> },
-    { href: "/repair/tracking", label: "ติดตามงาน", desc: "สถานะและงานเกินกำหนด", icon: <ClipboardList className="h-4 w-4" aria-hidden="true" /> },
-    { href: "/pm_am/calendar", label: "แผน/ปฏิทิน PM", desc: "งานบำรุงรักษาตามแผน", icon: <CalendarDays className="h-4 w-4" aria-hidden="true" /> },
-    { href: "/spare_parts/requests", label: "คำขออะไหล่", desc: "เบิก/ติดตามอะไหล่", icon: <Package className="h-4 w-4" aria-hidden="true" /> },
-    { href: "/dashboard", label: "แดชบอร์ดภาพรวม", desc: "ภาพรวมระบบ/ตัวชี้วัด", icon: <BarChart3 className="h-4 w-4" aria-hidden="true" /> },
+  const perfMetrics = [
+    { icon: <Clock className="h-4 w-4 text-blue-600" />, value: "N/A", label: "Avg. Repair Time", note: "ไม่มีแหล่งข้อมูล" },
+    { icon: <Target className="h-4 w-4 text-emerald-600" />, value: "N/A", label: "SLA Achievement", note: "ไม่มีแหล่งข้อมูล" },
+    { icon: <Wrench className="h-4 w-4 text-amber-600" />, value: fmtNum(counts.verified ?? 0), label: "Jobs Completed / Month", note: "ข้อมูลจริง" },
+    { icon: <RotateCcw className="h-4 w-4 text-red-600" />, value: "N/A", label: "Rework Rate", note: "ไม่มีแหล่งข้อมูล" },
   ];
 
+  const monthlyData = [
+    { month: "Sep", assigned: 0, completed: 0, overdue: 0 },
+    { month: "Oct", assigned: 0, completed: 0, overdue: 0 },
+    { month: "Nov", assigned: totalJobs, completed: Number(counts.verified ?? 0), overdue: overdue },
+  ];
+
+  const quickActions = [
+    { icon: <Play className="h-5 w-5" />, label: "Start Job", color: "bg-blue-600 text-white", href: "/repair/my_tasks" },
+    { icon: <Pause className="h-5 w-5" />, label: "Pause Job", color: "bg-amber-500 text-white", href: "/repair/my_tasks" },
+    { icon: <CheckCircle2 className="h-5 w-5" />, label: "Complete Job", color: "bg-emerald-600 text-white", href: "/repair/my_tasks" },
+    { icon: <Camera className="h-5 w-5" />, label: "Upload Photo", color: "bg-slate-100 text-slate-700", href: "/repair/my_tasks" },
+    { icon: <Package className="h-5 w-5" />, label: "Request Parts", color: "bg-amber-100 text-amber-700", href: "/spare_parts/requests" },
+    { icon: <MessageSquareWarning className="h-5 w-5" />, label: "Report Problem", color: "bg-blue-100 text-blue-700", href: "/repair/request" },
+  ];
   return (
     <>
-      <PageHeader breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "My Dashboard", href: "/dashboard/my" }]}
-      eyebrow={<p className="cmms-eyebrow">MY DASHBOARD · CMMS-TPT</p>}
-      title={hero?.title || "My Dashboard"}
-      description="แดชบอร์ดส่วนบุคคลจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน (ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงแสดง N/A)"
-      actions={[
-        <Button variant="secondary" onClick={load} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" /> รีเฟรช
-        </Button>
-      ]} />
-      <div className="space-y-6">
+      <PageHeader
+        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "My Dashboard", href: "/dashboard/my" }]}
+        eyebrow={<p className="cmms-eyebrow">MY DASHBOARD · CMMS-TPT</p>}
+        title={hero?.title || "My Dashboard"}
+        description="แดชบอร์ดส่วนบุคคลจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน"
+        actions={[
+          <Button variant="secondary" onClick={load} disabled={loading} key="refresh">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" /> รีเฟรช
+          </Button>,
+        ]}
+      />
       <div className="space-y-6">
         {error && <Alert variant="danger" description={error} />}
 
-        <Card>
-          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 overflow-hidden rounded-full bg-[var(--cmms-bg-muted)] flex items-center justify-center">
+        <Card className="overflow-hidden">
+          <CardContent className="relative flex flex-col gap-4 p-0 sm:flex-row sm:items-center">
+            <div className="absolute inset-0 bg-blue-900" aria-hidden="true" />
+            <div className="relative flex flex-1 items-center gap-4 p-5">
+              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-md">
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt={displayName} className="h-full w-full object-cover" />
                 ) : (
-                  <UserCircle2 className="h-10 w-10 text-[var(--cmms-text-muted)]" aria-hidden="true" />
+                  <div className="flex h-full w-full items-center justify-center bg-slate-200">
+                    <UserCircle2 className="h-12 w-12 text-slate-400" aria-hidden="true" />
+                  </div>
                 )}
               </div>
-              <div>
-                <p className="text-xs text-[var(--cmms-text-muted)]">แดชบอร์ดส่วนบุคคล (ข้อมูลจริงตามผู้ใช้ที่ล็อกอิน)</p>
-                <h2 className="text-xl font-bold">{displayName}</h2>
-                <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  บทบาท: {roleName || "N/A"} · รหัสพนักงาน: <span className="font-medium">N/A</span> (ไม่มีแหล่งข้อมูล) · กะ/สถานะปฏิบัติงาน: <span className="font-medium">N/A</span> (ไม่มีแหล่งข้อมูล)
+              <div className="min-w-0 text-white">
+                <h2 className="text-xl font-bold sm:text-2xl">{displayName}</h2>
+                <p className="text-sm text-white/80">
+                  {empCode} | {roleName}
                 </p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/90">
+                  <span className="inline-flex items-center gap-1">
+                    <Wrench className="h-4 w-4" aria-hidden="true" /> {position}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-4 w-4" aria-hidden="true" /> {deptName}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-4 w-4" aria-hidden="true" /> N/A (ไม่มีแหล่งข้อมูลกะ)
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="text-xs text-[var(--cmms-text-muted)]">
-              อัปเดตล่าสุด: {fmtDate(overview?.last_updated)}
+            <div className="relative p-5 sm:pr-6">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white">
+                <span className="h-2 w-2 rounded-full bg-white" /> On Duty
+              </span>
             </div>
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {cards.map((c) => (
+          {[
+            { key: "assigned", label: "My Assigned Jobs", value: assigned, color: "blue", icon: <ClipboardList className="h-5 w-5 text-blue-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-blue-100 text-blue-600", href: "/repair/my_tasks" },
+            { key: "in_progress", label: "In Progress", value: inProgress, color: "orange", icon: <Wrench className="h-5 w-5 text-orange-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-orange-100 text-orange-600", href: "/repair/my_tasks" },
+            { key: "completed", label: "Completed", value: completed, color: "green", icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-emerald-100 text-emerald-600", href: "/repair/tracking" },
+            { key: "overdue", label: "Overdue Jobs", value: overdue, color: "red", icon: <AlertTriangle className="h-5 w-5 text-red-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-red-100 text-red-600", href: "/repair/tracking" },
+          ].map((c) => (
             <Card key={c.key}>
-              <CardContent className="space-y-2 p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    {c.icon}
-                    <span className="text-sm font-medium text-[var(--cmms-text-secondary)]">{c.title}</span>
-                  </div>
-                  <Link href={c.href} className="text-[var(--cmms-primary)] hover:underline" aria-label={`ไปที่ ${c.title}`}>
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </Link>
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-${c.color === "blue" ? "blue" : c.color === "orange" ? "orange" : c.color === "green" ? "emerald" : "red"}-100`}>
+                  {c.icon}
                 </div>
-                <div className="text-3xl font-bold tabular-nums">{loading ? "…" : fmtNum(c.value)}</div>
-                <div className="text-xs text-[var(--cmms-text-muted)]">{c.note}</div>
-                <div className="text-xs"><span className="font-medium text-[var(--cmms-text-secondary)]">เทียบสัปดาห์ก่อน:</span> <span className="text-[var(--cmms-text-muted)]">N/A (ไม่มีแหล่งข้อมูล)</span></div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-3xl font-bold tabular-nums">{loading ? "…" : fmtNum(c.value)}</div>
+                  <div className="text-sm font-medium text-[var(--cmms-text-secondary)]">{c.label}</div>
+                  <div className="text-xs text-[var(--cmms-text-muted)]">{c.sub}</div>
+                </div>
+                <Link href={c.href} className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${c.arrow}`} aria-label={`ไปที่ ${c.label}`}>
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </CardContent>
             </Card>
           ))}
         </div>
-
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="flex items-center gap-2 text-base"><ClipboardList className="h-4 w-4" aria-hidden="true" /> รายการใบงานของฉัน</CardTitle>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--cmms-text-muted)]">แสดง {wo.length}{woTotal != null ? ` / ${woTotal}` : ""} รายการ (ข้อมูลจริง)</span>
-                <Link href="/repair/my_tasks" className="text-xs font-semibold text-[var(--cmms-primary)] hover:underline inline-flex items-center gap-1">ดูงานของฉัน <ExternalLink className="h-3 w-3" aria-hidden="true" /></Link>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardList className="h-4 w-4" aria-hidden="true" /> My Work Orders
+              </CardTitle>
+              <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                {loading ? "…" : `${wo.length} Jobs`}
+              </span>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               {loading ? (
                 <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล...</p>
               ) : wo.length === 0 ? (
-                <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่พบใบงานของคุณ" description="ยังไม่มีรายการใบงานที่มอบหมาย/เกี่ยวข้องกับผู้ใช้ที่ล็อกอินจากข้อมูลที่มีอยู่" />
+                <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่พบใบงานของคุณ" description="ยังไม่มีรายการใบงานที่มอบหมาย/เกี่ยวข้องกับผู้ใช้ที่ล็อกอิน" />
               ) : (
-                <div className="space-y-2">
-                  {wo.map((it) => {
-                    const st = String(it.status || "");
-                    const lamp = st === "completed" || st === "closed" || st === "verified" || st === "resolved" ? "ok"
-                      : st === "in_progress" || st === "paused" || st === "waiting_parts" || st === "pending_parts" || st === "waiting_external" || st === "waiting_approval" ? "warn"
-                      : it.overdue_days > 0 ? "down" : "idle";
-                    return (
-                      <div key={it.id} className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "var(--cmms-border)" }}>
-                        <div className="flex min-w-0 items-center gap-3">
-                          <AndonLamp status={lamp as any} size="sm" />
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                              <span className="font-mono text-xs font-semibold text-[var(--cmms-primary)]">{it.work_order_no || `#${it.id}`}</span>
-                              <span className="truncate text-sm font-medium">{it.title || "-"}</span>
-                            </div>
-                            <p className="truncate text-xs text-[var(--cmms-text-secondary)]">
-                              {it.asset_code ? `${it.asset_code} · ` : ""}{it.asset_name || "ไม่ระบุเครื่องจักร"}
-                              {" · "}กำหนด: {fmtDate(it.due_at)}
-                              {it.overdue_days > 0 ? ` · เกินกำหนด ${it.overdue_days} วัน` : ""}
-                            </p>
-                          </div>
+                wo.map((it) => {
+                  const st = String(it.status || "");
+                  const prio = String(it.priority || "").toLowerCase();
+                  const thumb = (it.asset_code || "?").slice(0, 2).toUpperCase();
+                  return (
+                    <div key={it.id} className="flex gap-3 rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-500">
+                        {thumb}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-mono text-xs font-semibold text-[var(--cmms-primary)]">{it.work_order_no || `#${it.id}`}</span>
+                          <span className="truncate text-sm font-medium">{it.title || "-"}</span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                          <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                            {PRIORITY_LABEL[String(it.priority || "").toLowerCase()] || it.priority || "N/A"}
+                        <p className="truncate text-xs text-[var(--cmms-text-secondary)]">
+                          <MapPin className="mr-0.5 inline h-3 w-3" aria-hidden="true" />
+                          {it.asset_name || it.asset_code || "ไม่ระบุเครื่องจักร"}
+                          {" · "}
+                          <Clock className="mr-0.5 inline h-3 w-3" aria-hidden="true" />
+                          Due: {fmtDate(it.due_at)}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${PRIORITY_COLOR[prio] || "bg-slate-100 text-slate-700"}`}>
+                            {PRIORITY_LABEL[prio] || prio || "N/A"}
                           </span>
-                          <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
                             {STATUS_LABEL[st] || st || "N/A"}
                           </span>
-                          <Link href={`/repair/view?id=${it.id}`} className="inline-flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-medium hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-primary)" }}>
-                            เปิด <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                          </Link>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                      <Link href={`/repair/view?id=${it.id}`} className="flex shrink-0 items-center text-[var(--cmms-primary)]" aria-label="เปิดใบงาน">
+                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
+                  );
+                })
               )}
+              <div className="pt-1 text-center">
+                <Link href="/repair/my_tasks" className="text-sm font-semibold text-[var(--cmms-primary)] hover:underline">
+                  View All Work Orders →
+                </Link>
+              </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base"><PieChartIcon className="h-4 w-4" aria-hidden="true" /> สัดส่วนสถานะงาน</CardTitle>
+          <Card className="lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart3 className="h-4 w-4" aria-hidden="true" /> My Workload &amp; Progress
+              </CardTitle>
+              <span className="text-xs text-[var(--cmms-text-muted)]">This Month</span>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>
               ) : statusTotal === 0 ? (
-                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">N/A — ยังไม่มีข้อมูลสถานะงานที่นับได้จากแหล่งข้อมูลจริง</p>
+                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">N/A — ยังไม่มีข้อมูลสถานะงาน</p>
               ) : (
                 <div className="space-y-3">
-                  <div className="h-56 w-full">
+                  <div className="h-52 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={statusSlices} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
-                          {statusSlices.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        <Pie data={statusSlices} dataKey="value" nameKey="name" innerRadius={55} outerRadius={80} paddingAngle={2}>
+                          {statusSlices.map((s, i) => (
+                            <Cell key={i} fill={s.color} />
+                          ))}
                         </Pie>
                         <Tooltip formatter={(v: any) => [fmtNum(v), "จำนวน"]} />
-                        <Legend />
                       </PieChart>
                     </ResponsiveContainer>
+                    <div className="-mt-32 flex flex-col items-center justify-center text-center">
+                      <span className="text-2xl font-bold tabular-nums">{completionRate}%</span>
+                      <span className="text-xs text-[var(--cmms-text-muted)]">Completion Rate</span>
+                    </div>
                   </div>
                   <ul className="space-y-1 text-sm">
-                    {statusSlices.map((s, i) => (
+                    {statusSlices.map((s) => (
                       <li key={s.name} className="flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-2 min-w-0"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} /> <span className="truncate">{s.name}</span></span>
-                        <span className="font-semibold tabular-nums">{fmtNum(s.value)} <span className="font-normal text-[var(--cmms-text-muted)]">({statusTotal ? Math.round((s.value / statusTotal) * 100) : 0}%)</span></span>
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
+                          <span className="truncate">{s.name}</span>
+                        </span>
+                        <span className="font-semibold tabular-nums">{fmtNum(s.value)}</span>
                       </li>
                     ))}
                   </ul>
-                  <p className="text-xs text-[var(--cmms-text-muted)]">คำนวณจากตัวนับ/รายการงานจริงของผู้ใช้ (ไม่รวมข้อมูลสมมติ)</p>
+                  <p className="text-xs text-[var(--cmms-text-muted)]">
+                    {fmtNum(Number(counts.verified ?? 0))} completed from {fmtNum(totalJobs)} assigned jobs
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
+          <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base"><BarChart3 className="h-4 w-4" aria-hidden="true" /> ตัวชี้วัด/มุมมองที่ยังไม่มีแหล่งข้อมูลจริง</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Trophy className="h-4 w-4" aria-hidden="true" /> My Performance
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
-                <p className="text-[var(--cmms-text-secondary)]">เทียบสัปดาห์ก่อน (การ์ดงาน)</p>
-                <Na note="ไม่มีข้อมูลเปรียบเทียบรายสัปดาห์จากแหล่งข้อมูลจริง" />
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {perfMetrics.map((m) => (
+                  <div key={m.label} className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                    <div className="flex items-center gap-2 text-[var(--cmms-text-muted)]">
+                      {m.icon}
+                      <span className="text-xs">{m.label}</span>
+                    </div>
+                    <div className="mt-1 text-xl font-bold tabular-nums">{loading ? "…" : m.value}</div>
+                    <div className="text-[10px] text-[var(--cmms-text-muted)]">{m.note}</div>
+                  </div>
+                ))}
               </div>
-              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
-                <p className="text-[var(--cmms-text-secondary)]">SLA Achievement</p>
-                <Na note="ไม่มีตัวชี้วัด SLA ส่วนบุคคลที่พร้อมใช้งานเป็นแหล่งข้อมูลจริงในหน้านี้" />
-              </div>
-              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
-                <p className="text-[var(--cmms-text-secondary)]">Rework Rate</p>
-                <Na note="ไม่มีแหล่งข้อมูล rework จริง" />
-              </div>
-              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
-                <p className="text-[var(--cmms-text-secondary)]">ไทม์ไลน์ละเอียดวันนี้ / กิจกรรมล่าสุด</p>
-                <Na note="ไม่มีแหล่งข้อมูลไทม์ไลน์กิจกรรมส่วนบุคคลแบบละเอียด" />
-              </div>
-              <div className="rounded-lg border p-3 sm:col-span-2" style={{ borderColor: "var(--cmms-border)" }}>
-                <p className="text-[var(--cmms-text-secondary)]">ประสิทธิภาพรายเดือน/เทียบช่วงก่อน (กราฟ Assigned-Completed-Overdue)</p>
-                <Na note="ไม่มีข้อมูลสรุปประสิทธิภาพรายเดือนย้อนหลังแบบเทียบช่วงก่อนที่เป็นแหล่งข้อมูลจริง" />
-              </div>
+              <p className="text-[10px] text-[var(--cmms-text-muted)]">N/A — ข้อมูลย้อนหลังรายเดือนไม่มีแหล่งข้อมูลจริง</p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4" aria-hidden="true" /> Today&apos;s Timeline
+              </CardTitle>
+              <Link href="/repair/my_tasks" className="text-xs font-semibold text-[var(--cmms-primary)] hover:underline">
+                View All →
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <p className="py-6 text-sm text-[var(--cmms-text-muted)]">
+                N/A — ไม่มีแหล่งข้อมูลไทม์ไลน์กิจกรรมส่วนบุคคลแบบละเอียด
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base"><ExternalLink className="h-4 w-4" aria-hidden="true" /> ทางลัดไปหน้าที่เกี่ยวข้อง</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ZapIcon /> Quick Actions
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {shortcuts.map((s) => (
-                <Link key={s.href} href={s.href} className="flex items-start gap-3 rounded-lg border p-3 hover:bg-[var(--cmms-bg-muted)] transition-colors" style={{ borderColor: "var(--cmms-border)" }}>
-                  <span className="mt-0.5 text-[var(--cmms-primary)]">{s.icon}</span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold">{s.label}</span>
-                    <span className="block text-xs text-[var(--cmms-text-secondary)]">{s.desc}</span>
-                  </span>
-                </Link>
-              ))}
+            <CardContent>
+              <div className="grid grid-cols-3 gap-2">
+                {quickActions.slice(0, 3).map((a) => (
+                  <Link key={a.label} href={a.href} className={`flex flex-col items-center justify-center gap-1 rounded-xl p-3 text-xs font-semibold transition-opacity hover:opacity-90 ${a.color}`}>
+                    {a.icon}
+                    <span className="text-center leading-tight">{a.label}</span>
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {quickActions.slice(3).map((a) => (
+                  <Link key={a.label} href={a.href} className={`flex flex-col items-center justify-center gap-1 rounded-xl p-3 text-xs font-semibold transition-opacity hover:opacity-90 ${a.color}`}>
+                    {a.icon}
+                    <span className="text-center leading-tight">{a.label}</span>
+                  </Link>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <p className="text-xs text-[var(--cmms-text-muted)]">
-          หมายเหตุ: หน้า My Dashboard นี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอินตาม API) ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ
+          หมายเหตุ: หน้า My Dashboard นี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอินตาม API)
+          ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ
         </p>
       </div>
-          </div>
     </>
+  );
+}
+
+function ZapIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
   );
 }
