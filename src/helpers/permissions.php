@@ -175,6 +175,7 @@ const PERMISSION_MATRIX = [
         'lubrication'   => ['write'],
         'failure'    => ['view', 'investigate', 'actions'],
         'safety'     => ['view', 'edit', 'execute'],
+        'contractor' => ['view'],
         'engineering_change' => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],

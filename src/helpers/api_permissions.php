@@ -134,7 +134,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'system_services.php'        => ['read' => ['settings', 'manage'],    'write' => ['settings', 'manage']],
     'ngrok.php'                  => ['read' => ['settings', 'manage'],    'write' => ['settings', 'manage']],
     'line_notify.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
-    'facility_layout.php'        => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    'facility_layout.php'        => ['read' => ['asset', 'view'],          'write' => ['settings', 'manage']],
     'email_notify.php'           => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'audit_logs.php'             => ['read' => ['audit_log', 'view'],     'write' => null],
     'sage_items.php'             => ['read' => ['sage', 'view'],          'write' => null],
