@@ -284,3 +284,61 @@ Gently rounded and machined: radius reads as component edges you can snap togeth
 - **Don't** use monospace as a mood for "technical"; codes, part numbers, and WO IDs may be monospace, body copy may not.
 - **Don't** animate the red Andon lamp when `prefers-reduced-motion` is on.
 - **Don't** let an eyebrow label float above a heading — the heading carries its own weight and no kicker earns it back.
+## Shared Primitives (Phase 2 additions)
+
+These primitives are required by the master spec §3 and §8. Tokens above apply unless a value is restated here.
+
+### Breadcrumb
+- Container: `flex items-center gap-1.5 text-[12px] text-muted-ink`, `aria-label="Breadcrumb"`.
+- Separator: `/` in `faint-ink`, never an icon. Last item is `text-ink font-medium` and not a link.
+- Max 3 visible levels on mobile; collapse middle levels to `…` (ellipsis) above 3.
+- Truncate individual crumbs at 24ch with ellipsis; full label in `title`.
+
+### Notification Center
+- Trigger: bell icon in top nav, 40×40 touch target, badge count capped at `99+`.
+- Panel: right-aligned dropdown/sheet, max width 360px (desktop) / full-width bottom sheet (mobile), max height 70vh scroll.
+- Item: avatar/icon + title (title face) + body (body face, 2 lines clamp) + relative time (label face, muted). Unread = 4px primary dot + `muted-bg` row.
+- Group by day ("วันนี้", "เมื่อวาน", "ก่อนหน้า"). Empty state uses `EmptyState` with "ไม่มีการแจ้งเตือน".
+
+### Timeline
+- Vertical, left rail 2px `line`, nodes 10px circles.
+- Node color by event type: info `info`, success `success`, warning `warning`, danger `danger`, neutral `muted-ink`.
+- Item: time (label face, tabular) + actor avatar + event text (body) + optional attachment link.
+- Compact variant (mobile): rail 1.5px, 8px nodes, body text 12px.
+
+### Employee Avatar (with photo)
+- Sizes: 24 / 32 / 40 / 56 / 80 px. Always circular.
+- With photo: `<img>` with `object-cover`, `loading="lazy"`, fallback to initials on error.
+- Without photo: initials on `accent-tint` bg with `accent-ink` text, font-weight 600.
+- Status dot: 8px, positioned bottom-right, colors from Andon set (green/amber/red) or `muted-ink` for offline. Dot has 2px `card` ring.
+- Never crop faces off-center; use `object-position: center top`.
+
+### Equipment Status indicator
+- States: `running` (andon-green), `idle` (muted-ink), `warning` (andon-amber), `fault` (andon-red), `maintenance` (info), `offline` (faint-ink).
+- Shape: 8px dot + label. In compact lists use dot only with `title`/`aria-label`.
+- Pulse animation only for `fault` and only when `prefers-reduced-motion` is off.
+
+### Loading states
+- Skeleton: use `Skeleton` primitive; match final layout dimensions to avoid layout shift.
+- Page-level: centered spinner (`Spinner`) with "กำลังโหลด…" label; min 300ms before showing to avoid flicker on fast loads.
+- Table: skeleton rows = 5, same column widths.
+- Never show a spinner for < 300ms.
+
+### Error states
+- Inline (form/section): `Alert` with `variant="destructive"`, message + retry action.
+- Page-level: full-width panel with icon, headline, body, primary action ("ลองใหม่") and secondary ("กลับหน้าหลัก").
+- Never show raw stack traces or API error codes to end users; log to console only.
+
+### Responsive breakpoints
+- `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px, `2xl` 1536px.
+- Mobile-first: base styles target < 640px; enhance upward.
+- Touch targets ≥ 48px below `md`; ≥ 40px at `md`+.
+- Tables: horizontal scroll container below `lg`; never shrink columns below 80px.
+- Grids ≥ 3 columns require `md`/`lg` breakpoints (no 3-col on mobile).
+
+### UX interaction standards
+- Keyboard: every interactive element reachable via Tab; Enter/Space activates; Esc closes dialogs/dropdowns; arrow keys navigate within menus/tabs.
+- Focus: 3px primary glow ring on `:focus-visible`; never remove outline without replacement.
+- Reduced motion: respect `prefers-reduced-motion: reduce` — disable pulse, slide, scale; keep opacity fades ≤ 100ms or remove.
+- Screen readers: icon-only buttons require `aria-label`; decorative icons `aria-hidden="true"`; status conveyed via text or `aria-live` for dynamic updates.
+- Contrast: body text ≥ 4.5:1, large text ≥ 3:1, UI components ≥ 3:1 (WCAG 2.2 AA).

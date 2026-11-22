@@ -71,6 +71,7 @@ import {
   type PlantMapAsset,
   type SpareReorderRow,
 } from "@/lib/dashboard-tower";
+import { ChartTip, ChartLegend as Legend } from "@/components/charts";
 
 /* ── สถานะใบงาน → ป้ายสี ─────────────────────────────────────────────── */
 const WO_STATUS: Record<string, { label: string; tone: string }> = {
@@ -200,55 +201,6 @@ function Na({ note, value = "N/A" }: { note: React.ReactNode; value?: string }) 
     <div className="tower-na">
       <span className="tower-na-value">{value}</span>
       <span className="tower-na-note">{note}</span>
-    </div>
-  );
-}
-
-function Legend({ items }: { items: { label: string; color: string; line?: boolean }[] }) {
-  return (
-    <div className="tower-legend">
-      {items.map((it) => (
-        <span className="tower-legend-item" key={it.label}>
-          <span className="tower-legend-swatch" data-shape={it.line ? "line" : undefined} style={{ background: it.color }} />
-          {it.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-interface TipItem {
-  name?: string | number;
-  value?: string | number;
-  color?: string;
-}
-
-function ChartTip({
-  active,
-  payload,
-  label,
-  unit,
-}: {
-  active?: boolean;
-  payload?: TipItem[];
-  label?: string | number;
-  unit?: string;
-}) {
-  if (!active || !payload || payload.length === 0) return null;
-  return (
-    <div className="tower-tooltip">
-      <div className="tower-tooltip-title">{label}</div>
-      {payload.map((p, i) => {
-        const v = typeof p.value === "number" ? (Number.isInteger(p.value) ? p.value : p.value.toFixed(1)) : p.value;
-        return (
-          <div className="tower-tooltip-row" key={`${p.name}-${i}`}>
-            <span style={{ color: p.color }}>{p.name}</span>
-            {": "}
-            <span className="tower-strong tower-num">{v}</span>
-            {unit ? ` ${unit}` : ""}
-          </div>
-        );
-      })}
     </div>
   );
 }
