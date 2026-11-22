@@ -25,7 +25,7 @@
 |---|------|-----|-------|-------------------|----------|
 | 1 | สำรวจ (Phase 0) | 0 | done | docs/DASHBOARD_BUILD.md | สร้างไฟล์นี้ |
 | 2 | ย้าย wallboard → /dashboard/wallboard | 1 | done | frontend/app/(dashboard)/dashboard/wallboard/page.tsx | copy ไม่แก้ logic |
-| 3 | dashboard-registry.ts | 1 | done | frontend/lib/dashboard-registry.ts | 26 รายการ |
+| 3 | dashboard-registry.ts | 1 | done | frontend/lib/dashboard-registry.ts | 31 รายการ |
 | 4 | /dashboard Portal | 1 | done | frontend/app/(dashboard)/dashboard/page.tsx | PageShell+HubGrid+ค้นหา+ใช้บ่อย+TV |
 | 5 | เปลี่ยนป้ายเมนู 'dashboard' | 1 | done | frontend/lib/i18n.ts, src/menu_catalog.php | perm key คงเดิม |
 | 6 | Maintenance Overview (wallboard) | 1 | done | (ย้ายแล้ว) | registered ready |

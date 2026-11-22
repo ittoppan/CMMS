@@ -44,7 +44,7 @@ export default function PredictiveAIPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card p-4">
                 <p className="text-xs text-muted-foreground">เวลาแก้ไขเฉลี่ย (ชม.)</p>
-                <p className="text-2xl font-bold text-foreground">{data.avg_resolution_hours ?? "—"} ชม.</p>
+                <p className="text-2xl font-bold text-foreground">{data.avg_resolution_hours ?? "ไม่มีข้อมูล"} ชม.</p>
               </div>
               <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card p-4">
                 <p className="text-xs text-muted-foreground">งานที่ปิดแล้ว</p>
@@ -57,7 +57,7 @@ export default function PredictiveAIPage() {
               <ul className="space-y-2 text-sm">
                 {(data.top_assets || []).map((a: any, i: number) => (
                   <li key={i} className="flex justify-between border-b border-border py-1">
-                    <span className="text-muted-foreground">{a.code || a.name || "—"}</span>
+                    <span className="text-muted-foreground">{a.code || a.name || "ไม่มีข้อมูล"}</span>
                     <span className="font-semibold">{a.failures} ครั้ง</span>
                   </li>
                 ))}
