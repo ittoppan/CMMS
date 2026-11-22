@@ -41,6 +41,7 @@ import {
   QrCode as QrCodeIcon,
   Server as ServerStackIcon,
   ArrowRight as ArrowRightIcon,
+  Rocket as RocketIcon,
   Lock as LockClosedIcon,
   Search as MagnifyingGlassIcon,
   Clock as ClockIcon,
@@ -447,6 +448,7 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
 
 // ลิงก์หน้าย่อยตั้งค่า
 const SUB_PAGES = [
+  { href: "/onboarding", label: "Onboarding Wizard", desc: "เตรียมข้อมูลหลักก่อน Go Live (step-by-step)", icon: RocketIcon },
   { href: "/settings/menus", label: "สิทธิ์เมนูตามบทบาท", desc: "กำหนดเมนูที่แต่ละบทบาทเห็นได้", icon: ShieldCheckIcon },
   { href: "/settings/permission-diff", label: "ตรวจ drift สิทธิ์เมนู vs API", desc: "เมนูที่เห็นได้แต่ข้อมูล 403", icon: ShieldCheckIcon },
   { href: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE", desc: "เทมเพลตข้อความ LINE + Web Push", icon: ChatBubbleLeftRightIcon },
