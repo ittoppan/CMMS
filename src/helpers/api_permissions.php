@@ -103,7 +103,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'reports.php'                => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
     'report_schedule.php'        => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
     // import: ทั้งอ่านและเขียนต้องมี report:export เพราะเมนู reports/import_excel จำกัดเฉพาะ 1,2,6
-    'import_excel.php'           => ['read' => ['report', 'export'],      'write' => ['report', 'export']],
+    'import_excel.php'           => ['read' => ['report', 'export'],      'write' => ['settings', 'manage']],
     'analytics_advanced.php'     => ['read' => ['report', 'view'],        'write' => null],
     'analytics_monthly.php'      => ['read' => ['report', 'view'],        'write' => null],
     'intelligence.php'           => ['read' => ['report', 'view'],        'write' => null],
@@ -232,6 +232,14 @@ const API_PERMISSION_ENFORCED = [
     'menu_permissions.php',
     'departments.php',
     'repair_options.php',
+    // Phase 3: admin/manager-level settings pages (previously unenforced)
+    'custom_pages.php',
+    'page_editor.php',
+    'pwa_settings.php',
+    'ngrok.php',
+    // Engineering reliability (previously unenforced)
+    'mtbf_mttr.php',
+    'production_hours.php',
 ];
 
 /** ชื่อไฟล์ endpoint ปัจจุบัน (ทนต่อ IIS rewrite / proxy) */
