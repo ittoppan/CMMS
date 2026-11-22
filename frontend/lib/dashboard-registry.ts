@@ -96,7 +96,7 @@ export const DASHBOARD_REGISTRY: DashboardItem[] = [
 
   // ---- กลุ่ม F วางแผนระยะหน้า ----
   { id: "production-impact-oee", group: "F", titleTh: "Production Impact & OEE", titleEn: "Production & OEE", descriptionTh: "ชั่วโมงเดินเครื่อง ยอดผลิตรายกะ ผลกระทบงานซ่อม", href: "/dashboard/production-impact", perm: "dashboard", icon: Activity, tier: 3, status: "ready" },
-  { id: "lubrication-management", group: "F", titleTh: "Lubrication Management", titleEn: "Lubrication", descriptionTh: "จุดหล่อลื่น รอบเวลา ใบงานหล่อลื่น", href: "/dashboard/lubrication", perm: "dashboard", icon: Droplets, tier: 3, status: "planned" },
+  { id: "lubrication-management", group: "F", titleTh: "Lubrication Management", titleEn: "Lubrication", descriptionTh: "จุดหล่อลื่น รอบเวลา ใบงานหล่อลื่น", href: "/dashboard/lubrication", perm: "dashboard", icon: Droplets, tier: 3, status: "ready" },
   { id: "utility-energy", group: "F", titleTh: "Utility & Energy", titleEn: "Utility & Energy", descriptionTh: "ฟอร์มจดมิเตอร์ ไฟ/น้ำ/ลม/ก๊าซ + แนวโน้ม", href: "/dashboard/utility-energy", perm: "dashboard", icon: Zap, tier: 3, status: "ready" },
   { id: "facility-management", group: "F", titleTh: "Facility Management", titleEn: "Facility", descriptionTh: "อาคาร/พื้นที่/สาธารณูปโภค", href: "/dashboard/facility", perm: "dashboard", icon: Building2, tier: 3, status: "ready" },
   { id: "predictive-ai-maintenance", group: "F", titleTh: "Predictive & AI Maintenance Intelligence", titleEn: "Predictive & AI", descriptionTh: "แสดงผลเมื่อข้อมูลถึงเกณฑ์ขั้นต่ำเท่านั้น", href: "/dashboard/predictive-ai", perm: "dashboard", icon: Sparkles, tier: 3, status: "ready" },
