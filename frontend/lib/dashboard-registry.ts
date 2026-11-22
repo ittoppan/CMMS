@@ -61,7 +61,7 @@ export const DASHBOARD_REGISTRY: DashboardItem[] = [
   // ---- กลุ่ม A ภาพรวมและควบคุมงาน ----
   { id: "maintenance-overview", group: "A", titleTh: "Maintenance Overview", titleEn: "Maintenance Overview", descriptionTh: "ภาพรวมการซ่อมบำรุงทั้งหมด (จอใหญ่)", href: "/dashboard/wallboard", perm: "dashboard", icon: LayoutDashboard, tier: 1, status: "ready" },
   { id: "work-order-control", group: "A", titleTh: "Work Order Control", titleEn: "Work Order Control", descriptionTh: "คิวงานหัวหน้างาน", href: "/supervisor", perm: "supervisor", icon: Wrench, tier: 1, status: "ready" },
-  { id: "backlog-aging", group: "A", titleTh: "Backlog & Aging งานค้างสะสม", titleEn: "Backlog & Aging", descriptionTh: "ค้างกี่ใบ นานเท่าไร ค้างเพราะอะไร", href: "/dashboard/backlog-aging", perm: "dashboard", icon: Clock, tier: 1, status: "planned" },
+  { id: "backlog-aging", group: "A", titleTh: "Backlog & Aging งานค้างสะสม", titleEn: "Backlog & Aging", descriptionTh: "ค้างกี่ใบ นานเท่าไร ค้างเพราะอะไร", href: "/dashboard/backlog-aging", perm: "dashboard", icon: Clock, tier: 1, status: "ready" },
   { id: "sla-escalation", group: "A", titleTh: "SLA & Escalation Control", titleEn: "SLA & Escalation", descriptionTh: "ติดตาม SLA และการ escalation", href: "/reports/sla", perm: "reports", icon: AlertTriangle, tier: 1, status: "ready" },
   { id: "shift-handover", group: "A", titleTh: "Shift Handover สรุปส่งกะ", titleEn: "Shift Handover", descriptionTh: "งานค้างส่งต่อ เหตุการณ์กะ เครื่องที่ต้องจับตา โน้ตส่งกะ", href: "/dashboard/shift-handover", perm: "dashboard", icon: CalendarClock, tier: 2, status: "planned" },
 
