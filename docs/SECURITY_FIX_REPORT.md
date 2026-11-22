@@ -149,3 +149,36 @@
 - BUILD_ID: 3jZQfqLNjbfrupTwPPg-Y
 - commit: 7cf207f55db20a703e67e519bac5c516ed159936
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
+
+---
+
+## Phase 8 — สรุปผล
+
+### (1) แก้แล้ว
+- intelligence drill-down: ปุ่ม "ดูใบงาน" แสดงเฉพาะแถวที่มี asset_id (แก้ null-asset row ที่ทำให้ drill ไม่ทำงาน) — `frontend/app/(dashboard)/analytics/intelligence/page.tsx`
+- pm_ical.php: role-based scope (Foreman+ เห็นทั้งหมด; Operate/Officer/User/Viewer/Officer-Read เห็นเฉพาะที่ assigned ให้ตัวเอง)
+- ApprovalService: เก็บ approval_token เป็น sha256 hash; processApproval ใช้ hash_equals; migration idempotent + backup table
+- approval.php: lookup ด้วย hash
+- frontend/lib/api.ts: 401 redirect กลาง, 403 ApiError
+- e2e password: env-only, random, teardown ปิด is_active (ยืนยัน: 0 active หลังรัน)
+- package.json: test:e2e:ci script
+
+### (2) ยังไม่แก้และเหตุผล
+- pm_ical token-based external access: ยังใช้ session cookie (เรียกจากหน้าเว็บ) — การเพิ่ม random token จะกระทบ flow ที่ใช้อยู่; รายงานแทนการเปลี่ยน
+- หน้าที่ใช้ fetch ตรง (ไม่ผ่านตัวกลาง): ไม่ย้ายทั้งหมด (เสี่ยงเปลี่ยน logic) — ลิสต์ใน matrix
+- git history ยังมีรหัสผ่านเดิม "Test@Cmms2026" ใน commit: c1312a1d, d1cfde5f, 52fe228f, 02601f74, 6e0a7192 (ไฟล์ phase2/3/6/role-menus) — ถือว่ารั่ว; รหัสผ่านถูกเปลี่ยนแล้ว (ปัจจุบันไม่ตรงกับรุ่นใน history)
+
+### (3) ให้ตัดสินใจ
+- ไม่มีรายการค้างเพิ่ม (LOTO=Manager+, 403 ที่ตัวกลาง — ทำแล้ว)
+
+### (4) ผลเทสทั้งชุดรอบเดียว
+- tsc: PASS
+- design-audit: PASS
+- Playwright: 166 passed, 0 failed, 0 not run (workers=1, NODE_OPTIONS=--max-old-space-size=4096, 6.2m)
+- test_approval_service.php: 31/31 PASS
+- Deploy: 30/30 checks passed
+
+### (5) BUILD_ID / commit
+- BUILD_ID: zas0iAWtk1_cexWsd8WXJ
+- commit: (ดู git log ล่าสุด)
+- URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
