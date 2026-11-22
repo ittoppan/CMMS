@@ -99,3 +99,31 @@
 - global_search: ทุก role ได้ 200 (ขนาด 57 bytes) — ต้องตรวจว่าคืนข้อมูลนอกสิทธิ์หรือไม่
 - pm_ical, inspection_dashboard/history, feedback, machine_bom: เปิดกว้างเกิน
 - repair_options: Operate/User/Viewer ได้ 403 (อาจกระทบ flow แจ้งซ่อม — ต้องตรวจ)
+
+---
+
+## Phase 10 — ปิด over-permission ให้ตรงกับเมนู (2026-11-22)
+
+Probe สดหลังแก้ (GET ด้วยบัญชี e2e_* ทั้ง 9 role) → 200 = อ่านได้, 403 = บล็อก
+
+| endpoint | Admin | Mgr | Asst | Foreman | Operate | User | Viewer | Officer | OffRead | เมนู (DB) | ผล |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| reports.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 200 | 200 | reports (1,2,5,6,8,10) | ✅ |
+| machine_bom.php | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 | asset_registry/bom_tree (1,2,6) | ✅ |
+| notifications_log.php | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 | notifications/history (1,2,6) | ✅ |
+| kpi_dashboard.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 403 | 403 | analytics (1,2,5,6) | ✅ |
+| analytics_advanced.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 403 | 403 | analytics (1,2,5,6) | ✅ |
+| analytics_monthly.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 403 | 403 | analytics (1,2,5,6) | ✅ |
+| intelligence.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 403 | 403 | analytics (1,2,5,6) | ✅ |
+| predictive_maintenance.php | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 403 | 403 | analytics (1,2,5,6) | ✅ |
+| feedback.php | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 200 | 200 | feedback (1,2,6,8,10) | ✅ |
+| repair.php | 200 | 200 | 200 | 200 | 200 | 200 | 403 | 200 | 200 | repair (Viewer=0) | ✅ |
+| pm_ical.php | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | session-based scope (Foreman+ all) | ✅ |
+
+Viewer repair menu = 0 (role_id=5, menu_key='repair' is_granted=0) → API 403 แล้ว
+pm_ical scope: Foreman+ (1,2,6,7) เห็นทั้งหมด; บทบาทอื่นเห็นเฉพาะ assigned_to = ตัวเอง
+
+scripts/ probe (IIS hiddenSegments บล็อก segment "scripts"):
+- /scripts/test_approval_service.php → 404
+- /scripts/test_security.php → 404
+- /scripts/php-db-tests.sh → 404

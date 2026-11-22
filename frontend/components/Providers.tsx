@@ -4,6 +4,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import ToastProvider from "./ToastProvider";
+import ApiFetchInterceptor from "./ApiFetchInterceptor";
 
 /**
  * Providers — ครอบทั้งแอป
@@ -36,7 +37,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <ApiFetchInterceptor />
+          {children}
+        </ToastProvider>
       </QueryClientProvider>
     </NextThemesProvider>
   );
