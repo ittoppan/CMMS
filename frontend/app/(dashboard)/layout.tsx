@@ -40,6 +40,8 @@ import { getMenuHrefs } from "../../lib/quick-links";
 import { routeIsBlocked } from "../../lib/route-perms";
 import { recordMenuUsage, getFrequentMenuItems } from "../../lib/frequent-menus";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "../../components/ui/breadcrumb";
+import { EmployeeAvatar } from "../../components/ui/employee-avatar";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { useUnreadCount } from "../../lib/notifications";
 import { t, useLang, setUserLang, tPage, tSection, applyUserLang } from "../../lib/i18n";
@@ -300,19 +302,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onClick={() => router.push("/profile")}
               className="flex w-full items-center gap-2.5 rounded-[var(--cmms-radius)] border border-border bg-card px-2.5 py-2 text-left shadow-sm transition-colors hover:border-[var(--cmms-border-hover)]"
             >
-              {currentUser?.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="h-8 w-8 rounded-full bg-secondary object-cover"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                />
-              ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
-                  {currentUser?.initial || "U"}
-                </span>
-              )}
+              <EmployeeAvatar
+                name={currentUser?.name || "ผู้ใช้งาน"}
+                photoUrl={currentUser?.avatar}
+                size={32}
+                status="online"
+              />
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                 {currentUser?.name || roleName || "ผู้ใช้งาน"}
                 {simulated && (
@@ -327,21 +322,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
           <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card/90 px-6 backdrop-blur lg:flex">
-            <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-              <Link href="/dashboard" className="transition-colors hover:text-foreground">CMMS</Link>
-              {section && (
-                <>
-                  <span aria-hidden="true">›</span>
-                  <span>{section}</span>
-                </>
-              )}
-              {pageTitle && (
-                <>
-                  <span aria-hidden="true">›</span>
-                  <span className="truncate font-medium text-foreground">{pageTitle}</span>
-                </>
-              )}
-            </div>
+            <Breadcrumb className="min-w-0">
+              <BreadcrumbList className="text-xs text-muted-foreground">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard" className="transition-colors hover:text-foreground">CMMS</BreadcrumbLink>
+                </BreadcrumbItem>
+                {section && (
+                  <>
+                    <BreadcrumbSeparator>›</BreadcrumbSeparator>
+                    <BreadcrumbItem><span>{section}</span></BreadcrumbItem>
+                  </>
+                )}
+                {pageTitle && (
+                  <>
+                    <BreadcrumbSeparator>›</BreadcrumbSeparator>
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="truncate">{pageTitle}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
+              </BreadcrumbList>
+            </Breadcrumb>
             <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
