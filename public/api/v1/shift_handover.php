@@ -27,6 +27,7 @@ try {
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'shift_handover', 'write');
         $input = json_decode(file_get_contents('php://input'), true);
         if (!is_array($input)) $input = $_POST;
         $shiftDate = trim((string)($input['shift_date'] ?? ''));

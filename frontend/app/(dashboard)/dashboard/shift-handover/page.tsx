@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { PageShell } from "@/components/PageShell";
+import { useCan } from "@/lib/useCan";
 import { FormSection, FormActions } from "@/components/layout/form-page";
 
 const SHIFT_LABEL: Record<string, string> = {
@@ -12,6 +13,8 @@ const SHIFT_LABEL: Record<string, string> = {
 };
 
 export default function ShiftHandoverPage() {
+  const can = useCan("shift_handover");
+  const canWrite = can("write");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [items, setItems] = React.useState<any[]>([]);
@@ -90,6 +93,7 @@ export default function ShiftHandoverPage() {
         {error && <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)] bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-danger)]">{error}</div>}
         {success && <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-success)] bg-[var(--cmms-success-light)] p-4 text-sm text-[var(--cmms-success)]">{success}</div>}
 
+        {canWrite && (
         <form onSubmit={submit} className="space-y-4">
           <FormSection title="บันทึกส่งกะใหม่" columns={2}>
             <div className="space-y-1">
@@ -127,6 +131,7 @@ export default function ShiftHandoverPage() {
             }
           />
         </form>
+        )}
 
         <div className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">ประวัติส่งกะ</h2>

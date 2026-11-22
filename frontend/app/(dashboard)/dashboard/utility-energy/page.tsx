@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { PageShell } from "@/components/PageShell";
+import { useCan } from "@/lib/useCan";
 import { FormSection, FormActions } from "@/components/layout/form-page";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -12,6 +13,8 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default function UtilityEnergyPage() {
+  const can = useCan("utility_energy");
+  const canWrite = can("write");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [items, setItems] = React.useState<any[]>([]);
@@ -80,6 +83,7 @@ export default function UtilityEnergyPage() {
         {error && <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)] bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-danger)]">{error}</div>}
         {success && <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-success)] bg-[var(--cmms-success-light)] p-4 text-sm text-[var(--cmms-success)]">{success}</div>}
 
+        {canWrite && (
         <form onSubmit={submit} className="space-y-4">
           <FormSection title="บันทึกค่ามิเตอร์" columns={2}>
             <div className="space-y-1">
@@ -113,6 +117,7 @@ export default function UtilityEnergyPage() {
             }
           />
         </form>
+        )}
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {summary.length === 0 ? (

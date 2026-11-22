@@ -34,6 +34,7 @@ try {
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'lubrication', 'write');
         $input = json_decode(file_get_contents('php://input'), true);
         if (!is_array($input)) $input = $_POST;
         $action = (string)($input['action'] ?? 'add_point');

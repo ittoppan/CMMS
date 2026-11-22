@@ -32,6 +32,7 @@ try {
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'utility_energy', 'write');
         $input = json_decode(file_get_contents('php://input'), true);
         if (!is_array($input)) $input = $_POST;
         $type = trim((string)($input['utility_type'] ?? ''));

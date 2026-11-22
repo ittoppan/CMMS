@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import { PageShell } from "@/components/PageShell";
+import { useCan } from "@/lib/useCan";
 import { FormSection, FormActions } from "@/components/layout/form-page";
 
 export default function LubricationPage() {
+  const can = useCan("lubrication");
+  const canWrite = can("write");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [items, setItems] = React.useState<any[]>([]);
@@ -96,6 +99,7 @@ export default function LubricationPage() {
           <p className="text-sm text-foreground">จุดหล่อลื่นทั้งหมด: <span className="font-semibold">{items.length}</span> · ถึงกำหนด: <span className="font-semibold text-[var(--cmms-danger)]">{dueCount}</span></p>
         </div>
 
+        {canWrite && (
         <form onSubmit={addPoint} className="space-y-4">
           <FormSection title="เพิ่มจุดหล่อลื่น" columns={2}>
             <div className="space-y-1 md:col-span-2">
@@ -119,6 +123,7 @@ export default function LubricationPage() {
             }
           />
         </form>
+        )}
 
         <div className="overflow-x-auto rounded-[var(--cmms-radius-lg)] border border-border bg-card">
           <table className="min-w-full text-sm">
@@ -147,14 +152,16 @@ export default function LubricationPage() {
                     {it.due ? <span className="text-[var(--cmms-danger)] font-semibold">ถึงกำหนด</span> : <span className="text-[var(--cmms-success)]">ปกติ</span>}
                   </td>
                   <td className="px-3 py-2">
-                    {markPointId === it.id ? (
+                    {canWrite && markPointId === it.id ? (
                       <span className="flex items-center gap-2">
                         <input type="date" value={markDate} onChange={(e) => setMarkDate(e.target.value)} className="rounded border border-border bg-card px-2 py-1 text-xs" />
                         <button onClick={() => markDone(it.id)} className="rounded bg-[var(--cmms-primary)] px-2 py-1 text-xs text-white">บันทึก</button>
                         <button onClick={() => setMarkPointId(null)} className="text-xs text-muted-foreground">ยกเลิก</button>
                       </span>
-                    ) : (
+                    ) : canWrite ? (
                       <button onClick={() => { setMarkPointId(it.id); setMarkDate(new Date().toISOString().slice(0, 10)); }} className="text-xs text-[var(--cmms-primary)] hover:underline">ทำหล่อลื่น</button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
                     )}
                   </td>
                 </tr>
