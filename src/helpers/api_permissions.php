@@ -208,6 +208,13 @@ const API_PERMISSION_ENFORCED = [
     'approval.php',
     'planning.php',
     'supervisor.php',
+    // Phase 6: ปิดช่องเขียนที่ยังไม่บังคับ
+    'stock_take.php',
+    'spare_parts.php',
+    'spare_issue_request.php',
+    'checklist_templates.php',
+    'forms.php',
+    'repair.php',
     // Calibration
     'calibration.php',
     'calibration_management.php',

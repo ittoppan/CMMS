@@ -44,8 +44,9 @@ try {
     // GET/PUT/DELETE ต้องเป็นผู้ใช้ในระบบ
     // POST อนุญาตแบบ anonymous — ฟอร์มแจ้งซ่อมสาธารณะ (LINE LIFF /repair/request)
     // ที่ไม่มี session; จะตรวจ receiver_name แทน (ดูใน case 'POST')
+    $repairMe = null;
     if ($method !== 'POST') {
-        requireLogin($pdo); // ต้อง login — รายการงาน/แก้ไข/ลบต้องเป็นผู้ใช้ในระบบ
+        $repairMe = requireLogin($pdo); // ต้อง login — รายการงาน/แก้ไข/ลบต้องเป็นผู้ใช้ในระบบ
     }
 
     switch ($method) {
@@ -108,6 +109,10 @@ try {
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+                // User (role 9) เห็นเฉพาะใบงานที่ตัวเองแจ้ง
+                if (is_array($repairMe) && (int)($repairMe['role_id'] ?? 0) === 9 && (int)($row['created_by'] ?? 0) !== (int)($repairMe['id'] ?? 0)) {
+                    http_response_code(403); echo json_encode(['error' => 'คุณไม่มีสิทธิ์เข้าถึงใบงานนี้']); exit;
+                }
                 $single = [$row];
                 attachWorkTeams($single, 'repair');
                 echo json_encode($single[0]);
@@ -119,6 +124,11 @@ try {
 
                 $where = [];
                 $params = [];
+                // User (role 9) เห็นเฉพาะใบงานที่ตัวเองแจ้ง
+                if (is_array($repairMe) && (int)($repairMe['role_id'] ?? 0) === 9) {
+                    $where[] = 'r.created_by = ?';
+                    $params[] = (int)$repairMe['id'];
+                }
                 if (!empty($_GET['asset_code'])) {
                     $where[] = 'a.code = ?';
                     $params[] = (string)$_GET['asset_code'];
