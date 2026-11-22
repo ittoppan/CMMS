@@ -219,5 +219,5 @@
 
 ### (5) BUILD_ID / commit
 - BUILD_ID: dTtE7rmEVxsJOQX7jqCt9
-- commit: c200eda2fccb6ab5e2bf546e6cc109154f1892c4
+- commit: ea0409af558a4b84af9bdca8a87a3a1a98bc4718 (code/deploy); docs commit: bf54f9f9
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
