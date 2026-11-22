@@ -34,3 +34,28 @@
 ## 5. BUILD_ID และ commit hash
 - BUILD_ID: M2nyF5DmBFU3EH6mPo7DY
 - commit hash: f768d08650e7e096edd3642c26ed74289f9e4484 (HEAD ก่อนแก้; ยังไม่ commit การแก้ใหม่)
+
+## รอบล่าสุด (asset detail redesign + permissions)
+### 1. แก้แล้ว
+- ปุ่ม "เบิกอะไหล่": /spare_parts/issue_center ไม่รับพารามิเตอร์เครื่อง → ลิงก์ไปหน้าโดยไม่ส่งพารามิเตอร์; แสดงเฉพาะ role ที่ canShow("spare_parts/issue_center") (Operate ขึ้นไป)
+- machine_bom.php read permission เปลี่ยนจาก machine_bom:view → asset_registry:view (ให้ role ที่เห็นหน้า asset detail อ่าน BOM ได้; เดิม Foreman/Operate/Officer ได้ 403)
+- asset_hub.php: isStaff = canPerm(asset_registry, view); User (ไม่มี asset_registry) ไม่ได้ closed repair history; history gated by isStaff
+- QR User flow: scan.php/asset_hub คืนข้อมูลขั้นต่ำ (ไม่มี BOM/ราคา/ต้นทุน/ประวัติซ่อมของคนอื่น/ข้อมูลเต็ม)
+- SECURITY_MATRIX.md เพิ่มหัวข้อ "หน้ารายละเอียดเครื่องจักร" พร้อมตาราง probe จริง 13 endpoint × 9 role
+- เทสใหม่: frontend/tests/e2e/asset-detail-api.spec.ts (6 tests) → รวม 172 tests (> 166)
+- ยืนยัน edit = role 1,2,6,7,8 (Operate ไม่ได้) ตรงกับ docs/ROLE_MENUS.md (ไม่มี menu แยก edit/create → permission matrix เป็น authority)
+- 98.5/availability: ไม่มีในหน้า view และ components ที่หน้านี้ใช้ (มีแค่ oee/page.tsx ซึ่งเป็นหน้าแยก)
+### 2. ยังไม่แก้และเหตุผล
+- calibration.php ยังใช้ calibration:view (Operate ได้ 403) — เป็น module แยก มีเมนู calibration ของตัวเอง; ไม่ปรับ (ตามเมนู)
+- facility_layout.php ยังใช้ settings:view (Operate/Viewer/User ได้ 403) — เป็น settings feature; ไม่ปรับ (ตามเมนู)
+- cost/reliability data ยัง gated ตาม permission ของตัวเอง (เฉพาะ role ที่มีสิทธิ์) — ตาม spec
+### 3. ให้ตัดสินใจ
+- ไม่มีรายการค้างที่ต้องตัดสินใจ (LOTO = Foreman ขึ้นไป, User เห็นเฉพาะของตัวเอง, ปิด over-permission ตามเมนู — ทำครบแล้ว)
+### 4. ผลเทสทั้งชุด
+- tsc --noEmit: PASS (0 error)
+- design-audit.py --diff HEAD: PASS (0 FAIL, 0 WARN)
+- Playwright: 172 passed, 0 failed (6.3m)
+- e2e_* active = 0
+### 5. BUILD_ID / commit hash
+- รอบก่อน deploy: BUILD_ID TmG1DPnVeuQzeN09b0p5F (commit 2b1a3fc5) — ยังไม่ deploy รอบใหม่
+- commit ใหม่: (ดู git log หลัง commit นี้)

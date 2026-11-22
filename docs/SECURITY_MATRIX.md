@@ -127,3 +127,29 @@ scripts/ probe (IIS hiddenSegments บล็อก segment "scripts"):
 - /scripts/test_approval_service.php → 404
 - /scripts/test_security.php → 404
 - /scripts/php-db-tests.sh → 404
+
+## หน้ารายละเอียดเครื่องจักร (/asset_registry/view)
+
+Probe จริงด้วยบัญชีทดสอบ (asset id=91, code=A-BM06). ค่า = HTTP status
+
+| endpoint | แท็บ/ส่วนที่ใช้ | Admin | Manager | Asst.Mgr | Foreman | Operate | Officer | Officer-Read | Viewer | User |
+|---|---|---|---|---|---|---|---|---|---|---|
+| asset_registry.php?id=91 | ภาพรวม/ทะเบียน | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 403 | 403 |
+| machine_bom.php?asset_id=91 | อะไหล่ & BOM | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 |
+| pm_plans.php?asset_id=91 | PM & ตรวจเช็ค | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 403 |
+| inspections.php?schedules=1&asset_id=91 | PM & ตรวจเช็ค | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| calibration.php?asset_id=91 | timeline (สอบเทียบ) | 200 | 200 | 200 | 200 | 403 | 200 | 200 | 200 | 403 |
+| facility_layout.php | ผังอาคาร (settings) | 200 | 200 | 200 | 200 | 403 | 200 | 200 | 403 | 403 |
+| repair.php?asset_code=A-BM06 | ประวัติซ่อม | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 403 | 200 |
+| asset_measurements.php?asset_id=91 | เทคนิค/มิเตอร์ | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| asset_meters.php?asset_id=91 | เทคนิค/มิเตอร์ | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| index.php?resource=users | ผู้ใช้ | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| index.php?resource=pm-plans | PM plans (global) | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| scan.php?code=A-BM06 | QR resolve | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+| asset_hub.php?code=A-BM06 | asset_hub (QR) | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 |
+
+### Flow QR สำหรับ User (scan.php + asset_hub.php)
+
+- scan.php (resolve): คืน type=asset, data.asset keys = id, code, name, category, criticality, status, department, department_id, location, location_id, image_path, qr_token, payload (+ active_work_orders, pm_due, counts). ไม่มี BOM ราคาอะไหล่, ต้นทุน, ประวัติซ่อมของคนอื่น, หรือข้อมูลเต็ม.
+- asset_hub.php: คืน asset keys = id, code, name, category, location, department, criticality, status, image_path (ขั้นต่ำ) + counts (pm_open, active_work_orders, repairs_total, repairs_done) + active_work_orders (ที่ยังเปิด) + pm (open/next_due/last_done). history=[] (ไม่ส่งประวัติซ่อมที่ปิดแล้วให้ User). ไม่มี BOM/ราคา/ต้นทุน/ข้อมูลเต็ม.
+- ปุ่มแจ้งซ่อม: /repair/request?asset_code=<code> (LIFF endpoint) — User แจ้งซ่อมได้.

@@ -69,7 +69,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'asset_data_quality.php'     => ['read' => ['asset', 'view'],         'write' => null],
     'asset_stats.php'            => ['read' => ['dashboard', 'view'],     'write' => null],
     'asset_reports.php'          => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
-    'machine_bom.php'            => ['read' => ['machine_bom', 'view'],   'write' => ['asset', 'edit']],
+    'machine_bom.php'            => ['read' => ['asset_registry', 'view'],   'write' => ['asset', 'edit']],
     'scan.php'                   => ['read' => ['asset', 'view'],         'write' => null],
     'reliability.php'            => ['read' => ['reliability', 'read'],   'write' => ['reliability', 'write']],
     'asset_reliability.php'      => ['read' => ['reliability', 'read'],   'write' => ['reliability', 'write']],

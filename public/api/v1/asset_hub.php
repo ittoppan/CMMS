@@ -74,7 +74,7 @@ try {
         $sessionUser = currentUser($pdo);
         if ($sessionUser && canPerm($pdo, 'asset', 'view')) {
             $viewer = $sessionUser;
-            $isStaff = true;
+            $isStaff = canPerm($pdo, 'asset_registry', 'view');
         }
     }
 
@@ -98,7 +98,7 @@ try {
         exit;
     }
 
-    $payload = asset_hub_payload($pdo, $asset, $viewer);
+    $payload = asset_hub_payload($pdo, $asset, $viewer, $isStaff);
     echo json_encode(
         array_merge(['success' => true, 'registered' => true, 'staff' => $isStaff], $payload),
         JSON_UNESCAPED_UNICODE

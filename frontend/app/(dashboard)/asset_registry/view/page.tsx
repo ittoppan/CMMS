@@ -754,6 +754,12 @@ export default function AssetRegistryViewPage() {
           ทำเช็คชีท PM
         </Button>
       )}
+      {canShow("spare_parts/issue_center") && (
+        <Button variant="secondary" onClick={() => router.push(`/spare_parts/issue_center`)}>
+          <PackageOpen size={16} strokeWidth={1.75} aria-hidden="true" />
+          เบิกอะไหล่
+        </Button>
+      )}
       <Button variant="outline" onClick={() => router.push("/asset_registry")}>
         <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
         กลับ

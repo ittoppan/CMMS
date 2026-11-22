@@ -73,7 +73,7 @@ function asset_hub_user_for_line(PDO $pdo, string $lineUserId): ?array
     return $row ?: null;
 }
 
-function asset_hub_payload(PDO $pdo, array $asset, array $viewer): array
+function asset_hub_payload(PDO $pdo, array $asset, array $viewer, bool $isStaff = false): array
 {
     $assetId = (int)$asset['id'];
 
@@ -101,16 +101,19 @@ function asset_hub_payload(PDO $pdo, array $asset, array $viewer): array
     $activeSt->execute([$assetId]);
     $active = $activeSt->fetchAll(PDO::FETCH_ASSOC);
 
-    $historySt = $pdo->prepare(
-        "SELECT r.work_order_no, r.title, r.status, r.created_at, r.completed_at, r.closed_at,
-                r.downtime_minutes, r.resolution, r.root_cause, u.full_name AS technician
-         FROM repair r LEFT JOIN users u ON u.id = r.assigned_to
-         WHERE r.asset_id = ? AND r.status IN ('completed','verified','closed')
-         ORDER BY COALESCE(r.closed_at, r.completed_at, r.updated_at) DESC
-         LIMIT 10"
-    );
-    $historySt->execute([$assetId]);
-    $history = $historySt->fetchAll(PDO::FETCH_ASSOC);
+    $history = [];
+    if ($isStaff) {
+        $historySt = $pdo->prepare(
+            "SELECT r.work_order_no, r.title, r.status, r.created_at, r.completed_at, r.closed_at,
+                    r.downtime_minutes, r.resolution, r.root_cause, u.full_name AS technician
+             FROM repair r LEFT JOIN users u ON u.id = r.assigned_to
+             WHERE r.asset_id = ? AND r.status IN ('completed','verified','closed')
+             ORDER BY COALESCE(r.closed_at, r.completed_at, r.updated_at) DESC
+             LIMIT 10"
+        );
+        $historySt->execute([$assetId]);
+        $history = $historySt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     $countsSt = $pdo->prepare(
         "SELECT COUNT(*) AS total,
