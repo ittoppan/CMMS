@@ -6,11 +6,10 @@ import { expect, test } from "@playwright/test";
  * Dedicated E2E accounts:
  *   e2e_viewer        (role 5, Viewer)        -> landing /dashboard
  *   e2e_officer_read  (role 10, Officer-Read) -> landing /home
- * Password (both): Test@Cmms2026
  */
 
-const VIEWER_CREDS = { username: "e2e_viewer", password: "Test@Cmms2026" };
-const OFFICER_READ_CREDS = { username: "e2e_officer_read", password: "Test@Cmms2026" };
+const VIEWER_CREDS = { username: "e2e_viewer", password: process.env.E2E_PASSWORD! };
+const OFFICER_READ_CREDS = { username: "e2e_officer_read", password: process.env.E2E_PASSWORD! };
 
 // Full visible sidebar menu set for each role (derived from menu_permissions + sidebar-nav).
 const VIEWER_VISIBLE = [

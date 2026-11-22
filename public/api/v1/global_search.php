@@ -7,6 +7,7 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 require_once __DIR__ . '/../../../src/helpers/knowledge_search.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -25,35 +26,41 @@ try {
 
     $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
 
-    // Work orders
+    // Work orders (เฉพาะ role ที่มี repair:view)
     $wo = [];
+    if (canPerm($pdo, 'repair', 'view')) {
     try {
         $st = $pdo->prepare("SELECT id, work_order_no, title, status FROM repair WHERE (work_order_no LIKE ? OR title LIKE ? OR description LIKE ?) ORDER BY created_at DESC LIMIT " . (int)$limit);
         $st->execute([$like, $like, $like]);
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $wo[] = ['id' => (int)$r['id'], 'no' => $r['work_order_no'], 'title' => $r['title'], 'status' => $r['status'], 'href' => '/repair/view?id=' . (int)$r['id']];
         }
-    } catch (Throwable $e) { error_log('global_search wo: ' . $e->getMessage()); }
+            } catch (Throwable $e) { error_log('global_search wo: ' . $e->getMessage()); }
+    }
 
-    // Assets
+    // Assets (เฉพาะ role ที่มี asset:view)
     $assets = [];
+    if (canPerm($pdo, 'asset', 'view')) {
     try {
         $st = $pdo->prepare("SELECT id, code, name FROM asset_registry WHERE (code LIKE ? OR name LIKE ?) ORDER BY code ASC LIMIT " . (int)$limit);
         $st->execute([$like, $like]);
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $assets[] = ['id' => (int)$r['id'], 'code' => $r['code'], 'name' => $r['name'], 'href' => '/asset_registry/view?id=' . (int)$r['id']];
         }
-    } catch (Throwable $e) { error_log('global_search asset: ' . $e->getMessage()); }
+            } catch (Throwable $e) { error_log('global_search asset: ' . $e->getMessage()); }
+    }
 
-    // Knowledge articles (published only)
+    // Knowledge articles (published only) — เฉพาะ role ที่มี knowledge:read
     $knowledge = [];
+    if (canPerm($pdo, 'knowledge', 'read')) {
     try {
         $st = $pdo->prepare("SELECT id, article_key, title FROM knowledge_article WHERE status = 'published' AND (title LIKE ? OR article_key LIKE ? OR summary LIKE ?) ORDER BY published_at DESC LIMIT " . (int)$limit);
         $st->execute([$like, $like, $like]);
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $knowledge[] = ['id' => (int)$r['id'], 'key' => $r['article_key'], 'title' => $r['title'], 'href' => '/knowledge/articles/' . (int)$r['id']];
         }
-    } catch (Throwable $e) { error_log('global_search knowledge: ' . $e->getMessage()); }
+            } catch (Throwable $e) { error_log('global_search knowledge: ' . $e->getMessage()); }
+    }
 
     echo json_encode(['query' => $q, 'work_orders' => $wo, 'assets' => $assets, 'knowledge' => $knowledge], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {

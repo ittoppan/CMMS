@@ -1,0 +1,488 @@
+{
+  "Admin": {
+    "repair.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 200
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 400
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 400
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 400
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 400
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 400
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 400
+    },
+    "permission_diff.php": {
+      "get": 200,
+      "post": 200
+    }
+  },
+  "Manager": {
+    "repair.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 200
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 400
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 400
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 400
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 400
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 400
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 400
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Asst.Manager": {
+    "repair.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 200
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 400
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 400
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 400
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 400
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 400
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 400
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Foreman": {
+    "repair.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 200
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 400
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 400
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 400
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 400
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Operate": {
+    "repair.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 200
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 403
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 400
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 403
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 403
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 403,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "User": {
+    "repair.php": {
+      "get": 200,
+      "post": 400
+    },
+    "spare_parts.php": {
+      "get": 403,
+      "post": 403
+    },
+    "spare_issue_request.php": {
+      "get": 403,
+      "post": 403
+    },
+    "stock_take.php": {
+      "get": 403,
+      "post": 403
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 403
+    },
+    "checklist_templates.php": {
+      "get": 403,
+      "post": 403
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 403,
+      "post": 403
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 403
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 403
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 403,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Viewer": {
+    "repair.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 403
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 403
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 403
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 403
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 403
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 403
+    },
+    "approval.php": {
+      "get": 200,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 403,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Officer": {
+    "repair.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 400
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 403
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 403
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 400
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 403
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 403
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 403
+    },
+    "approval.php": {
+      "get": 403,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  },
+  "Officer-Read": {
+    "repair.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_parts.php": {
+      "get": 200,
+      "post": 403
+    },
+    "spare_issue_request.php": {
+      "get": 200,
+      "post": 403
+    },
+    "stock_take.php": {
+      "get": 200,
+      "post": 403
+    },
+    "inspections.php": {
+      "get": 200,
+      "post": 403
+    },
+    "checklist_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "form_templates.php": {
+      "get": 200,
+      "post": 403
+    },
+    "forms.php": {
+      "get": 200,
+      "post": 403
+    },
+    "planning.php": {
+      "get": 400,
+      "post": 403
+    },
+    "supervisor.php": {
+      "get": 400,
+      "post": 403
+    },
+    "approval.php": {
+      "get": 403,
+      "post": 403
+    },
+    "sage_shipments.php": {
+      "get": 200,
+      "post": 403
+    },
+    "permission_diff.php": {
+      "get": 403,
+      "post": 403
+    }
+  }
+}

@@ -616,10 +616,12 @@ export default function IntelligencePage() {
                     <td className="px-3 py-2">{r.min_gap_hours == null ? "—" : fmtNum(r.min_gap_hours, 0)}</td>
                     <td className="px-3 py-2 text-xs">{fmtDt(r.last_wo)}</td>
                     <td className="px-3 py-2 text-right">
+                      {r.asset_id ? (
                       <button type="button" onClick={() => { setF("asset_id", String(r.asset_id)); fetchAll({ asset_id: String(r.asset_id) }); }}
                         className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--cmms-primary)" }}>
                         ดูใบงาน <ArrowRight size={12} aria-hidden="true" />
                       </button>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

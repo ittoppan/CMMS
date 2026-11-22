@@ -220,14 +220,16 @@ try {
             $uid = (int)($_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? 0);
 
             if ($action === 'approve') {
-                requireRole(canApprove(), 'เฉพาะหัวหน้างาน/ผู้จัดการที่อนุมัติคำขอเบิก');
+                requireRole(canApproveType('spare_issue'), 'เฉพาะหัวหน้างาน/ผู้จัดการที่อนุมัติคำขอเบิก');
+                if ((int)$req['requested_by'] === $uid) { http_response_code(403); echo json_encode(['error' => 'ไม่สามารถอนุมัติคำขอของตัวเองได้']); exit; }
                 $pdo->prepare("UPDATE spare_issue_requests SET status = 'Approved', approved_by = ?, approved_at = NOW() WHERE id = ?")->execute([$uid, $id]);
                 Sage300Service::logAudit($uid, 'Spare_Issue', 'Approve_Request', null, "Approved request #$id");
                 echo json_encode(['success' => true, 'status' => 'Approved', 'message' => 'อนุมัติคำขอเบิกเรียบร้อย (รอคลังจ่าย)']);
                 exit;
             }
             if ($action === 'reject') {
-                requireRole(canApprove(), 'เฉพาะหัวหน้างาน/ผู้จัดการที่ปฏิเสธคำขอเบิก');
+                requireRole(canApproveType('spare_issue'), 'เฉพาะหัวหน้างาน/ผู้จัดการที่ปฏิเสธคำขอเบิก');
+                if ((int)$req['requested_by'] === $uid) { http_response_code(403); echo json_encode(['error' => 'ไม่สามารถปฏิเสธคำขอของตัวเองได้']); exit; }
                 $reason = trim((string)($data['reason'] ?? ''));
                 if ($reason === '') { http_response_code(400); echo json_encode(['error' => 'กรุณาระบุเหตุผลการปฏิเสธ']); exit; }
                 $pdo->prepare("UPDATE spare_issue_requests SET status = 'rejected', rejection_reason = ?, approved_by = ?, approved_at = NOW() WHERE id = ?")->execute([$reason, $uid, $id]);

@@ -16,24 +16,27 @@ class ApprovalService {
         string $requesterName,
         array $details = [],
         ?string $approverEmail = null,
-        ?string $approverLineId = null
+        ?string $approverLineId = null,
+        ?int $requesterId = null
     ): array {
         $pdo = getDb();
         
-        // Generate secure 64-character token
+        // Generate secure 64-character token (random_bytes 32 → 64 hex)
         $token = bin2hex(random_bytes(32));
+        // เก็บเฉพาะ hash (sha256) ของ token ใน DB — token จริงส่งในลิงก์เท่านั้น
+        $tokenHash = hash('sha256', $token);
 
         $approverEmail = $approverEmail ?: 'manager@toppan.co.th';
 
         $stmt = $pdo->prepare("
             INSERT INTO approval_requests (
-                request_type, target_id, document_no, title, requester_name,
-                approver_email, approver_line_id, status, approval_token, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW())
+                request_type, target_id, document_no, title, requester_name, requester_id,
+                approver_email, approver_line_id, status, approval_token, approval_token_hashed, expires_at, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW())
         ");
         $stmt->execute([
-            $requestType, $targetId, $documentNo, $title, $requesterName,
-            $approverEmail, $approverLineId, $token
+            $requestType, $targetId, $documentNo, $title, $requesterName, $requesterId,
+            $approverEmail, $approverLineId, $tokenHash
         ]);
 
         $requestId = $pdo->lastInsertId();
@@ -68,12 +71,24 @@ class ApprovalService {
     public static function processApproval(string $token, string $action, ?string $reason = null): array {
         $pdo = getDb();
         
+        $tokenHash = hash('sha256', $token);
         $stmt = $pdo->prepare("SELECT * FROM approval_requests WHERE approval_token = ? LIMIT 1");
-        $stmt->execute([$token]);
+        $stmt->execute([$tokenHash]);
         $req = $stmt->fetch();
 
-        if (!$req) {
+        if (!$req || !hash_equals((string)$req['approval_token'], $tokenHash)) {
             return ['success' => false, 'message' => 'ไม่พบข้อมูลคำขออนุมัติ หรือ Token ไม่ถูกต้อง'];
+        }
+
+        // Expiry check (token ใช้ได้ 7 วัน)
+        if (!empty($req['expires_at']) && strtotime((string)$req['expires_at']) < time()) {
+            return ['success' => false, 'message' => 'Token หมดอายุแล้ว กรุณาขออนุมัติใหม่'];
+        }
+
+        // ห้ามอนุมัติคำขอของตัวเอง
+        $currentUid = (int)($_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? 0);
+        if ($currentUid > 0 && !empty($req['requester_id']) && (int)$req['requester_id'] === $currentUid) {
+            return ['success' => false, 'message' => 'ไม่สามารถอนุมัติคำขอของตัวเองได้'];
         }
 
         if ($req['status'] !== 'pending') {

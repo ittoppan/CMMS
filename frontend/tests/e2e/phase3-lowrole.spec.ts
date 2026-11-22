@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const CREDS = [
-  { name: "User", username: "e2e_user", password: "Test@Cmms2026" },
-  { name: "Viewer", username: "e2e_viewer", password: "Test@Cmms2026" },
-  { name: "Officer-Read", username: "e2e_officer_read", password: "Test@Cmms2026" },
+  { name: "User", username: "e2e_user", password: process.env.E2E_PASSWORD! },
+  { name: "Viewer", username: "e2e_viewer", password: process.env.E2E_PASSWORD! },
+  { name: "Officer-Read", username: "e2e_officer_read", password: process.env.E2E_PASSWORD! },
 ];
 
 const ENDPOINTS = [

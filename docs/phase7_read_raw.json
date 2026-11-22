@@ -1,0 +1,920 @@
+{
+  "Admin": {
+    "cost": {
+      "status": 200,
+      "size": 879
+    },
+    "kpi_dashboard": {
+      "status": 200,
+      "size": 1444
+    },
+    "analytics_advanced": {
+      "status": 200,
+      "size": 16369
+    },
+    "analytics_monthly": {
+      "status": 200,
+      "size": 6008
+    },
+    "reports": {
+      "status": 200,
+      "size": 2693
+    },
+    "workload": {
+      "status": 200,
+      "size": 32326
+    },
+    "notifications_log": {
+      "status": 200,
+      "size": 66560
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9347
+    },
+    "intelligence": {
+      "status": 200,
+      "size": 4970
+    },
+    "predictive_maintenance": {
+      "status": 200,
+      "size": 13355
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 952
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 200,
+      "size": 1019
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 200,
+      "size": 30
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 200,
+      "size": 1538
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Manager": {
+    "cost": {
+      "status": 200,
+      "size": 879
+    },
+    "kpi_dashboard": {
+      "status": 200,
+      "size": 1444
+    },
+    "analytics_advanced": {
+      "status": 200,
+      "size": 16369
+    },
+    "analytics_monthly": {
+      "status": 200,
+      "size": 6008
+    },
+    "reports": {
+      "status": 200,
+      "size": 2697
+    },
+    "workload": {
+      "status": 200,
+      "size": 32326
+    },
+    "notifications_log": {
+      "status": 200,
+      "size": 66560
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9353
+    },
+    "intelligence": {
+      "status": 200,
+      "size": 4974
+    },
+    "predictive_maintenance": {
+      "status": 200,
+      "size": 13355
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 952
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 200,
+      "size": 1019
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 200,
+      "size": 30
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 200,
+      "size": 1538
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Asst.Manager": {
+    "cost": {
+      "status": 200,
+      "size": 879
+    },
+    "kpi_dashboard": {
+      "status": 200,
+      "size": 1444
+    },
+    "analytics_advanced": {
+      "status": 200,
+      "size": 16369
+    },
+    "analytics_monthly": {
+      "status": 200,
+      "size": 6008
+    },
+    "reports": {
+      "status": 200,
+      "size": 2707
+    },
+    "workload": {
+      "status": 200,
+      "size": 32326
+    },
+    "notifications_log": {
+      "status": 200,
+      "size": 66560
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9363
+    },
+    "intelligence": {
+      "status": 200,
+      "size": 4984
+    },
+    "predictive_maintenance": {
+      "status": 200,
+      "size": 13355
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 952
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 200,
+      "size": 1019
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 200,
+      "size": 30
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Foreman": {
+    "cost": {
+      "status": 403,
+      "size": 162
+    },
+    "kpi_dashboard": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_advanced": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_monthly": {
+      "status": 403,
+      "size": 93
+    },
+    "reports": {
+      "status": 200,
+      "size": 2601
+    },
+    "workload": {
+      "status": 200,
+      "size": 32326
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9355
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 952
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 71
+    },
+    "feedback": {
+      "status": 403,
+      "size": 92
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Operate": {
+    "cost": {
+      "status": 403,
+      "size": 162
+    },
+    "kpi_dashboard": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_advanced": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_monthly": {
+      "status": 403,
+      "size": 93
+    },
+    "reports": {
+      "status": 200,
+      "size": 2478
+    },
+    "workload": {
+      "status": 403,
+      "size": 92
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 7964
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 169
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 71
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "User": {
+    "cost": {
+      "status": 403,
+      "size": 90
+    },
+    "kpi_dashboard": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_advanced": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_monthly": {
+      "status": 403,
+      "size": 93
+    },
+    "reports": {
+      "status": 403,
+      "size": 91
+    },
+    "workload": {
+      "status": 403,
+      "size": 92
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9041
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 403,
+      "size": 89
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 169
+    },
+    "inspection_dashboard": {
+      "status": 403,
+      "size": 94
+    },
+    "inspection_history": {
+      "status": 403,
+      "size": 94
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 90
+    },
+    "feedback": {
+      "status": 403,
+      "size": 92
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Viewer": {
+    "cost": {
+      "status": 403,
+      "size": 162
+    },
+    "kpi_dashboard": {
+      "status": 200,
+      "size": 1444
+    },
+    "analytics_advanced": {
+      "status": 200,
+      "size": 16369
+    },
+    "analytics_monthly": {
+      "status": 200,
+      "size": 6008
+    },
+    "reports": {
+      "status": 200,
+      "size": 2617
+    },
+    "workload": {
+      "status": 200,
+      "size": 32326
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9051
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 169
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 71
+    },
+    "feedback": {
+      "status": 403,
+      "size": 92
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Officer": {
+    "cost": {
+      "status": 403,
+      "size": 162
+    },
+    "kpi_dashboard": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_advanced": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_monthly": {
+      "status": 403,
+      "size": 93
+    },
+    "reports": {
+      "status": 200,
+      "size": 2603
+    },
+    "workload": {
+      "status": 403,
+      "size": 92
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9054
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 169
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 71
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  },
+  "Officer-Read": {
+    "cost": {
+      "status": 403,
+      "size": 162
+    },
+    "kpi_dashboard": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_advanced": {
+      "status": 403,
+      "size": 93
+    },
+    "analytics_monthly": {
+      "status": 403,
+      "size": 93
+    },
+    "reports": {
+      "status": 200,
+      "size": 2614
+    },
+    "workload": {
+      "status": 403,
+      "size": 92
+    },
+    "notifications_log": {
+      "status": 403,
+      "size": 100
+    },
+    "global_search": {
+      "status": 200,
+      "size": 57
+    },
+    "dashboard": {
+      "status": 200,
+      "size": 9065
+    },
+    "intelligence": {
+      "status": 403,
+      "size": 96
+    },
+    "predictive_maintenance": {
+      "status": 403,
+      "size": 96
+    },
+    "pm_reminders": {
+      "status": 200,
+      "size": 287
+    },
+    "pm_ical": {
+      "status": 200,
+      "size": 169
+    },
+    "inspection_dashboard": {
+      "status": 200,
+      "size": 330
+    },
+    "inspection_history": {
+      "status": 200,
+      "size": 47
+    },
+    "spare_usage": {
+      "status": 400,
+      "size": 50
+    },
+    "asset_stats": {
+      "status": 400,
+      "size": 35
+    },
+    "report_schedule": {
+      "status": 403,
+      "size": 71
+    },
+    "feedback": {
+      "status": 200,
+      "size": 52
+    },
+    "departments": {
+      "status": 200,
+      "size": 2964
+    },
+    "machine_bom": {
+      "status": 403,
+      "size": 95
+    },
+    "sage_items": {
+      "status": 400,
+      "size": 32
+    },
+    "iot": {
+      "status": 403,
+      "size": 87
+    },
+    "repair_options": {
+      "status": 200,
+      "size": 12203
+    },
+    "asset_hub": {
+      "status": 400,
+      "size": 80
+    }
+  }
+}

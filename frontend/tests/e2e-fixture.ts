@@ -47,6 +47,8 @@ if ($cmd === 'up') {
   // (ตัวนับต่อ username ของบัญชีจริงยังทำงานตามปกติ; ที่ล้างคือ IP loopback ที่ทุก test ใช้ร่วมกัน)
   $pdo->exec("DELETE FROM iot_rate_limits WHERE scope_key = 'login_user:e2e_bot' OR scope_key LIKE 'login_ip:%'");
   $pdo->exec("DELETE FROM users WHERE username='e2e_bot'");
+  // เปิดใช้งานบัญชีทดสอบ e2e_* ระหว่างรันเทส
+  $pdo->exec("UPDATE users SET is_active=1 WHERE username LIKE 'e2e_%'");
   $hash = password_hash($pw, PASSWORD_BCRYPT);
   $pdo->prepare("INSERT INTO users (role_id, role, username, email, password, full_name, is_active, must_change_password) VALUES (2,'engineer','e2e_bot','e2e_bot@cmms.local',?,'E2E Visual Bot',1,0)")->execute([$hash]);
   echo "ok";
@@ -75,6 +77,7 @@ async function globalTeardown(): Promise<void> {
   fs.writeFileSync(tmp, `<?php
 require_once 'C:/inetpub/wwwroot/cmms-tpt/src/config/db.php';
 $pdo = getDb();
+$pdo->exec("UPDATE users SET is_active=0 WHERE username LIKE 'e2e_%'");
 echo "deleted:" . $pdo->exec("DELETE FROM users WHERE username='e2e_bot'");
 `);
   try {

@@ -7,15 +7,23 @@ try {
     $pdo = getDb();
     requireLogin($pdo); // ต้อง login ก่อนดาวน์โหลดแผน PM
 
-    $rows = $pdo->query("
-        SELECT p.id, p.title, p.description, p.due_date, p.status,
+    // role-based scope: Foreman+ (1,2,6,7) เห็นทั้งหมด; Operate/Officer/User/Viewer/Officer-Read เห็นเฉพาะที่มอบหมายให้ตัวเอง
+    $uid = (int)($_SESSION['user_id'] ?? 0);
+    $rid = (int)($_SESSION['role_id'] ?? 0);
+    $canSeeAll = in_array($rid, [1, 2, 6, 7], true);
+    $scopeSql = $canSeeAll ? '' : ' AND p.assigned_to = ?';
+    $params = $canSeeAll ? [] : [$uid];
+
+    $sql = "SELECT p.id, p.title, p.description, p.due_date, p.status,
                u.full_name AS assigned_to_name, a.name AS asset_name
         FROM pm_am p
         LEFT JOIN users u ON p.assigned_to = u.id
         LEFT JOIN asset_registry a ON p.asset_id = a.id
-        WHERE p.due_date IS NOT NULL AND p.due_date >= '1970-01-01'
-        ORDER BY p.due_date
-    ")->fetchAll(PDO::FETCH_ASSOC);
+        WHERE p.due_date IS NOT NULL AND p.due_date >= '1970-01-01'" . $scopeSql . "
+        ORDER BY p.due_date";
+    $st = $pdo->prepare($sql);
+    $st->execute($params);
+    $rows = $st->fetchAll(PDO::FETCH_ASSOC);
 
     $esc = function (string $s): string {
         return str_replace(["\r", "\n", ","], ['', ' ', ','], trim((string)$s));

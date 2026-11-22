@@ -57,3 +57,45 @@
 
 (คอลัมน์ก่อนแก้ดูตารางด้านบน; หลังแก้ = สถานะปัจจุบัน)
 
+
+---
+
+## การอ่านข้อมูล (เฟส 7)
+
+วัดด้วย phase7-read.spec.ts (GET เท่านั้น) ผลดิบ: docs/phase7_read_raw.json
+
+### สถานะ HTTP (200 = อ่านได้, 403 = บล็อก, 400 = validation/พารามิเตอร์)
+
+| endpoint | Admin | Mgr | Asst | Foreman | Operate | User | Viewer | Officer | OffRead | ควรอ่าน (ตามเมนู) | ช่องว่าง |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| cost | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 | Mgr+/Asst+ | OK |
+| kpi_dashboard | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | ทุก role (dashboard) | User/Operate/Viewer อ่าน KPI ทั้งโรงงาน — สูง |
+| analytics_advanced | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+/Viewer | Foreman/Operate/User/Officer อ่าน analytics ทั้งโรงงาน — สูง |
+| analytics_monthly | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+/Viewer | เหมือนด้านบน — สูง |
+| reports | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+/Viewer/Officer | Foreman/Operate/User อ่าน reports ทั้งโรงงาน — สูง |
+| workload | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 403 | Mgr+/Asst+/Foreman | Operate/User/Viewer/Officer อ่าน workload ทั้งโรงงาน — สูง |
+| notifications_log | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+ | Foreman/Operate/User/Viewer/Officer อ่าน log แจ้งเตือนทั้งโรงงาน — สูง |
+| global_search | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | ทุก role (ในขอบเขต) | อาจคืนข้อมูลนอกสิทธิ์ — ต้องตรวจ |
+| dashboard | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | ทุก role | OK (กรองตาม role ฝั่ง UI) |
+| intelligence | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+ | Foreman/Operate/User/Viewer/Officer อ่าน intelligence — สูง |
+| predictive_maintenance | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+ | เหมือนด้านบน — สูง |
+| pm_reminders | 200 | 200 | 200 | 200 | 200 | 403 | 200 | 200 | 200 | Mgr+/Asst+/Foreman/Operate/Viewer | User บล็อกแล้ว OK; Officer อ่านได้ (ตามเมนู) |
+| pm_ical | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+/Foreman | Operate/User/Viewer/Officer อ่าน PM calendar ทั้งโรงงาน — กลาง |
+| inspection_dashboard | 200 | 200 | 200 | 200 | 200 | 403 | 200 | 200 | 200 | Mgr+/Asst+/Foreman/Operate/Viewer/Officer | User บล็อกแล้ว OK |
+| inspection_history | 200 | 200 | 200 | 200 | 200 | 403 | 200 | 200 | 200 | Mgr+/Asst+/Foreman/Operate/Viewer/Officer | User บล็อกแล้ว OK |
+| spare_usage | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | ต้อง param | ไม่ได้ข้อมูล (validation) |
+| asset_stats | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | ต้อง param | ไม่ได้ข้อมูล |
+| report_schedule | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 | Mgr+/Asst+ | Foreman บล็อกแล้ว OK; Operate/User/Viewer/Officer บล็อกแล้ว OK |
+| feedback | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+/Officer | Foreman/Operate/User/Viewer อ่าน feedback ทั้งหมด — กลาง |
+| departments | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | ทุก role (dropdown) | ยกเว้น: ข้อมูลแผนกไม่อ่อนไหว — อนุญาต |
+| machine_bom | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | 200 | Mgr+/Asst+ | Foreman/Operate/User/Viewer/Officer อ่าน BOM — กลาง |
+| sage_items | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | ต้อง param | ไม่ได้ข้อมูล |
+| iot | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 403 | 403 | Mgr+ (iot/monitor) | OK |
+| repair_options | 200 | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 200 | ทุก role ที่แจ้งซ่อม | Operate/User/Viewer บล็อก (repair_options มีข้อมูล?) — ต้องตรวจ |
+| asset_hub | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | ต้อง param | ไม่ได้ข้อมูล |
+
+### สรุปช่องว่างสูง (ต้องแก้)
+- kpi_dashboard, analytics_advanced, analytics_monthly, intelligence, predictive_maintenance, reports, workload, notifications_log: ทุก role อ่านได้ (รวม User/Operate) — ควรเป็น Mgr+/Asst+/Viewer ตามเมนู
+- global_search: ทุก role ได้ 200 (ขนาด 57 bytes) — ต้องตรวจว่าคืนข้อมูลนอกสิทธิ์หรือไม่
+- pm_ical, inspection_dashboard/history, feedback, machine_bom: เปิดกว้างเกิน
+- repair_options: Operate/User/Viewer ได้ 403 (อาจกระทบ flow แจ้งซ่อม — ต้องตรวจ)

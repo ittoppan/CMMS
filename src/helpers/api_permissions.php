@@ -38,9 +38,9 @@ const API_ENDPOINT_PERMISSIONS = [
     'approval.php'               => ['read' => ['request', 'view'],       'write' => ['request', 'approve']],
     'planning.php'               => ['read' => ['repair', 'view'],        'write' => ['repair', 'schedule']],
     'supervisor.php'             => ['read' => ['repair', 'view'],        'write' => ['repair', 'verify']],
-    'workload.php'               => ['read' => ['repair', 'view'],        'write' => null],
+    'workload.php'               => ['read' => ['workload', 'view'],     'write' => null],
     'dashboard.php'              => ['read' => ['dashboard', 'view'],     'write' => null],
-    'kpi_dashboard.php'          => ['read' => ['dashboard', 'view'],     'write' => null],
+    'kpi_dashboard.php'          => ['read' => ['analytics', 'view'],     'write' => null],
 
     /* ---------- PM / Inspection / Calibration ---------- */
     'pm_am.php'                  => ['read' => ['pm_am', 'view'],         'write' => ['pm_am', 'edit']],
@@ -69,7 +69,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'asset_data_quality.php'     => ['read' => ['asset', 'view'],         'write' => null],
     'asset_stats.php'            => ['read' => ['dashboard', 'view'],     'write' => null],
     'asset_reports.php'          => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
-    'machine_bom.php'            => ['read' => ['asset', 'view'],         'write' => ['asset', 'edit']],
+    'machine_bom.php'            => ['read' => ['machine_bom', 'view'],   'write' => ['asset', 'edit']],
     'scan.php'                   => ['read' => ['asset', 'view'],         'write' => null],
     'reliability.php'            => ['read' => ['reliability', 'read'],   'write' => ['reliability', 'write']],
     'asset_reliability.php'      => ['read' => ['reliability', 'read'],   'write' => ['reliability', 'write']],
@@ -100,13 +100,14 @@ const API_ENDPOINT_PERMISSIONS = [
     'knowledge.php'              => ['read' => ['knowledge', 'read'],     'write' => ['knowledge', 'create']],
 
     /* ---------- Report / Analytics / Cost ---------- */
-    'reports.php'                => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
+    'reports.php'                => ['read' => ['reports', 'view'],       'write' => ['report', 'export']],
     'report_schedule.php'        => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
     // import: ทั้งอ่านและเขียนต้องมี report:export เพราะเมนู reports/import_excel จำกัดเฉพาะ 1,2,6
     'import_excel.php'           => ['read' => ['report', 'export'],      'write' => ['settings', 'manage']],
-    'analytics_advanced.php'     => ['read' => ['report', 'view'],        'write' => null],
-    'analytics_monthly.php'      => ['read' => ['report', 'view'],        'write' => null],
-    'intelligence.php'           => ['read' => ['report', 'view'],        'write' => null],
+    'analytics_advanced.php'     => ['read' => ['analytics', 'view'],     'write' => null],
+    'analytics_monthly.php'      => ['read' => ['analytics', 'view'],     'write' => null],
+    'intelligence.php'           => ['read' => ['intelligence', 'view'],   'write' => null],
+    'predictive_maintenance.php' => ['read' => ['intelligence', 'view'],   'write' => null],
     'cost.php'                   => ['read' => ['report', 'view'],        'write' => null],
 
     /* ---------- System / Settings / User management ---------- */
@@ -124,7 +125,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'menu_permissions.php'       => ['read' => null,                      'write' => ['settings', 'manage']],
     // ใช้ตัดสินการแสดงปุ่มใน UI: คืนเฉพาะสิทธิ์ของตัวเอง (ไม่มี PII) จึงเปิดให้ผู้ที่ล็อกอินทุกคน
     'my_permissions.php'         => ['read' => null,                      'write' => null],
-    'repair_options.php'         => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    'repair_options.php'         => ['read' => ['repair', 'view'],       'write' => ['settings', 'manage']],
     'departments.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'pwa_settings.php'           => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'page_editor.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
@@ -143,9 +144,9 @@ const API_ENDPOINT_PERMISSIONS = [
 
     /* ---------- Notification / Feedback / Own profile ---------- */
     'notifications.php'          => ['read' => ['notification', 'view'],  'write' => ['notification', 'view']],
-    'notifications_log.php'      => ['read' => ['notification', 'view'],  'write' => null],
+    'notifications_log.php'      => ['read' => ['notification_log', 'view'], 'write' => null],
     'push_subscribe.php'         => ['read' => null,                      'write' => null], // การสมัครรับ push ของตัวเอง
-    'feedback.php'               => ['read' => null,                      'write' => null], // ผู้ใช้ส่งข้อเสนอแนะของตัวเอง
+    'feedback.php'               => ['read' => ['feedback', 'view'],    'write' => null], // ผู้ใช้ส่งข้อเสนอแนะของตัวเอง
     'profile.php'                => ['read' => null,                      'write' => null], // ข้อมูลส่วนตัวของตัวเอง
 
     /* ---------- Public / token / signature (ไม่ใช้ session permission) ---------- */
@@ -185,6 +186,7 @@ const API_PERMISSION_ENFORCED = [
     'analytics_advanced.php',
     'analytics_monthly.php',
     'intelligence.php',
+    'predictive_maintenance.php',
     'cost.php',
     // PM / Inspection
     'pm_am.php',
@@ -231,6 +233,8 @@ const API_PERMISSION_ENFORCED = [
     'iot.php',
     'suppliers.php',
     'knowledge.php',
+    'notifications_log.php',
+    'feedback.php',
     // Workforce
     'workforce.php',
     // Settings (read settings:view)
@@ -298,5 +302,5 @@ function api_enforce_endpoint_permission(PDO $pdo): void
         }
     }
 
-    requirePerm($pdo, (string)$module, (string)$action, 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้ (' . $module . ':' . $action . ')');
+    requirePerm($pdo, (string)$module, (string)$action, 'คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้ (' . $module . ':' . $action . ')');
 }

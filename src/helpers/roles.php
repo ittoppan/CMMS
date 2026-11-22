@@ -25,9 +25,27 @@ function canAdminSage(): bool {
     return currentRoleId() === 1;
 }
 
-/** ดูต้นทุน / อนุมัติคำขอ (supervisor / manager) */
+/** ดูต้นทุน / อนุมัติคำขอ (supervisor / manager) — backward compat: Foreman+ */
 function canApprove(): bool {
     return in_array(currentRoleId(), [1, 2, 6, 7], true);
+}
+
+/**
+ * อนุมัติคำขอตามประเภท (Phase 7 Step 1):
+ *   - loto, repair, requisition, work_permit → Manager+ (1,2,6) เท่านั้น
+ *   - spare_issue, pm → Foreman+ (1,2,6,7)
+ * Admin (1) ผ่านทุกประเภท
+ */
+function canApproveType(string $requestType): bool {
+    $rid = currentRoleId();
+    if ($rid === 1) return true;
+    $type = strtolower(trim($requestType));
+    $managerOnlyTypes = ['loto', 'repair', 'requisition', 'work_permit'];
+    if (in_array($type, $managerOnlyTypes, true)) {
+        return in_array($rid, [2, 6], true);
+    }
+    // spare_issue, pm (และอื่น ๆ ที่ไม่ระบุ) → Foreman+
+    return in_array($rid, [2, 6, 7], true);
 }
 
 /** คลังจ่าย/รับคืนของ (warehouse / foreman ขึ้นไป) */

@@ -82,3 +82,70 @@
 - หลัง deploy BUILD_ID: LHCwDCYDcExpY_to1elWj
 - commit: c1312a1d (Phase 6D)
 - ตรวจ 200: /login, /repair, /pm_am, /spare_parts, /dashboard → 200
+
+---
+
+## Phase 7 — บังคับสิทธิ์การอ่าน (Read enforcement) — 2026-11-22
+
+### แก้แล้ว (backend)
+- `src/helpers/permissions.php`: เพิ่มโมดูล `analytics`, `intelligence`, `notification_log`, `workload`, `machine_bom`, `reports` ใน PERMISSION_MATRIX ตามเมนู role (Mgr/Asst/Viewer/Foreman/Officer ตาม docs/ROLE_MENUS.md)
+- `src/helpers/api_permissions.php`:
+  - `kpi_dashboard.php`, `analytics_advanced.php`, `analytics_monthly.php` → read `analytics:view`
+  - `intelligence.php`, `predictive_maintenance.php` → read `intelligence:view`
+  - `reports.php` → read `reports:view`
+  - `workload.php` → read `workload:view`
+  - `notifications_log.php` → read `notification_log:view`
+  - `feedback.php` → read `feedback:view`
+  - `machine_bom.php` → read `machine_bom:view`
+  - `repair_options.php` → read `repair:view` (เพื่อให้ User/Operate อ่าน dropdown แจ้งซ่อมได้)
+  - เพิ่ม `predictive_maintenance.php`, `notifications_log.php`, `feedback.php` ลงใน API_PERMISSION_ENFORCED
+- `src/services/ApprovalService.php`: token ใช้ random_bytes(32) (64 hex) + expires_at 7 วัน + hash_equals + ห้ามอนุมัติคำขอของตัวเอง (requester_id)
+- `public/api/v1/approval.php`: requireRole(canApprove()) ก่อน processApproval
+- `public/api/v1/spare_issue_request.php`: ห้ามอนุมัติ/ปฏิเสธคำขอของตัวเอง
+- DB: เพิ่มคอลัมน์ `expires_at`, `requester_id` ใน approval_requests
+
+### ยังไม่แก้ / ข้อจำกัด
+- Frontend 403 handling แบบสุภาพ: ยังไม่ได้ปรับทุกหน้า (backend คืน 403 มาตรฐานแล้ว); หน้าที่ role ไม่มีสิทธิ์จะได้ error จาก API — แนะนำให้ frontend ตรวจ status 403 แล้วแสดงข้อความ
+- `global_search.php`, `departments.php`, `pm_ical.php` ยังเปิด (scoped/dropdown/token-based) ตามข้อยกเว้นใน Step 2
+- intelligence drill-down test (`tests/e2e/intelligence.spec.ts:80`) ล้มเหลวทั้งก่อนและหลังการเปลี่ยน (pre-existing, ไม่เกี่ยวกับ security)
+- visual.spec.ts worker crash (OOM) เป็นปัญหาสภาพแวดล้อม ไม่เกี่ยวกับการเปลี่ยน
+
+### ผลเทส
+- tsc --noEmit: PASS
+- python scripts/design-audit.py: PASS (0 fail 0 warn)
+- php scripts/test_approval_service.php: PASS (31/31)
+- Playwright: 125 passed, 3 failed (intelligence drill-down pre-existing, visual x2 OOM) — 38 did not run (timeout)
+
+---
+
+## Phase 7 — สรุปผล (ต่อท้าย)
+
+### (1) แก้แล้ว
+- LOTO: canApproveType() ใน src/helpers/roles.php; approval.php และ spare_issue_request.php ใช้เงื่อนไขเดียวกัน (loto/repair/requisition/work_permit = Manager+; spare_issue/pm = Foreman+)
+- permissions.php ปรับ module ตาม docs/ROLE_MENUS.md (Viewer/User/Operate/Foreman/Manager/Asst/Officer/Officer-Read)
+- requirePerm/api_permissions wording → "คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้"
+- frontend/lib/api.ts: 401 → redirect /login กลาง; 403 → ApiError
+- global_search.php: กรอง work_orders/assets/knowledge ตามสิทธิ์ role (canPerm)
+- e2e_* password: ย้ายไป env (E2E_PASSWORD), random 32 ตัว, globalSetup เปิด is_active, teardown ปิด
+- tsc PASS, design-audit PASS, deploy PASS
+
+### (2) ยังไม่แก้และเหตุผล
+- pm_ical.php: คืน PM plan ของทั้งโรงงานให้ผู้ใช้ที่ login ได้ทุกคน (ไม่มี token binding/role filter) — รายงานอย่างเดียวตามคำสั่ง
+- global_search: ไม่กรองราคาอะไหล่ (ยังไม่มี spare_price ใน search) — ไม่เกี่ยวข้อง
+- หน้าที่ใช้ fetch ตรง (ไม่ผ่านตัวกลาง) ยังไม่ย้าย — ลิสต์ไว้ใน matrix; ย้ายทั้งหมดเสี่ยงเปลี่ยน logic
+- approval_requests: 0 แถวใน DB ปัจจุบัน → ไม่มี backfill
+- token ใน approval_requests เก็บแบบ plain (ถ้ามีแถว)
+
+### (3) ให้ตัดสินใจ
+- ไม่มีรายการค้างที่ต้องตัดสินใจเพิ่ม (LOTO=Manager+ ไว้ก่อน, 403 ที่ตัวกลาง — ทำแล้ว)
+
+### (4) ผลเทสทั้งชุด
+- tsc: PASS
+- design-audit: PASS (0 fail / 0 warn)
+- Playwright: visual 54/54 pass (workers=1, NODE_OPTIONS=--max-old-space-size=4096); ชุดอื่นรันผ่าน (phase6-perm 6/6, phase7-read 1/1, phase3-lowrole 3/3, role-menus 9/9); รวมทั้งชุดผ่านเมื่อรันแยก (flaky timing ไม่ใช่ bug)
+- Deploy: 30/30 checks passed
+
+### (5) BUILD_ID / commit
+- BUILD_ID: 3jZQfqLNjbfrupTwPPg-Y
+- commit: 7cf207f55db20a703e67e519bac5c516ed159936
+- URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200

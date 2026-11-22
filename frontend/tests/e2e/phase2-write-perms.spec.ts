@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-const VIEWER_CREDS = { username: "e2e_viewer", password: "Test@Cmms2026" };
-const OFFICER_READ_CREDS = { username: "e2e_officer_read", password: "Test@Cmms2026" };
-const OPERATE_CREDS = { username: "e2e_operate", password: "Test@Cmms2026" };
+const VIEWER_CREDS = { username: "e2e_viewer", password: process.env.E2E_PASSWORD! };
+const OFFICER_READ_CREDS = { username: "e2e_officer_read", password: process.env.E2E_PASSWORD! };
+const OPERATE_CREDS = { username: "e2e_operate", password: process.env.E2E_PASSWORD! };
 
 async function getCsrf(page: any): Promise<string> {
   const res = await page.request.get("/api/v1/csrf.php");

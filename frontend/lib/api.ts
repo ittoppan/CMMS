@@ -97,7 +97,12 @@ export async function apiFetch(
 
   // ไม่ส่ง property liff ต่อไปยัง fetch
   const { liff: _liff, ...restInit } = (init ?? {}) as ApiFetchInit;
-  return fetch(url, { ...restInit, headers, credentials: "include" });
+  const res = await fetch(url, { ...restInit, headers, credentials: "include" });
+  // 401 → พาไปหน้า login (central handling)
+  if (res.status === 401 && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    window.location.href = "/login";
+  }
+  return res;
 }
 
 /** fetch + parse JSON + normalize error (throw ApiError) */

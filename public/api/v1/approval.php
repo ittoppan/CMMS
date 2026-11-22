@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../../src/services/ApprovalService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/helpers/roles.php';
 // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
     enforceCsrf();
@@ -95,6 +96,15 @@ try {
                 exit;
             }
             
+            // ตรวจสิทธิ์ตามประเภทคำขอ (loto/repair/requisition = Manager+; spare_issue/pm = Foreman+)
+            $reqType = '';
+            try {
+                $tokenHash = hash('sha256', $token);
+                $tq = $pdo->prepare('SELECT request_type FROM approval_requests WHERE approval_token = ? LIMIT 1');
+                $tq->execute([$tokenHash]);
+                $reqType = (string)$tq->fetchColumn();
+            } catch (Throwable $e) { $reqType = ''; }
+            requireRole(canApproveType($reqType !== '' ? $reqType : 'repair'), 'เฉพาะผู้จัดการ/หัวหน้างานที่อนุมัติเอกสารประเภทนี้ได้');
             $result = ApprovalService::processApproval($token, $action, $reason);
             if (empty($result['success'])) {
                 $code = !empty($result['already_processed']) ? 409 : 400;

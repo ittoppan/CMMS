@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "node:path";
+// โหลด .env จาก root โปรเจกต์ (เก็บรหัสผ่านทดสอบใน env เท่านั้น)
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 
 /**
  * E2E smoke tests â€” target the LIVE standalone server on :3001

@@ -45,6 +45,13 @@ const PERMISSION_MATRIX = [
         'supplier'   => ['view', 'create', 'edit', 'delete'],
         'calibration'=> ['view', 'create', 'edit', 'delete'],
         'report'     => ['view', 'export'],
+        'analytics'  => ['view'],
+        'intelligence'=> ['view'],
+        'notification_log' => ['view'],
+        'workload'   => ['view'],
+        'machine_bom'=> ['view'],
+        'reports'    => ['view'],
+        'feedback'   => ['view'],
         'dashboard'  => ['view'],
         'shift_handover' => ['write'],
         'utility_energy' => ['write'],
@@ -81,6 +88,13 @@ const PERMISSION_MATRIX = [
         'supplier'   => ['view', 'create', 'edit', 'delete'],
         'calibration'=> ['view', 'create', 'edit', 'delete'],
         'report'     => ['view', 'export'],
+        'analytics'  => ['view'],
+        'intelligence'=> ['view'],
+        'notification_log' => ['view'],
+        'workload'   => ['view'],
+        'machine_bom'=> ['view'],
+        'reports'    => ['view'],
+        'feedback'   => ['view'],
         'dashboard'  => ['view'],
         'shift_handover' => ['write'],
         'utility_energy' => ['write'],
@@ -116,6 +130,10 @@ const PERMISSION_MATRIX = [
         'supplier'   => ['view'],
         'calibration'=> ['view', 'create', 'edit'],
         'report'     => ['view'],
+        'reports'    => ['view'],
+        'workload'   => ['view'],
+        'notification'=> ['view'],
+        'reliability'=> ['read'],
         'dashboard'  => ['view'],
         'shift_handover' => ['write'],
         'utility_energy' => ['write'],
@@ -141,7 +159,7 @@ const PERMISSION_MATRIX = [
         // Foreman ต้องอ่าน departments/facility_layout (ตัวกรองแผนก + ผังอาคาร) แต่ไม่จัดการ settings
         'settings'   => ['view'],
     ],
-    3 => [ // Technician — ช่าง
+    3 => [ // Technician — ช่าง (Operate)
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
         'request'    => ['view', 'create'],
         'asset'      => ['view'],
@@ -149,6 +167,8 @@ const PERMISSION_MATRIX = [
         'inspection' => ['view', 'execute'],
         'spare_parts'=> ['view', 'request'],
         'report'     => ['view'],
+        'reports'    => ['view'],
+        'feedback'   => ['view'],
         'dashboard'  => ['view'],
         'shift_handover' => ['write'],
         'utility_energy' => ['write'],
@@ -159,10 +179,10 @@ const PERMISSION_MATRIX = [
         'document'   => ['view'],
         'training'   => ['view'],
         'workforce'  => ['view', 'capacity_view'],
-        // A technician records execution progress only. They cannot re-plan the
-        // shutdown, cannot edit readiness, and cannot touch startup/closeout.
+        // Operate sees reports/*, shutdown execution/readiness, workforce/workload menus
         'shutdown'   => ['view', 'execute'],
         'reliability'=> ['read', 'export'],
+        'notification'=> ['view'],
         // A technician reads knowledge and can tell the system whether it helped.
         // Recording the verdict is what makes the usage data real; writing the
         // knowledge is not theirs to do.
@@ -189,6 +209,9 @@ const PERMISSION_MATRIX = [
         'audit_log'  => ['view'],
         'document'   => ['view'],
         'report'     => ['view', 'export'],
+        'reports'    => ['view'],
+        'feedback'   => ['view'],
+        'notification'=> ['view'],
         'dashboard'  => ['view'],
         // เมนูที่ได้รับใน menu_permissions แต่ยังไม่มีใน matrix → เพิ่มให้ข้อมูลโหลดได้จริง
         'calibration' => ['view', 'create', 'edit'],
@@ -204,7 +227,6 @@ const PERMISSION_MATRIX = [
         'repair'     => ['view', 'create'],
         'request'    => ['view', 'create'],
         'asset'      => ['view'],
-        'report'     => ['view'],
         'dashboard'  => ['view'],
         'notification'=> ['view'],
         'knowledge'  => ['read', 'search'],
@@ -220,6 +242,10 @@ const PERMISSION_MATRIX = [
         'supplier'   => ['view'],
         'calibration'=> ['view'],
         'report'     => ['view'],
+        'analytics'  => ['view'],
+        'reports'    => ['view'],
+        'notification'=> ['view'],
+        'workload'   => ['view'],
         'dashboard'  => ['view'],
         'failure'    => ['view'],
         'safety'     => ['view'],
@@ -249,11 +275,15 @@ const PERMISSION_MATRIX_BY_ROLE_NAME = [
         'audit_log'  => ['view'],
         'document'   => ['view'],
         'report'     => ['view', 'export'],
+        'reports'    => ['view'],
+        'feedback'   => ['view'],
+        'notification'=> ['view'],
         'dashboard'  => ['view'],
         'calibration' => ['view'],
         'pm_am'      => ['view'],
         'inspection' => ['view'],
         'asset'      => ['view'],
+        'repair'     => ['view'],
         'knowledge'  => ['read', 'search', 'feedback'],
         'training'   => ['view'],
         'workforce'  => ['view', 'capacity_view'],
@@ -339,7 +369,7 @@ function canPerm(PDO $pdo, string $module, string $action): bool {
 }
 
 /** middleware — ไม่มีสิทธิ์ตอบ 403 (รูปมาตรฐาน + audit security event) แล้วจบ request */
-function requirePerm(PDO $pdo, string $module, string $action, string $message = 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้'): void {
+function requirePerm(PDO $pdo, string $module, string $action, string $message = 'คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้'): void {
     if (canPerm($pdo, $module, $action)) return;
     api_forbidden($pdo, 'FORBIDDEN', $message);
 }

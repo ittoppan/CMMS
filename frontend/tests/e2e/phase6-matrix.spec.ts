@@ -5,15 +5,15 @@ import path from "path";
 const BASE = "http://localhost:8081";
 
 const ROLES = [
-  { name: "Admin", username: "e2e_admin", password: "Test@Cmms2026" },
-  { name: "Manager", username: "e2e_manager", password: "Test@Cmms2026" },
-  { name: "Asst.Manager", username: "e2e_asstmanager", password: "Test@Cmms2026" },
-  { name: "Foreman", username: "e2e_foreman", password: "Test@Cmms2026" },
-  { name: "Operate", username: "e2e_operate", password: "Test@Cmms2026" },
-  { name: "User", username: "e2e_user", password: "Test@Cmms2026" },
-  { name: "Viewer", username: "e2e_viewer", password: "Test@Cmms2026" },
-  { name: "Officer", username: "e2e_officer", password: "Test@Cmms2026" },
-  { name: "Officer-Read", username: "e2e_officer_read", password: "Test@Cmms2026" },
+  { name: "Admin", username: "e2e_admin", password: process.env.E2E_PASSWORD! },
+  { name: "Manager", username: "e2e_manager", password: process.env.E2E_PASSWORD! },
+  { name: "Asst.Manager", username: "e2e_asstmanager", password: process.env.E2E_PASSWORD! },
+  { name: "Foreman", username: "e2e_foreman", password: process.env.E2E_PASSWORD! },
+  { name: "Operate", username: "e2e_operate", password: process.env.E2E_PASSWORD! },
+  { name: "User", username: "e2e_user", password: process.env.E2E_PASSWORD! },
+  { name: "Viewer", username: "e2e_viewer", password: process.env.E2E_PASSWORD! },
+  { name: "Officer", username: "e2e_officer", password: process.env.E2E_PASSWORD! },
+  { name: "Officer-Read", username: "e2e_officer_read", password: process.env.E2E_PASSWORD! },
 ];
 
 const ENDPOINTS = [

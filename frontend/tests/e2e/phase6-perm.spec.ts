@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 const BASE = "http://localhost:8081";
 
 async function login(request: any, username: string) {
-  await request.post(`${BASE}/api/auth/login.php`, { data: { username, password: "Test@Cmms2026" } });
+  await request.post(`${BASE}/api/auth/login.php`, { data: { username, password: process.env.E2E_PASSWORD! } });
   const csrfRes = await request.get(`${BASE}/api/v1/csrf.php`);
   const csrfJson = await csrfRes.json().catch(() => ({}));
   return csrfJson?.csrf_token ?? "";
