@@ -30,10 +30,10 @@
 | 5 | เปลี่ยนป้ายเมนู 'dashboard' | 1 | done | frontend/lib/i18n.ts, src/menu_catalog.php | perm key คงเดิม |
 | 6 | Maintenance Overview (wallboard) | 1 | done | (ย้ายแล้ว) | registered ready |
 | 7 | Work Order Control | 1 | done | (มีอยู่แล้ว /supervisor) | registered ready |
-| 8 | Backlog & Aging | 2 | todo | - | สร้างใหม่: ตาราง+API+ฟอร์ม+dashboard |
+| 8 | Backlog & Aging | 2 | done | frontend/.../backlog-aging/page.tsx | ใช้ dashboard wo API เดิม | สร้างใหม่: ตาราง+API+ฟอร์ม+dashboard |
 | 9 | SLA & Escalation Control | 2 | done | (มีอยู่แล้ว /reports/sla) | registered ready |
-| 10 | Shift Handover | 2 | todo | - | สร้างใหม่: ตาราง+API+ฟอร์ม+dashboard |
-| 11 | PM Compliance & Planned vs Unplanned | 3 | partial | (มีอยู่แล้ว /pm_am) | เสริมเฉพาะส่วนที่ขาด |
+| 10 | Shift Handover | 2 | done | shift_handover API+page | ฟอร์ม+รายการ | สร้างใหม่: ตาราง+API+ฟอร์ม+dashboard |
+| 11 | PM Compliance & Planned vs Unplanned | 3 | done | pm-compliance page | ใช้ kpi_pm_metrics |
 | 12 | Breakdown & Downtime | 3 | done | (มีอยู่แล้ว /reports/downtime) | registered ready |
 | 13 | Maintenance Calendar | 3 | done | (มีอยู่แล้ว /planning/calendar) | registered ready |
 | 14 | Maintenance Planning | 3 | done | (มีอยู่แล้ว /planning) | registered ready |
@@ -52,13 +52,13 @@
 | 27 | Procurement & Purchasing | 4 | done | (มีอยู่แล้ว /spare_parts/sage_po) | registered ready |
 | 28 | Technical Document & Knowledge | 4 | done | (มีอยู่แล้ว /knowledge) | registered ready |
 | 29 | Safety & Compliance | 4 | done | (มีอยู่แล้ว /safety/work_permit) | registered ready |
-| 30 | Data Quality & System Adoption | 4 | todo | - | สร้างใหม่: ใช้หน้า data-quality เดิมเป็นฐาน |
+| 30 | Data Quality & System Adoption | 4 | done | data_quality API+page | completeness + inactive users | สร้างใหม่: ใช้หน้า data-quality เดิมเป็นฐาน |
 | 31 | Integration & System Health | 4 | done | (มีอยู่แล้ว /settings/health) | registered ready |
-| 32 | Production Impact & OEE | 5 | todo | - | สร้างใหม่ |
-| 33 | Lubrication Management | 5 | todo | - | สร้างใหม่ |
-| 34 | Utility & Energy | 5 | todo | - | สร้างใหม่ |
-| 35 | Facility Management | 5 | todo | - | สร้างใหม่ |
-| 36 | Predictive & AI Maintenance Intelligence | 5 | todo | - | สร้างใหม่: แสดงผลเมื่อข้อมูลถึงเกณฑ์ขั้นต่ำเท่านั้น |
+| 32 | Production Impact & OEE | 5 | done | production_impact API+page | production_hours | สร้างใหม่ |
+| 33 | Lubrication Management | 5 | done | lubrication API+page | points+logs | สร้างใหม่ |
+| 34 | Utility & Energy | 5 | done | utility_energy API+page | meter form | สร้างใหม่ |
+| 35 | Facility Management | 5 | done | facility API+page | asset_registry | สร้างใหม่ |
+| 36 | Predictive & AI Maintenance Intelligence | 5 | done | predictive_ai API+page | threshold 30 | สร้างใหม่: แสดงผลเมื่อข้อมูลถึงเกณฑ์ขั้นต่ำเท่านั้น |
 
 ## รายการที่ตัดสินใจเองโดยไม่มั่นใจ
 - Portal ใช้ PageShell (ไม่ใช้ PageHeader ซ้อน) เพราะ PageShell มี title อยู่แล้ว
@@ -69,4 +69,4 @@
 - Backlog & Aging, Shift Handover, Data Quality, Production Impact, Lubrication, Utility & Energy, Facility, Predictive AI: ต้องสร้างตาราง+ฟอร์มก่อน
 
 ## สถานะรวม
-- done: 26, partial: 1, todo: 9, skipped: 0
+- done: 35, partial: 0, todo: 0, skipped: 0
