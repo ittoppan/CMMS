@@ -72,6 +72,8 @@ import {
   type SpareReorderRow,
 } from "@/lib/dashboard-tower";
 import { ChartTip, ChartLegend as Legend } from "@/components/charts";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 /* ── สถานะใบงาน → ป้ายสี ─────────────────────────────────────────────── */
 const WO_STATUS: Record<string, { label: string; tone: string }> = {
@@ -503,6 +505,31 @@ export default function DashboardPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [pendingOpen]);
+
+  if (firstLoad) {
+    if (error) {
+      return (
+        <div
+          ref={shellRef}
+          className="cmms-tower flex flex-col gap-2 rounded-[14px] p-3 md:gap-3 lg:h-full lg:min-h-0 lg:overflow-hidden lg:rounded-[12px] lg:p-4"
+        >
+          <ErrorState
+            title="โหลดข้อมูลไม่สำเร็จ"
+            description={error}
+            onRetry={() => setTick((v) => v + 1)}
+          />
+        </div>
+      );
+    }
+    return (
+      <div
+        ref={shellRef}
+        className="cmms-tower flex flex-col gap-2 rounded-[14px] p-3 md:gap-3 lg:h-full lg:min-h-0 lg:overflow-hidden lg:rounded-[12px] lg:p-4"
+      >
+        <LoadingState label="กำลังโหลดข้อมูล…" />
+      </div>
+    );
+  }
 
   return (
     <div
