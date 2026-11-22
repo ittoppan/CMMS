@@ -96,7 +96,7 @@ try {
                 exit;
             }
             
-            // ตรวจสิทธิ์ตามประเภทคำขอ (loto/repair/requisition = Manager+; spare_issue/pm = Foreman+)
+            // ตรวจสิทธิ์ตามประเภทคำขอ (repair/requisition/work_permit = Manager+; loto/spare_issue/pm = Foreman+)
             $reqType = '';
             try {
                 $tokenHash = hash('sha256', $token);

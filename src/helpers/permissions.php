@@ -122,7 +122,7 @@ const PERMISSION_MATRIX = [
 
     7 => [ // Foreman — หัวหน้าชุด
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
-        'request'    => ['view', 'create'],
+        'request'    => ['view', 'create', 'approve', 'reject'],
         'asset'      => ['view', 'edit'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close'],
         'inspection' => ['view', 'create', 'execute'],

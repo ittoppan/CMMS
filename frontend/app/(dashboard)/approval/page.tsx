@@ -44,9 +44,18 @@ const statusBadge: Record<ApprovalItem["status"], { label: string; variant: "suc
   pending: { label: "รออนุมัติ", variant: "warning" },
 };
 
+function canApproveTypeFrontend(requestType: string, roleId: number | null): boolean {
+  if (roleId === null) return true;
+  if (roleId === 1) return true;
+  if (roleId === 2 || roleId === 6) return true;
+  if (roleId === 7) return ["loto", "spare_issue", "pm"].includes(requestType);
+  return false;
+}
+
 export default function ApprovalCenterPage() {
   const hero = usePageHero("approval");
 
+  const [roleId, setRoleId] = useState<number | null>(null);
   const [items, setItems] = useState<ApprovalItem[]>([]);
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);
@@ -88,6 +97,18 @@ export default function ApprovalCenterPage() {
   useEffect(() => {
     fetchApprovals();
   }, [fetchApprovals]);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/menu_permissions.php?user=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!alive || !j?.user) return;
+        setRoleId(Number(j.user.role_id || 0));
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   const handleAction = async (item: ApprovalItem, action: "approve" | "reject") => {
     setProcessingId(item.id);
@@ -142,25 +163,29 @@ export default function ApprovalCenterPage() {
       header: "การอนุมัติ",
       renderCell: (item) =>
         item.status === "pending" ? (
-          <HStack gap={2} wrap="wrap">
-            <Button
-              size="sm"
-              disabled={processingId !== null && processingId !== item.id}
-              onClick={() => handleAction(item, "approve")}
-            >
-              <CheckCircle2 size={14} strokeWidth={1.75} aria-hidden="true" />
-              {processingId === item.id ? "กำลัง..." : "อนุมัติ"}
-            </Button>
-            <Button
-              size="sm"
-              variant="danger"
-              disabled={processingId !== null}
-              onClick={() => handleAction(item, "reject")}
-            >
-              <XCircle size={14} strokeWidth={1.75} aria-hidden="true" />
-              ปฏิเสธ
-            </Button>
-          </HStack>
+          canApproveTypeFrontend(item.requestType, roleId) ? (
+            <HStack gap={2} wrap="wrap">
+              <Button
+                size="sm"
+                disabled={processingId !== null && processingId !== item.id}
+                onClick={() => handleAction(item, "approve")}
+              >
+                <CheckCircle2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                {processingId === item.id ? "กำลัง..." : "อนุมัติ"}
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                disabled={processingId !== null}
+                onClick={() => handleAction(item, "reject")}
+              >
+                <XCircle size={14} strokeWidth={1.75} aria-hidden="true" />
+                ปฏิเสธ
+              </Button>
+            </HStack>
+          ) : (
+            <span className="text-sm text-muted-foreground">ไม่มีสิทธิ์อนุมัติ</span>
+          )
         ) : (
           <span className="text-sm text-muted-foreground">ดำเนินการแล้ว</span>
         ),

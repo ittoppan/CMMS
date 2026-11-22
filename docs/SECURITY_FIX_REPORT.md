@@ -289,3 +289,22 @@
 - BUILD_ID: qqH9x4-PQXqfRTdXtPtDL
 - commit: 41e62e9d6cfb790a58bbebbd9942c481c6cb159f
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
+
+## Phase 12 — LOTO approval permission (Foreman+)
+
+### สรุปการแก้
+- `src/helpers/roles.php`: `canApproveType('loto')` เปลี่ยนจาก Manager+ เป็น Foreman+ (role 1,2,6,7); `repair`, `requisition`, `work_permit` คง Manager+; `spare_issue`, `pm` คง Foreman+.
+- `public/api/v1/approval.php`: comment อัปเดต; ยังใช้ `canApproveType()` ชุดเดียว.
+- `src/helpers/permissions.php`: Foreman (role 7) ได้ `request:approve/reject` เพื่อให้เรียก endpoint อนุมัติ LOTO ได้ (type gate ยังบล็อก repair/requisition).
+- `frontend/app/(dashboard)/approval/page.tsx`: ซ่อนปุ่มอนุมัติ/ปฏิเสธสำหรับประเภทที่ผู้ใช้ไม่มีสิทธิ์ (Foreman เห็น LOTO, ไม่เห็น repair/requisition).
+- คงกฎห้ามอนุมัติคำขอของตัวเองทุกประเภท ผ่าน `ApprovalService::processApproval()` (`requester_id` check).
+
+### ผลเทสทั้งชุดรอบเดียว
+- tsc --noEmit: PASS
+- python scripts/design-audit.py: PASS (0 fail / 0 warn)
+- Playwright: 166 passed, 0 failed, 0 not run (workers=1)
+- e2e_* accounts: 0 active (ยืนยันแล้ว)
+
+### BUILD_ID / commit
+- BUILD_ID: 0OcJuhgXJyry2_j3ScAnC
+- commit: (local commit pending)
