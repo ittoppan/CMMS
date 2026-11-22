@@ -112,7 +112,7 @@ const PERMISSION_MATRIX = [
         'asset'      => ['view', 'edit'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close'],
         'inspection' => ['view', 'create', 'execute'],
-        'spare_parts'=> ['view', 'request', 'issue', 'return'],
+        'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit', 'plan'],
         'supplier'   => ['view'],
         'calibration'=> ['view', 'create', 'edit'],
         'report'     => ['view'],
@@ -182,8 +182,8 @@ const PERMISSION_MATRIX = [
     8 => [ // Officer — ธุรการ/ผู้ดูแลเอกสาร (สิทธิ์อิงเมนูที่ได้รับจริงใน menu_permissions)
         // เพิ่มเฉพาะที่จำเป็นเพื่อไม่ให้การบังคับใช้ permission ใหม่ตัดสิทธิ์ที่เคยใช้ได้
         // Office เป็นคนดูแลสต็อก: เบิกใน CMMS แล้วไปตัดสต็อกใน Shipments ของ Sage 300
-        'sage'       => ['view', 'write'],
-        'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit', 'plan'],
+        'sage'       => ['view'],
+        'spare_parts'=> ['view', 'request', 'issue', 'return'],
         'users'      => ['view'],
         'settings'   => ['view'],
         'audit_log'  => ['view'],
@@ -198,6 +198,16 @@ const PERMISSION_MATRIX = [
         'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'feedback'],
         // home KPI tile (supervisor.php?action=kpis) — อ่านสรุปได้เท่านั้น
         'repair'     => ['view'],
+    ],
+
+    9 => [ // User — ผู้แจ้งซ่อม (เห็นเฉพาะใบงานที่ตัวเองแจ้ง)
+        'repair'     => ['view', 'create'],
+        'request'    => ['view', 'create'],
+        'asset'      => ['view'],
+        'report'     => ['view'],
+        'dashboard'  => ['view'],
+        'notification'=> ['view'],
+        'knowledge'  => ['read', 'search'],
     ],
 
     5 => [ // Viewer — อ่านอย่างเดียว

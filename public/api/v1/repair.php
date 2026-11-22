@@ -224,6 +224,15 @@ try {
 
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
+            // Phase 6: ตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์ก่อน validation (เฉพาะการสร้างใบแจ้งซ่อม; rate ใช้สิทธิ์ของผู้ประเมิน)
+            if (($data['action'] ?? '') !== 'rate') {
+                require_once __DIR__ . '/../../../src/helpers/permissions.php';
+                $repairPostUser = currentUser($pdo);
+                if ($repairPostUser) {
+                    requirePerm($pdo, 'repair', 'create', 'คุณไม่มีสิทธิ์สร้างใบแจ้งซ่อม');
+                }
+            }
+
             // ประเมินงานซ่อม (tracking) — บันทึกคะแนน/ความคิดเห็นลง repair_ratings
             if (($data['action'] ?? '') === 'rate') {
                 // ตัวตน: session หรือ LIFF ID token ที่ผูกบัญชีแล้ว (ผู้แจ้งจาก LINE ไม่มี PHP session)
@@ -368,6 +377,13 @@ try {
                     echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
                     exit;
                 }
+            }
+            // Phase 6: validation ก่อน insert — ป้องกัน 500 (Field 'title' doesn't have default)
+            if (empty($data['title']) && empty($data['receiver_name']) && empty($data['failure_report'])) {
+                clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing title — ต้องระบุหัวข้อหรือชื่อผู้แจ้ง'], JSON_UNESCAPED_UNICODE);
+                exit;
             }
             $cols = []; $vals = [];
             foreach ($allowed as $col) {

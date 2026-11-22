@@ -27,7 +27,7 @@ function canAdminSage(): bool {
 
 /** ดูต้นทุน / อนุมัติคำขอ (supervisor / manager) */
 function canApprove(): bool {
-    return in_array(currentRoleId(), [1, 2, 6], true);
+    return in_array(currentRoleId(), [1, 2, 6, 7], true);
 }
 
 /** คลังจ่าย/รับคืนของ (warehouse / foreman ขึ้นไป) */

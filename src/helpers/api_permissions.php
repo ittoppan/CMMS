@@ -83,7 +83,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'spare_issue_request.php'    => ['read' => ['spare_parts', 'view'],   'write' => ['spare_parts', 'request']],
     'spare_usage.php'            => ['read' => ['spare_parts', 'view'],   'write' => ['spare_parts', 'request']],
     'spare_optimization.php'     => ['read' => ['spare_parts', 'view'],   'write' => ['spare_parts', 'plan']],
-    'stock_take.php'             => ['read' => ['spare_parts', 'view'],   'write' => ['spare_parts', 'plan']],
+    'stock_take.php'             => ['read' => ['spare_parts', 'view'],   'write' => null],
     'equipment_borrowing.php'    => ['read' => ['spare_parts', 'view'],   'write' => ['spare_parts', 'issue']],
     'suppliers.php'              => ['read' => ['supplier', 'view'],      'write' => ['supplier', 'edit']],
     'contractor.php'             => ['read' => ['contractor', 'view'],    'write' => ['contractor', 'execute']],

@@ -50,3 +50,10 @@
 
 - User ควรเห็น repair ที่ assigned ให้ตัวเองด้วยหรือไม่ (ปัจจุบัน scope เฉพาะ created_by)
 - inspections/form_templates internal check ควรย้ายมาใช้ api_permissions หรือไม่
+
+---
+
+## หลังแก้ (Phase 6C) — ผลรันซ้ำ
+
+(คอลัมน์ก่อนแก้ดูตารางด้านบน; หลังแก้ = สถานะปัจจุบัน)
+
