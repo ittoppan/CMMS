@@ -39,3 +39,46 @@
 - tsc --noEmit: passed
 - Playwright phase2-write-perms.spec.ts: 3/3 passed
 - Playwright phase3-lowrole.spec.ts: 3/3 passed
+
+## Phase 6: ปิดช่อง endpoint ที่ยังไม่บังคับสิทธิ์
+
+### (1) แก้แล้ว
+- เปิด enforcement ใน api_permissions.php สำหรับ stock_take, spare_parts, spare_issue_request, checklist_templates, forms, repair (GET)
+- stock_take.php: granular role check (สร้าง/นับ: Operate+; ปิดรอบ/ปรับยอด/ยกเลิก/ลบ: Foreman+/Manager+)
+- spare_issue_request.php: canApprove ขยายเป็น Foreman+ (อนุมัติ/ปฏิเสธ)
+- repair.php: permission check ก่อน validation (repair:create สำหรับผู้ login) + validation 400 แทน 500 (root cause: title missing → DB constraint) + User ownership scoping (GET list และ ?id=)
+- permissions.php: Foreman spare_parts +edit/+plan; Officer ตัด edit/plan และ sage write; เพิ่ม User (role 9) matrix ขั้นต่ำ
+- sage_shipments: Officer ไม่สามารถเขียนได้ (sage:write ถูกตัด)
+- GET permissions ตามเมนู: User ไม่เห็น spare_parts/spare_issue_request/stock_take/checklist_templates/forms/approval; Viewer ไม่เห็น approval
+- Playwright phase6-perm.spec.ts: 5/5 passed
+
+### (2) ยังไม่แก้และเหตุผล
+- approval.php ยังเป็น token-based (email/line link) — ไม่เปลี่ยนตามคำสั่งรอตัดสิน
+- inspections.php, form_templates.php มี internal role check บางส่วน; GET ยังเปิดทุก role ที่มี inspection:view (ตามเมนู) — ไม่เปลี่ยนเพราะผลทดสอบยืนยันว่าถูกแล้ว
+- repair.php GET สำหรับ Viewer ยังเปิด (repair:view) — Viewer มีเมนู repair (อ่านอย่างเดียว) ตาม ROLE_MENUS
+
+### (3) ให้ตัดสินใจ (ยังไม่ได้แก้จริง)
+- approval: ประเภทอนุมัติ repair/requisition/loto/pm/spare_issue; ปัจจุบัน create_request ต้อง request:approve (Manager+); Foreman เห็นเมนูแต่ POST 403
+  - ข้อเสนอ: Foreman ควรอนุมัติ PM, LOTO, spare_issue (งานภาคสนาม); Manager+ อนุมัติ repair, requisition
+  - ตาราง: ประเภทอนุมัติ | role ที่อนุมัติได้ปัจจุบัน | ข้อเสนอ
+    - repair | Manager+ (1,2,6) | Manager+ (ไม่เปลี่ยน)
+    - requisition | Manager+ (1,2,6) | Manager+ (ไม่เปลี่ยน)
+    - loto | Manager+ (1,2,6) | Foreman+ (1,2,6,7)
+    - pm | Manager+ (1,2,6) | Foreman+ (1,2,6,7)
+    - spare_issue | Manager+ (1,2,6) | Foreman+ (1,2,6,7)
+- User ควรเห็น repair ที่ assigned ให้ตัวเองด้วยหรือไม่ (ปัจจุบัน scope เฉพาะ created_by)
+- inspections/form_templates internal check ควรย้ายมาใช้ api_permissions หรือไม่
+
+### (4) ผลเทสทั้งชุด
+- tsc --noEmit: passed
+- python scripts/design-audit.py: PASS (0 fail, 0 warn)
+- Playwright phase3-lowrole.spec.ts: 3/3 passed
+- Playwright phase6-matrix.spec.ts: 1/1 passed
+- Playwright phase6-perm.spec.ts: 5/5 passed
+- ไม่พบการปรับยอดสต็อกจริง (stock_take POST สร้างรอบ draft เท่านั้น ไม่มี complete)
+
+### (5) BUILD_ID / commit
+- ก่อน deploy BUILD_ID: J8f7gMJ39gzwR4qyXzWhu
+- หลัง deploy BUILD_ID: LHCwDCYDcExpY_to1elWj
+- commit: c1312a1d (Phase 6D)
+- ตรวจ 200: /login, /repair, /pm_am, /spare_parts, /dashboard → 200
