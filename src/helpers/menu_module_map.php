@@ -88,7 +88,7 @@ function menu_key_to_module(string $menuKey): string
         'mtbf_mttr' => 'reliability',
         'reliability' => 'reliability',
         'asset_reliability' => 'reliability',
-        'asset_registry' => 'asset',
+        'asset_registry' => 'asset_registry',
         'pm_am' => 'pm_am',
         'spare_parts' => 'spare_parts',
         'suppliers' => 'supplier',
@@ -102,7 +102,7 @@ function menu_key_to_module(string $menuKey): string
     $prefixes = [
         'repair/' => 'repair',
         'pm_am/' => 'pm_am',
-        'asset_registry/' => 'asset',
+        'asset_registry/' => 'asset_registry',
         'asset-reliability/' => 'reliability',
         'asset_reliability/' => 'reliability',
         'calibration/' => 'calibration',
@@ -129,7 +129,7 @@ function menu_key_to_module(string $menuKey): string
     $fallback = [
         'repair' => 'repair',
         'pm_am' => 'pm_am',
-        'asset_registry' => 'asset',
+        'asset_registry' => 'asset_registry',
         'calibration' => 'calibration',
         'spare_parts' => 'spare_parts',
         'suppliers' => 'supplier',

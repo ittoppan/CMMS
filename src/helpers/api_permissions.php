@@ -59,7 +59,7 @@ const API_ENDPOINT_PERMISSIONS = [
     'calibration_tracking.php'   => ['read' => ['calibration', 'view'],   'write' => ['calibration', 'edit']],
 
     /* ---------- Asset / Reliability ---------- */
-    'asset_registry.php'         => ['read' => ['asset', 'view'],         'write' => ['asset', 'edit']],
+    'asset_registry.php'         => ['read' => ['asset_registry', 'view'],         'write' => ['asset_registry', 'edit']],
     'asset_components.php'       => ['read' => ['asset', 'view'],         'write' => ['asset', 'edit']],
     'asset_criticality.php'      => ['read' => ['asset', 'view'],         'write' => ['asset', 'edit']],
     'asset_lifecycle.php'        => ['read' => ['asset', 'view'],         'write' => ['asset', 'edit']],
