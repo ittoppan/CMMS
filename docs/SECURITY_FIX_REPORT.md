@@ -221,3 +221,38 @@
 - BUILD_ID: dTtE7rmEVxsJOQX7jqCt9
 - commit: ea0409af558a4b84af9bdca8a87a3a1a98bc4718 (code/deploy); docs commit: bf54f9f9
 - URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
+
+---
+
+## Phase 10 — ปิด over-permission ให้ตรงกับเมนู (2026-11-22)
+
+### (1) แก้แล้ว
+- `src/helpers/permissions.php`: ปิด over-permission ตาม menu_permissions จริง:
+  - Operate (role 3): ถอด `reports` และ `feedback` (menu = 0 ทั้งคู่)
+  - Foreman (role 7): ถอด `reports` (menu = 0)
+  - Viewer (role 5): ถอด `repair` (menu repair=0, repair/tracking=0) → repair.php ตอบ 403 แล้ว
+  - Viewer (role 5): เพิ่ม `intelligence` (menu analytics=1 แต่เดิมไม่มี) → ปิดช่อง under-permission
+- `frontend/components/ApiFetchInterceptor.tsx` (ใหม่) + `Providers.tsx`: ห่อ window.fetch สำหรับคำขอ same-origin `/api/` — 403 แสดง toast "คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้", 401 พาไป /login; ไม่เปลี่ยน response; ไม่ดัก /_next หรือโดเมนอื่น
+- `docs/SECURITY_MATRIX.md`: อัปเดตตาราง Phase 10 (probe สด 9 role)
+- `docs/TESTING.md`: ขั้นตอนแยก DB สำหรับเทส (cmms_tpt_test + cmms_test user สร้างแล้ว; backend ทดสอบแยกยังไม่ตั้ง)
+- pm_ical.php: ยืนยัน scope ตาม role ทำงาน (Foreman+ เห็นทั้งหมด; บทบาทอื่นเฉพาะ assigned_to ตัวเอง) — probe ทุก role 200
+
+### (2) ยังไม่แก้และเหตุผล
+- แยกฐานข้อมูลเทส (cmms_tpt_test) ยังไม่ได้ชี้ Playwright ไปที่นั่น เพราะต้องมี backend ทดสอบแยก (IIS พอร์ตอื่น) — เขียนขั้นตอนใน docs/TESTING.md แล้ว; ไม่เปลี่ยนค่าตั้งของเทส
+- pm_ical token-based external access: ยังใช้ session cookie (ไม่เพิ่ม random token เพราะกระทบ flow)
+
+### (3) ให้ตัดสินใจ
+- (ไม่มีรายการค้างใหม่; over-permission ปิดตามเมนูแล้ว)
+
+### (4) ผลเทสทั้งชุดรอบเดียว
+- tsc --noEmit: PASS
+- python scripts/design-audit.py: PASS (0 fail / 0 warn)
+- Playwright: 166 passed, 0 failed, 0 not run (workers=1, 6.2m)
+- test_approval_service.php: (ไม่รันรอบนี้; คงเดิม 31/31)
+- Deploy: 30/30 checks passed
+
+### (5) BUILD_ID / commit
+- BUILD_ID: fUjRm76EZLOo3AErkSQrS
+- commit: c54af46c3535f77655b3bf9c77f0a6b02f6d7659 (code/deploy); BUILD_ID fUjRm76EZLOo3AErkSQrS
+- URLs: /login /repair /repair/request /pm_am /spare_parts /dashboard → 200; JS chunk → 200
+- e2e_* accounts: 0 active
