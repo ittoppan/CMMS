@@ -33,3 +33,35 @@
 ## 5. BUILD_ID และ commit hash
 - BUILD_ID: TmG1DPnVeuQzeN09b0p5F
 - commit hash: f768d08650e7e096edd3642c26ed74289f9e4484 (ยังไม่ commit การแก้ใหม่)
+
+---
+
+## ขั้น 1 (ต่อ) — 2026-11-22
+
+### 1. แก้แล้ว
+- `public/api/v1/settings.php`: GET รายการเต็ม / `?id=` / `?defaults` ต้อง `settings:manage` (Admin); role อื่นได้เฉพาะระดับ B (กรอง admin-only keys ฝั่งเซิร์ฟเวอร์)
+- `src/helpers/api_permissions.php`: `master_data.php`/`departments.php` read = null (ไม่ต้อง settings:view)
+- `src/helpers/permissions.php`: ถอด `settings:view` ออกจาก role 2,6,7,8 และ Officer-Read; คง `settings` ใน role 1 เพื่อให้ my_permissions คืน action list
+- `public/api/auth/login.php`: IP จาก trusted proxy เท่านั้น (loopback), timing normalization สำหรับบัญชีที่ไม่มีจริง, ล็อกอินสำเร็จล้างตัวนับ
+- `scripts/unlock_login.php`: CLI ปลดล็อกตัวนับ (username หรือ --all-e2e)
+- `frontend/app/(dashboard)/settings/page.tsx`: guard 403 สำหรับ non-admin + ไม่ fetch เมื่อไม่มีสิทธิ์
+- `frontend/tests/e2e/settings-security.spec.ts`: 13 เทสใหม่ (scope, 403, secret values, unauth public)
+
+### 2. ยังไม่แก้และเหตุผล
+- หมุน secret: ไม่ได้แก้ค่าใดๆ ตามกติกา (รอผู้ใช้ตัดสินใจ) — key ที่เคยถูกส่งออกแบบ plain ให้ role ที่ล็อกอินทุก role ก่อนแก้: ทุก key ใน SENSITIVE (line_channel_*, smtp_pass, telegram_bot_token, vapid_*, ntfy_token) เพราะ GET รายการเต็มไม่มี gate
+- LOTO = Foreman ขึ้นไป, User เห็นเฉพาะที่ตัวเองแจ้ง, 403 ดักที่ตัวกลาง: คงเดิม
+
+### 3. ให้ตัดสินใจ
+- (ไม่มีรายการค้างจากขั้นนี้ — secret rotation รอคำสั่งผู้ใช้)
+
+### 4. ผลเทสทั้งชุด
+- tsc --noEmit: PASS (0 errors)
+- scripts/design-audit.py --diff HEAD: PASS (0 FAIL, 0 WARN)
+- Playwright ทั้งชุด: 186 passed, 0 failed
+- e2e_* active = 0 (teardown ลบแล้ว)
+- git status: clean
+
+### 5. BUILD_ID และ commit hash
+- BUILD_ID: MR9mCmyk0xiqG3WCV7UAf
+- commit hash (step 1): 4868b01b
+- commit hash (deploy log): 9afd145e
