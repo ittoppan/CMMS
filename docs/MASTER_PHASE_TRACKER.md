@@ -9,7 +9,7 @@
 | Phase | ชื่อ | สถานะ | หลักฐาน / หมายเหตุ |
 |---|---|---|---|
 | 0 | System Discovery & Baseline | **COMPLETE** | `MASTER_SYSTEM_DISCOVERY.md`, `MASTER_MODULE_INVENTORY.md`, `MASTER_API_INVENTORY.md`, `MASTER_ROLE_PERMISSION_MATRIX.md`, `MASTER_BASELINE.md` |
-| 1 | Full UX/UI Audit | **COMPLETE (consolidated)** | `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md` — 13 route ใหม่ยังไม่มี per-page evidence (ไปต่อ Phase 4/6) |
+| 1 | Full UX/UI Audit | **COMPLETE (consolidated)** | `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md` — per-page evidence ของ route ใหม่ปิดแล้วใน `PHASE_1_PER_PAGE_EVIDENCE.md` |
 | 2 | Enterprise Design System | **PASS** | `DESIGN_SYSTEM.md` v3 + primitives + `COMPONENT_LIBRARY.md` + `DESIGN_TOKENS.md` (จากโค้ดจริง); ลบ `/ui-demo`, `/ui-kit` แล้ว (247/247 pages, tsc/build PASS); ค้างเก็บกวาด card-in-card/tile ในหน้าที่ยังไม่ย้าย |
 | 3 | Global Layout & Navigation | **PASS (มี finding N1–N3)** | bottom nav 390 = 6 ปุ่ม hit 59px/padding 96px/overflow 0; keyboard PASS (skip link, Enter→main, ring 2–3px, Ctrl+K palette 130→5, Esc ปิด); role menu เทียบ API 9 บทบาท: ไม่มีเมนูที่ไม่ได้สิทธิ์ถูกแสดง ยกเว้น `/dashboard` — `docs/PHASE_3_LAYOUT_NAV_REPORT.md` |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); **K1–K7 แก้แล้ว `f86634f6`**, **K8–K10 + `reports.php` แก้แล้ว `50e9e23a`** (ตัวเลขก่อน/หลังในรายงาน §9–§10); last-updated + drill-down ปิดแล้ว `b55e4046`; **TBT วัดแล้ว: 0 ms desktop / 512 ms median ที่ CPU 4× → ยังไม่ผ่านเป้าเมื่อ throttle**; ค้าง audit INSUFFICIENT DATA + ลด TBT |
@@ -27,14 +27,14 @@
 - Tasks: [x] โครงสร้าง, [x] 265 routes, [x] 113 APIs, [x] 104 components, [x] roles/permissions, [x] notification, [x] PWA, [x] test inventory, [x] baseline รวม
 - Files: `docs/MASTER_*.md` (5 ไฟล์)
 - Tests: `tsc --noEmit` PASS (2026-11-23, working tree มี D3.2)
-- Known issues: 13 route ไม่อยู่ใน UI_MIGRATION table; 16 API ไม่อยู่ในเมทริกซ์; production ล้า 18 commit
+- Known issues: 13 route ไม่อยู่ใน `UI_MIGRATION.md` → **ปิดช่องว่างแล้ว**: `PHASE_1_PER_PAGE_EVIDENCE.md` มีหลักฐานรายหน้าครบ 11 route (`ui-demo`/`ui-kit` ถูกลบ `d6f19ef7`) + จำแนกหัวหน้าครบ 252 หน้า (ผ่าน 229, N/A 10, board by design 2, **ฝ่าฝืน 11**); 16 API ยังไม่อยู่ในเมทริกซ์; production ล้า 18 commit
 - Approval: ไม่ต้อง
 
 ## 2. Phase 1 — Full UX/UI Audit
 
 - Tasks: [x] รวม audit เดิม, [x] จัดระดับ C/H/M/L, [x] ลำดับความสำคัญ, [x] ระบุหน้าที่ต้องแก้
 - Files: `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md`
-- Known issues: per-page สำหรับ 13 route ใหม่ยังไม่มี; การวัด 768/1440 ยังไม่มี
+- Known issues: per-page สำหรับ 13 route ใหม่ → **เสร็จ** `PHASE_1_PER_PAGE_EVIDENCE.md` (11 route เปิดจริง 200, h1 1 ตัว, overflow 0 ที่ 390/1440, เนื้อหาจริงครบ); การวัด **768 ยังไม่มี**; finding ใหม่ **P1-1** `PageShell` เป็น header ระบบที่สอง (10 หน้า)
 - Approval: ไม่ต้อง
 
 ## 3. Phase 2 — Enterprise Design System
