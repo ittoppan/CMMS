@@ -11,7 +11,7 @@
 | 0 | System Discovery & Baseline | **COMPLETE** | `MASTER_SYSTEM_DISCOVERY.md`, `MASTER_MODULE_INVENTORY.md`, `MASTER_API_INVENTORY.md`, `MASTER_ROLE_PERMISSION_MATRIX.md`, `MASTER_BASELINE.md` |
 | 1 | Full UX/UI Audit | **COMPLETE (consolidated)** | `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md` — 13 route ใหม่ยังไม่มี per-page evidence (ไปต่อ Phase 4/6) |
 | 2 | Enterprise Design System | **PASS** | `DESIGN_SYSTEM.md` v3 + primitives + `COMPONENT_LIBRARY.md` + `DESIGN_TOKENS.md` (จากโค้ดจริง); ลบ `/ui-demo`, `/ui-kit` แล้ว (247/247 pages, tsc/build PASS); ค้างเก็บกวาด card-in-card/tile ในหน้าที่ยังไม่ย้าย |
-| 3 | Global Layout & Navigation | IN PROGRESS | PageShell/PageHeader/DetailHeader, Breadcrumb, EmployeeAvatar, NotificationCenter (commit `114f0dba`, `d7a12f6a`, `3f2d792b`); ยังไม่ตรวจ role menu/mobile nav/global search ครบ |
+| 3 | Global Layout & Navigation | **PASS (มี finding N1–N3)** | bottom nav 390 = 6 ปุ่ม hit 59px/padding 96px/overflow 0; keyboard PASS (skip link, Enter→main, ring 2–3px, Ctrl+K palette 130→5, Esc ปิด); role menu เทียบ API 9 บทบาท: ไม่มีเมนูที่ไม่ได้สิทธิ์ถูกแสดง ยกเว้น `/dashboard` — `docs/PHASE_3_LAYOUT_NAV_REPORT.md` |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; ค้าง KPI validation, drill-down, last-updated, TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
@@ -47,8 +47,9 @@
 
 ## 4. Phase 3 — Global Layout & Navigation
 
-- Tasks: [x] layout/sidebar shell, [x] PageHeader/DetailHeader, [x] breadcrumb, [x] avatar, [x] notification bell, [x] command palette (global search เมนู), [ ] ตรวจ role menu vs `menu_permissions` ครบทุก role, [ ] mobile nav ที่ 390 (bottom nav 5 ปุ่ม), [ ] keyboard nav ผ่าน axe/manual
-- Known issues: H6, H7
+- Tasks: [x] layout/sidebar shell, [x] PageHeader/DetailHeader, [x] breadcrumb, [x] avatar, [x] notification bell, [x] command palette, [x] ตรวจ role menu vs สิทธิ์จริง 9 บทบาท (ไม่พบเมนูที่ไม่มีสิทธิ์ ยกเว้น `/dashboard`), [x] mobile nav 390 (6 ปุ่ม role-based, hit 59px, padding 96px, overflow 0), [x] keyboard nav (skip link, focus ring, palette เปิด/ปิด/ค้นหา)
+- Tests: Playwright 2026-11-23 — `docs/PHASE_3_LAYOUT_NAV_REPORT.md`
+- Known issues: **N1** `/dashboard` แสดงใน role 3/7/9 ขณะที่สิทธิ์ `dashboard=0` (รอตัดสินใจว่าหมายถึงหน้าแรกหรือโมดูล); **N2** เมนูแวบเห็นทั้งหมดก่อนสิทธิ์โหลดเสร็จ (`useMenuPermission.canShowAll=true`); **N3** `menu_permissions.php` ไม่มี `?user=` → 403; H6, H7 เดิม
 - Approval: ไม่ต้อง (ห้ามเปลี่ยน route/URL)
 
 ## 5. Phase 4 — Dashboard & Data Visualization
