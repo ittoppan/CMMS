@@ -226,8 +226,8 @@ export default function MyDashboardPage() {
         {error && <Alert variant="danger" description={error} />}
 
         <Card className="overflow-hidden">
-          <CardContent className="relative flex flex-col gap-4 p-0 sm:flex-row sm:items-center" style={{ backgroundColor: "#1e3a8a" }}>
-            <div className="relative flex flex-1 items-center gap-4 p-5" style={{ backgroundColor: "#1e3a8a" }}>
+          <CardContent className="relative flex flex-col gap-4 p-0 sm:flex-row sm:items-center bg-blue-900">
+            <div className="relative flex flex-1 items-center gap-4 p-5 bg-blue-900">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-md">
                 <EmployeeAvatar name={displayName} photoUrl={avatar} size={80} />
               </div>

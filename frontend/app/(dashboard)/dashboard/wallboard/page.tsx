@@ -106,7 +106,7 @@ const RANGES = D.RANGE_OPTIONS.filter((r) =>
 const PRIORITY_META: Record<string, { label: string; color: string }> = {
   critical: { label: "วิกฤต", color: C.red },
   high: { label: "ด่วน", color: C.amber },
-  medium: { label: "ปกติ", color: "#93c5fd" },
+  medium: { label: "ปกติ", color: C.blueSoft },
   low: { label: "ไม่เร่งด่วน", color: C.green },
 };
 
