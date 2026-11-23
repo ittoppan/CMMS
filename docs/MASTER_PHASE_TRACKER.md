@@ -121,8 +121,9 @@
 
 ## 12. Phase 11 — QA / Security / Performance / Deployment — **BLOCKED**
 
-- Tasks ที่ทำได้ตอนนี้: [x] security audit บางส่วน (`SECURITY_FIX_REPORT`, `SETTINGS_AUDIT`, `ASSET_DETAIL_REPORT`, `API_SECURITY_AUDIT`), [ ] regression เต็ม, [ ] axe/lighthouse ครบ, [ ] API enforcement
+- Tasks ที่ทำได้ตอนนี้: [x] security audit บางส่วน (`SECURITY_FIX_REPORT`, `SETTINGS_AUDIT`, `ASSET_DETAIL_REPORT`, `API_SECURITY_AUDIT`), [ ] regression เต็ม, [ ] axe/lighthouse ครบ, [x] API enforcement — ตรวจ CSRF ครบ 113 endpoint (บังคับที่ `src/auth.php:92-97`), permission หลุด 10/16 endpoint (`PHASE_11_API_ENFORCEMENT_AUDIT.md`; E11-1 HIGH รออนุมัติ)
 - Tasks ที่ต้องรอ: Staging, HTTPS, backup/restore drill, rollback plan, production deploy approval
+- Known issues: E11-1 (HIGH, API ไม่ตรวจสิทธิ์เมนู 10 จาก 16 endpoint ที่ทดสอบ — อ่านหลุด, การเขียนยังไม่ทดสอบ) · E11-2 (MEDIUM, 25 ไฟล์ที่เขียน SQL ไม่มี `requirePerm`) · E11-3 (MEDIUM, `spare_parts.php` คืน 1,870 แถว / 1.47 MB ไม่มี pagination — ตรงกับ Phase 8)
 - Blockers: ไม่มี Staging env; TLS/cert; เจ้าของระบบยังไม่อนุมัติ
 - Approval: **ต้องอนุมัติเป็นลายลักษณ์อักษรก่อนทุก deployment**
 
