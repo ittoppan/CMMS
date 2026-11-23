@@ -17,7 +17,7 @@
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
 | 7 | Maintenance & PM | **BLOCKED** | `pm_am`=3 แถว แต่ทั้งหมดเป็น `E2E-SEED` (seed จาก e2e) → ตรวจ workflow/PM compliance ด้วยข้อมูลผลิตจริงไม่ได้; ยังไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
-| 9 | Reports, Analytics & Export | NOT STARTED | ต้องเริ่มด้วย audit filter↔export parity |
+| 9 | Reports, Analytics & Export | IN PROGRESS | audit filter↔export parity เสร็จ 2026-11-23: พบ E1 (หน้า export ไม่ใช้ filter + ยิง `/api/v1/index.php` ไม่มี scope/audit) และ E2 (export ตัดที่ 50 แถว) → แก้แล้ว; parity 9 resource MATCH (work-orders 50→105, assets 50→82), E2E ดาวน์โหลด CSV/XLSX ผ่าน, tsc+build ผ่าน — `docs/PHASE_9_REPORTS_EXPORT_REPORT.md`; ค้าง P9-1..P9-4 (streaming, role 403 UI, PDF/analytics); **รออนุมัติการแตะ `rpt_page_params()` (backend, gated ด้วย export flag)** |
 | 10 | Technician & Mobile | NOT STARTED | มี baseline 390 อย่างเดียว; 768/1440, offline/PWA ยังไม่ทดสอบ |
 | 11 | QA / Security / Performance / Deployment | **BLOCKED** | ไม่มี Staging, HTTPS/TLS ยังไม่เปิด, ต้องอนุมัติเจ้าของระบบก่อน deploy; audit บางส่วนมีแล้ว (security/settings/asset) |
 

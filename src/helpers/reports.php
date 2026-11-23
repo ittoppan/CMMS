@@ -69,6 +69,8 @@ function rpt_opts(array $exclude = []): array {
         'source_type' => (string)($_GET['source_type'] ?? ''),
         'priority' => (string)($_GET['priority'] ?? ''),
         'status' => (string)($_GET['status'] ?? ''),
+        // export ต้องได้ชุดข้อมูลครบตาม filter (rpt_page_params ใช้ flag นี้)
+        'export' => (string)($_GET['export'] ?? ''),
     ];
     foreach ($exclude as $k) unset($out[$k]);
     return $out;
@@ -213,6 +215,10 @@ function rpt_col(string $key, string $label, string $align = 'left', string $typ
 }
 
 function rpt_page_params(array $opts, int $default = 50, int $max = 300): array {
+    // export: ต้องได้ข้อมูลครบทั้งชุดตาม filter เดียวกับหน้าจอ ไม่ใช่แค่หน้าละ 50 แถว
+    if (!empty($opts['export'])) {
+        return ['limit' => 50000, 'offset' => 0, 'group_by' => (string)($_GET['group_by'] ?? '')];
+    }
     $limit = min($max, max(1, (int)($_GET['limit'] ?? $default)));
     $offset = max(0, (int)($_GET['offset'] ?? 0));
     $groupBy = (string)($_GET['group_by'] ?? '');
