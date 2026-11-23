@@ -62,6 +62,6 @@
 |---|---|---|---|
 | A1 | 108 endpoint ไม่ enforced ระดับ endpoint | High | มี guard เดิมบางส่วน; ต้อง UAT role จริงก่อนเปิด |
 | A2 | 6 endpoint "ไม่มี guard" ตามเอกสาร | High | ต้องตรวจซ้ำใน Phase 11 (ห้ามเดา) |
-| A3 | `index.php` เป็น endpoint แปลก (ไม่ใช่ API จริง) | Low | ตรวจว่าไม่ถูกเรียกจาก UI |
+| A3 | `index.php` เป็น endpoint แปลก (ไม่ใช่ API จริง) | Low | **ปิดแล้ว** — เป็น resource router ที่ UI เรียกจริง (analytics/assets/bom_tree/criticality/view); ดู `PHASE_11_API_A3_A4_A5.md` |
 | A4 | `spare_parts.php` list ส่ง ~1MB | Medium | ต้อง pagination ฝั่ง server (IMP-1) — เปลี่ยน contract query param ไม่ใช่ response shape |
 | A5 | `approval.php` ใช้ token-based (email/LINE link) | Medium | คงไว้ตามคำสั่งเดิม; ห้ามเปลี่ยน auth |
