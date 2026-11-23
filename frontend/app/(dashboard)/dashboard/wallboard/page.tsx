@@ -63,8 +63,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 
 /**
- * แยก Recharts ออกจาก chunk แรก: กราฟถูกโหลดหลัง first paint แล้ว mount ทีละตัว (stagger)
- * เพื่อไม่ให้เกิด long task ก้อนใหญ่ก้อนเดียว
+ * แยก Recharts ออกจาก chunk แรก: กราฟถูกโหลดหลัง first paint (stagger ถูกตัดออกแล้ว — วัด 5 รอบไม่ต่างจาก noise)
  */
 const chartFallback = () => <div style={{ minHeight: 120 }} aria-hidden />;
 const MonthlyOverviewChart = dynamic(() => import("@/components/wallboard/charts").then((m) => m.MonthlyOverviewChart), {
@@ -202,28 +201,22 @@ function Panel({
   );
 }
 
-function IdleChart({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function IdleChart({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const timers: number[] = [];
-    // delay ใช้เกลี่ยการ mount กราฟแต่ละใบไม่ให้เกิด long task ก้อนเดียว
-    const show = () => {
-      if (delay > 0) timers.push(window.setTimeout(() => setReady(true), delay));
-      else setReady(true);
-    };
-    // fallback: layout จอ TV/clip อาจทำให้ panel ไม่ intersect เลย → ต้องยังแสดงกราฟแน่นอน
-    timers.push(window.setTimeout(show, 1500));
+    // fallback: layout จอ TV/clip อาจทำให้ panel ไม่ intersect เลย → ต้องยังแสดงกราฟภายใน 1.5 วิ
+    const timer = window.setTimeout(() => setReady(true), 1500);
     if (typeof IntersectionObserver === "undefined") {
-      show();
-      return () => timers.forEach((t) => window.clearTimeout(t));
+      setReady(true);
+      return () => window.clearTimeout(timer);
     }
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          show();
+          setReady(true);
           io.disconnect();
         }
       },
@@ -232,9 +225,9 @@ function IdleChart({ children, delay = 0 }: { children: React.ReactNode; delay?:
     io.observe(el);
     return () => {
       io.disconnect();
-      timers.forEach((t) => window.clearTimeout(t));
+      window.clearTimeout(timer);
     };
-  }, [delay]);
+  }, []);
   // ต้องมี height จริง (h-full) ไม่ใช่แค่ minHeight ไม่งั้น ResponsiveContainer ของ Recharts จะวัดได้ 0px แล้วไม่วาดกราฟ
   return (
     <div ref={ref} className="h-full w-full" style={{ minHeight: 120 }}>
@@ -917,7 +910,7 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <IdleChart delay={200}><DonutChart slices={assetSlices} /></IdleChart>
+                  <IdleChart><DonutChart slices={assetSlices} /></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{healthyPct === null ? "N/A" : `${healthyPct}%`}</span>
                     <span className="tower-donut-label">Overall Health</span>
@@ -960,7 +953,7 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <IdleChart delay={400}><DonutChart slices={statusSlices} /></IdleChart>
+                  <IdleChart><DonutChart slices={statusSlices} /></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{fmtNumber(statusTotal)}</span>
                     <span className="tower-donut-label">งานค้าง</span>
@@ -1081,7 +1074,7 @@ export default function DashboardPage() {
             <div className="flex min-h-0 flex-1 flex-col gap-1">
               <Legend items={[{ label: "MTBF (ชม.)", color: C.blue }, { label: "MTTR (ชม.)", color: C.green, line: true }]} />
               <div className="min-h-0 flex-1">
-                <IdleChart delay={600}><MtbfMttrChart points={data.mtbfPoints} font={chartFont} /></IdleChart>
+                <IdleChart><MtbfMttrChart points={data.mtbfPoints} font={chartFont} /></IdleChart>
               </div>
             </div>
           )}
@@ -1106,7 +1099,7 @@ export default function DashboardPage() {
             />
           ) : (
             <div className="min-h-0 flex-1">
-              <IdleChart delay={800}><TopDowntimeChart rows={topDowntime} font={chartFont} /></IdleChart>
+              <IdleChart><TopDowntimeChart rows={topDowntime} font={chartFont} /></IdleChart>
             </div>
           )}
         </Panel>

@@ -62,7 +62,7 @@
 - Known issues — **K8–K10 + `reports.php:246` แก้แล้ว** (`50e9e23a`, รายงาน §10): K8 ระบุช่วงของ KPI กับ trend บนจอ; K9 `planned_end_at` เข้า `kpi_is_overdue()` (0 ใบกระทบ, overdue ยัง 74); K10 ตัด MTTR fallback (MTTR เท่าเดิม 2.5/2.5/4.0/2.33 ตรง SQL); K3c Report Center MTBF ล่าสุด 459 → 691 ชม.
 - Known issues — **คงเหลือ**: ข้อมูล PM (3 แถว) และ MTBF/MTTR (18 แถว) เป็น seed จาก e2e → ตัวเลขถูกตามสูตรแต่ยังไม่ใช่ภาพการผลิตจริง (Phase 7 BLOCKED); C2, H4, M6
 - Known issues — **TBT ลองแยก lazy chart แล้วไม่สำเร็จ** (2026-11-23, §4.2): แยก Recharts เป็น dynamic chunk → TBT 481/334/418 ms (baseline 367–375) และ `charts_rendered = 0` เพราะ `IdleChart` gate ด้วย IntersectionObserver → กราฟไม่เคยอยู่ใน blocking window; ย้อนกลับแล้ว (tsc+build ผ่าน) คอขวดจริงคือ hydration 878 โหนด/10 panel
-- Known issues — **TBT lazy chart + stagger** (§4.4): แยก Recharts เป็น chunk + เกลี่ย mount → median 1,084 → **1,038 ms**, long task สูงสุด 411 → **314 ms**, กราฟ 5/5; เป้า <300 ms ยังไม่ผ่าน ต้องอนุมัติแนวทางลดจำนวนกราฟรอบแรก
+- Known issues — **TBT lazy chart** (§4.5): แยก Recharts เป็น chunk (ไม่มี stagger — วัด 5+5 รอบแล้ว stagger ไม่ผ่าน, median 1,052 vs 1,024) → TBT median **1,024 ms**, long task สูงสุด 360 ms, กราฟ 5/5; เป้า <300 ms ยังไม่ผ่าน → ข้อเสนอ 3 ทางใน `docs/PHASE_4_TBT_OPTIONS.md` รออนุมัติ
 - Known issues — **TBT** (`b55e4046`, `PHASE_4_UI_ACCEPTANCE.md` §4.1): production build = **0 ms** desktop; CPU 4× = **367/375/372 ms** ในหน้าต่าง FCP→+5s (median 372) โดย **long task ก่อน load = 0 ms** → คอขวดคือ hydration + เรนเดอร์กราฟชุดแรก ~360 ms (อีก ~90–110 ms มาจากข้อมูลรองที่ defer อยู่แล้ว); ยังไม่ได้ throttle network
 - Approval: ไม่ต้อง (ห้ามเปลี่ยนสูตร KPI)
 
