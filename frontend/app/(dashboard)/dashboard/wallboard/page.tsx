@@ -466,14 +466,19 @@ export default function DashboardPage() {
       : "N/A";
 
   /* สัดส่วนของการ์ด In Progress / Overdue = เทียบกับงานค้างทั้งหมด (ไม่ใช่งานที่เปิดใหม่ในช่วง) */
-  const openTotal = counts
+  /* K5: ยอดค้างจริงคือ core.open_wo (ทุกสถานะที่ยังไม่ปิด) — ถังของโดนัทเดิมรวมไม่ครบ
+     (เช่นสถานะ pending) ทำให้ยอดในกราฟไม่เท่ากับ KPI/แผง SLA ทั้งที่ข้อมูลชุดเดียวกัน */
+  const countsOpenSum = counts
     ? counts.unassigned +
       counts.assigned +
-      counts.active +
+      counts.pending_approval +
+      Math.max(0, counts.active - counts.waiting_parts - counts.waiting_external) +
       counts.waiting_parts +
       counts.waiting_external +
       counts.pending_verification
     : 0;
+  const openTotal = core && core.open_wo > 0 ? core.open_wo : countsOpenSum;
+  const otherOpen = Math.max(0, openTotal - countsOpenSum);
   const shareOfTotal = (n: number) => (openTotal > 0 ? `${Math.round((n / openTotal) * 1000) / 10}%` : "—");
 
   const sparkCreated = useMemo(() => (data.trend ?? []).map((p) => p.created), [data.trend]);
@@ -488,11 +493,12 @@ export default function DashboardPage() {
     if (!counts) return [];
     return [
       { name: "รอรับงาน", value: counts.unassigned + counts.assigned + counts.pending_approval, color: C.blue },
-      { name: "กำลังซ่อม", value: counts.active, color: C.amber },
+      { name: "กำลังซ่อม", value: Math.max(0, counts.active - counts.waiting_parts - counts.waiting_external), color: C.amber },
       { name: "รออะไหล่", value: counts.waiting_parts + counts.waiting_external, color: C.teal },
       { name: "รอตรวจ", value: counts.pending_verification, color: C.purple },
+      { name: "อื่น ๆ", value: otherOpen, color: C.text3 },
     ].filter((s) => s.value > 0);
-  }, [counts]);
+  }, [counts, otherOpen]);
 
   const statusTotal = statusSlices.reduce((s, x) => s + x.value, 0);
 
@@ -755,7 +761,7 @@ export default function DashboardPage() {
           badge={core ? shareOfTotal(core.overdue_wo) : undefined}
           meta={
             ov
-              ? `SLA เสี่ยง ${fmtNumber(ov.alerts.sla_at_risk)} · วิกฤตเปิดอยู่ ${fmtNumber(ov.alerts.critical_open)}`
+              ? `เสี่ยง SLA ${fmtNumber(ov.alerts.sla_at_risk)} · วิกฤตเปิด ${fmtNumber(ov.alerts.critical_open)} · เกณฑ์ค้างเกิน 7 วัน`
               : "กำลังโหลดข้อมูล"
           }
           tone="red"
@@ -766,7 +772,7 @@ export default function DashboardPage() {
           icon={Timer}
           value={core ? (core.mttr_hours === null ? "N/A" : fmtHours(core.mttr_hours)) : "—"}
           unit={core && core.mttr_hours !== null ? "ชม." : undefined}
-          badge={core && core.mtbf_hours !== null ? `MTBF ${fmtHours(core.mtbf_hours)}` : "—"}
+          badge={core && core.mtbf_hours !== null ? `MTBF 180 วัน ${fmtHours(core.mtbf_hours)}` : "—"}
           badgeTone="dim"
           meta={core && core.mttr_hours === null ? "ไม่มีใบงานปิดในช่วงนี้" : "เวลาเฉลี่ยซ่อมเสร็จต่อใบงาน"}
           tone="purple"
@@ -808,8 +814,12 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[0.58em]">
-                <Link href={`/repair?priority=${p.priority}&status=overdue`} className="tower-panel-link">
-                  เลยกำหนด <strong>{fmtNumber(p.overdue)}</strong>
+                <Link
+                  href={`/repair?priority=${p.priority}&status=overdue`}
+                  className="tower-panel-link"
+                  title="เกินกำหนด SLA — นับเฉพาะใบที่มีวันครบกำหนด (sla_due_at / estimated_completion_date / planned_end_at) จึงน้อยกว่า KPI Overdue ที่นับเกณฑ์ค้างเกิน 7 วันด้วย"
+                >
+                  เกิน SLA <strong>{fmtNumber(p.overdue)}</strong>
                 </Link>
                 <Link
                   href={`/repair?priority=${p.priority}&status=sla_risk`}
@@ -1080,10 +1090,17 @@ export default function DashboardPage() {
         </Panel>
 
         <Panel
-          title="MTBF / MTTR Trend"
+          title="MTBF / MTTR รายเดือน"
           icon={Activity}
           className="min-h-[170px] lg:min-h-0"
-          action={<span className="tower-panel-sub">ตาราง {SRC.mtbf}</span>}
+          action={
+            <span
+              className="tower-panel-sub"
+              title="MTBF = SUM(operating_hours)/SUM(total_failures) ต่อเดือน · MTTR = SUM(total_downtime_minutes)/SUM(total_failures) — คนละนิยามกับ MTBF 180 วันบนการ์ด KPI"
+            >
+              ผลรวมต่อเดือน · {SRC.mtbf}
+            </span>
+          }
           bodyClassName="flex min-h-0 flex-col"
         >
           {!data.mtbfAllowed ? (

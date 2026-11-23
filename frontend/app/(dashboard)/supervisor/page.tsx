@@ -149,7 +149,7 @@ export default function SupervisorDeskPage() {
     { label: "In Progress", value: c.active ?? 0, to: "/supervisor/queue?g=active", tone: "var(--cmms-warning-dark)" },
     { label: "Waiting for Parts", value: c.waiting_parts ?? 0, to: "/supervisor/queue?g=waiting", tone: "var(--cmms-warning-dark)" },
     { label: "Overdue", value: c.overdue ?? 0, to: "/supervisor/queue?g=overdue", tone: "var(--cmms-danger)" },
-    { label: "Completed", value: c.verified ?? 0, to: "/supervisor/queue?g=verified", tone: "var(--cmms-success-dark)" },
+    { label: "Completed (รอตรวจรับ)", value: c.pending_verification ?? 0, to: "/supervisor/queue?g=pending_verification", tone: "var(--cmms-success-dark)" },
   ];
 
   const perfCards = [
@@ -157,7 +157,7 @@ export default function SupervisorDeskPage() {
     { label: "MTBF (ชม.)", value: data?.mtbf_hours ?? null, suffix: "ชม.", hint: "ช่วงเฉลี่ยระหว่างการชำรุด" },
     { label: "เวลาตอบสนอง", value: data?.avg_response_minutes ?? null, suffix: "น.", hint: "ตอบสนองเฉลี่ย" },
     { label: "% ปิดงานใน SLA", value: data?.sla_compliance_pct ?? null, suffix: "%", hint: "ภายใน 30 วัน" },
-    { label: "% ทำ PM", value: data?.pm_compliance_pct ?? null, suffix: "%", hint: "จาก Inspection Checklists" },
+    { label: "% ทำ PM", value: data?.pm_compliance_pct ?? null, suffix: "%", hint: "จาก Inspection Checklists (— = ยังไม่มีรอบตรวจ)" },
   ];
 
   const priorityMeta = [

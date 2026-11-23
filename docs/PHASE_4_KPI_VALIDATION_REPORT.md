@@ -254,3 +254,70 @@ php frontend/tmp-kpi-peek.php
 ```
 
 > สคริปต์เป็นไฟล์ชั่วคราว (ไม่ commit) — ผลดิบเก็บไว้ที่ `docs/PHASE_4_KPI_RAW.json`
+
+---
+
+## 9. การแก้ K1–K7 (เจ้าของระบบอนุมัติ 2026-11-23)
+
+> รอบก่อนหน้า (Phase 4 validation) ห้ามแก้สูตร — รอบนี้เจ้าของระบบอนุมัติ "แก้ K1–K7 ทั้งหมด" แล้ว
+> ไฟล์ที่แก้: `src/helpers/kpi.php`, `frontend/lib/dashboard-tower.ts`,
+> `frontend/app/(dashboard)/dashboard/wallboard/page.tsx`, `frontend/app/(dashboard)/supervisor/page.tsx`
+> ไม่แตะ DB schema / route / URL / สิทธิ์; ไม่แก้ข้อมูลใน DB
+
+### 9.1 สรุปการแก้
+
+| รหัส | สิ่งที่แก้ | จุดที่แก้ |
+|---|---|---|
+| K1 | `counts.critical_active` กับ `alerts.critical_open` ใช้ `kpi_critical_statuses()` ร่วมกัน (เดิมถือลิสต์สถานะคนละชุด); drill-down `group=critical` ใช้ชุดเดียวกัน | `kpi.php` §4 + `kpi_core_metrics()` + `kpi_alerts()` + `kpi_wo_list()` |
+| K2 | `kpi_pm_metrics()`: `due_total` ผูกช่วง `due_date` (เดิมนับทั้งตาราง), `overdue_pending` แยกไปคิดกับ `due_date`, เพิ่ม `unrecorded`, `on_time_pct = on_time/(on_time+late)` → null เมื่อยังไม่มีใบที่ตัดสินได้ | `kpi.php: kpi_pm_metrics()` |
+| K2c | `pm_compliance_pct`: อ่าน `total_schedules` จาก view ก่อน — ถ้า 0 → `null` (เดิม view คืน `compliance_pct = 0`) | `kpi.php: kpi_core_metrics()` |
+| K3 | MTBF/MTTR รายเดือนใช้ยอดดิบ: `SUM(operating_hours)/SUM(total_failures)` และ `SUM(total_downtime_minutes)/SUM(total_failures)/60` (เดิมเฉลี่ยค่าเฉลี่ยรายเครื่อง) + แยกป้ายนิยาม MTBF 180 วัน (การ์ด KPI) กับ MTBF รายเดือน | `dashboard-tower.ts: monthlyMtbfMttr()`, wallboard panel |
+| K4 | ตัวกรอง (department/location/asset/asset_category/technician/source_type/priority/status) มีผลกับ MTTR, MTBF, response time, SLA compliance (เดิมใช้แค่ scope ตาม role) | `kpi.php: kpi_core_metrics()` |
+| K5 | เพิ่ม `pending` ใน `kpi_active_statuses()`; โดนัท wallboard ใช้ `core.open_wo` เป็นยอดตั้ง + ถัง "อื่น ๆ" + ไม่นับ `waiting_parts` ซ้ำกับ `active` | `kpi.php` §4, wallboard |
+| K6 | การ์ด supervisor "Completed" ใช้ `counts.pending_verification` และลิงก์ `?g=pending_verification`; เพิ่ม `group=verified` ใน `kpi_wo_list()` (เดิมคิวไม่กรองจริง) | `supervisor/page.tsx`, `kpi.php` |
+| K7 | ป้ายแยกนิยาม: แผง SLA เปลี่ยนเป็น "เกิน SLA" + tooltip ระบุว่านับเฉพาะใบที่มีวันครบกำหนด; KPI Overdue ระบุเกณฑ์ค้างเกิน 7 วัน | wallboard |
+
+### 9.2 ผลวัดก่อน/หลัง (DB `cmms_tpt`, 2026-11-23, role 2)
+
+| KPI | ก่อน | หลัง | ผล |
+|---|---|---|---|
+| `counts.critical_active` / `alerts.critical_open` | 0 / 1 | **1 / 1** | ตรงกัน (K1) |
+| `pm_compliance_pct` | 0 | **null (—)** | ตรง V1 (K2c) |
+| PM `due_total` (today / this_month / last_month / this_year) | 3 ทุกช่วง (ทั้งตาราง) | **1 / 2 / 0 / 2** | ผูกช่วง (K2) |
+| PM completion `last_month` (ไม่มี PM ถึงกำหนด) | 0% | **null** | ตรง V1 (K2) |
+| PM `completed` vs `on_time + late` (ไม่ระบุช่วง) | 1 vs 0 | 1 = 0 + 0 + **unrecorded 1** | ตรวจที่มาได้ (K2) |
+| MTBF รายเดือน พ.ย. / มิ.ย. | 459 / 598 | **691 / 1,802** | ตรง `SUM/SUM` (K3) |
+| MTTR รายเดือน พ.ย. / มิ.ย. | เฉลี่ยรายเครื่อง | **1.6 / 2.0 ชม.** | ตรง `SUM/SUM` (K3) |
+| แผนก 10: MTTR / MTBF | 2.5 / 734.4 | **null / null** | ตรง SQL (แผนก 10 ไม่มีใบปิด) (K4) |
+| ผลรวมทุก priority ในแผง SLA | 103 | **105** | = `open_wo` (K5) |
+| โดนัท "Work Orders by Status" | 103 | **105** (ถังเดิม 103 + "อื่น ๆ" 2) | = `core.open_wo` (K5) |
+| การ์ด supervisor "Completed" | 0 | **6** | = งานเสร็จรอตรวจรับ (K6) |
+
+ค่าดิบหลังแก้: `docs/PHASE_4_KPI_RAW_AFTER.json`
+
+### 9.3 ผลข้างเคียงที่ตั้งใจ (ต้องรับทราบ)
+
+- **`pending` เป็น active แล้ว**: 2 ใบ (`repair.id` 323, 340) เข้า backlog และตัวเลขที่อิง "งานยังไม่ปิด" ของโมดูลอื่น (`kpi_asset_health`, รายงาน) — `overdue` ยังเป็น 74 เพราะสองใบไม่มีวันครบกำหนด
+- **รายงาน PM (`reports.php`)** ใช้ `kpi_pm_metrics()` ร่วม → `due_total`/completion ของรายงานผูกช่วงตามตัวกรองรายงานด้วย
+- **K11 ถูกแก้ไปด้วย** (นอกชุด K1–K7): on-time ใช้ `DATE(completed_at) <= due_date` ตาม inventory §2.1 — วันนี้ไม่มีผลเป็นตัวเลข (ใบที่ปิดไม่มี `completed_at`)
+- **ยังไม่แก้ (รออนุมัติ)**: K8 (trend 30/62 วันวางข้าง KPI all-time), K9 (`planned_end_at` ใน `kpi_is_overdue`), K10 (MTTR fallback), และ `src/helpers/reports.php:246` ที่ยังใช้ `AVG(mtbf_hours)` (mean-of-means แบบเดียวกับ K3 เดิม)
+
+### 9.4 การตรวจซ้ำ
+
+```bash
+php frontend/tmp-kpi-validate.php > docs/PHASE_4_KPI_RAW_AFTER.json   # สคริปต์ชั่วคราว ไม่ commit
+php -l src/helpers/kpi.php                                           # No syntax errors
+cd frontend && npx tsc --noEmit                                       # PASS (exit 0)
+```
+
+**ข้อจำกัดของรอบนี้**: ตรวจที่ค่าที่ API/ฟังก์ชันกลางคืน + `tsc` — ยังไม่ได้เปิดเบราว์เซอร์ดูป้าย/โดนัทใหม่
+(ป้าย "เกิน SLA", ถัง "อื่น ๆ", การ์ด "Completed (รอตรวจรับ)") ด้วยตา
+
+### 9.5 Acceptance
+
+| รายการ | ผล |
+|---|---|
+| K1–K7 แก้ตามที่อนุมัติ | **PASS** (มีตัวเลขก่อน/หลัง) |
+| ไม่แตะ schema/route/สิทธิ์/ข้อมูล | **PASS** |
+| KPI ตรงตาม inventory ทุกตัว | **ยังไม่ PASS** — K8, K9, K10 และ `reports.php:246` ค้าง |
+| Phase 4 COMPLETE | **ยังไม่** — เหลือ drill-down, last-updated, TBT < 300ms, การตรวจ UI ด้วยตา |

@@ -1,0 +1,529 @@
+{
+    "measured_at": "2026-11-23T14:32:37+07:00",
+    "ranges": {
+        "all": {
+            "total_wo_created": 105,
+            "wo_completed_in_range": 6,
+            "wo_completion_rate": 5.7,
+            "mttr_hours": 2.5,
+            "mtbf_hours": 734.4,
+            "downtime_minutes": 885,
+            "sla_compliance_pct": null,
+            "pm_compliance_pct": null,
+            "counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 74,
+                "assigned": 1,
+                "active": 22,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 1,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 74
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 8,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 8
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "pm": {
+                "due_total": 3,
+                "completed": 1,
+                "on_time": 0,
+                "late": 0,
+                "unrecorded": 1,
+                "overdue_pending": 0,
+                "completion_rate": 33.3,
+                "on_time_pct": null
+            }
+        },
+        "today": {
+            "total_wo_created": 0,
+            "wo_completed_in_range": 0,
+            "wo_completion_rate": null,
+            "mttr_hours": null,
+            "mtbf_hours": 734.4,
+            "downtime_minutes": 0,
+            "sla_compliance_pct": null,
+            "pm_compliance_pct": null,
+            "counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 74,
+                "assigned": 1,
+                "active": 22,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 1,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 74
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 8,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 8
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "pm": {
+                "due_total": 1,
+                "completed": 0,
+                "on_time": 0,
+                "late": 0,
+                "unrecorded": 0,
+                "overdue_pending": 0,
+                "completion_rate": 0,
+                "on_time_pct": null
+            }
+        },
+        "this_month": {
+            "total_wo_created": 12,
+            "wo_completed_in_range": 1,
+            "wo_completion_rate": 8.3,
+            "mttr_hours": 2.5,
+            "mtbf_hours": 734.4,
+            "downtime_minutes": 195,
+            "sla_compliance_pct": null,
+            "pm_compliance_pct": null,
+            "counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 74,
+                "assigned": 1,
+                "active": 22,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 1,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 74
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 8,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 8
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "pm": {
+                "due_total": 2,
+                "completed": 0,
+                "on_time": 0,
+                "late": 0,
+                "unrecorded": 0,
+                "overdue_pending": 0,
+                "completion_rate": 0,
+                "on_time_pct": null
+            }
+        },
+        "last_month": {
+            "total_wo_created": 21,
+            "wo_completed_in_range": 1,
+            "wo_completion_rate": 4.8,
+            "mttr_hours": 4,
+            "mtbf_hours": 734.4,
+            "downtime_minutes": 240,
+            "sla_compliance_pct": null,
+            "pm_compliance_pct": null,
+            "counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 74,
+                "assigned": 1,
+                "active": 22,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 1,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 74
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 8,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 8
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "pm": {
+                "due_total": 0,
+                "completed": 0,
+                "on_time": 0,
+                "late": 0,
+                "unrecorded": 0,
+                "overdue_pending": 0,
+                "completion_rate": null,
+                "on_time_pct": null
+            }
+        },
+        "this_year": {
+            "total_wo_created": 105,
+            "wo_completed_in_range": 6,
+            "wo_completion_rate": 5.7,
+            "mttr_hours": 2.33,
+            "mtbf_hours": 734.4,
+            "downtime_minutes": 885,
+            "sla_compliance_pct": null,
+            "pm_compliance_pct": null,
+            "counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 74,
+                "assigned": 1,
+                "active": 22,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 1,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 74
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 8,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 8
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "pm": {
+                "due_total": 2,
+                "completed": 0,
+                "on_time": 0,
+                "late": 0,
+                "unrecorded": 0,
+                "overdue_pending": 0,
+                "completion_rate": 0,
+                "on_time_pct": null
+            }
+        }
+    },
+    "scopes": {
+        "role3_user1": {
+            "total_wo_created": 6,
+            "open_wo": 6,
+            "overdue_wo": 0,
+            "critical_active": 1
+        },
+        "role4_user1": {
+            "total_wo_created": 9,
+            "open_wo": 9,
+            "overdue_wo": 1,
+            "critical_active": 1
+        }
+    },
+    "raw": {
+        "repair_status_counts": {
+            "open": 74,
+            "in_progress": 22,
+            "completed": 6,
+            "pending": 2,
+            "assigned": 1
+        },
+        "pending_rows": [
+            {
+                "id": 323,
+                "status": "pending",
+                "priority": "high",
+                "assigned_to": null,
+                "department_id": 7,
+                "sla_due_at": null,
+                "estimated_completion_date": null,
+                "created_at": "2026-11-19 21:49:37"
+            },
+            {
+                "id": 340,
+                "status": "pending",
+                "priority": "high",
+                "assigned_to": null,
+                "department_id": null,
+                "sla_due_at": null,
+                "estimated_completion_date": null,
+                "created_at": "2026-11-20 13:46:08"
+            }
+        ],
+        "critical_rows": [
+            {
+                "id": 2057,
+                "work_order_no": "E2E-WO-4",
+                "status": "completed",
+                "priority": "critical"
+            }
+        ],
+        "pm_rows": [
+            {
+                "id": 750,
+                "status": "pending",
+                "due_date": "2026-11-26",
+                "completed_at": null
+            },
+            {
+                "id": 751,
+                "status": "in_progress",
+                "due_date": "2026-11-23",
+                "completed_at": null
+            },
+            {
+                "id": 752,
+                "status": "completed",
+                "due_date": "2026-11-18",
+                "completed_at": null
+            }
+        ],
+        "inspection_view": {
+            "total_schedules": 0,
+            "due_today": null,
+            "overdue": null,
+            "in_progress": null,
+            "completed": null,
+            "passed": null,
+            "failed": null,
+            "critical_fail": null,
+            "avg_score_pct": "0.00",
+            "compliance_pct": "0.00"
+        },
+        "mtbf_monthly": [
+            {
+                "year": 2026,
+                "month": 6,
+                "op_hours": "1802.00",
+                "failures": "1",
+                "dt_min": "120",
+                "mtbf_doc": "1802.0",
+                "mttr_doc_hours": "2.0"
+            },
+            {
+                "year": 2026,
+                "month": 7,
+                "op_hours": "1855.00",
+                "failures": "1",
+                "dt_min": "180",
+                "mtbf_doc": "1855.0",
+                "mttr_doc_hours": "3.0"
+            },
+            {
+                "year": 2026,
+                "month": 8,
+                "op_hours": "1835.00",
+                "failures": "1",
+                "dt_min": "90",
+                "mtbf_doc": "1835.0",
+                "mttr_doc_hours": "1.5"
+            },
+            {
+                "year": 2026,
+                "month": 9,
+                "op_hours": "1799.00",
+                "failures": "1",
+                "dt_min": "60",
+                "mtbf_doc": "1799.0",
+                "mttr_doc_hours": "1.0"
+            },
+            {
+                "year": 2026,
+                "month": 10,
+                "op_hours": "1864.00",
+                "failures": "1",
+                "dt_min": "240",
+                "mtbf_doc": "1864.0",
+                "mttr_doc_hours": "4.0"
+            },
+            {
+                "year": 2026,
+                "month": 11,
+                "op_hours": "1382.00",
+                "failures": "2",
+                "dt_min": "195",
+                "mtbf_doc": "691.0",
+                "mttr_doc_hours": "1.6"
+            }
+        ],
+        "overall_mtbf_mttr_doc": {
+            "mtbf": "1505.3",
+            "mttr_hours": "2.1"
+        },
+        "dept10": {
+            "total_wo_created": 14,
+            "wo_completed_in_range": 0,
+            "mttr_hours": null,
+            "mtbf_hours": null,
+            "downtime_minutes": 0,
+            "sla_compliance_pct": null,
+            "open_wo": 14,
+            "sql": {
+                "n": 14,
+                "dt": "0",
+                "completed": "0"
+            }
+        }
+    }
+}

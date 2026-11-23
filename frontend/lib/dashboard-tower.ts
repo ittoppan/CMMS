@@ -131,23 +131,59 @@ export async function fetchMtbfMttr(): Promise<MtbfMttrRow[]> {
 
 /**
  * รวมตาราง mtbf_mttr (รายเครื่อง/รายเดือน) เป็นอนุกรมรายเดือน
- * ใช้ค่าเฉลี่ยของแถวที่มีค่าจริงเท่านั้น — ถ้าไม่มีแถวเลยจะคืน [] (หน้าเพจแสดง N/A)
+ * K3: คำนวณจากยอดดิบรวมต่อเดือน ไม่ใช่เฉลี่ยค่าเฉลี่ยรายเครื่อง (mean-of-means)
+ *   MTBF = SUM(operating_hours) / SUM(total_failures)
+ *   MTTR = SUM(total_downtime_minutes) / SUM(total_failures) / 60
+ * เดือนที่ข้อมูลไม่พอ (failures = 0 หรือ op_hours = 0) → null (V1) หน้าเพจแสดง N/A
+ * ถ้า API ไม่ส่งยอดดิบมา จะถอยไปใช้ค่าเฉลี่ยของ mtbf_hours/mttr_minutes ตามเดิม
  */
 export function monthlyMtbfMttr(rows: MtbfMttrRow[], maxPoints = 8): MtbfMttrPoint[] {
-  type Acc = { key: string; label: string; mtbfSum: number; mtbfN: number; mttrSum: number; mttrN: number };
+  type Acc = {
+    key: string;
+    label: string;
+    opHours: number;
+    failures: number;
+    downtimeMin: number;
+    mtbfSum: number;
+    mtbfN: number;
+    mttrSum: number;
+    mttrN: number;
+  };
   const buckets = new Map<string, Acc>();
   let rawSum = 0;
+  const num = (v: number | string | null | undefined): number | null => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
 
   for (const row of rows) {
     const year = Number(row.year);
     const month = Number(row.month);
     if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) continue;
     const key = `${year}-${String(month).padStart(2, "0")}`;
-    const acc = buckets.get(key) ?? { key, label: `${TH_MONTHS_SHORT[month - 1]} ${String(year).slice(-2)}`, mtbfSum: 0, mtbfN: 0, mttrSum: 0, mttrN: 0 };
-    const mtbf = row.mtbf_hours === null || row.mtbf_hours === undefined ? NaN : Number(row.mtbf_hours);
-    const mttr = row.mttr_minutes === null || row.mttr_minutes === undefined ? NaN : Number(row.mttr_minutes);
-    if (Number.isFinite(mtbf)) { acc.mtbfSum += mtbf; acc.mtbfN += 1; rawSum += 1; }
-    if (Number.isFinite(mttr)) { acc.mttrSum += mttr; acc.mttrN += 1; rawSum += 1; }
+    const acc =
+      buckets.get(key) ?? {
+        key,
+        label: `${TH_MONTHS_SHORT[month - 1]} ${String(year).slice(-2)}`,
+        opHours: 0,
+        failures: 0,
+        downtimeMin: 0,
+        mtbfSum: 0,
+        mtbfN: 0,
+        mttrSum: 0,
+        mttrN: 0,
+      };
+    const op = num(row.operating_hours);
+    const failures = num(row.total_failures);
+    const downtime = num(row.total_downtime_minutes);
+    const mtbf = num(row.mtbf_hours);
+    const mttr = num(row.mttr_minutes);
+    if (op !== null) acc.opHours += op;
+    if (failures !== null) acc.failures += failures;
+    if (downtime !== null) acc.downtimeMin += downtime;
+    if (mtbf !== null) { acc.mtbfSum += mtbf; acc.mtbfN += 1; rawSum += 1; }
+    if (mttr !== null) { acc.mttrSum += mttr; acc.mttrN += 1; rawSum += 1; }
     buckets.set(key, acc);
   }
 
@@ -156,12 +192,21 @@ export function monthlyMtbfMttr(rows: MtbfMttrRow[], maxPoints = 8): MtbfMttrPoi
   return [...buckets.values()]
     .sort((a, b) => a.key.localeCompare(b.key))
     .slice(-maxPoints)
-    .map((b) => ({
-      key: b.key,
-      label: b.label,
-      mtbf: b.mtbfN > 0 ? Math.round((b.mtbfSum / b.mtbfN) * 10) / 10 : null,
-      mttr: b.mttrN > 0 ? Math.round(((b.mttrSum / b.mttrN / 60) * 10)) / 10 : null,
-    }));
+    .map((b) => {
+      const mtbf =
+        b.failures > 0 && b.opHours > 0
+          ? Math.round((b.opHours / b.failures) * 10) / 10
+          : b.mtbfN > 0
+            ? Math.round((b.mtbfSum / b.mtbfN) * 10) / 10
+            : null;
+      const mttr =
+        b.failures > 0
+          ? Math.round((b.downtimeMin / b.failures / 60) * 10) / 10
+          : b.mttrN > 0
+            ? Math.round((b.mttrSum / b.mttrN / 60) * 10) / 10
+            : null;
+      return { key: b.key, label: b.label, mtbf, mttr };
+    });
 }
 
 /* ── Formatters ── */

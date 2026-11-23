@@ -23,7 +23,9 @@
 `kpi_scope()` — server-side: role 3 (Technician) เห็นเฉพาะงานที่ assigned ให้ตัวเอง; role 4 (Operator) เห็นเฉพาะงานที่ตัวเองแจ้ง; อื่น ๆ เห็นทั้งหมด. สิทธิ์ต้นทุน `kpi_can_see_cost()` = role 1,2,6 เท่านั้น (section `cost` ตอบ 403 กับ role อื่น).
 
 ### 0.4 กลุ่มสถานะ
-- **active** (`kpi_active_statuses`): `open, acknowledged, draft, pending_approval, approved, assigned, accepted, in_progress, paused, waiting_parts, pending_parts, waiting_external, waiting_approval, completed, pending_verification, resolved`
+- **active** (`kpi_active_statuses`): `open, acknowledged, draft, pending, pending_approval, approved, assigned, accepted, in_progress, paused, waiting_parts, pending_parts, waiting_external, waiting_approval, completed, pending_verification, resolved`
+  > 2026-11-23: เพิ่ม `pending` (K5) — เดิมสถานะนี้ไม่อยู่ทั้ง active และ done ทำให้ 2 ใบไม่ถูกนับใน backlog/alerts/แผง SLA
+- **critical ที่ยังเปิด** (`kpi_critical_statuses`): = `kpi_active_statuses()` ชุดเดียว ใช้ร่วมกับ `counts.critical_active` และ `alerts.critical_open` (K1)
 - **done** (`kpi_done_statuses`): `closed, cancelled, rejected, verified, done, skipped`
 
 ### 0.5 งานค้างเกินกำหนด (overdue)
@@ -68,7 +70,7 @@
 | MTBF | ค่าเฉลี่ยช่วงห่าง (ชม.) ระหว่างรอบซ่อม breakdown ของเครื่องเดียวกัน (180 วัน) | `repair.completed_at, repair.source_type` | ดู KPI_DEFINITIONS §12.1 (คนละนิยามกับ ana_reliability) |
 | Downtime hours | `SUM(repair.downtime_minutes)/60` | `repair.downtime_minutes` | V1 (กรอกน้อย — ดู §12.3) |
 | SLA at risk | งานที่ due < now + risk window | `repair.sla_due_at/estimated_completion_date` | — |
-| Critical open | `COUNT(priority=critical AND status active)` | `repair.priority, repair.status` | — |
+| Critical open | `COUNT(priority=critical AND status ∈ kpi_critical_statuses())` | `repair.priority, repair.status` | ฟังก์ชันเดียวกับ `counts.critical_active` (K1) |
 
 > per-tile `Na` แสดงเมื่อข้อมูลไม่พร้อม; full-page LoadingState/ErrorState ใช้เมื่อ first load ไม่มี overview (Phase 4b).
 
@@ -81,6 +83,7 @@
 | งานค้างเกินกำหนด | `kpi_is_overdue` count | `repair.*` (ตาม §0.5) | — |
 | งานที่ยังไม่มอบหมาย | `COUNT(assigned_to IS NULL AND status active)` | `repair.assigned_to` | — |
 | งานรอตรวจรับ | `COUNT(status=pending_verification)` | `repair.status` | — |
+| งานเสร็จแล้วรอตรวจรับ (การ์ด "Completed") | `COUNT(status ∈ completed/pending_verification/resolved)` = `counts.pending_verification` | `repair.status` | การ์ดเดิมใช้ `counts.verified` (closed+verified) = 0 ทั้งที่มีงานเสร็จ 6 ใบ (K6) |
 
 ### 1.3 Backlog & Aging — `/dashboard/backlog-aging`
 **refresh:** PAGE-LOAD | **source:** `repair` active + `kpi_is_overdue`
@@ -121,9 +124,10 @@
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
+| PM ถึงกำหนด (due_total) | `COUNT(status ∈ pending/in_progress/completed/overdue AND due_date ∈ range)` | `pm_am.status, pm_am.due_date` | V1,V4 — ตัวหาร 0 → `completion_rate = null` (เดิมนับทั้งตาราง: K2) |
 | PM done (in range) | `COUNT(pm_am completed_at ∈ range AND status ∈ completed/closed)` | `pm_am.completed_at, pm_am.status` | V4 |
-| PM on-time | `COUNT(DATE(completed_at) ≤ due_date)` | `pm_am.completed_at, pm_am.due_date` | — |
-| PM compliance % | `on_time / done × 100` | derived | V1 |
+| PM on-time | `COUNT(DATE(completed_at) ≤ due_date)` | `pm_am.completed_at, pm_am.due_date` | นับเฉพาะใบที่มี `completed_at`; ใบปิดที่ไม่ลงวันที่ปิดงาน → `unrecorded` (ไม่นับเป็น late) |
+| PM compliance % (on-time) | `on_time / (on_time + late) × 100` | derived | V1 — null เมื่อยังไม่มีใบที่ตัดสินได้ |
 | PM overdue active | `COUNT(status pending/in_progress/overdue AND due_date < CURDATE())` | `pm_am.status, pm_am.due_date` | — |
 | Planned % (pm) | `COUNT(source_type='pm') / total × 100` | `repair.source_type` | — |
 | Unplanned % (breakdown) | `COUNT(source_type='breakdown') / total × 100` | `repair.source_type` | — |

@@ -230,11 +230,21 @@ function kpi_dashboard_role(array $user): string {
 function kpi_active_statuses(): array {
     return ['open', 'acknowledged', 'draft', 'pending_approval', 'approved', 'assigned', 'accepted',
         'in_progress', 'paused', 'waiting_parts', 'pending_parts', 'waiting_external', 'waiting_approval',
+        'pending', // K5: สถานะนี้ไม่เคยอยู่ในลิสต์ active/done → เคยตกหล่นจาก backlog/alerts/ตัวนับ
         'completed', 'pending_verification', 'resolved'];
 }
 
 function kpi_done_statuses(): array {
     return ['closed', 'cancelled', 'rejected', 'verified', 'done', 'skipped'];
+}
+
+/**
+ * K1 — สถานะของ WO priority critical ที่ยังต้องติดตาม (ยังไม่ปิด/ยกเลิก)
+ * counts.critical_active และ alerts.critical_open ต้องใช้ฟังก์ชันนี้ร่วมกันเท่านั้น
+ * (เดิมสองที่ถือลิสต์สถานะคนละชุด → 0 กับ 1 บนจอเดียวกัน)
+ */
+function kpi_critical_statuses(): array {
+    return kpi_active_statuses();
 }
 
 /** WO ค้างเกินกำหนด (ดูจาก due date / SLA / เกณฑ์ open เกิน 7 วัน) — นิยามเดียวกับ supervisor */
@@ -318,7 +328,7 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
         'active' => $cntRepair(" AND r.status IN ('in_progress','paused','waiting_parts','waiting_external','waiting_approval')"),
         'pending_verification' => $cntRepair(" AND r.status IN ('completed','pending_verification','resolved')"),
         'verified' => $cntRepair(" AND r.status IN ('verified','closed')"),
-        'critical_active' => $cntRepair(" AND r.priority = 'critical' AND r.status IN ('open','acknowledged','pending_approval','approved','assigned','accepted','in_progress','paused','waiting_parts','waiting_external','waiting_approval')"),
+        'critical_active' => $cntRepair(" AND r.priority = 'critical' AND r.status IN ('" . implode("','", kpi_critical_statuses()) . "')"), // K1: ลิสต์เดียวกับ alerts
         'completed_today' => $cntRepair(" AND r.completed_at >= CURDATE()"),
         'waiting_parts' => $cntRepair(" AND r.status IN ('waiting_parts','pending_parts')"),
         'waiting_external' => $cntRepair(" AND r.status = 'waiting_external'"),
@@ -369,8 +379,8 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     } else {
         $mttrSql .= ' AND r.completed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
     }
-    $mttrSql .= $scope['sql'];
-    $mttrParams = array_merge($range ? ['start' => $range['start'], 'end' => $range['end']] : [], $scope['params']);
+    $mttrSql .= $flt['sql'] . $scope['sql']; // K4: ตัวกรอง (แผนก/ที่ตั้ง/เครื่อง/ช่าง) ต้องมีผลกับ MTTR
+    $mttrParams = array_merge($range ? [$range['start'], $range['end']] : [], $flt['params'], $scope['params']);
     $st = $pdo->prepare($mttrSql);
     $st->execute(array_values($mttrParams));
     $v = $st->fetchColumn();
@@ -381,8 +391,8 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     $st = $pdo->prepare("SELECT r.asset_id, r.completed_at FROM repair r
                          WHERE r.source_type='breakdown' AND r.completed_at IS NOT NULL
                            AND r.completed_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
-                           AND r.status IN ('closed','verified','completed','resolved')" . $scope['sql'] . " ORDER BY r.asset_id, r.completed_at ASC");
-    $st->execute($scope['params']);
+                           AND r.status IN ('closed','verified','completed','resolved')" . $flt['sql'] . $scope['sql'] . " ORDER BY r.asset_id, r.completed_at ASC"); // K4: ตัวกรองต้องมีผลกับ MTBF
+    $st->execute(array_merge($flt['params'], $scope['params'])); // K4
     $byAsset = [];
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $byAsset[(int)$b['asset_id']][] = strtotime($b['completed_at']);
     $intervals = [];
@@ -396,8 +406,8 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     $respSql = 'SELECT AVG(r.response_time_minutes) FROM repair r WHERE r.response_time_minutes IS NOT NULL AND r.response_time_minutes > 0';
     $respParams = [];
     if ($range) { $respSql .= $createdRange; $respParams = array_merge($respParams, [$range['start'], $range['end']]); }
-    $respSql .= $scope['sql'];
-    $respParams = array_merge($respParams, $scope['params']);
+    $respSql .= $flt['sql'] . $scope['sql']; // K4
+    $respParams = array_merge($respParams, $flt['params'], $scope['params']);
     $st = $pdo->prepare($respSql);
     $st->execute($respParams);
     $resp = $st->fetchColumn();
@@ -413,8 +423,8 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     } else {
         $slaSql .= ' AND r.completed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
     }
-    $slaSql .= $scope['sql'];
-    $slaParams = array_merge($slaParams, $scope['params']);
+    $slaSql .= $flt['sql'] . $scope['sql']; // K4
+    $slaParams = array_merge($slaParams, $flt['params'], $scope['params']);
     $st = $pdo->prepare($slaSql);
     $st->execute($slaParams);
     $slaDone = 0; $slaTotal = 0;
@@ -429,8 +439,8 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     // ---------- PM compliance (จาก inspection checklists) ----------
     $pmCompliance = null;
     try {
-        $v = $pdo->query('SELECT compliance_pct FROM v_inspection_dashboard_kpis')->fetchColumn();
-        if ($v !== null && $v !== false) $pmCompliance = round((float)$v, 1);
+        $vk = $pdo->query('SELECT total_schedules, compliance_pct FROM v_inspection_dashboard_kpis')->fetch(PDO::FETCH_ASSOC); // K2c: view คืน 0 แม้ตารางว่าง
+        if ($vk && (int)$vk['total_schedules'] > 0 && $vk['compliance_pct'] !== null) $pmCompliance = round((float)$vk['compliance_pct'], 1); // V1: ตัวหาร 0 → null
     } catch (Exception $e) { /* ข้าม */ }
 
     // ---------- Downtime / Cost ----------
@@ -493,7 +503,8 @@ function kpi_alerts(PDO $pdo, array $opts): array {
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $params = array_merge($flt['params'], $scope['params']);
 
-    $active = '"open","acknowledged","pending_approval","approved","assigned","accepted","in_progress","paused","waiting_parts","pending_parts","waiting_external","waiting_approval","completed","pending_verification","resolved"';
+    // K1: ใช้ชุดสถานะเดียวกับ counts.* (แหล่งเดียว) — เดิมเขียนลิสต์ซ้ำแล้วไม่ตรงกัน
+    $active = '"' . implode('","', kpi_active_statuses()) . '"';
 
     $count = function (string $cond, array $p) use ($pdo, $where) {
         $st = $pdo->prepare('SELECT COUNT(*) FROM repair r' . $where . $cond);
@@ -608,10 +619,11 @@ function kpi_wo_list(PDO $pdo, array $opts): array {
     $cond = '';
     switch ($group) {
         case 'overdue': $cond = " AND r.status IN ('" . implode("','", kpi_active_statuses()) . "')"; break; // filter หลัง fetch เฉพาะงานที่ยังไม่จบ
-        case 'critical': $cond = " AND r.priority = 'critical'"; break;
+        case 'critical': $cond = " AND r.priority = 'critical' AND r.status IN ('" . implode("','", kpi_critical_statuses()) . "')"; break; // K1: จำนวนตรงกับ counts.critical_active
         case 'waiting_parts': $cond = " AND r.status IN ('waiting_parts','pending_parts')"; break;
         case 'pending_verification': $cond = " AND r.status IN ('completed','pending_verification','resolved')"; break;
         case 'assigned': $cond = " AND r.status IN ('assigned','accepted')"; break;
+        case 'verified': $cond = " AND r.status IN ('verified','closed')"; break; // K6: ปลายทาง drill-down ของการ์ด supervisor
         case 'active': $cond = " AND r.status IN ('in_progress','paused','waiting_parts','pending_parts','waiting_external','waiting_approval')"; break;
         case 'open': $cond = " AND r.status NOT IN ('cancelled','rejected','draft','done','skipped','closed','verified')"; break;
         default: $cond = " AND r.status NOT IN ('cancelled','rejected','draft','done','skipped')";
@@ -678,33 +690,45 @@ function kpi_wo_list(PDO $pdo, array $opts): array {
 
 function kpi_pm_metrics(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
+    // K2: ตัวหาร (PM ที่ถึงกำหนด) ต้องผูกช่วงเวลาเดียวกับที่ผู้ใช้เลือก
+    //     เดิมนับทั้งตาราง → ช่วงที่ไม่มี PM แสดง 0% แทน null (V1: ตัวหาร 0 → null)
     $dueSql = kpi_range_sql($range, 'due_date');
     $doneSql = kpi_range_sql($range, 'completed_at');
-    $params = []; $dueP = $range ? [$range['start'], $range['end']] : [];
+    $dueP = $range ? [$range['start'], $range['end']] : [];
     $doneP = $range ? [$range['start'], $range['end']] : [];
 
+    $st = $pdo->prepare('SELECT COUNT(*) AS due_cnt,
+        SUM(CASE WHEN status IN ("pending","in_progress") AND due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_pending
+        FROM pm_am WHERE status IN ("pending","in_progress","completed","overdue")' . $dueSql);
+    $st->execute($dueP);
+    $dueRow = $st->fetch(PDO::FETCH_ASSOC) ?: [];
+    $dueTotal = (int)($dueRow['due_cnt'] ?? 0);
+    $overduePending = (int)($dueRow['overdue_pending'] ?? 0);
+
+    // K11: นิยามตาม inventory §2.1 — ใช้ DATE(completed_at) <= due_date (due_date เป็น DATE)
     $st = $pdo->prepare('SELECT
         SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) AS done_cnt,
-        SUM(CASE WHEN status = "completed" AND completed_at IS NOT NULL AND completed_at <= due_date THEN 1 ELSE 0 END) AS on_time,
-        SUM(CASE WHEN status = "completed" AND completed_at IS NOT NULL AND completed_at > due_date THEN 1 ELSE 0 END) AS late,
-        SUM(CASE WHEN status IN ("pending","in_progress") AND due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_pending
-        FROM pm_am WHERE 1=1' . $doneSql . $dueSql);
-    $st->execute(array_merge($doneP, $dueP));
-    $row = $st->fetch(PDO::FETCH_ASSOC);
-    $dueTotal = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE status IN ('pending','in_progress','completed') OR (status = 'overdue')")->fetchColumn();
+        SUM(CASE WHEN status = "completed" AND completed_at IS NOT NULL AND DATE(completed_at) <= due_date THEN 1 ELSE 0 END) AS on_time,
+        SUM(CASE WHEN status = "completed" AND completed_at IS NOT NULL AND DATE(completed_at) > due_date THEN 1 ELSE 0 END) AS late
+        FROM pm_am WHERE 1=1' . $doneSql);
+    $st->execute($doneP);
+    $row = $st->fetch(PDO::FETCH_ASSOC) ?: [];
     $doneCount = (int)($row['done_cnt'] ?? 0);
     $onTime = (int)($row['on_time'] ?? 0);
     $late = (int)($row['late'] ?? 0);
-    $overduePending = (int)($row['overdue_pending'] ?? 0);
+    // ใบที่ปิดแล้วแต่ไม่มีวันที่ปิดงาน → ตัดสินทัน/ช้าไม่ได้ แยกออก ไม่นับเป็น late
+    $unrecorded = max(0, $doneCount - $onTime - $late);
 
     $completion = $dueTotal > 0 ? round($doneCount / $dueTotal * 100, 1) : null;
-    $onTimePct = $doneCount > 0 ? round($onTime / $doneCount * 100, 1) : null;
+    $judged = $onTime + $late;
+    $onTimePct = $judged > 0 ? round($onTime / $judged * 100, 1) : null; // V1: ไม่มีใบที่ตัดสินได้ → null
 
     return [
         'due_total' => $dueTotal,
         'completed' => $doneCount,
         'on_time' => $onTime,
         'late' => $late,
+        'unrecorded' => $unrecorded,
         'overdue_pending' => $overduePending,
         'completion_rate' => $completion,
         'on_time_pct' => $onTimePct,
