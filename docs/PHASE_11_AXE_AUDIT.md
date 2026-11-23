@@ -73,9 +73,34 @@ aria-controls="radix-_R_1einpfl4pfjbb_-content-all"  (axe: Invalid ARIA attribut
 - ปุ่มสลับภาษา: เห็น «TH/EN» แต่ `aria-label="Switch to English"`
 (WCAG 2.5.3 Label in Name)
 
-## 4. สิ่งที่ยังไม่ได้ตรวจ
+## 4. มือถือ 390×844 (light) — สแกนแล้ว
+
+| หน้า | overflowX | violations | node | หมายเหตุ |
+|---|---|---|---|---|
+| `/dashboard` | 0 | **0** | 0 | sidebar ถูกซ่อนบนมือถือ → A11-2 ไม่เกิด |
+| `/reports` | 0 | 1 | 5 | contrast (andon-chip, `text-white/80`, `text-[11px]`) |
+| `/reports/export_excel` | 0 | 1 | 4 | contrast |
+| `/notifications` | 0 | 2 | 4 | `aria-valid-attr-value` (critical) + contrast |
+| `/profile` | 0 | **0** | 0 | — |
+
+รวม **13 node** — เป็นต้นเหตุเดียวกับ desktop ทั้งหมด ไม่มีปัญหาใหม่เฉพาะมือถือ, ไม่มี horizontal scroll ทั้ง 5 หน้า
+
+## 5. Dark mode — **N/A by design (ตรวจไม่ได้)**
+
+ลอง 2 วิธี (emulateMedia `prefers-color-scheme: dark` และ `localStorage.theme=dark`) → `<html class="light">` ตลอด, body ยัง `rgb(246,248,251)`
+
+สาเหตุ: `components/Providers.tsx:11` → *“next-themes: forced light เสมอ — ไม่เอา dark mode (ผู้ใช้ยืนยัน) เลี่ยงปุ่มสลับธีม”*
+
+→ **ไม่ใช่บั๊ก และไม่ต้องแก้** แต่หมายความว่า “axe dark mode” เป็นข้อที่ **ทำไม่ได้** จนกว่าจะมีค่าตัดสินใจใหม่จากเจ้าของระบบ (ถ้าเปลี่ยนใจต้องเปิด forcedTheme ก่อน)
+
+## 6. Regression suite — ยังรันไม่ผ่านในสภาพแวดล้อมนี้
+
+รัน `npx playwright test` ด้วย config มาตรฐาน (ทั้งหมด 30 spec): **28 passed / 131 failed**
+ข้อสังเกต: spec ส่วนใหญ่ต้องมี fixture/สิทธิ์หลาย role/seed ที่ยังไม่มีในเครื่องนี้ → **ยังไม่สรุปว่าเป็น regression** และ checkbox `[ ] regression เต็ม` ยังปิดไม่ได้ จนกว่าจะมี fixture ครบและบัญชีที่ต้องการ
+
+## 7. สิ่งที่ยังไม่ได้ตรวจ
 
 - อีก **6 หน้า**ที่ role 5 ไม่มีสิทธิ์ (403) และหน้าในโมดูลที่ถูกบล็อกทั้งหมด (repair, asset, calibration, settings, planning ฯลฯ) → ต้องใช้บัญชี role 1/2/3/6/7
-- โหมดมือถือ/dark mode (axe บน viewport 390 + `prefers-color-scheme: dark`) — ยังไม่ได้รัน
+- ~~โหมดมือถือ~~ (สแกนแล้ว §4) · ~~dark mode~~ (N/A by design §5)
 - Lighthouse (Performance/PWA) — ยังไม่ได้ติดตั้ง/รัน; PWA ต้อง HTTPS หรือ localhost
 - ค่าที่วัดได้มาจาก **build 22 พ.ย.** (R9-9) → ต้องรันซ้ำหลัง rebuild ก่อนสรุปว่าปิดได้
