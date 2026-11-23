@@ -15,8 +15,8 @@
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); **K1–K7 แก้แล้ว `f86634f6`**, **K8–K10 + `reports.php` แก้แล้ว `50e9e23a`** (ตัวเลขก่อน/หลังในรายงาน §9–§10); last-updated + drill-down ปิดแล้ว `b55e4046`; **TBT วัดแล้ว: 0 ms desktop / 512 ms median ที่ CPU 4× → ยังไม่ผ่านเป้าเมื่อ throttle**; ค้าง audit INSUFFICIENT DATA + ลด TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`); **audit my-repairs/history/detail 2026-11-23** (`PHASE_5_MY_REPAIRS_AUDIT.md`): `/my-repairs` PASS (h1 1, overflow 0, console 0 ที่ 390px), พบ F5-1 (role ไม่มีสิทธิ์ยังยิง 2 คำขอ → console error) และ F5-2 (`/repair/view` ไม่มี `?id` → fallback `id=1`) — รออนุมัติแก้ |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
-| 7 | Maintenance & PM | **BLOCKED** | `pm_am`=3 แถว แต่ทั้งหมดเป็น `E2E-SEED` (seed จาก e2e) → ตรวจ workflow/PM compliance ด้วยข้อมูลผลิตจริงไม่ได้; ยังไม่มีคำสั่งสร้างข้อมูลทดแทน |
-| 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
+| 7 | Maintenance & PM | **BLOCKED (UI audit เสร็จ)** | `PHASE_7_PM_UI_AUDIT.md`: 12 route ผ่านกฎหัวหน้า 12/12; `pm_am`=3 แถวเป็น `E2E-SEED` และตาราง PM อีก 6 ตัว = 0 แถว → ตรวจ workflow/PM compliance ไม่ได้ |
+| 8 | Asset, Inventory & Spare Parts | **audit ครบ — ค้าง UI ระดับสิทธิ์** | `PHASE_8_ASSET_PAGE_AUDIT.md`: 28 route (8 asset + 20 calibration) ตรวจหัวหน้า 27/28 (A8-1), spare pagination **มีแล้ว** (PAGE_SIZE 15, 1,870 แถว = 125 หน้า), traceability asset→WO ครบโค็ดแต่ role 5 โดน 403 by design |
 | 9 | Reports, Analytics & Export | IN PROGRESS | audit filter↔export parity เสร็จ 2026-11-23 (`PHASE_9_REPORTS_EXPORT_REPORT.md`): พบ E1 (หน้า export ไม่ใช้ filter + ยิง `/api/v1/index.php` ไม่มี scope/audit) และ E2 (export ตัดที่ 50 แถว) → แก้แล้ว; parity 9 resource MATCH (work-orders 50→105, assets 50→82), E2E ดาวน์โหลด CSV/XLSX ผ่าน, tsc+build ผ่าน; **P9-4 (monthly PDF) audit เสร็จ** (`PHASE_9_P9_4_MONTHLY_PDF_AUDIT.md`): ตัด raw dump `/api/v1/index.php` + hardcode `user=1` ออก, yearCost คำนวณจาก analytics_monthly, tsc+build ผ่าน — ค้าง P9-4a/b/c + P9-1/P9-2/P9-3; **รออนุมัติการแตะ `rpt_page_params()` (backend, gated ด้วย export flag)** |
 | 10 | Technician & Mobile | IN PROGRESS | audit 2026-11-23: responsive 6 pages × 3 viewports PASS (overflow 0, h1 1, console 0); touch targets >=44 PASS; PWA manifest valid + SW registered; offline routes declared; push/Lighthouse BLOCKED on HTTPS — `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md` |
 | 11 | QA / Security / Performance / Deployment | **BLOCKED** | ไม่มี Staging, HTTPS/TLS ยังไม่เปิด, ต้องอนุมัติเจ้าของระบบก่อน deploy; audit บางส่วนมีแล้ว (security/settings/asset) |
@@ -96,9 +96,9 @@
 
 ## 8. Phase 7 — Maintenance & PM — **BLOCKED**
 
-- เหตุผล: `pm_am` = 0 แถว, ไม่มี PM schedule/checklist ที่ผูกกับ asset จริง → ตรวจไม่ได้ตามกติกา "ห้ามสร้างข้อมูลปลอม"
+- เหตุผล: `pm_am`=3 แถว (seed e2e), `pm_am_plans`/`plan_assets`/`plan_checklists`/`checklist_results`/`attachments`/`pm_planned_parts` = **0 แถวทุกตาราง** → ไม่มีแผน PM/checklist ที่ผูกกับ asset จริง → ตรวจไม่ได้ตามกติกา "ห้ามสร้างข้อมูลปลอม"
 - ต้องขอ: (ก) ข้อมูล PM จริงชุดทดสอบใน DB แยก หรือ (ข) อนุมัติสร้างข้อมูลทดสอบใน environment ที่ไม่ใช่ Production
-- Tasks ที่ทำได้ก่อน: audit UI/โครงสร้างหน้า PM (ยังไม่เริ่ม)
+- Tasks ที่ทำได้ก่อน: [x] audit UI/โครงสร้างหน้า PM (`PHASE_7_PM_UI_AUDIT.md`: 12 route, 12/12 ใช้ PageHeader/DetailHeader, 0 ของเก่า; เปิดจริง 12/12 = 403 gate เพราะ role 5 `pm_am*`=0; ตาราง PM 6 ตัว = **0 แถว** ทั้งหมด, `pm_am` มีแต่ 3 ใบ `E2E-SEED` วันนี้ 10:06)
 
 ## 9. Phase 8 — Asset, Inventory & Spare Parts
 
