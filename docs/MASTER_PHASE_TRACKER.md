@@ -108,8 +108,9 @@
 
 ## 10. Phase 9 — Reports, Analytics & Export
 
-- Tasks: [ ] audit filter↔export parity, [ ] permission ก่อน export, [ ] progress/loading, [ ] filename+date+เงื่อนไข, [ ] drill-down, [ ] ตรวจ Excel/PDF/CSV จริง
-- Known issues: H5
+- Tasks: [ ] audit filter↔export parity, [ ] permission ก่อน export, [ ] progress/loading, [ ] filename+date+เงื่อนไข, [ ] drill-down, [x] ตรวจ Excel/PDF/CSV จริง (`PHASE_9_EXPORT_FILE_AUDIT.md` — 10 ไฟล์ CSV/XLSX เปิดได้ parity ตรง DB 105/82/7/2/0 แถว, audit 10 แถว, PDF จริง 6.9 MB/1 หน้า; R9-1 MEDIUM รออนุมัติ)
+- Known issues: R9-1 (MEDIUM, `/reports/monthly_pdf` ฝัง default เดือน 7/2026 ตายตัว `page.tsx:66-67` → เห็น/ส่งออกเดือนผิด) · R9-2 (LOW, ชื่อไฟล์ CSV/XLSX ไม่มีช่วงวันที่) · R9-3 (LOW, PDF ฝัง PNG ซ้ำทุกหน้า) · R9-4 (LOW, `reports.php:68-70` audit_log เป็น dead code)
+- Known issues เดิม: H5
 - Approval: ไม่ต้อง (ห้ามเปลี่ยนข้อมูล)
 
 ## 11. Phase 10 — Technician & Mobile
