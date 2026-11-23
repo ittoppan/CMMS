@@ -14,7 +14,7 @@
 | 3 | Global Layout & Navigation | IN PROGRESS | PageShell/PageHeader/DetailHeader, Breadcrumb, EmployeeAvatar, NotificationCenter (commit `114f0dba`, `d7a12f6a`, `3f2d792b`); ยังไม่ตรวจ role menu/mobile nav/global search ครบ |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; ค้าง KPI validation, drill-down, last-updated, TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
-| 6 | Work Order Control | IN PROGRESS | D3.0–D3.1 audit done; D3.2 commit `023fdc6c` (tsc PASS); D3.3 queue redesign + tsc/build PASS (`docs/PHASE_D3_QUEUE_REPORT.md`); **D3.4 detail (compact summary + aging + mobile) เสร็จ + tsc/build PASS** (`docs/PHASE_D3_DETAIL_REPORT.md`); D3.5–D3.8 ไม่เริ่ม |
+| 6 | Work Order Control | IN PROGRESS | D3.0–D3.1 audit done; D3.2 commit `023fdc6c` (tsc PASS); D3.3 queue redesign + tsc/build PASS (`docs/PHASE_D3_QUEUE_REPORT.md`); **D3.4 detail (compact summary + aging + mobile) เสร็จ + tsc/build PASS** (`docs/PHASE_D3_DETAIL_REPORT.md`); **D3.5 responsive + D3.6 axe PASS** (`docs/PHASE_D3_RESPONSIVE_A11Y_REPORT.md`); เหลือ D3.7 role E2E + D3.8 docs |
 | 7 | Maintenance & PM | **BLOCKED** | `pm_am`=0 แถว → ตรวจ workflow/PM compliance ด้วยข้อมูลจริงไม่ได้; ไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
 | 9 | Reports, Analytics & Export | NOT STARTED | ต้องเริ่มด้วย audit filter↔export parity |
@@ -74,11 +74,11 @@
   - [x] D3.3 `tsc --noEmit` PASS + production build (`.next-verify`) PASS
   - [x] D3.4 detail: StatusChip เตือนเกินกำหนด, ป้าย aging (เกินกำหนด/ใกล้ครบ/เหลือ/ค้างมา/ปิดภายใน N วัน), ช่องกำหนดเสร็จ (SLA), ตารางอะไหล่ 2 ตาราง → การ์ดบนมือถือ, primaryAction บนหัวเพจ — `PHASE_D3_DETAIL_REPORT.md`
   - [x] D3.4 `tsc --noEmit` PASS + production build (`.next-verify`, 249/249 pages, route `○ /repair/view`) PASS
-  - [ ] D3.5 responsive 1440/768/390
-  - [ ] D3.6 axe
+  - [x] D3.5 responsive 1440/768/390 — 12/12 เคส ไม่มี horizontal overflow (Playwright, `.next-verify` :3003, `e2e_manager`)
+  - [x] D3.6 axe — 0 Critical / 0 Serious ทั้ง 12 เคส (wcag2a/2aa/21a/21aa); แก้ muted token + closure-document colours + 3 aria-label + queue breakpoint `lg` — `PHASE_D3_RESPONSIVE_A11Y_REPORT.md`
   - [ ] D3.7 role E2E (User/Operate/Foreman)
   - [ ] D3.8 perf + regression + docs (DESIGN_REPORT/BEFORE_AFTER/ROLE_PERMISSION_TEST/TEST_RESULTS)
-- Known issues: ต้องมีบัญชี e2e ที่ active (ตอนนี้ `is_active=0`); filter department/date ต้องอนุมัติแก้ API; D3.3 และ D3.4 ยังไม่ทดสอบด้วยเบราว์เซอร์/ข้อมูลจริง (ต้อง login) — เหลือ D3.5–D3.7
+- Known issues: บัญชี `e2e_*` ทั้ง 10 ตัว `is_active=1` แล้ว → D3.5/D3.6 วัดด้วยเบราว์เซอร์จริงได้; filter department/date ต้องอนุมัติแก้ API; D3.7 role E2E ยังไม่ทำ; โหมดมืดยังไม่วัด contrast
 - Known issues (D3.4): `aging` คำนวณตอน render (ไม่ tick ข้ามวัน); ตารางผลค้นหา Sage ยัง `overflow-x-auto`; `statusLabel`/`statusLabels` เป็น dead code รอเก็บกวาด Phase 2
 - Files: `app/(dashboard)/supervisor/queue/page.tsx`, `components/supervisor/WorkOrderTrendChart.tsx`, `app/(dashboard)/repair/view/page.tsx`
 - Approval: ไม่ต้องสำหรับ UI; **ต้องอนุมัติ** ถ้าจะแก้ `supervisor.php`
@@ -117,9 +117,9 @@
 ## 13. ลำดับงานถัดไป (ทำต่อทันที)
 
 1. Commit D3.2 + อัปเดต tracker (ทำงานรอบนี้)
-2. D3.3 Queue workspace
-3. D3.4 Detail + D3.5 responsive + D3.6 axe
-4. D3.7 role E2E + D3.8 docs
+2. ~~D3.3 Queue workspace~~ (เสร็จ `320fea69`)
+3. ~~D3.4 Detail + D3.5 responsive + D3.6 axe~~ (เสร็จ: D3.5/D3.6 มีหลักฐานวัดจริง 12/12 เคส)
+4. D3.7 role E2E (User/Operate/Foreman) + D3.8 docs
 5. Phase 2 docs (`COMPONENT_LIBRARY.md`, `DESIGN_TOKENS.md`) + ลบ demo pages
 6. Phase 4 KPI validation (เริ่มจาก dashboard/wallboard + supervisor)
 7. Phase 9 audit → Phase 10 mobile

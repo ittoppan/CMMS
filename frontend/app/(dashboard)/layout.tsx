@@ -359,7 +359,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 type="button"
                 onClick={() => setUserLang(lang === "th" ? "en" : "th")}
                 title={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
-                aria-label={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
+                aria-label={lang === "th" ? "EN · Switch to English" : "TH · สลับเป็นภาษาไทย"}
                 className="inline-flex h-9 min-w-[34px] select-none items-center justify-center rounded-full border border-border bg-secondary px-2 text-xs font-extrabold tracking-wider text-muted-foreground transition-colors cursor-pointer hover:bg-accent"
               >
                 {lang === "th" ? "EN" : "TH"}

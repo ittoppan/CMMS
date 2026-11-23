@@ -119,7 +119,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ fontSize: 12, color: "#64748B" }}>ผู้รับผิดชอบงานซ่อม:</div>
           <div style={{ fontWeight: 700, color: "#2563EB", marginTop: 2 }}>{wo.assignedName}</div>
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 8 }}>ผู้รับมอบงานซ่อมเสร็จ:</div>
-          <div style={{ fontWeight: 700, color: "#16A34A", marginTop: 2 }}>{wo.receiverName || "-"}</div>
+          <div style={{ fontWeight: 700, color: "#15803D", marginTop: 2 }}>{wo.receiverName || "-"}</div>
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 8 }}>เวลาซ่อม (Downtime):</div>
           <div style={{ fontSize: 13, marginTop: 2 }}>{wo.downtimeMinutes > 0 ? `${wo.downtimeMinutes} นาที` : "-"}</div>
         </div>
@@ -161,22 +161,22 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
       {/* Before / After Photos */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 14 }}>
         <div style={{ border: "2px dashed #EF4444", borderRadius: 12, padding: 12, background: "#FEF2F2" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#DC2626" }}>🔴 รูปถ่ายก่อนซ่อม / จุดชำรุด</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#B91C1C" }}>🔴 รูปถ่ายก่อนซ่อม / จุดชำรุด</div>
           <div style={{ width: "100%", height: 200, borderRadius: 8, overflow: "hidden", background: "#CBD5E1", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {wo.beforeImg ? (
               <img src={wo.beforeImg} alt="รูปถ่ายก่อนซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: 12, color: "#64748B" }}>ไม่มีรูปถ่ายก่อนซ่อม</span>
+              <span style={{ fontSize: 12, color: "#475569" }}>ไม่มีรูปถ่ายก่อนซ่อม</span>
             )}
           </div>
         </div>
         <div style={{ border: "2px solid #10B981", borderRadius: 12, padding: 12, background: "#ECFDF5" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#16A34A" }}>🟢 รูปถ่ายหลังซ่อมเสร็จ</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#15803D" }}>🟢 รูปถ่ายหลังซ่อมเสร็จ</div>
           <div style={{ width: "100%", height: 200, borderRadius: 8, overflow: "hidden", background: "#CBD5E1", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {wo.afterImg ? (
               <img src={wo.afterImg} alt="รูปถ่ายหลังซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: 12, color: "#64748B" }}>ไม่มีรูปถ่ายหลังซ่อม</span>
+              <span style={{ fontSize: 12, color: "#475569" }}>ไม่มีรูปถ่ายหลังซ่อม</span>
             )}
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
               fontWeight: 700,
               marginTop: 4,
               color:
-                wo.contaminateChecking === "contaminated" ? "#DC2626"
+                wo.contaminateChecking === "contaminated" ? "#B91C1C"
                 : wo.contaminateChecking === "clean" ? "#16A34A"
                 : "#334155",
             }}
@@ -287,7 +287,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
         </div>
 
         <div style={{ border: "2px solid #10B981", borderRadius: 12, padding: 14, textAlign: "center", background: "#ECFDF5" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#16A34A" }}>✓ ตรวจรับมอบงานเสร็จสมบูรณ์</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#15803D" }}>✓ ตรวจรับมอบงานเสร็จสมบูรณ์</div>
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>ลายเซ็นผู้รับมอบงาน</div>
           <div style={{ width: "80%", height: 80, border: "1px dashed #10B981", borderRadius: 8, margin: "8px auto", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF" }}>
             {wo.receiverSignature ? (

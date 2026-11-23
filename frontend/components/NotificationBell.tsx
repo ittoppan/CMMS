@@ -92,7 +92,7 @@ export function NotificationBell({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label="การแจ้งเตือน"
+          aria-label={`การแจ้งเตือน${unread > 0 ? ` — ${unread} รายการที่ยังไม่อ่าน` : ""}`}
           title="การแจ้งเตือน"
           className={cn(
             "relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",

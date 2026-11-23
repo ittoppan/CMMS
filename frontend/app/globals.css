@@ -200,7 +200,7 @@ body {
   --color-background-popover: #FFFFFF;
   --color-text-primary: #1C2536;
   --color-text-secondary: #475569;
-  --color-text-muted: #64748B;
+  --color-text-muted: #5B6B80; /* D3.6: darkened from #64748B — 4.43:1 on page bg failed WCAG AA, now ~4.8:1 */
   --color-text-disabled: #9AA4B8;
   --color-border: #E6EBF2;
   --color-border-emphasized: #CBD5E1;
@@ -2973,7 +2973,7 @@ next-route-announcer {
   --cmms-bg-wash: #eff3f8;
   --cmms-text-primary: #1c2536;
   --cmms-text-secondary: #475569;
-  --cmms-text-muted: #64748b;
+  --cmms-text-muted: #5b6b80; /* D3.6: AA on page bg (was #64748b = 4.43:1) */
   --cmms-text-on-primary: #ffffff;
   --cmms-border: #e6ebf2;
   --cmms-border-hover: #cbd5e1;

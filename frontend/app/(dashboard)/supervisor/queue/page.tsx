@@ -371,7 +371,7 @@ export default function SupervisorQueuePage() {
       )}
 
       {/* Desktop table */}
-      <Card className="hidden overflow-hidden md:block">
+      <Card className="hidden overflow-hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -456,7 +456,7 @@ export default function SupervisorQueuePage() {
       </Card>
 
       {/* Mobile cards — อ่านได้โดยไม่ต้อง scroll แนวนอน */}
-      <div className="space-y-2 md:hidden">
+      <div className="space-y-2 lg:hidden">
         {loading ? (
           <Card className="overflow-hidden"><QueueSkeleton /></Card>
         ) : items.length === 0 ? (
