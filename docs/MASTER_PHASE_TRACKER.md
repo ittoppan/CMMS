@@ -13,7 +13,7 @@
 | 2 | Enterprise Design System | **PASS** | `DESIGN_SYSTEM.md` v3 + primitives + `COMPONENT_LIBRARY.md` + `DESIGN_TOKENS.md` (จากโค้ดจริง); ลบ `/ui-demo`, `/ui-kit` แล้ว (247/247 pages, tsc/build PASS); ค้างเก็บกวาด card-in-card/tile ในหน้าที่ยังไม่ย้าย |
 | 3 | Global Layout & Navigation | **PASS (มี finding N1–N3)** | bottom nav 390 = 6 ปุ่ม hit 59px/padding 96px/overflow 0; keyboard PASS (skip link, Enter→main, ring 2–3px, Ctrl+K palette 130→5, Esc ปิด); role menu เทียบ API 9 บทบาท: ไม่มีเมนูที่ไม่ได้สิทธิ์ถูกแสดง ยกเว้น `/dashboard` — `docs/PHASE_3_LAYOUT_NAV_REPORT.md` |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); **K1–K7 แก้แล้ว `f86634f6`**, **K8–K10 + `reports.php` แก้แล้ว `50e9e23a`** (ตัวเลขก่อน/หลังในรายงาน §9–§10); last-updated + drill-down ปิดแล้ว `b55e4046`; **TBT วัดแล้ว: 0 ms desktop / 512 ms median ที่ CPU 4× → ยังไม่ผ่านเป้าเมื่อ throttle**; ค้าง audit INSUFFICIENT DATA + ลด TBT |
-| 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
+| 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`); **audit my-repairs/history/detail 2026-11-23** (`PHASE_5_MY_REPAIRS_AUDIT.md`): `/my-repairs` PASS (h1 1, overflow 0, console 0 ที่ 390px), พบ F5-1 (role ไม่มีสิทธิ์ยังยิง 2 คำขอ → console error) และ F5-2 (`/repair/view` ไม่มี `?id` → fallback `id=1`) — รออนุมัติแก้ |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
 | 7 | Maintenance & PM | **BLOCKED** | `pm_am`=3 แถว แต่ทั้งหมดเป็น `E2E-SEED` (seed จาก e2e) → ตรวจ workflow/PM compliance ด้วยข้อมูลผลิตจริงไม่ได้; ยังไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
@@ -68,8 +68,8 @@
 
 ## 6. Phase 5 — Repair Request & Employee Experience
 
-- Tasks: [x] D1 ลดคลิกเหลือ 4 (ไม่ลบ required/validation/double-submit), [x] mobile 390, [x] e2e User, [ ] ตรวจ my-repairs/history/detail, [ ] notification ตาม workflow (ตรวจของเดิม)
-- Known issues: none blocking
+- Tasks: [x] D1 ลดคลิกเหลือ 4 (ไม่ลบ required/validation/double-submit), [x] mobile 390, [x] e2e User, [x] ตรวจ my-repairs/history/detail (`PHASE_5_MY_REPAIRS_AUDIT.md` — ตรวจได้เฉพาะเส้นทาง 403 สำหรับ history/detail), [ ] notification ตาม workflow (ตรวจของเดิม)
+- Known issues: F5-1 (LOW, console error 2 รายการเมื่อ role ไม่มีสิทธิ์เปิด `/repair/history`) · F5-2 (MEDIUM, `/repair/view` ไม่มี `?id` → fallback `id=1` ที่ `page.tsx:346`) — ทั้งคู่ต้องอนุมัติก่อนแก้ เพราะแตะพฤติกรรมการโหลดข้อมูล
 - Approval: ไม่ต้อง
 
 ## 7. Phase 6 — Work Order Control (งานปัจจุบัน)
