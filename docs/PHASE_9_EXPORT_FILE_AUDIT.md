@@ -67,6 +67,7 @@
 | R9-2 | LOW | ไฟล์ CSV/XLSX ตั้งชื่อด้วย `resource_วันเวลาexport` **ไม่มีช่วงวันที่/เงื่อนไขของรายงาน** → แยกไฟล์ย้อนหลังยาก (PDF มีปี-เดือน ดีกว่าอยู่แล้ว) | `reports.php:1491,1527` | ใช่ (แก้ export) |
 | R9-3 | LOW | PDF 6.9 MB สำหรับ 1 หน้า เพราะฝัง PNG ที่ `scale:2` ทั้งก้อน; ถ้ารายงานยาวหลายหน้าจะฝังภาพเดิมซ้ำทุกหน้า → ไฟล์บวมคูณจำนวนหน้า | §2 + `monthly_pdf/page.tsx:154-168` | ใช่ |
 | R9-4 | LOW | `reports.php:68-70` เรียก `audit_log('REPORT_EXPORT', …)` หลัง export — **ไม่เคยทำงาน** เพราะทั้ง `rpt_export_csv` และ `rpt_export_xlsx` `exit` ก่อน (audit ยังถูกบันทึกผ่าน `rpt_log_audit` จึงไม่เสียข้อมูล) | `src/helpers/reports.php:1473-1529` | ไม่เร่ง |
+| R9-5 | **MEDIUM** | สิทธิ์ export ตัดสินด้วย role id ที่ฝังในโค้ด (`rpt_permitted`) ไม่ได้อ่าน `menu_permissions` → เปลี่ยนสิทธิ์ในหน้า `/roles` ไม่มีผลกับ API; และ 10 จาก 12 resource ไม่มีกฎเลย | §4.5 ตารางยิงจริง + `reports.php:151` | ใช่ (แตะ authorization) |
 
 ## 4. ตรวจแล้วไม่ใช่ปัญหา (กันรายงานผิด)
 
@@ -74,9 +75,42 @@
 - **`assets` 82 แถว = จำนวนเครื่องจริง** จึงไม่ใช่การตัดข้อมูลทิ้ง
 - **401 เมื่อไม่ล็อกอิน** = มี auth gate ก่อนสร้างไฟล์
 
+## 4.5 Permission ก่อน export — ตรวจแล้ว (รอบที่ 2)
+
+แหล่งข้อมูล:** `src/helpers/reports.php:151` `rpt_permitted()` ถูกเรียกที่ต้นทางเดียว `rpt_dispatch()` (บรรทัด 1516) ซึ่ง **ทั้งหน้าจอ (`resource=…`) และการดาวน์โหลด (`export=csv|xlsx`) ผ่านเข้าที่เดียวกัน** → ตัวกรองทำงานก่อนสร้างไฟล์
+
+ยิงจริงด้วย role 5:
+
+| คำขอ | HTTP | ผล |
+|---|---|---|
+| `resource=cost&export=csv` | **403** | `ไม่มีสิทธิ์ดูรายงานนี้ (Report Permission)` |
+| `resource=cost&export=xlsx` | **403** | เดียวกัน |
+| `resource=technicians&export=csv` | **403** | เดียวกัน |
+| `resource=technicians&export=xlsx` | **403** | เดียวกัน |
+| `resource=cost` (หน้าจอ) | **403** | เดียวกัน |
+| `resource=pm&export=csv` | 200 | ไฟล์ 676 bytes |
+
+**สรุป: มี permission gate ก่อน export จริง** — restricted resource ถูกกันที่ API ทั้งหน้าจอและไฟล์ (ไม่ใช่แค่ซ่อนปุ่มบน UI)
+
+**แต่กลไกไม่ตรงกับระบบเมนู (finding R9-5):**
+
+```php
+function rpt_permitted(string $resource, int $roleId): bool {
+    switch ($resource) {
+        case 'cost':        return kpi_can_see_cost($roleId);            // 1,2,6
+        case 'technicians': return in_array($roleId, [1, 2, 6, 7], true);
+        default:            return true;                                  // 10 จาก 12 resource = ผ่านทุก role
+    }
+}
+```
+
+- ตัดสินด้วย **role id ที่ฝังในโค้ด** ไม่ได้อ่าน `menu_permissions`
+- → ถ้าฝ่าย IT ไปเปลี่ยนสิทธิ์ `reports/cost` ในหน้า `/roles` ผลกับ API **ไม่เปลี่ยน**
+- → resource 10 ตัวที่เหลือ (`work-orders`, `assets`, `spare-parts`, `downtime`, `pm`, `inspections`, `requests`, `sla`, `mttr-mtbf`, `center`) **ไม่มีกฎเลย** เปิดให้ทุก role ที่ล็อกอิน (สอดคล้องกับ E11-1)
+
 ## 5. สิ่งที่ยังไม่ได้ตรวจ
 
-- **permission ระดับ resource**: role 5 มีสิทธิ์ `reports/*` ครบทุกตัวที่ทดสอบ จึงแยกไม่ออกว่า export ตรวจสิทธิ์ราย resource จริงหรือไม่ (ต้องใช้บัญชีที่ไม่มีสิทธิ์ reports)
+- สิทธิ์แบบ **ราย resource ที่ไม่ใช่ cost/technicians** — ไม่มีกฎให้ทดสอบ; ต้องใช้บัญชีที่ `menu_permissions` เป็น 0 สำหรับ resource นั้น แล้วดูว่า API ยังให้โหลดหรือไม่
 - ช่วงวันที่/ตัวกรอง: ดาวน์โหลดด้วยค่า default เท่านั้น ยังไม่ได้ทดสอบว่า filter บนหน้าจอส่งต่อไปยังไฟล์ตรงกัน (parity ตัวเลขกับหน้าจอมีรายงานเดิม `442bc2ed`)
 - drill-down และ progress/loading ระหว่าง export
 - PDF หลายหน้า (รายงานที่ยาวเกิน 1 หน้า) — ยังไม่ทดสอบการแบ่งหน้า
@@ -87,3 +121,4 @@
 | checkbox | สถานะ |
 |---|---|
 | `[ ] ตรวจ Excel/PDF/CSV จริง` | **ตรวจแล้ว** — CSV/XLSX 10 ไฟล์เปิดได้ parity ตรง DB, PDF สร้างได้จริง 6.9 MB/1 หน้า; พบ R9-1 MEDIUM (เดือน default ผิด) |
+| `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
