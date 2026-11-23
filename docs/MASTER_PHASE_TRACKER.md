@@ -102,8 +102,8 @@
 
 ## 9. Phase 8 — Asset, Inventory & Spare Parts
 
-- Tasks: [x] asset detail redesign + BOM permission + QR minimal + tests (`b7f0c6e4`), [x] asset stats API, [x] audit ทุกหน้า asset (28 หน้า = 20 calibration + 8 asset_registry — `PHASE_8_ASSET_PAGE_AUDIT.md`: นับ route จริง 28, เปิดจริง 25 หน้าได้ 403 gate, `/calibration/run` = dynamic 404 ถูกต้อง; หัวหน้า PageHeader 27/28 + ฝ่าฝืน 0 `cmms-page-hero`; visual ยังตรวจไม่ได้ — ต้องมีบัญชีที่มีสิทธิ์), [ ] spare pagination, [ ] traceability asset→WO
-- Known issues: M4, IMP-1, IMP-2 (upload limit mismatch) · A8-1 (MEDIUM, `calibration/mobile` สร้างหัวหน้าเอง `<p class=cmms-eyebrow>`+`<h1>` แทน PageHeader, `page.tsx:107-108`) · A8-2 (LOW, หน้า 403 gate ตอบ HTTP 200)
+- Tasks: [x] asset detail redesign + BOM permission + QR minimal + tests (`b7f0c6e4`), [x] asset stats API, [x] audit ทุกหน้า asset (28 หน้า = 20 calibration + 8 asset_registry — `PHASE_8_ASSET_PAGE_AUDIT.md`: นับ route จริง 28, เปิดจริง 25 หน้าได้ 403 gate, `/calibration/run` = dynamic 404 ถูกต้อง; หัวหน้า PageHeader 27/28 + ฝ่าฝืน 0 `cmms-page-hero`; visual ยังตรวจไม่ได้ — ต้องมีบัญชีที่มีสิทธิ์), [x] spare pagination (**PASS ระดับโค็ด — ทำแล้ว ไม่ต้องอนุมัติ**: `spare_parts/page.tsx:100` PAGE_SIZE=15 + `?limit&page` → server คืน `total` จาก WHERE เดียวกัน; 1,870 แถว = 125 หน้า; UI ยังไม่วัด — role 5 `spare_parts`=0 → 403 by design), [x] traceability asset→WO (**BLOCKED by design**: โค็ดครบ `view/page.tsx:596` → `repair.php:132` กรอง `a.code`, timeline `href=/repair/view?id=`; role 5 `repair`=0 → 403 ทุก GET, anonymous 401; ข้อมูลจริง `A-BM06` = 7 ใบ — ยังไม่เห็น timeline จริง)
+- Known issues: M4, IMP-1, IMP-2 (upload limit mismatch) · A8-1 (MEDIUM, `calibration/mobile` สร้างหัวหน้าเอง `<p class=cmms-eyebrow>`+`<h1>` แทน PageHeader, `page.tsx:107-108`) · A8-2 (LOW, หน้า 403 gate ตอบ HTTP 200) · A8-3 (LOW, asset timeline เรียก `repair.php?asset_code=` โดยไม่ใส่ limit → `$limit=0` คืนทั้งหมด; ปัจจุบันมากสุด 7 ใบ)
 - Approval: ต้องอนุมัติถ้าเปลี่ยน contract ของ list (query params)
 
 ## 10. Phase 9 — Reports, Analytics & Export
