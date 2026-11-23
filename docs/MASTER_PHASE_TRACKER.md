@@ -68,8 +68,8 @@
 
 ## 6. Phase 5 — Repair Request & Employee Experience
 
-- Tasks: [x] D1 ลดคลิกเหลือ 4 (ไม่ลบ required/validation/double-submit), [x] mobile 390, [x] e2e User, [x] ตรวจ my-repairs/history/detail (`PHASE_5_MY_REPAIRS_AUDIT.md` — ตรวจได้เฉพาะเส้นทาง 403 สำหรับ history/detail), [ ] notification ตาม workflow (ตรวจของเดิม)
-- Known issues: F5-1 (LOW, console error 2 รายการเมื่อ role ไม่มีสิทธิ์เปิด `/repair/history`) · F5-2 (MEDIUM, `/repair/view` ไม่มี `?id` → fallback `id=1` ที่ `page.tsx:346`) — ทั้งคู่ต้องอนุมัติก่อนแก้ เพราะแตะพฤติกรรมการโหลดข้อมูล
+- Tasks: [x] D1 ลดคลิกเหลือ 4 (ไม่ลบ required/validation/double-submit), [x] mobile 390, [x] e2e User, [x] ตรวจ my-repairs/history/detail (`PHASE_5_MY_REPAIRS_AUDIT.md` — ตรวจได้เฉพาะเส้นทาง 403 สำหรับ history/detail), [x] notification ตาม workflow (ตรวจของเดิม) (`PHASE_5_NOTIFICATION_AUDIT.md` — ครอบ 4 เหตุการณ์ / ขาด 6 สถานะ)
+- Known issues: F5-1 (LOW, console error 2 รายการเมื่อ role ไม่มีสิทธิ์เปิด `/repair/history`) · F5-2 (MEDIUM, `/repair/view` ไม่มี `?id` → fallback `id=1` ที่ `page.tsx:346`) · N5-1 (MEDIUM, 6 สถานะปลายทางไม่มีแจ้งเตือน) · N5-2 (LOW, แจ้งเฉพาะสมาชิกที่เพิ่มใหม่) · N5-3 (LOW, `notification_logs.template` ไม่ถูกบันทึก) — ทั้งหมดต้องอนุมัติก่อนแก้ เพราะแตะพฤติกรรม/logic
 - Approval: ไม่ต้อง
 
 ## 7. Phase 6 — Work Order Control (งานปัจจุบัน)
