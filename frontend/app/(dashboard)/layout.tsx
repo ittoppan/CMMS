@@ -461,8 +461,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link
               href="/profile"
               className="cmms-mobile-app-bar-btn"
-              aria-label="profile"
-              title="profile"
+              aria-label={`${(() => { const p=(currentUser?.name||"USER").split(/\s+/).filter(Boolean); return ((p[0]?.[0]||"") + (p[p.length-1]?.[0]||"")).toUpperCase(); })()} โปรไฟล์`}
             >
               <EmployeeAvatar name={currentUser?.name || "USER"} photoUrl={currentUser?.avatar} size={24} />
             </Link>
@@ -507,15 +506,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Sheet>
 
           {/* Global scan shortcut (ทุกหน้าใน dashboard) — สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม */}
-          <Link
-            href="/scan"
-            className="cmms-global-scan-fab"
-            aria-label="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
-            title="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
-          >
-            <Scan size={22} strokeWidth={2} aria-hidden="true" />
-            <span className="cmms-global-scan-fab-label">สแกน</span>
-          </Link>
+          <nav aria-label="ทางลัดสแกน">
+            <Link
+              href="/scan"
+              className="cmms-global-scan-fab"
+              aria-label="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+              title="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+            >
+              <Scan size={22} strokeWidth={2} aria-hidden="true" />
+              <span className="cmms-global-scan-fab-label">สแกน</span>
+            </Link>
+          </nav>
 
           {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
           <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูหลัก">

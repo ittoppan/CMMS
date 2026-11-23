@@ -201,19 +201,13 @@ export default function MyDashboardPage() {
     { icon: <RotateCcw className="h-4 w-4 text-red-600" />, value: "N/A", label: "Rework Rate", note: "ไม่มีแหล่งข้อมูล" },
   ];
 
-  const monthlyData = [
-    { month: "Sep", assigned: 0, completed: 0, overdue: 0 },
-    { month: "Oct", assigned: 0, completed: 0, overdue: 0 },
-    { month: "Nov", assigned: totalJobs, completed: Number(counts.verified ?? 0), overdue: overdue },
-  ];
-
-  const quickActions = [
-    { icon: <Play className="h-5 w-5" />, label: "Start Job", color: "bg-blue-600 text-white", href: "/repair/my_tasks" },
-    { icon: <Pause className="h-5 w-5" />, label: "Pause Job", color: "bg-amber-500 text-white", href: "/repair/my_tasks" },
-    { icon: <CheckCircle2 className="h-5 w-5" />, label: "Complete Job", color: "bg-emerald-600 text-white", href: "/repair/my_tasks" },
-    { icon: <Camera className="h-5 w-5" />, label: "Upload Photo", color: "bg-slate-100 text-slate-700", href: "/repair/my_tasks" },
-    { icon: <Package className="h-5 w-5" />, label: "Request Parts", color: "bg-amber-100 text-amber-700", href: "/spare_parts/requests" },
-    { icon: <MessageSquareWarning className="h-5 w-5" />, label: "Report Problem", color: "bg-blue-100 text-blue-700", href: "/repair/request" },
+    const quickActions = [
+    { icon: <Play className="h-5 w-5" />, label: "เริ่มงาน", color: "bg-blue-600 text-white", href: "/repair/my_tasks" },
+    { icon: <Pause className="h-5 w-5" />, label: "พักงาน", color: "bg-amber-500 text-slate-900", href: "/repair/my_tasks" },
+    { icon: <CheckCircle2 className="h-5 w-5" />, label: "เสร็จงาน", color: "bg-emerald-600 text-slate-900", href: "/repair/my_tasks" },
+    { icon: <Camera className="h-5 w-5" />, label: "อัปโหลดรูป", color: "bg-slate-100 text-slate-700", href: "/repair/my_tasks" },
+    { icon: <Package className="h-5 w-5" />, label: "ขออะไหล่", color: "bg-amber-100 text-amber-700", href: "/spare_parts/requests" },
+    { icon: <MessageSquareWarning className="h-5 w-5" />, label: "แจ้งปัญหา", color: "bg-blue-100 text-blue-700", href: "/repair/request" },
   ];
   return (
     <>
@@ -232,15 +226,14 @@ export default function MyDashboardPage() {
         {error && <Alert variant="danger" description={error} />}
 
         <Card className="overflow-hidden">
-          <CardContent className="relative flex flex-col gap-4 p-0 sm:flex-row sm:items-center">
-            <div className="absolute inset-0 bg-blue-900" aria-hidden="true" />
-            <div className="relative flex flex-1 items-center gap-4 p-5">
+          <CardContent className="relative flex flex-col gap-4 p-0 sm:flex-row sm:items-center" style={{ backgroundColor: "#1e3a8a" }}>
+            <div className="relative flex flex-1 items-center gap-4 p-5" style={{ backgroundColor: "#1e3a8a" }}>
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-md">
                 <EmployeeAvatar name={displayName} photoUrl={avatar} size={80} />
               </div>
               <div className="min-w-0 text-white">
-                <h2 className="text-xl font-bold sm:text-2xl">{displayName}</h2>
-                <p className="text-sm text-white/80">
+                <h2 className="text-xl font-bold sm:text-2xl" style={{ color: "#ffffff" }}>{displayName}</h2>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
                   {empCode} | {roleName}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/90">
@@ -257,7 +250,7 @@ export default function MyDashboardPage() {
               </div>
             </div>
             <div className="relative p-5 sm:pr-6">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-3 py-1 text-xs font-semibold text-white">
                 <span className="h-2 w-2 rounded-full bg-white" /> On Duty
               </span>
             </div>
@@ -310,7 +303,7 @@ export default function MyDashboardPage() {
                   const thumb = (it.asset_code || "?").slice(0, 2).toUpperCase();
                   return (
                     <div key={it.id} className="flex gap-3 rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-500">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700">
                         {thumb}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -463,7 +456,7 @@ export default function MyDashboardPage() {
           </Card>
         </div>
 
-        <p className="text-xs text-[var(--cmms-text-muted)]">
+        <p className="text-xs text-[var(--cmms-text-secondary)]">
           หมายเหตุ: หน้า My Dashboard นี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอินตาม API)
           ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ
         </p>

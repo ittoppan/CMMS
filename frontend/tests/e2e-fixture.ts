@@ -14,6 +14,8 @@ import path from "node:path";
 
 const AUTH_FILE = path.join(__dirname, "..", ".e2e-auth.json");
 const SEED_SCRIPT = path.join(__dirname, "e2e", "fixtures", "seed-data.php");
+const CLEANUP_SCRIPT = path.join(__dirname, "e2e", "fixtures", "cleanup-e2e.php");
+const VERIFY_SCRIPT = path.join(__dirname, "e2e", "fixtures", "verify-e2e-residue.php");
 
 function php(script: string, args: string[] = []): string {
   return execFileSync("php", [script, ...args], { encoding: "utf8" });
@@ -70,9 +72,14 @@ if ($cmd === 'up') {
 
 async function globalTeardown(): Promise<void> {
   if (process.env.E2E_USERNAME || process.env.E2E_NO_FIXTURE === "1") return;
+  // ลบข้อมูลที่เทสสร้างผ่านบัญชี e2e_* ทั้งหมดก่อน (ทุกตารางที่มีคอลัมน์ e2e-user)
+  console.log("[e2e-cleanup]", php(CLEANUP_SCRIPT).trim());
   // ลบ seed ก่อนเสมอ แม้ AUTH_FILE หาย (suite ถูก interrupt) — แถวที่ seed ไว้ลบตัวเองได้
   seed("down");
-  if (!fs.existsSync(AUTH_FILE)) return;
+  if (!fs.existsSync(AUTH_FILE)) {
+    console.log("[e2e-verify]", php(VERIFY_SCRIPT).trim());
+    return;
+  }
   const tmp = path.join(process.env.TEMP || "/tmp", `e2e-fixture-${Date.now()}.php`);
   fs.writeFileSync(tmp, `<?php
 require_once 'C:/inetpub/wwwroot/cmms-tpt/src/config/db.php';
@@ -86,6 +93,8 @@ echo "deleted:" . $pdo->exec("DELETE FROM users WHERE username='e2e_bot'");
   } finally {
     fs.unlinkSync(tmp);
   }
+  // ตรวจซ้ำว่าไม่มีแถว e2e_* เหลือ (ถ้ามี ให้เทสล้ม)
+  console.log("[e2e-verify]", php(VERIFY_SCRIPT).trim());
 }
 
 export default globalSetup;

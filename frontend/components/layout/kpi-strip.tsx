@@ -74,8 +74,9 @@ export function KpiStrip({ items, ariaLabel, className }: KpiStripProps) {
     <div
       role="group"
       aria-label={ariaLabel}
+      tabIndex={0}
       className={cn(
-        "flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:snap-none md:overflow-visible md:pb-0",
+        "flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:snap-none md:overflow-visible md:pb-0 focus:outline-none",
         className
       )}
     >

@@ -76,15 +76,24 @@ export default function BacklogAgingPage() {
 
   // Aging buckets
   const buckets = React.useMemo(() => {
-    const b = { d0_3: 0, d4_7: 0, d8_14: 0, d15: 0 };
+    const b = { d0_7: 0, d8_14: 0, d15_30: 0, d30p: 0 };
     for (const it of items) {
       const d = ageDays(it.created_at);
-      if (d <= 3) b.d0_3++;
-      else if (d <= 7) b.d4_7++;
+      if (d <= 7) b.d0_7++;
       else if (d <= 14) b.d8_14++;
-      else b.d15++;
+      else if (d <= 30) b.d15_30++;
+      else b.d30p++;
     }
     return b;
+  }, [items]);
+
+  const overdueCount = React.useMemo(() => {
+    const now = Date.now();
+    return items.filter((it) => {
+      if (!it.due_at) return false;
+      const t = new Date(it.due_at).getTime();
+      return !isNaN(t) && t < now;
+    }).length;
   }, [items]);
 
   // Reason buckets
@@ -99,10 +108,12 @@ export default function BacklogAgingPage() {
 
   const kpiItems = [
     { label: "งานค้างทั้งหมด", value: total ?? items.length, tone: "default" as const },
-    { label: "ค้าง 0-3 วัน", value: buckets.d0_3, tone: "success" as const },
-    { label: "ค้าง 4-7 วัน", value: buckets.d4_7, tone: "warning" as const },
-    { label: "ค้าง 8-14 วัน", value: buckets.d8_14, tone: "warning" as const },
-    { label: "ค้าง >14 วัน", value: buckets.d15, tone: "danger" as const },
+    { label: "เกินกำหนด", value: overdueCount, tone: "danger" as const },
+    { label: "เกินกำหนด %", value: items.length > 0 ? Math.round((overdueCount / items.length) * 100) + "%" : "0%", tone: "warning" as const },
+    { label: "อายุ 0-7 วัน", value: buckets.d0_7, tone: "success" as const },
+    { label: "อายุ 8-14 วัน", value: buckets.d8_14, tone: "warning" as const },
+    { label: "อายุ 15-30 วัน", value: buckets.d15_30, tone: "warning" as const },
+    { label: "อายุ >30 วัน", value: buckets.d30p, tone: "danger" as const },
   ];
 
   return (
@@ -117,6 +128,9 @@ export default function BacklogAgingPage() {
       }
     >
       <div className="space-y-6">
+        <div className="rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+          หมายเหตุ: ใบงานค้างทั้งหมดเป็นข้อมูลนำเข้าเก่าที่ยังไม่ได้ยืนยัน (ดู docs/REPAIR_BACKLOG_REPORT.md) — ห้ามแก้หรือปิดใบงานในงานนี้
+        </div>
         {loading ? (
           <div className="text-sm text-muted-foreground">กำลังโหลด...</div>
         ) : error ? (
@@ -134,7 +148,7 @@ export default function BacklogAgingPage() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card p-4">
-                <h3 className="mb-3 text-sm font-semibold text-foreground">ค้างเพราะอะไร</h3>
+                <h2 className="mb-3 text-sm font-semibold text-foreground">ค้างเพราะอะไร</h2>
                 <ul className="space-y-2">
                   {reasons.map(([reason, count]) => (
                     <li key={reason} className="flex items-center justify-between text-sm">
@@ -145,19 +159,19 @@ export default function BacklogAgingPage() {
                 </ul>
               </div>
               <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card p-4">
-                <h3 className="mb-3 text-sm font-semibold text-foreground">Aging (วัน)</h3>
+                <h2 className="mb-3 text-sm font-semibold text-foreground">Aging (วัน)</h2>
                 <ul className="space-y-2 text-sm">
-                  <li className="flex justify-between"><span className="text-muted-foreground">0-3 วัน</span><span className="font-semibold">{buckets.d0_3}</span></li>
-                  <li className="flex justify-between"><span className="text-muted-foreground">4-7 วัน</span><span className="font-semibold">{buckets.d4_7}</span></li>
+                  <li className="flex justify-between"><span className="text-muted-foreground">0-7 วัน</span><span className="font-semibold">{buckets.d0_7}</span></li>
                   <li className="flex justify-between"><span className="text-muted-foreground">8-14 วัน</span><span className="font-semibold">{buckets.d8_14}</span></li>
-                  <li className="flex justify-between"><span className="text-muted-foreground">&gt;14 วัน</span><span className="font-semibold text-[var(--cmms-danger)]">{buckets.d15}</span></li>
+                  <li className="flex justify-between"><span className="text-muted-foreground">15-30 วัน</span><span className="font-semibold">{buckets.d15_30}</span></li>
+                  <li className="flex justify-between"><span className="text-muted-foreground">&gt;30 วัน</span><span className="font-semibold text-[var(--cmms-danger)]">{buckets.d30p}</span></li>
                 </ul>
               </div>
             </div>
 
             <ListToolbar search={{ value: query, onChange: setQuery, placeholder: "ค้นหางานค้าง" }} />
 
-            <div className="overflow-x-auto rounded-[var(--cmms-radius-lg)] border border-border bg-card">
+            <div className="overflow-x-auto rounded-[var(--cmms-radius-lg)] border border-border bg-card" role="region" aria-label="ตารางงานค้าง" tabIndex={0}>
               <table className="min-w-full text-sm">
                 <thead className="bg-muted/50 text-left text-xs font-semibold text-muted-foreground">
                   <tr>

@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -98,7 +98,7 @@ const RANGES = D.RANGE_OPTIONS.filter((r) =>
 const PRIORITY_META: Record<string, { label: string; color: string }> = {
   critical: { label: "วิกฤต", color: C.red },
   high: { label: "ด่วน", color: C.amber },
-  medium: { label: "ปกติ", color: C.blue },
+  medium: { label: "ปกติ", color: "#93c5fd" },
   low: { label: "ไม่เร่งด่วน", color: C.green },
 };
 
@@ -128,6 +128,8 @@ interface Loaded {
   spareTotal: number;
   mtbfPoints: MtbfMttrPoint[];
   mtbfRows: number;
+  spareAllowed: boolean;
+  mtbfAllowed: boolean;
 }
 
 const EMPTY: Loaded = {
@@ -143,6 +145,8 @@ const EMPTY: Loaded = {
   spareTotal: 0,
   mtbfPoints: [],
   mtbfRows: 0,
+  spareAllowed: true,
+  mtbfAllowed: true,
 };
 
 /** ตัวอักษรในกราฟสเกลตามความกว้างจอ (TV อ่านได้) */
@@ -176,7 +180,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className={`tower-panel ${className}`}>
+    <section className={`tower-panel ${className}`} style={{ contentVisibility: "auto", containIntrinsicSize: "320px" }}>
       <div className="tower-panel-head">
         <h2 className="tower-panel-title">
           <Icon size="1em" strokeWidth={2.2} aria-hidden />
@@ -187,6 +191,31 @@ function Panel({
       <div className={`tower-panel-body ${bodyClassName}`}>{children}</div>
     </section>
   );
+}
+
+function IdleChart({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setReady(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setReady(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return <div ref={ref} style={{ minHeight: 120 }}>{ready ? children : null}</div>;
 }
 
 function PanelLink({ href, label }: { href: string; label: string }) {
@@ -338,24 +367,18 @@ export default function DashboardPage() {
       setError(e instanceof Error ? e.message : "โหลดข้อมูลภาพรวมไม่สำเร็จ");
     }
 
-    const [trend, monthly, downtime, recent, openList, pm, plant, spare, mtbf] = await Promise.allSettled([
+    const [trend, downtime, recent, openList, pm] = await Promise.allSettled([
       D.fetchTrend(q),
-      fetchMonthlyTrend(q, 12),
       D.fetchDowntime(q),
       D.fetchWoList({ ...q, group: "all", limit: 8 }),
       D.fetchWoList({ ...q, group: "open", limit: 200 }),
       D.fetchPmList({ limit: 100 }),
-      fetchPlantMap(),
-      fetchReorderParts(6),
-      fetchMtbfMttr(),
     ]);
 
-    const mtbfRows = mtbf.status === "fulfilled" ? mtbf.value : [];
-
-    setData({
+    setData((prev) => ({
+      ...prev,
       overview,
       trend: trend.status === "fulfilled" ? trend.value.series ?? [] : null,
-      monthly: monthly.status === "fulfilled" ? monthly.value : null,
       downtime: downtime.status === "fulfilled" ? downtime.value : null,
       recent: recent.status === "fulfilled" ? recent.value.items ?? [] : null,
       openWos:
@@ -363,15 +386,57 @@ export default function DashboardPage() {
           ? { items: openList.value.items ?? [], total: openList.value.total ?? 0 }
           : null,
       pm: pm.status === "fulfilled" ? pm.value.items : null,
-      plant: plant.status === "fulfilled" ? plant.value : null,
-      spare: spare.status === "fulfilled" ? spare.value.rows : null,
-      spareTotal: spare.status === "fulfilled" ? spare.value.total : 0,
-      mtbfPoints: monthlyMtbfMttr(mtbfRows),
-      mtbfRows: mtbfRows.length,
-    });
+    }));
 
     if (overview) setLastOk(new Date());
     setLoading(false);
+
+    // โหลดข้อมูลรอง (monthly trend 12 เดือน, plant map, spare, MTBF) หลัง first paint
+    // เพื่อลด blocking ของ main thread บนมือถือ
+    const runSecondary = async () => {
+      // ตรวจสิทธิ์ก่อนเรียก spare/MTBF เพื่อหลีกเลี่ยง 403 และไม่เปิดเผยข้อมูลที่ไม่มีสิทธิ์
+      const checkPerm = async (module: string): Promise<boolean> => {
+        try {
+          const res = await fetch(`/api/v1/my_permissions.php?module=${encodeURIComponent(module)}`, { credentials: "include" });
+          if (!res.ok) return false;
+          const json = await res.json();
+          const actions = json?.actions ?? {};
+          return Object.values(actions).some((v) => v === true);
+        } catch {
+          return false;
+        }
+      };
+      const [spareAllowed, mtbfAllowed] = await Promise.all([
+        checkPerm("spare_parts"),
+        checkPerm("reliability"),
+      ]);
+
+      const tasks: Promise<unknown>[] = [fetchMonthlyTrend(q, 12), fetchPlantMap()];
+      if (spareAllowed) tasks.push(fetchReorderParts(6));
+      if (mtbfAllowed) tasks.push(fetchMtbfMttr());
+      const results = await Promise.allSettled(tasks);
+      const monthly = results[0];
+      const plant = results[1];
+      const spare = spareAllowed ? results[2] : null;
+      const mtbf = mtbfAllowed ? results[spareAllowed ? 3 : 2] : null;
+      const mtbfRows = mtbf && mtbf.status === "fulfilled" ? (mtbf.value as any) : [];
+      setData((prev) => ({
+        ...prev,
+        monthly: monthly.status === "fulfilled" ? (monthly.value as any) : null,
+        plant: plant.status === "fulfilled" ? (plant.value as any) : null,
+        spare: spare && spare.status === "fulfilled" ? (spare.value as any).rows : null,
+        spareTotal: spare && spare.status === "fulfilled" ? (spare.value as any).total : 0,
+        mtbfPoints: monthlyMtbfMttr(mtbfRows),
+        mtbfRows: mtbfRows.length,
+        spareAllowed,
+        mtbfAllowed,
+      }));
+    };
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => { void runSecondary(); });
+    } else {
+      setTimeout(() => { void runSecondary(); }, 0);
+    }
   }, [q, tick]);
 
   useEffect(() => {
@@ -791,7 +856,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
+                <IdleChart><ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={monthly ?? []} margin={{ top: 8, right: 2, bottom: 0, left: -22 }}>
                     <CartesianGrid stroke={C.grid} vertical={false} />
                     <XAxis
@@ -820,7 +885,7 @@ export default function DashboardPage() {
                       tickFormatter={(v: number) => `${v}%`}
                     />
                     <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(140, 180, 225, 0.08)" }} />
-                    <Bar yAxisId="left" dataKey="created" name="Work Orders" fill={C.blue} radius={[2, 2, 0, 0]} maxBarSize={22} />
+                    <Bar yAxisId="left" dataKey="created" name="Work Orders" fill={C.blue} radius={[2, 2, 0, 0]} maxBarSize={22} isAnimationActive={false} />
                     <Line
                       yAxisId="right"
                       type="monotone"
@@ -830,9 +895,10 @@ export default function DashboardPage() {
                       strokeWidth={2}
                       connectNulls
                       dot={{ r: 2.4, fill: C.green, strokeWidth: 0 }}
+                      isAnimationActive={false}
                     />
                   </ComposedChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></IdleChart>
               </div>
             </>
           )}
@@ -853,16 +919,16 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <IdleChart><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={assetSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none">
+                      <Pie data={assetSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none" isAnimationActive={false}>
                         {assetSlices.map((s) => (
                           <Cell key={s.name} fill={s.color} />
                         ))}
                       </Pie>
                       <Tooltip content={<ChartTip />} />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{healthyPct === null ? "N/A" : `${healthyPct}%`}</span>
                     <span className="tower-donut-label">Overall Health</span>
@@ -905,16 +971,16 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <IdleChart><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={statusSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none">
+                      <Pie data={statusSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none" isAnimationActive={false}>
                         {statusSlices.map((s) => (
                           <Cell key={s.name} fill={s.color} />
                         ))}
                       </Pie>
                       <Tooltip content={<ChartTip />} />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{fmtNumber(statusTotal)}</span>
                     <span className="tower-donut-label">งานค้าง</span>
@@ -1020,23 +1086,25 @@ export default function DashboardPage() {
           action={<span className="tower-panel-sub">ตาราง {SRC.mtbf}</span>}
           bodyClassName="flex min-h-0 flex-col"
         >
-          {data.mtbfRows === 0 || data.mtbfPoints.length === 0 ? (
+          {!data.mtbfAllowed ? (
+            <Na note="ไม่มีสิทธิ์เข้าถึงข้อมูล MTBF/MTTR" value="N/A" />
+          ) : data.mtbfRows === 0 || data.mtbfPoints.length === 0 ? (
             <Na note={`ตาราง ${SRC.mtbf} ยังไม่มีข้อมูล — ต้องบันทึกชั่วโมงเดินเครื่องและงานเสียก่อน`} />
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-1">
               <Legend items={[{ label: "MTBF (ชม.)", color: C.blue }, { label: "MTTR (ชม.)", color: C.green, line: true }]} />
               <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
+                <IdleChart><ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data.mtbfPoints} margin={{ top: 8, right: 2, bottom: 0, left: -22 }}>
                     <CartesianGrid stroke={C.grid} vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} />
                     <YAxis yAxisId="left" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} width={40} />
                     <YAxis yAxisId="right" orientation="right" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} width={34} />
                     <Tooltip content={<ChartTip unit="ชม." />} />
-                    <Line yAxisId="left" type="monotone" dataKey="mtbf" name="MTBF" stroke={C.blue} strokeWidth={2} dot={{ r: 2.4, fill: C.blue, strokeWidth: 0 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="mttr" name="MTTR" stroke={C.green} strokeWidth={2} dot={{ r: 2.4, fill: C.green, strokeWidth: 0 }} />
+                    <Line yAxisId="left" type="monotone" dataKey="mtbf" name="MTBF" stroke={C.blue} strokeWidth={2} dot={{ r: 2.4, fill: C.blue, strokeWidth: 0 }} isAnimationActive={false} />
+                    <Line yAxisId="right" type="monotone" dataKey="mttr" name="MTTR" stroke={C.green} strokeWidth={2} dot={{ r: 2.4, fill: C.green, strokeWidth: 0 }} isAnimationActive={false} />
                   </ComposedChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></IdleChart>
               </div>
             </div>
           )}
@@ -1061,7 +1129,7 @@ export default function DashboardPage() {
             />
           ) : (
             <div className="min-h-0 flex-1">
-              <ResponsiveContainer width="100%" height="100%">
+              <IdleChart><ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topDowntime} layout="vertical" margin={{ top: 4, right: 34, bottom: 0, left: 4 }}>
                   <CartesianGrid stroke={C.grid} horizontal={false} />
                   <XAxis type="number" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} />
@@ -1074,9 +1142,9 @@ export default function DashboardPage() {
                     axisLine={false}
                   />
                   <Tooltip content={<ChartTip unit="ชม." />} cursor={{ fill: "rgba(140, 180, 225, 0.08)" }} />
-                  <Bar dataKey="hours" name="Downtime" fill={C.blue} radius={[0, 3, 3, 0]} maxBarSize={16} />
+                  <Bar dataKey="hours" name="Downtime" fill={C.blue} radius={[0, 3, 3, 0]} maxBarSize={16} isAnimationActive={false} />
                 </BarChart>
-              </ResponsiveContainer>
+              </ResponsiveContainer></IdleChart>
             </div>
           )}
         </Panel>
@@ -1125,7 +1193,9 @@ export default function DashboardPage() {
           action={<PanelLink href="/spare_parts" label="คลังอะไหล่" />}
           bodyClassName="flex min-h-0 flex-col"
         >
-          {data.spare === null ? (
+          {!data.spareAllowed ? (
+            <Na note="ไม่มีสิทธิ์เข้าถึงข้อมูลอะไหล่" value="N/A" />
+          ) : data.spare === null ? (
             firstLoad ? loadingNote : <Na note={`โหลด ${SRC.spare} ไม่สำเร็จ`} />
           ) : data.spare.length === 0 ? (
             <Na note="ไม่มีอะไหล่ที่ถึงจุดสั่งซื้อ" value="สต็อกปกติ" />

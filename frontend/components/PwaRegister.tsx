@@ -395,6 +395,8 @@ export default function PwaRegister() {
           lineHeight: 1,
           cursor: "pointer",
           padding: "4px 6px",
+          minWidth: 24,
+          minHeight: 24,
         }}
       >
         ×
