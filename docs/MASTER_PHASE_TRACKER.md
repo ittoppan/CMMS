@@ -108,7 +108,7 @@
 
 ## 10. Phase 9 — Reports, Analytics & Export
 
-- Tasks: [ ] audit filter↔export parity, [x] permission ก่อน export (`PHASE_9_EXPORT_FILE_AUDIT.md` §4.5 — cost/technicians 403 ที่ `rpt_dispatch`, pm 200; R9-5 MEDIUM), [ ] progress/loading, [ ] filename+date+เงื่อนไข, [ ] drill-down, [x] ตรวจ Excel/PDF/CSV จริง (`PHASE_9_EXPORT_FILE_AUDIT.md` — 10 ไฟล์ CSV/XLSX เปิดได้ parity ตรง DB 105/82/7/2/0 แถว, audit 10 แถว, PDF จริง 6.9 MB/1 หน้า; R9-1 MEDIUM รออนุมัติ)
+- Tasks: [x] audit filter↔export parity (**PASS** — `PHASE_9_EXPORT_FILE_AUDIT.md` §4.6: `table.total` = แถวใน CSV ครบ 26/26 ชุด, ผลต่าง 50 vs 105 = pagination ไม่ใช่การตัดข้อมูล; `range_start/end` ต้องค์ `range=custom`), [x] permission ก่อน export (`PHASE_9_EXPORT_FILE_AUDIT.md` §4.5 — cost/technicians 403 ที่ `rpt_dispatch`, pm 200; R9-5 MEDIUM), [ ] progress/loading, [ ] filename+date+เงื่อนไข, [ ] drill-down, [x] ตรวจ Excel/PDF/CSV จริง (`PHASE_9_EXPORT_FILE_AUDIT.md` — 10 ไฟล์ CSV/XLSX เปิดได้ parity ตรง DB 105/82/7/2/0 แถว, audit 10 แถว, PDF จริง 6.9 MB/1 หน้า; R9-1 MEDIUM รออนุมัติ)
 - Known issues: R9-1 (MEDIUM, `/reports/monthly_pdf` ฝัง default เดือน 7/2026 ตายตัว `page.tsx:66-67` → เห็น/ส่งออกเดือนผิด) · R9-2 (LOW, ชื่อไฟล์ CSV/XLSX ไม่มีช่วงวันที่) · R9-3 (LOW, PDF ฝัง PNG ซ้ำทุกหน้า) · R9-4 (LOW, `reports.php:68-70` audit_log เป็น dead code) · R9-5 (MEDIUM, `rpt_permitted` ใช้ role id ไม่ใช่ `menu_permissions` — เปลี่ยนสิทธิ์ใน /roles ไม่มีผลกับ API, 10/12 resource ไม่มีกฎ)
 - Known issues เดิม: H5
 - Approval: ไม่ต้อง (ห้ามเปลี่ยนข้อมูล)

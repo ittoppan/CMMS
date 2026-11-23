@@ -108,10 +108,36 @@ function rpt_permitted(string $resource, int $roleId): bool {
 - → ถ้าฝ่าย IT ไปเปลี่ยนสิทธิ์ `reports/cost` ในหน้า `/roles` ผลกับ API **ไม่เปลี่ยน**
 - → resource 10 ตัวที่เหลือ (`work-orders`, `assets`, `spare-parts`, `downtime`, `pm`, `inspections`, `requests`, `sla`, `mttr-mtbf`, `center`) **ไม่มีกฎเลย** เปิดให้ทุก role ที่ล็อกอิน (สอดคล้องกับ E11-1)
 
+## 4.6 Filter ↔ Export parity — ตรวจแล้ว (รอบที่ 3)
+
+เทียบ `table.total` ของหน้าจอ (JSON) กับจำนวนแถวในไฟล์ CSV ที่ **filter ชุดเดียวกัน** — 2 resource × 13 ชุดเงื่อนไข
+
+| เงื่อนไข (work-orders) | total (หน้าจอ) | CSV rows | ผล |
+|---|---|---|---|
+| ไม่มี filter | **105** | 105 | ✅ (rows=50 เพราะ page_size=50) |
+| `limit=1000` | 105 | 105 | ✅ |
+| `range=this_month` | 12 | 12 | ✅ |
+| `range=last_month` | 21 | 21 | ✅ |
+| `range=this_year` | 105 | 105 | ✅ |
+| `range=custom` 2026-05-01…05-31 | **49** | 49 | ✅ |
+| `range=custom` + `limit=1000` | 49 | 49 | ✅ |
+| `status=completed` | 6 | 6 | ✅ |
+| `status=open` | 74 | 74 | ✅ |
+| `priority=high` | 8 | 8 | ✅ |
+| `priority=medium&status=open` | 73 | 73 | ✅ |
+| `asset_id=91` | 7 | 7 | ✅ |
+| `range_start/end` โดยไม่ส่ง `range=custom` | 105 | 105 | ✅ (ถูกต้อง — ไม่ใช่ custom) |
+| downtime × 13 ชุด (มีเงื่อนไข 8 ตัวที่ให้ 0 แถว) | 7/2/1/7/6/1/6/0/6/7… | เท่ากันทุกชุด | ✅ |
+
+**สรุป: parity ผ่าน** — `total` ตรงกับ CSV ทุกชุด (26/26); ตัวเลขที่ «ไม่ตรง» ตอนแรก (`rows=50` vs `105`) ไม่ใช่บั๊ก แต่คือ **pagination**: `rpt_page_params()` ตั้ง `limit` default 50 สำหรับหน้าจอ และคืน 50000 เมื่อ `export` ไม่ว่าง (`reports.php:217-225`) — UI แสดง «ทั้งหมด 105 รายการ» และมีปุ่มเปลี่ยนหน้า (`onPage` → `patchQuery({offset})`, `report-page.tsx:316`)
+
+เงื่อนไข `range_start`/`range_end` **ใช้ได้เฉพาะเมื่อ `range=custom`** (`kpi.php:89-100`) — ส่งเดี่ยวๆ จะถูกเพิกเฉย (ไม่ใช่บั๊ก แต่เป็นกับดักถ้า client ส่งแค่วันเริ่ม/สิ้นสุดโดยไม่ส่ง `range=custom`)
+
 ## 5. สิ่งที่ยังไม่ได้ตรวจ
 
 - สิทธิ์แบบ **ราย resource ที่ไม่ใช่ cost/technicians** — ไม่มีกฎให้ทดสอบ; ต้องใช้บัญชีที่ `menu_permissions` เป็น 0 สำหรับ resource นั้น แล้วดูว่า API ยังให้โหลดหรือไม่
-- ช่วงวันที่/ตัวกรอง: ดาวน์โหลดด้วยค่า default เท่านั้น ยังไม่ได้ทดสอบว่า filter บนหน้าจอส่งต่อไปยังไฟล์ตรงกัน (parity ตัวเลขกับหน้าจอมีรายงานเดิม `442bc2ed`)
+- การคลิกเปลี่ยนหน้าจริงบนตาราง (มี `onPage` ในโค้ดและ `total` ถูกต้อง แต่ยังไม่ได้คลิกดูหน้า 2/3)
+- filter ที่มาจาก dropdown บนหน้าจอ (ผมยิงผ่าน query string ตรง ไม่ได้คลิกเลือกใน UI)
 - drill-down และ progress/loading ระหว่าง export
 - PDF หลายหน้า (รายงานที่ยาวเกิน 1 หน้า) — ยังไม่ทดสอบการแบ่งหน้า
 - เปิดไฟล์ด้วย Excel/LibreOffice จริง (ตรวจด้วย ZipArchive/ไบต์เท่านั้น)
@@ -121,4 +147,5 @@ function rpt_permitted(string $resource, int $roleId): bool {
 | checkbox | สถานะ |
 |---|---|
 | `[ ] ตรวจ Excel/PDF/CSV จริง` | **ตรวจแล้ว** — CSV/XLSX 10 ไฟล์เปิดได้ parity ตรง DB, PDF สร้างได้จริง 6.9 MB/1 หน้า; พบ R9-1 MEDIUM (เดือน default ผิด) |
+| `[ ] audit filter↔export parity` | **ตรวจแล้ว (PASS)** — `table.total` = จำนวนแถว CSV ครบ 26/26 ชุด (work-orders 13 + downtime 13), ผลต่าง 50 vs 105 คือ pagination ไม่ใช่การตัดข้อมูล |
 | `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
