@@ -135,7 +135,7 @@ export default function AndonBoardPage() {
       const [repairRes, pmRes, spareRes, kpiRes] = await Promise.all([
         fetch("/api/v1/repair.php"),
         fetch("/api/v1/pm_am.php"),
-        fetch("/api/v1/spare_parts.php"),
+        fetch("/api/v1/spare_parts.php?limit=200"),
         fetch("/api/v1/kpi_dashboard.php"),
       ]);
       const [repairJson, pmJson, spareJson, kpiJson] = await Promise.all([
@@ -143,7 +143,8 @@ export default function AndonBoardPage() {
       ]);
       if (Array.isArray(repairJson)) setRepairs(repairJson);
       if (Array.isArray(pmJson)) setPms(pmJson);
-      if (Array.isArray(spareJson)) setSpares(spareJson);
+      const spareItems = Array.isArray(spareJson) ? spareJson : (spareJson?.items ?? []);
+      if (Array.isArray(spareItems)) setSpares(spareItems);
       if (kpiJson && !Array.isArray(kpiJson)) setKpi(kpiJson);
       setLastSync(fmtClock(new Date()));
       setCountdown(refreshSec);

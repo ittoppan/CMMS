@@ -955,9 +955,11 @@ try {
                         $cu = currentUser($pdo);
                         $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, $leadIdAssign > 0 ? $leadIdAssign : (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
 
-                        if (!empty($res['added'])) {
+                        // N5-2: แจ้งทุกคนในชุดที่ได้รับมอบหมาย (ไม่ใช่เฉพาะคนที่เพิ่มใหม่)
+                        $notifyIds = !empty($res['added']) ? (array)$res['added'] : (array)$teamIds;
+                        if (!empty($notifyIds)) {
                             $names = [];
-                            foreach ((array)$res['added'] as $uid) {
+                            foreach ($notifyIds as $uid) {
                                 $st = $pdo->prepare("SELECT full_name, email FROM users WHERE id = ? AND is_active = 1");
                                 $st->execute([(int)$uid]);
                                 $nu = $st->fetch(PDO::FETCH_ASSOC);

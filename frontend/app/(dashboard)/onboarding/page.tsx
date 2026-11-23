@@ -74,7 +74,7 @@ async function fetchCount(id: string): Promise<number> {
       case "locations": { const r = await fetch("/api/v1/master_data.php?entity=locations"); const j = await r.json(); return Array.isArray(j) ? j.length : 0; }
       case "suppliers": { const r = await fetch("/api/v1/suppliers.php"); const j = await r.json(); return Array.isArray(j) ? j.length : 0; }
       case "assets": { const r = await fetch("/api/v1/asset_registry.php"); const j = await r.json(); return Array.isArray(j) ? j.length : (Array.isArray(j?.data) ? j.data.length : 0); }
-      case "spare_parts": { const r = await fetch("/api/v1/spare_parts.php"); const j = await r.json(); return Array.isArray(j) ? j.length : (Array.isArray(j?.data) ? j.data.length : 0); }
+      case "spare_parts": { const r = await fetch("/api/v1/spare_parts.php?limit=1"); const j = await r.json(); return (j?.total ?? (Array.isArray(j) ? j.length : (Array.isArray(j?.items) ? j.items.length : (Array.isArray(j?.data) ? j.data.length : 0)))); }
       case "pm": { const r = await fetch("/api/v1/pm_am.php"); const j = await r.json(); return Array.isArray(j) ? j.length : (Array.isArray(j?.data) ? j.data.length : 0); }
       default: return 0;
     }

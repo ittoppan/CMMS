@@ -73,10 +73,11 @@ export default function SpareBalancesPage() {
 
   const loadParts = () => {
     setLoading(true);
-    fetch("/api/v1/spare_parts.php")
+    fetch("/api/v1/spare_parts.php?limit=200")
       .then((res) => res.json())
       .then((json) => {
-        if (Array.isArray(json)) setParts(json);
+        const items = Array.isArray(json) ? json : (json?.items ?? json?.data ?? []);
+        if (Array.isArray(items)) setParts(items);
       })
       .catch(() => {})
       .finally(() => setLoading(false));

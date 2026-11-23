@@ -63,6 +63,10 @@ export default function RepairHistoryPage() {
     try {
       // ดึงเฉพาะงานที่ปิดแล้วเมื่อ API รองรับ เพื่อลดปริมาณข้อมูล (fallback: กรองฝั่ง client)
       const res = await fetch("/api/v1/repair.php?status=completed_all");
+      if (!res.ok) {
+        if (res.status === 403) { setWorkOrders([]); setError(null); setLoading(false); return; }
+        throw new Error(`HTTP ${res.status}`);
+      }
       const json = await res.json();
       const rows = Array.isArray(json) ? json : (Array.isArray(json?.items) ? json.items : []);
       if (Array.isArray(rows)) {
@@ -91,7 +95,6 @@ export default function RepairHistoryPage() {
         setWorkOrders(fetched);
       }
     } catch (e) {
-      console.error("Failed to fetch repair history", e);
       setError("ไม่สามารถโหลดประวัติงานซ่อมได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);

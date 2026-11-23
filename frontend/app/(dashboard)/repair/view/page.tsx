@@ -343,7 +343,12 @@ export default function RepairViewDetailsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const idParam = params.get("id") || "1";
+    const idParam = params.get("id");
+    if (!idParam) {
+      // F5-2: ไม่มี ?id → กลับไปหน้ารายการ แทนที่จะเปิด id=1 โดยไม่ตั้งใจ
+      window.location.replace("/repair");
+      return;
+    }
     setWoId(idParam);
 
     fetch(`/api/v1/repair.php?id=${idParam}`)

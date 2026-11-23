@@ -85,7 +85,7 @@ export default function SageIssueCenterPage() {
       const [woRes, userRes, partRes] = await Promise.all([
         fetch("/api/v1/repair.php"),
         fetch("/api/v1/users.php"),
-        fetch("/api/v1/spare_parts.php"),
+        fetch("/api/v1/spare_parts.php?limit=200"),
       ]);
       const woJson = await woRes.json();
       const userJson = await userRes.json();
@@ -104,8 +104,9 @@ export default function SageIssueCenterPage() {
             .map((u: any) => ({ value: String(u.id), label: u.full_name }))
         );
       }
-      if (Array.isArray(partJson)) {
-        setParts(partJson);
+      const partItems = Array.isArray(partJson) ? partJson : (partJson?.items ?? []);
+      if (partItems.length) {
+        setParts(partItems);
       }
     } catch (e) {
       console.error(e);

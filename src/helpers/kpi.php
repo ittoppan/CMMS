@@ -484,7 +484,7 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
         'cost_total' => round($cost_total, 2),
         'material_cost' => round($material_cost, 2),
         'critical_asset_downtime_minutes' => round($critical_downtime, 1),
-        'open_wo' => $counts['open_wo'] ?? $cntRepair(" AND r.status NOT IN ('cancelled','rejected','draft','done','skipped','closed','verified')"),
+        'open_wo' => $counts['open_wo'] ?? $cntRepair(" AND r.status NOT IN ('cancelled','rejected','draft','done','skipped','closed','verified','completed')"),
         'overdue_wo' => $counts['overdue'],
     ];
 }
@@ -622,7 +622,7 @@ function kpi_wo_list(PDO $pdo, array $opts): array {
         case 'assigned': $cond = " AND r.status IN ('assigned','accepted')"; break;
         case 'verified': $cond = " AND r.status IN ('verified','closed')"; break; // K6: ปลายทาง drill-down ของการ์ด supervisor
         case 'active': $cond = " AND r.status IN ('in_progress','paused','waiting_parts','pending_parts','waiting_external','waiting_approval')"; break;
-        case 'open': $cond = " AND r.status NOT IN ('cancelled','rejected','draft','done','skipped','closed','verified')"; break;
+        case 'open': $cond = " AND r.status NOT IN ('cancelled','rejected','draft','done','skipped','closed','verified','completed')"; break;
         default: $cond = " AND r.status NOT IN ('cancelled','rejected','draft','done','skipped')";
     }
     $dateSql = '';

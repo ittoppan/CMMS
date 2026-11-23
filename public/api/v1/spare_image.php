@@ -141,36 +141,8 @@ if ($useTtf && $fontBold !== '') {
     imagestring($img, 5, intdiv($W - strlen($codeText) * 9, 2), $y, $codeText, $fg);
 }
 
-// ชื่อ (wrap 2-3 บรรทัด)
-if ($name !== '') {
-    $lineMax = 26; // ตัวอักษรต่อบรรทัด
-    $words = preg_split('/\s+/u', $name);
-    $lines = [];
-    $cur = '';
-    foreach ($words as $w) {
-        $try = $cur === '' ? $w : $cur . ' ' . $w;
-        if (mb_strlen($try) <= $lineMax || $cur === '') {
-            $cur = $try;
-        } else {
-            $lines[] = $cur;
-            $cur = $w;
-        }
-    }
-    if ($cur !== '') $lines[] = $cur;
-    $lines = array_slice($lines, 0, 3);
-
-    $startY = 300;
-    if ($useTtf && $fontReg !== '') {
-        foreach ($lines as $i => $ln) {
-            $bb = imagettfbbox(24, 0, $fontReg, $ln);
-            imagettftext($img, 24, 0, intdiv($W - ($bb[2] - $bb[0]), 2), $startY + $i * 36, $fg, $fontReg, $ln);
-        }
-    } else {
-        foreach ($lines as $i => $ln) {
-            imagestring($img, 3, intdiv($W - strlen($ln) * 8, 2), $startY + $i * 18, $ln, $fg);
-        }
-    }
-}
+// ชื่อ: ไม่แสดงบน placeholder แล้ว (G11-2) เพื่อไม่เปิดเผย inventories บน public URL
+// (cache เก่าที่มีชื่อจะถูกแทนที่เมื่อสร้างใหม่)
 
 /* ---------- 4) cache + serve ---------- */
 if ($cacheFile !== '') {
