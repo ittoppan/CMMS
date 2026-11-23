@@ -250,7 +250,11 @@ function rpt_build_center(PDO $pdo, array $user, array $opts): array {
         $passWithWarning = (int)$pdo->query("SELECT COUNT(*) FROM inspection_schedules WHERE result = 'pass_with_warning'")->fetchColumn();
     } catch (Throwable $e) {}
 
-    $mtbfLatest = $pdo->query("SELECT year, month, ROUND(AVG(mtbf_hours),1) AS mtbf, ROUND(AVG(mttr_minutes),1) AS mttr FROM mtbf_mttr GROUP BY year, month ORDER BY year DESC, month DESC LIMIT 1")->fetch() ?: null;
+    // K3c: เดือนล่าสุดใช้ยอดดิบรวม (SUM/SUM) ไม่ใช่เฉลี่ยค่าเฉลี่ยรายเครื่อง (mean-of-means)
+    $mtbfLatest = $pdo->query("SELECT year, month,
+            ROUND(SUM(operating_hours) / NULLIF(SUM(total_failures),0), 1) AS mtbf,
+            ROUND(SUM(total_downtime_minutes) / NULLIF(SUM(total_failures),0), 1) AS mttr
+        FROM mtbf_mttr GROUP BY year, month ORDER BY year DESC, month DESC LIMIT 1")->fetch() ?: null;
 
     $kpi = [
         rpt_kpi('open_wo', 'งานค้างเปิด', (int)($core['open_wo'] ?? 0), 'ใบ', ((int)($core['open_wo'] ?? 0)) > 0 ? 'amber' : '', 'number'),

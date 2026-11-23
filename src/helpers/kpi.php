@@ -251,7 +251,8 @@ function kpi_critical_statuses(): array {
 function kpi_is_overdue(array $r): bool {
     if (in_array((string)($r['status'] ?? ''), kpi_done_statuses(), true)) return false;
     $now = time();
-    foreach (['sla_due_at', 'estimated_completion_date'] as $f) {
+    // K9: due ที่ใช้ตัดสิน overdue = sla_due_at → estimated_completion_date → planned_end_at (ตาม inventory §0.5)
+    foreach (['sla_due_at', 'estimated_completion_date', 'planned_end_at'] as $f) {
         $v = trim((string)($r[$f] ?? ''));
         if ($v !== '' && $v !== '0000-00-00 00:00:00' && strcasecmp($v, 'NULL') !== 0) {
             $t = strtotime($v);
@@ -268,7 +269,8 @@ function kpi_is_overdue(array $r): bool {
 function kpi_overdue_days(array $r): int {
     if (in_array((string)($r['status'] ?? ''), kpi_done_statuses(), true)) return 0;
     $now = time();
-    foreach (['sla_due_at', 'estimated_completion_date'] as $f) {
+    // K9: due ที่ใช้ตัดสิน overdue = sla_due_at → estimated_completion_date → planned_end_at (ตาม inventory §0.5)
+    foreach (['sla_due_at', 'estimated_completion_date', 'planned_end_at'] as $f) {
         $v = trim((string)($r[$f] ?? ''));
         if ($v !== '' && $v !== '0000-00-00 00:00:00' && strcasecmp($v, 'NULL') !== 0) {
             $t = strtotime($v);
@@ -335,7 +337,7 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     ];
 
     // ---------- backlog + overdue (นิยามเดียวกับ supervisor) ----------
-    $sel = 'SELECT r.id, r.status, r.created_at, r.sla_due_at, r.estimated_completion_date FROM repair r';
+    $sel = 'SELECT r.id, r.status, r.created_at, r.sla_due_at, r.estimated_completion_date, r.planned_end_at FROM repair r';
     $st = $pdo->prepare($sel . $where . ' AND r.status IN ("' . implode('","', kpi_active_statuses()) . '")');
     $st->execute($params);
     $backlog = $st->fetchAll(PDO::FETCH_ASSOC);
@@ -362,18 +364,13 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     $completedInRange = (int)$st->fetchColumn();
 
     // ---------- MTTR (range หรือ 30 วันล่าสุด) ----------
-    // repair_time_minutes (ช่องกรอกตรง) มีเพียงไม่กี่แถว → fallback: ระยะจากเริ่มงาน (actual_start/acknowledged) ถึงปิดงาน
+    // K10: นิยาม inventory §1.1 = AVG(repair_time_minutes)/60 เฉพาะงานปิดที่มีค่า > 0
+    //      ตัด fallback TIMESTAMPDIFF(actual_start → completed) — ใบที่ไม่ลงเวลาซ่อมจริงจะไม่ถูกนับใน MTTR
     $mttr = null;
-    $mttrValueExpr = 'CASE
-            WHEN r.repair_time_minutes IS NOT NULL AND r.repair_time_minutes > 0 THEN r.repair_time_minutes
-            ELSE TIMESTAMPDIFF(MINUTE, COALESCE(r.actual_start_at, r.acknowledged_at), r.completed_at)
-        END';
-    $mttrSql = "SELECT AVG({$mttrValueExpr}) AS v FROM repair r
+    $mttrSql = 'SELECT AVG(r.repair_time_minutes) AS v FROM repair r
                 WHERE r.completed_at IS NOT NULL
-                  AND (r.status IN (\"closed\",\"verified\") OR r.completed_at IS NOT NULL)
-                  AND (r.repair_time_minutes IS NOT NULL AND r.repair_time_minutes > 0
-                       OR (COALESCE(r.actual_start_at, r.acknowledged_at) IS NOT NULL
-                           AND r.completed_at > COALESCE(r.actual_start_at, r.acknowledged_at)))";
+                  AND r.repair_time_minutes IS NOT NULL
+                  AND r.repair_time_minutes > 0';
     if ($range) {
         $mttrSql .= $completedRange;
     } else {
@@ -570,7 +567,7 @@ function kpi_alerts(PDO $pdo, array $opts): array {
 
 /** รายการ WO ค้างเกินกำหนด (สำหรับ queue ลงลึก) */
 function kpi_overdue_rows(PDO $pdo, string $activeSql, string $where, array $params): array {
-    $st = $pdo->prepare('SELECT r.id, r.status, r.created_at, r.sla_due_at, r.estimated_completion_date FROM repair r' . $where . ' AND r.status IN (' . $activeSql . ')');
+    $st = $pdo->prepare('SELECT r.id, r.status, r.created_at, r.sla_due_at, r.estimated_completion_date, r.planned_end_at FROM repair r' . $where . ' AND r.status IN (' . $activeSql . ')');
     $st->execute($params);
     $rows = $st->fetchAll(PDO::FETCH_ASSOC);
     $out = [];

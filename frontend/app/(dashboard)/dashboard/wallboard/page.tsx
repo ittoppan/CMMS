@@ -778,6 +778,10 @@ export default function DashboardPage() {
           tone="purple"
         />
       </div>
+      {/* K8: การ์ด KPI เป็นยอดตามช่วงที่เลือก แต่เส้น sparkline มาจาก trend 30 วันล่าสุด — ต้องบอกให้ชัด */}
+      <p className="tower-panel-sub shrink-0 px-1">
+        ตัวเลข KPI = ยอดตามช่วงที่เลือก (ไม่เลือก = ทั้งหมด) · เส้น sparkline = 30 วันล่าสุด
+      </p>
 
       {/* ── ROW 2: MAIN ANALYTICS ───────────────────────────────────── */}
       {/* ── ROW 1.5: SLA ตามระดับความสำคัญ (กดเพื่อไปยังรายการที่กรองแล้ว) ── */}

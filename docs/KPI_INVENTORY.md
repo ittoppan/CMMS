@@ -30,6 +30,8 @@
 
 ### 0.5 งานค้างเกินกำหนด (overdue)
 `kpi_is_overdue()` = จริงเมื่อสถานะยังไม่จบ และ (sla_due_at/estimated_completion_date/planned_end_at < now) หรือ (ยังอยู่สถานะตั้งต้น และเปิดมาเกิน 7 วัน).
+> 2026-11-23: `planned_end_at` ถูกใช้จริงแล้ว (K9) — `kpi_core_metrics()` และ `kpi_overdue_rows()` ดึงคอลัมน์นี้มาคิดด้วย
+> **"Overdue" (KPI) ≠ "เกิน SLA" (แผง SLA ตามระดับความสำคัญ):** KPI ใช้เกณฑ์ข้างบน (เลยกำหนด **หรือ** ค้างเกิน 7 วัน) ส่วนแผง SLA นับเฉพาะใบที่มีวันครบกำหนดและเลยกำหนดแล้ว — วันเดียวกันจึงได้ 74 กับ 1
 
 ### 0.6 หลัก INSUFFICIENT DATA
 ตัวหาร/ข้อมูลต้นทางเป็น 0 → คืน `null` (ไม่ใช่ 0) → หน้าจอแสดง `—` / "INSUFFICIENT DATA" + ป้ายคุณภาพข้อมูล.
@@ -66,7 +68,7 @@
 | Completion rate | `completed / created × 100` | derived | V1 (null if created=0) |
 | In Progress (active) | `COUNT(status ∈ active)` | `repair.status` | V2 |
 | Overdue | `COUNT(kpi_is_overdue)` ของ backlog | `repair.sla_due_at/estimated_completion_date/planned_end_at, repair.status, repair.created_at` | V5 (overdue def) |
-| MTTR | `AVG(repair_time_minutes)/60` (เฉพาะงานปิด/มี completed_at, >0) | `repair.repair_time_minutes, repair.completed_at` | V1 (30 วันล่าสุดถ้าไม่มี range) |
+| MTTR | `AVG(repair_time_minutes)/60` (เฉพาะงานปิด/มี completed_at, >0) | `repair.repair_time_minutes, repair.completed_at` | V1 (30 วันล่าสุดถ้าไม่มี range) — **ไม่มี fallback** `TIMESTAMPDIFF(actual_start→completed)` แล้ว (K10) |
 | MTBF | ค่าเฉลี่ยช่วงห่าง (ชม.) ระหว่างรอบซ่อม breakdown ของเครื่องเดียวกัน (180 วัน) | `repair.completed_at, repair.source_type` | ดู KPI_DEFINITIONS §12.1 (คนละนิยามกับ ana_reliability) |
 | Downtime hours | `SUM(repair.downtime_minutes)/60` | `repair.downtime_minutes` | V1 (กรอกน้อย — ดู §12.3) |
 | SLA at risk | งานที่ due < now + risk window | `repair.sla_due_at/estimated_completion_date` | — |

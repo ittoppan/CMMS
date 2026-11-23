@@ -335,7 +335,12 @@ export default function SupervisorDeskPage() {
       {/* Trend */}
       <section aria-labelledby="trend">
         <Card>
-          <CardHeader><CardTitle className="text-base">Work Order Trend (30 วันล่าสุด)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Work Order Trend (30 วันล่าสุด){" "}
+              <span className="text-xs font-normal text-[var(--cmms-text-muted)]">— KPI ด้านบนเป็นยอดปัจจุบัน ไม่ผูกช่วง 30 วัน</span>
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-56 w-full" /> : <WorkOrderTrendChart data={trend} />}
           </CardContent>

@@ -321,3 +321,51 @@ cd frontend && npx tsc --noEmit                                       # PASS (ex
 | ไม่แตะ schema/route/สิทธิ์/ข้อมูล | **PASS** |
 | KPI ตรงตาม inventory ทุกตัว | **ยังไม่ PASS** — K8, K9, K10 และ `reports.php:246` ค้าง |
 | Phase 4 COMPLETE | **ยังไม่** — เหลือ drill-down, last-updated, TBT < 300ms, การตรวจ UI ด้วยตา |
+
+---
+
+## 10. การแก้ K8–K10 + `reports.php` (อนุมัติ 2026-11-23 รอบที่ 2)
+
+> ต่อจาก §9 — เจ้าของระบบอนุมัติชุดที่เหลือ (K8, K9, K10 และ `src/helpers/reports.php:246`)
+> ไฟล์ที่แก้: `src/helpers/kpi.php`, `src/helpers/reports.php`,
+> `frontend/app/(dashboard)/dashboard/wallboard/page.tsx`, `frontend/app/(dashboard)/supervisor/page.tsx`
+
+### 10.1 สิ่งที่แก้
+
+| รหัส | การแก้ | จุดที่แก้ |
+|---|---|---|
+| K9 | `kpi_is_overdue()` / `kpi_overdue_days()` ตรวจครบ `sla_due_at → estimated_completion_date → planned_end_at`; เพิ่มคอลัมน์ `planned_end_at` ในคำสั่งของ backlog และ `kpi_overdue_rows()` | `kpi.php` |
+| K10 | MTTR = `AVG(repair_time_minutes)/60` เฉพาะงานปิดที่มีค่า > 0 — **ตัด fallback** `TIMESTAMPDIFF(actual_start → completed)` ตาม inventory §1.1 | `kpi.php: kpi_core_metrics()` |
+| K3c | Report Center "MTBF/MTTR ล่าสุด" เปลี่ยนจาก `AVG(mtbf_hours)` เป็น `SUM(operating_hours)/SUM(total_failures)` | `reports.php:253` |
+| K8 | เปิดเผยช่วงเวลาบนจอ: ใต้แถว KPI ของ wallboard ระบุ "KPI = ยอดตามช่วงที่เลือก · sparkline = 30 วันล่าสุด"; การ์ด trend ของ supervisor ระบุ "KPI ด้านบนเป็นยอดปัจจุบัน ไม่ผูกช่วง 30 วัน" | wallboard, supervisor |
+
+### 10.2 ผลวัด (DB `cmms_tpt`, 2026-11-23, role 2)
+
+| รายการ | ก่อน | หลัง | หลักฐาน |
+|---|---|---|---|
+| Overdue (`counts.overdue` / `alerts.overdue_open`) | 74 | **74** | ไม่มีใบที่ใช้ `planned_end_at` (0 ใบ) — เปลี่ยนนิยามแล้วแต่ไม่มีตัวเลขขยับ |
+| MTTR (ไม่ระบุช่วง / this_month / last_month / this_year) | 2.5 / 2.5 / 4.0 / 2.33 | **2.5 / 2.5 / 4.0 / 2.33** | ตรง `AVG(repair_time_minutes)/60` = 2.5; ใบปิดที่ไม่มี `repair_time_minutes` = 0 |
+| Report Center MTBF ล่าสุด (พ.ย. 2026) | 459.0 ชม. | **691.0 ชม.** | MTTR 97.5 นาทีเท่าเดิม |
+| total / completed / downtime / SLA / critical / PM compliance | — | **ไม่เปลี่ยนจาก §9** | 105/12/21/105/0 · 6/1/1/6/0 · 885/195/240/885/0 · null · 1/1 · null |
+| scope role 3 / role 4 | 6 / 9 ใบ | **6 / 9 ใบ** | ไม่ได้รับผลกระทบ |
+
+หลักฐานประกอบ K7: นับเฉพาะใบที่เลยวันครบกำหนดจริงได้ **1 ใบ** (id 71) ตรงกับตัวเลขในแผง SLA ขณะที่ KPI Overdue = 74 (รวมเกณฑ์ค้างเกิน 7 วัน)
+
+### 10.3 สถานะ KPI หลังรอบนี้
+
+| รหัส | สถานะ |
+|---|---|
+| K1–K7 | แก้แล้ว `f86634f6` (§9) |
+| K8, K9, K10, K3c (`reports.php`) | แก้แล้ว (ส่วนนี้) |
+| **KPI ตรงตาม inventory** | **PASS** — ทุก KPI ที่ 3 จอแสดงคำนวณตรงสูตรใน `docs/KPI_INVENTORY.md`; ส่วนที่ยังเป็น `—` คือ INSUFFICIENT DATA ตาม V1 |
+| ข้อจำกัดที่เหลือ | ข้อมูล PM (3 แถว) และ MTBF/MTTR (18 แถว) เป็น seed จาก e2e — ตัวเลข "ถูกตามสูตร" แต่ยังไม่ใช่ภาพการผลิตจริง (Phase 7 ยัง BLOCKED) |
+
+### 10.4 การตรวจซ้ำ
+
+```bash
+php frontend/tmp-kpi-validate.php > docs/PHASE_4_KPI_RAW_AFTER.json   # สคริปต์ชั่วคราว ไม่ commit
+php -l src/helpers/kpi.php && php -l src/helpers/reports.php          # No syntax errors
+cd frontend && npx tsc --noEmit                                       # PASS
+```
+
+**ยังไม่ได้ตรวจด้วยตา**: ข้อความ K8 ทั้งสองจุด และการ์ด/โดนัทจาก §9 — ต้องเปิดเบราว์เซอร์ยืนยัน (จะทำพร้อม Phase 4 ส่วน UI)
