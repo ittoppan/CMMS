@@ -168,12 +168,43 @@ function rpt_permitted(string $resource, int $roleId): bool {
 
 > R9-6/R9-7/R9-8 ต้องแก้ใน `src/helpers/reports.php` (backend logic) → **รออนุมัติ** ตามกฎ UI Migration
 
+## 4.8 Progress/loading ระหว่าง export — **ยังไม่ได้ตรวจสอบ** (และเจอเรื่องใหญ่แทน)
+
+### สิ่งที่ตั้งใจวัด
+
+คลิก «ส่งออก Excel» แล้วดูว่า (1) ปุ่มถูก `disabled` (2) ข้อความเป็น «กำลังสร้าง Excel...» (3) มีข้อความสำเร็จหลังดาวน์โหลด
+
+### สิ่งที่เจอ
+
+**R9-9 (HIGH — ระดับกระบวนการ): build ที่รันที่ `:3001` เก่ากว่าซอร์สโค้ด**
+
+| หลักฐาน | ค่า |
+|---|---|
+| `frontend/.next/BUILD_ID` | `htWEsqvUdXnCZgebfn3yN` — mtime **22 พ.ย. 22:49** |
+| `frontend/.next/standalone/.next/BUILD_ID` | เดียวกัน (22 พ.ย. 22:49) |
+| ซอร์สที้แก้ล่าสุด | `app/(dashboard)/reports/export_excel/page.tsx` — **23 พ.ย. 16:09** |
+| pre-push hook สร้าง build ลง | `.next-verify` (BUILD_ID `R02F0GYXaNWfDRiW_A-Hy`) — **ไม่ใช่ `.next`** |
+| หน้า `:3001/reports/export_excel` แสดง | ปุ่มเดี่ยว `ส่งออกไฟล์ Excel / CSV ทันที` — **มีเฉพาะใน build เก่า** ไม่มีในซอร์ส |
+| หน้าเดียวกันบน `.next-verify` (เสิร์ฟที่ :3006) | มีปุ่ม `ส่งออก Excel` + `ส่งออก CSV` ครบ (ตรงกับซอร์ส) |
+
+→ ผลกระทบ: **ผลตรวจจ์ UI ทั้งหมดที่ทำบน `:3001` เป็นคำอธิบายของ build 22 พ.ย.** ไม่ใช่ซอร์สปัจจุบัน (API/PHP ยังเป็นซอร์สจริง เพราะ PHP ไม่ compile — ตัวเลข/สิทธิ์/parity ใน §4.1–§4.7 จึงยังใช้ได้ แต่ผลที่พึ่ง DOM ต้องวัดซ้ำหลัง rebuild)
+
+**R9-10 (MEDIUM): คลิก «ส่งออก Excel» บนหน้า `/reports/export_excel` ไม่เกิดอะไร** — ไม่มี request ถูกยิง, ปุ่มไม่ถูก `disabled`, ไม่มีข้อความสำเร็จ/ผิดพลาด, ไม่มีไฟล์ (วัดบน build 22 พ.ย. + บน `.next-verify` ได้ผลเดียวกัน แต่ login บน :3006 ไม่เสถียร เพราะไม่ี PHP API)
+
+ซอร์สปัจจุบัน *ออกแบบ* ไว้ถูก: `busy` state → `disabled={busy !== ""}` + ổiข้อความ `กำลังสร้าง Excel.../CSV...` (`export_excel/page.tsx:204-212`) แต่ **ยังไม่ได้เห็นสถานะนั้นทำงานจริง** → checkbox นี้ **คงไว้ ``[ ]``** ไม่ติ๊กถัวๆ
+
+### ข้อจำกัดที่กันการวัด
+
+- `:3001` = build เก่า → ไม่มีปุ่มตามซอร์ส
+- `.next-verify` (ซอร์สใหม่) เสิร์ฟบน :3006 ได้ แต่ **ไม่มี PHP API** → login ไม่ผ่าน (API 401/404)
+- dev server `:3002` มี overlay `#cmms-splash` บน `<div aria-hidden=true>` ที่ปิดทับปุ่ม login → Playwright คลิกไม่ได้ (>30s timeout)
+
 ## 5. สิ่งที่ยังไม่ได้ตรวจ
 
 - สิทธิ์แบบ **ราย resource ที่ไม่ใช่ cost/technicians** — ไม่มีกฎให้ทดสอบ; ต้องใช้บัญชีที่ `menu_permissions` เป็น 0 สำหรับ resource นั้น แล้วดูว่า API ยังให้โหลดหรือไม่
 - การคลิกเปลี่ยนหน้าจริงบนตาราง (มี `onPage` ในโค้ดและ `total` ถูกต้อง แต่ยังไม่ได้คลิกดูหน้า 2/3)
 - filter ที่มาจาก dropdown บนหน้าจอ (ผมยิงผ่าน query string ตรง ไม่ได้คลิกเลือกใน UI)
-- **progress/loading ระหว่าง export** (ยังไม่ได้ตรวจ)
+- **progress/loading ระหว่าง export** — ยังไม่ได้ตรวจ (เหตุผลใน §4.8: build เก่า / splash overlay / พอร์ตทดสอบไม่มี PHP API)
 - drill-down ของ `requests` และ `inspections` (ทั้งคู่ 0 แถวใน DB — ตรวจไม่ได้)
 - PDF หลายหน้า (รายงานที่ยาวเกิน 1 หน้า) — ยังไม่ทดสอบการแบ่งหน้า
 - เปิดไฟล์ด้วย Excel/LibreOffice จริง (ตรวจด้วย ZipArchive/ไบต์เท่านั้น)
@@ -185,4 +216,5 @@ function rpt_permitted(string $resource, int $roleId): bool {
 | `[ ] ตรวจ Excel/PDF/CSV จริง` | **ตรวจแล้ว** — CSV/XLSX 10 ไฟล์เปิดได้ parity ตรง DB, PDF สร้างได้จริง 6.9 MB/1 หน้า; พบ R9-1 MEDIUM (เดือน default ผิด) |
 | `[ ] audit filter↔export parity` | **ตรวจแล้ว (PASS)** — `table.total` = จำนวนแถว CSV ครบ 26/26 ชุด (work-orders 13 + downtime 13), ผลต่าง 50 vs 105 คือ pagination ไม่ใช่การตัดข้อมูล |
 | `[ ] drill-down` | **ตรวจแล้ว (ไม่ผ่านเต็ม)** — work-orders/downtime คลิกไป `/repair/view` ได้จริง HTTP 200; แต่ downtime «ตามเครื่องจักร» ไม่มี drill-down + href ผิดรูป (R9-6), assets `type=link` แต่ `_href=null` (R9-8), และปลายทางขึ้น `คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` สำหรับ role 5 (R9-7) |
+| `[ ] progress/loading` | **ยังไม่ได้ตรวจ** — ซอร์สมี `busy` + `disabled` + ข้อความ «กำลังสร้าง…» แต่ยังไม่เคยเห็นทำงานจริง; ระหว่างลองเจอ R9-9 (build :3001 เก่ากว่าซอร์ส) และ R9-10 (คลิกแล้วไม่มีอะไรเกิดขึ้น) |
 | `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
