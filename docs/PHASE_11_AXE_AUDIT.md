@@ -1,0 +1,81 @@
+# Phase 11 — Accessibility audit ด้วย axe-core (WCAG 2.1 A/AA)
+
+> วันที่: 2026-11-23 · เครื่องมือ: `@axe-core/playwright` 4.14 (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`)
+> รันบน `http://localhost:3001` (build 22 พ.ย. — ดู R9-9) ด้วย role 5 (Viewer)
+> เป้าหมาย: เริ่มปิด checkbox `[ ] axe/lighthouse ครบ`
+
+## 1. ขอบเขตที่สแกนได้จริง
+
+| สถานะ | จำนวน | หน้า |
+|---|---|---|
+| สแกนสำเร็จ | **8** | `/login`, `/dashboard`, `/reports`, `/reports/export_excel`, `/reports/work-orders`, `/reports/downtime`, `/notifications`, `/profile` |
+| 404 (ไม่มี route นี้) | **3** | `/spare_parts/criticality`, `/announcements`, `/help` |
+| ข้ามเพราะ 403 (role 5 ไม่มีสิทธิ์) | **6** | `/settings`, `/planning`, `/pm_am`, `/supervisor`, `/knowledge`, `/documents` |
+
+> หมายเหตุ: `spare_parts/criticality` มีใน `menu_permissions` (role 5 = granted) แต่ **ไม่มี route ใน `frontend/app`** → ลิงก์ที่ grant ไว้จะตกไป 404
+
+## 2. ผลรวม
+
+| rule | impact | จำนวน node | หน้า |
+|---|---|---|---|
+| `color-contrast` | serious | **22** | 8 หน้า (login 1, dashboard 2, reports 5, export_excel 4, work-orders 2, downtime 2, notifications 3, profile 0, 404s 3) |
+| `label-content-name-mismatch` | serious | **14** | ทุกหน้าที่มี topbar (2 node/หน้า: ปุ่มค้นหา + ปุ่มสลับภาษา) |
+| `aria-valid-attr-value` | **critical** | **1** | `/notifications` |
+
+รวม **37 node** / 3 rule — ไม่มี critical อื่น, ไม่มี violation ระดับ moderate/minor
+
+## 3. Findings (พร้อมค่าที่วัดได้)
+
+### A11-1 (HIGH) — chip ในหน้า `/reports` อ่านไม่ออก (contrast 1.07)
+
+```
+<span class="cmms-andon-chip">ISO 9001 / ISO 55000</span>
+foreground #fefefe · background #f5f6f8 · ratio 1.07 (ต้อง ≥ 4.5)
+```
+สาเหตุ: `.cmms-andon-chip` (`app/globals.css:2475-2486`) ออกแบบมา **สำหรับ hero พื้นเข้ม** (`color: rgba(255,255,255,.9)` + `background: rgba(255,255,255,.07)`) แต่ถูกใช้บนพื้นสว่าง → ขาวบนขาว
+ทางแก้ (UI-only, รออนุมัติ): ใส่ในบริบท `.cmms-hero-on-dark` หรือเพิ่ม variant พื้นสว่าง
+
+### A11-2 (HIGH) — หัวข้อ «ใช้บ่อย» ใน sidebar `/dashboard` contrast 1.04
+
+```
+<p class="px-2.5 pb-1 pt-1.5 text-sm font-semibold text-foreground">ใช้บ่อย</p>
+foreground #18181b · background #0b1d31 · ratio 1.04
+```
+`text-foreground` (เข้ม) บนพื้น sidebar เข้ม → แทบมองไม่เห็น
+
+### A11-3 (MEDIUM) — ปุ่ม «ล็อกอินด้วย LINE» contrast 2.25
+
+```
+<span>ล็อกอินด้วย LINE</span> · #ffffff on #06c755 · ratio 2.25
+```
+
+### A11-4 (MEDIUM) — เมนู active ใน sidebar contrast 4.01
+
+```
+<span class="min-w-0 flex-1 truncate">ศูนย์รวม Dashboard</span> · #ffffff on #2e7fe0 · ratio 4.01
+```
+
+### A11-5 (MEDIUM) — `/notifications` tab มี `aria-controls` ชี้ไป element ที่ไม่มี
+
+```
+aria-controls="radix-_R_1einpfl4pfjbb_-content-all"  (axe: Invalid ARIA attribute value)
+```
+เกิดจาก Tabs (Radix/shadcn) ที่ unmount content ของ tab ที่ไม่ active แต่ยังประกาศ `aria-controls` — ผู้ใช้ screen reader จะกระโดดไปไม่ถึงเนื้อหา
+
+### A11-6 (LOW) — ข้อความ muted 4.36 (ต่ำกว่า 4.5 เล็กน้อย)
+
+`--cmms-text-muted` (#64748b) บน `#f4f5f7` = 4.36 → เกิด 3 node บน `/notifications`, `/reports`, `/reports/work-orders` (ข้อความ «ข้อมูลจาก: …», badge `text-[11px]`)
+
+### A11-7 (LOW) — accessible name ไม่ตรงกับข้อความที่เห็น (14 node)
+
+ปุ่ม topbar 2 ตัวทุกหน้า:
+- ปุ่มค้นหา: `aria-label="เปิดค้นหาทั่วทั้งแอป..."` แต่ข้างในมีข้อความ/คีย์ลัดที่ไม่อยู่ในชื่อ
+- ปุ่มสลับภาษา: เห็น «TH/EN» แต่ `aria-label="Switch to English"`
+(WCAG 2.5.3 Label in Name)
+
+## 4. สิ่งที่ยังไม่ได้ตรวจ
+
+- อีก **6 หน้า**ที่ role 5 ไม่มีสิทธิ์ (403) และหน้าในโมดูลที่ถูกบล็อกทั้งหมด (repair, asset, calibration, settings, planning ฯลฯ) → ต้องใช้บัญชี role 1/2/3/6/7
+- โหมดมือถือ/dark mode (axe บน viewport 390 + `prefers-color-scheme: dark`) — ยังไม่ได้รัน
+- Lighthouse (Performance/PWA) — ยังไม่ได้ติดตั้ง/รัน; PWA ต้อง HTTPS หรือ localhost
+- ค่าที่วัดได้มาจาก **build 22 พ.ย.** (R9-9) → ต้องรันซ้ำหลัง rebuild ก่อนสรุปว่าปิดได้
