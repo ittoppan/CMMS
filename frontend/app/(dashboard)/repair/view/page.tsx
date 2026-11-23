@@ -43,6 +43,7 @@ import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DetailHeader } from "@/components/layout";
+import { StatusChip, fmtDT } from "@/components/supervisor/StatusChip";
 
 interface PartRow {
   id: number;
@@ -119,6 +120,9 @@ interface WorkOrderDetail {
   outsourceBy?: string;
   actualStartAt?: string;
   repairTimeMinutes?: number;
+  /** กำหนดเสร็จ/SLA — อ่านจากฟิลด์เดิมของ API (sla_due_at → estimated_completion_date) ใช้แสดง aging เท่านั้น */
+  slaDueAt?: string;
+  estimatedCompletionDate?: string;
   /** ผลประเมินล่าสุดจากผู้แจ้ง (repair_ratings แถวล่าสุด) — 0/undefined = ยังไม่ประเมิน */
   ratingScore?: number;
   ratingComment?: string | null;
@@ -179,6 +183,73 @@ const priorityBadgeVariant = (p: string): "danger" | "warning" | "info" | "neutr
   };
   return m[String(p || "").toLowerCase()] || "neutral";
 };
+
+/* ── Aging ของใบงาน (แสดงผลเท่านั้น) ──
+ * นิยามเดียวกับ KPI/SLA ฝั่งเซิร์ฟเวอร์ (src/helpers/kpi.php: kpi_is_overdue / kpi_overdue_days):
+ *   กำหนดเสร็จ = sla_due_at → estimated_completion_date · เกินกำหนดเฉพาะงานที่ยังไม่จบ
+ *   ไม่มีกำหนดเสร็จ + สถานะยังเปิด + ค้างเกิน 7 วัน = เกินกำหนด
+ * ไม่เขียนค่ากลับ ไม่เรียก API เพิ่ม และไม่แก้สูตร KPI — ใช้ฟิลด์ที่ API ส่งมาอยู่แล้ว
+ */
+const WO_DONE_STATUSES = new Set(["completed", "closed", "resolved", "cancelled", "rejected", "skipped", "verified", "done"]);
+const WO_OPEN_AGING_STATUSES = new Set(["open", "acknowledged", "assigned", "accepted", "approved", "pending_approval"]);
+
+function parseWoDate(v?: string | null): Date | null {
+  const raw = String(v ?? "").trim();
+  if (!raw || raw === "-" || raw === "—" || raw.startsWith("0000-00-00")) return null;
+  const d = new Date(raw.includes("T") ? raw : raw.replace(" ", "T"));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+interface WOAging {
+  done: boolean;
+  hasDue: boolean;
+  dueAt: Date | null;
+  overdueDays: number;
+  daysLeft: number;
+  ageDays: number | null;
+  cycleDays: number | null;
+}
+
+function woAging(w: {
+  status: string;
+  createdDate: string;
+  completedAt?: string;
+  slaDueAt?: string;
+  estimatedCompletionDate?: string;
+}): WOAging {
+  const now = Date.now();
+  const created = parseWoDate(w.createdDate);
+  const due = parseWoDate(w.slaDueAt) || parseWoDate(w.estimatedCompletionDate);
+  const status = String(w.status || "").toLowerCase();
+  const done = WO_DONE_STATUSES.has(status);
+  const ageDays = created ? Math.max(0, Math.floor((now - created.getTime()) / 86400000)) : null;
+
+  if (done) {
+    const closed = parseWoDate(w.completedAt);
+    const cycleDays = created && closed ? Math.max(0, Math.ceil((closed.getTime() - created.getTime()) / 86400000)) : null;
+    return { done: true, hasDue: !!due, dueAt: due, overdueDays: 0, daysLeft: 0, ageDays, cycleDays };
+  }
+  if (due) {
+    const diff = due.getTime() - now;
+    if (diff < 0) {
+      return { done: false, hasDue: true, dueAt: due, overdueDays: Math.ceil(-diff / 86400000), daysLeft: 0, ageDays, cycleDays: null };
+    }
+    return { done: false, hasDue: true, dueAt: due, overdueDays: 0, daysLeft: Math.ceil(diff / 86400000), ageDays, cycleDays: null };
+  }
+  // ไม่มีกำหนดเสร็จ — เกณฑ์เปิดเกิน 7 วัน (ตรงกับ kpi_overdue_days)
+  if (created && WO_OPEN_AGING_STATUSES.has(status) && now - created.getTime() > 7 * 86400000) {
+    return {
+      done: false,
+      hasDue: false,
+      dueAt: null,
+      overdueDays: Math.ceil((now - created.getTime()) / 86400000),
+      daysLeft: 0,
+      ageDays,
+      cycleDays: null,
+    };
+  }
+  return { done: false, hasDue: false, dueAt: null, overdueDays: 0, daysLeft: 0, ageDays, cycleDays: null };
+}
 
 // ไทม์ไลน์: กิจกรรม → สีหลอดไฟ + ไอคอน
 const toneColor = { ok: "var(--cmms-success)", warn: "var(--cmms-warning)", down: "var(--cmms-danger)", idle: "var(--cmms-text-secondary)" } as const;
@@ -310,6 +381,8 @@ export default function RepairViewDetailsPage() {
             outsourceBy: String(row.outsource_by || ""),
             actualStartAt: String(row.actual_start_at || ""),
             repairTimeMinutes: Number(row.repair_time_minutes || 0),
+            slaDueAt: String(row.sla_due_at || ""),
+            estimatedCompletionDate: String(row.estimated_completion_date || ""),
             ratingScore: Number(row.rating_score || 0),
             ratingComment: row.rating_comment ?? null,
             team: Array.isArray(row.team) ? row.team : []
@@ -671,6 +744,36 @@ export default function RepairViewDetailsPage() {
   const partsTotal = partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0);
   // ผลประเมินล่าสุดจากผู้แจ้ง (0 = ยังไม่ประเมิน → ไม่แสดงการ์ด)
   const ratingScore = Math.max(0, Math.min(5, Math.round(Number(wo.ratingScore ?? 0))));
+  const aging = woAging({
+    status: wo.status,
+    createdDate: wo.createdDate,
+    completedAt: wo.completedAt,
+    slaDueAt: wo.slaDueAt,
+    estimatedCompletionDate: wo.estimatedCompletionDate,
+  });
+  // ป้าย aging เด่นชัด — ใช้เฉพาะ token สีของระบบ
+  const agingPill = aging.done
+    ? {
+        text: aging.cycleDays != null ? `ปิดงานภายใน ${aging.cycleDays} วัน` : "ปิดงานแล้ว",
+        cls: "bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]",
+      }
+    : aging.overdueDays > 0
+      ? {
+          text: aging.hasDue ? `เกินกำหนด ${aging.overdueDays} วัน` : `ค้างเกินกำหนด ${aging.overdueDays} วัน`,
+          cls: "bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]",
+        }
+      : aging.hasDue
+        ? {
+            text: aging.daysLeft <= 2 ? `ใกล้ครบกำหนด ${aging.daysLeft} วัน` : `เหลืออีก ${aging.daysLeft} วัน`,
+            cls:
+              aging.daysLeft <= 2
+                ? "bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]"
+                : "bg-[var(--cmms-info-light)] text-[var(--cmms-info)]",
+          }
+        : {
+            text: aging.ageDays != null ? `ค้างมา ${aging.ageDays} วัน` : "ไม่มีกำหนดเสร็จ",
+            cls: "bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-secondary)]",
+          };
 
   return (
     <>
@@ -683,6 +786,12 @@ export default function RepairViewDetailsPage() {
         eyebrow={<p className="cmms-eyebrow">WORK ORDER DETAIL · CMMS-TOPPAN</p>}
         title="ใบสั่งงานซ่อม"
         description="WORK ORDER DETAIL · CMMS-TOPPAN"
+        primaryAction={
+          <Button key="print" variant="primary" onClick={handlePrint} className="gap-2">
+            <Printer className="w-4 h-4" />
+            <span>{t("action.print_closure_doc")}</span>
+          </Button>
+        }
         actions={[
           <Button
             key="back"
@@ -702,15 +811,6 @@ export default function RepairViewDetailsPage() {
           >
             <FileDown className="w-4 h-4" />
             <span>{downloading ? t("action.building_pdf") : t("action.download_pdf_fen03")}</span>
-          </Button>,
-          <Button
-            key="print"
-            variant="primary"
-            onClick={handlePrint}
-            className="gap-2"
-          >
-            <Printer className="w-4 h-4" />
-            <span>{t("action.print_closure_doc")}</span>
           </Button>,
         ]}
       />
@@ -760,40 +860,53 @@ export default function RepairViewDetailsPage() {
             <div className="flex items-center gap-4 flex-wrap">
               <AndonLamp status={andonOf(wo.status)} size="lg" />
               <div className="space-y-1 min-w-0">
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {statusLabel(wo.status)}
-                </span>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                <StatusChip status={wo.status} overdue={aging.overdueDays > 0} />
+                <h2 className="text-xl font-bold tracking-tight text-foreground tabular-nums md:text-2xl">
                   {wo.workOrderNo}
                 </h2>
-                <p className="text-base font-semibold text-foreground">
+                <p className="text-sm font-semibold text-foreground md:text-base">
                   {wo.title}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground md:text-sm">
                   {wo.assetName}
                 </p>
               </div>
             </div>
-            <div className="flex items-end justify-end">
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
               <Badge variant={priorityBadgeVariant(wo.priority)}>
                 ความเร่งด่วน: {priorityLabel(wo.priority)}
               </Badge>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${agingPill.cls}`}
+              >
+                {agingPill.text}
+              </span>
+              {aging.hasDue && aging.dueAt && (
+                <span className="w-full text-xs text-muted-foreground md:w-auto">
+                  กำหนดเสร็จ {fmtDT(aging.dueAt.toISOString())}
+                </span>
+              )}
             </div>
           </CardHeader>
           <CardContent>
             {/* ข้อเท็จจริงของใบงาน */}
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
+            <dl className="grid grid-cols-2 gap-2 md:grid-cols-4">
               {([
                 { label: "ผู้แจ้ง", value: wo.receiverName },
                 { label: "ผู้รับผิดชอบ", value: wo.assignedName },
-                { label: "วันที่แจ้ง", value: wo.createdDate },
-                { label: "วันที่ปิด", value: wo.completedAt },
-                { label: "Downtime", value: wo.downtimeMinutes ? `${wo.downtimeMinutes} นาที` : "—" },
+                { label: "วันที่แจ้ง", value: wo.createdDate && wo.createdDate !== "-" ? fmtDT(wo.createdDate) : "—" },
+                {
+                  label: "กำหนดเสร็จ (SLA)",
+                  value: aging.dueAt ? fmtDT(aging.dueAt.toISOString()) : "—",
+                  tone: aging.overdueDays > 0 ? "down" : aging.hasDue ? "ok" : "idle",
+                },
+                { label: "วันที่ปิด", value: wo.completedAt && wo.completedAt !== "-" ? fmtDT(wo.completedAt) : "—" },
+                { label: "Downtime", value: wo.downtimeMinutes ? `${wo.downtimeMinutes.toLocaleString()} นาที` : "—" },
                 { label: "ค่าใช้จ่ายรวม", value: `฿${(wo.costParts + wo.costLabor + wo.costOutsource).toLocaleString()}` },
                 { label: "ผลตรวจการปนเปื้อน", value: contamLabel[wo.contaminateChecking || "not_checked"] ?? "ยังไม่ตรวจ", tone: contamTone(wo.contaminateChecking || "") },
                 { label: "ผู้รับเหมาภายนอก", value: wo.outsourceBy || "—", tone: wo.outsourceBy ? "warn" : "idle" },
               ] as { label: string; value: string; tone?: "ok" | "warn" | "down" | "idle" }[]).map((f) => (
-                <div key={f.label} className="min-w-0 rounded-[var(--cmms-radius-sm)] border border-border p-2.5">
+                <div key={f.label} className="min-w-0 rounded-[var(--cmms-radius-sm)] border border-border px-2.5 py-2">
                   <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {f.label}
                   </dt>
@@ -940,7 +1053,7 @@ export default function RepairViewDetailsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto rounded-xl border border-border">
+              <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-left border-b border-border">
@@ -976,6 +1089,32 @@ export default function RepairViewDetailsPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              {/* Mobile cards — อ่านได้โดยไม่ต้อง scroll แนวนอน */}
+              <div className="space-y-2 md:hidden">
+                {wo.requestedParts.map((p, i) => (
+                  <div key={`m-${p.code}-${p.name}-${i}`} className="rounded-xl border border-border p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{p.name}</p>
+                        <p className="text-xs text-muted-foreground tabular-nums">{p.code || "พิมพ์เอง (ไม่มีรหัส)"}</p>
+                      </div>
+                      <Badge variant="neutral" className="shrink-0">×{p.qty.toLocaleString()}</Badge>
+                    </div>
+                    {p.code ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full gap-1.5"
+                        loading={partsSaving}
+                        onClick={() => addSagePart({ item_no: p.code, description: p.name }, p.qty)}
+                      >
+                        <PackagePlus className="w-3.5 h-3.5" />
+                        <span>เบิกเลย</span>
+                      </Button>
+                    ) : null}
+                  </div>
+                ))}
               </div>
               <p className="text-2xs text-muted-foreground mt-2">
                 ปุ่ม "เบิกเลย" เพิ่มรายการเข้าใบเบิก (Pending Issue) ตามสต็อก Sage 300 — ตรวจจำนวนอีกครั้งที่ตารางใบเบิกด้านล่าง
@@ -1023,7 +1162,7 @@ export default function RepairViewDetailsPage() {
             {partRows.length === 0 ? (
               <p className="text-sm text-muted-foreground">ยังไม่มีอะไหล่ในใบเบิก — ค้นหา Item Code ใน Sage 300 แล้วกด "เพิ่ม" ด้านล่าง</p>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-border">
+              <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-left border-b border-border">
@@ -1103,6 +1242,72 @@ export default function RepairViewDetailsPage() {
                 </table>
               </div>
             )}
+
+            {/* Mobile cards — อ่านได้โดยไม่ต้อง scroll แนวนอน */}
+            <div className="space-y-2 md:hidden">
+              {partRows.map((r) => (
+                <div key={`m-${r.id}-${r.code}`} className="space-y-2 rounded-xl border border-border p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{r.name}</p>
+                      <p className="text-xs text-muted-foreground tabular-nums">{r.code}</p>
+                    </div>
+                    <span className="shrink-0 text-sm font-bold tabular-nums">
+                      ฿{(r.quantity_used * (r.unit_price || 0)).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-end justify-between gap-2">
+                    <div className="space-y-1">
+                      <Label htmlFor={`m-qty-${r.id}`} className="text-[11px] text-muted-foreground">
+                        จำนวน
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={`m-qty-${r.id}`}
+                          type="number"
+                          min={1}
+                          value={r.quantity_used}
+                          onChange={(e) =>
+                            setPartRows(partRows.map((x) => (x.id === r.id ? { ...x, quantity_used: Math.max(1, Number(e.target.value) || 1) } : x)))
+                          }
+                          onBlur={(e) => updateQty(r.id, Math.max(1, Number(e.target.value) || 1))}
+                          disabled={Number(r.issued_qty) > 0}
+                          className="h-9 w-20 rounded-lg border border-input bg-card px-2 text-sm disabled:opacity-50"
+                        />
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          × ฿{(r.unit_price || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`นำอะไหล่ ${r.code} ออก`}
+                      onClick={() => removePart(r.id)}
+                      disabled={Number(r.issued_qty) > 0}
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="text-xs">
+                    {r.request_status === "Issued" ? (
+                      <Badge variant="success">
+                        จ่ายแล้ว {Number(r.issued_qty || 0).toLocaleString()}
+                        {Number(r.remaining) > 0 ? ` · เหลือ ${r.remaining}` : ""}
+                      </Badge>
+                    ) : r.request_status === "Returned" ? (
+                      <Badge variant="info">คืนแล้ว</Badge>
+                    ) : (
+                      <span className="text-muted-foreground">ยังไม่จ่าย (Pending)</span>
+                    )}
+                    {r.sage_doc_no && (
+                      <span className="ml-1 text-muted-foreground tabular-nums">· อ้างอิง {r.sage_doc_no}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* ค้นหา & เพิ่มอะไหล่ — สต็อกจริงจาก Sage 300 (Item Code เป็น reference key) */}
             <div className="rounded-xl border border-border p-3 space-y-3">
