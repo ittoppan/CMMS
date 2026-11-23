@@ -39,10 +39,10 @@
 
 ## 3. Phase 2 — Enterprise Design System
 
-- Tasks: [x] `DESIGN_SYSTEM.md` v3, [x] primitives (PageHeader/KpiStrip/…), [x] tokens ใน `globals.css` (`--cmms-*`), [x] `DESIGN_TOKENS.md` (ค่าจริง + กฏคู่สี AA + ข้อจำกัด dark mode ที่ยังไม่มีในสไตล์ชีต), [x] `COMPONENT_LIBRARY.md` (layout/primitives/ตาราง/โดเมนซ่อม + สิ่งที่ห้ามทำ), [x] ลบ `/ui-demo`,`/ui-kit` — [ ] ตรวจ card-in-card/tile มาตรฐานเดียว (ทยอยในหน้าที่ยังไม่ย้าย)
+- Tasks: [x] `DESIGN_SYSTEM.md` v3, [x] primitives (PageHeader/KpiStrip/…), [x] tokens ใน `globals.css` (`--cmms-*`), [x] `DESIGN_TOKENS.md` (ค่าจริง + กฏคู่สี AA + ข้อจำกัด dark mode ที่ยังไม่มีในสไตล์ชีต), [x] `COMPONENT_LIBRARY.md` (layout/primitives/ตาราง/โดเมนซ่อม + สิ่งที่ห้ามทำ), [x] ลบ `/ui-demo`,`/ui-kit` — [x] ตรวจ card-in-card/tile มาตรฐานเดียว (`PHASE_2_CARD_SURFACE_AUDIT.md` — วัด DOM จริง 20 หน้า: card-in-card 0/7, surface นอกมาตรฐาน 2 แบบใน 6 ไฟล์ = C2-1/C2-2)
 - Files: `frontend/components/layout/*`, `frontend/components/ui/*`, `frontend/components/supervisor/*`, `docs/DESIGN_SYSTEM.md`, `docs/DESIGN_TOKENS.md`, `docs/COMPONENT_LIBRARY.md`
 - Tests: `npx tsc --noEmit` PASS + `NEXT_DIST_DIR=.next-verify npm run build` PASS (247/247 pages หลังลบ 2 route)
-- Known issues: U4, U7, U8 (badge/colour/tile ไม่ตรงกันในหน้าที่ยังไม่ย้าย); dark theme ใน `DESIGN_SYSTEM.md` §2.2 ยังไม่มีใน `globals.css`
+- Known issues: U4, U7, U8 (badge/colour/tile ไม่ตรงกันในหน้าที่ยังไม่ย้าย); dark theme ใน `DESIGN_SYSTEM.md` §2.2 ยังไม่มีใน `globals.css`; C2-1 (`components/ui/table.tsx` สร้าง surface เองแทน `<Card>`) · C2-2 (5 ไฟล์ใช้ `rounded-xl border border-border bg-card p-4` ซ้ำ)
 - Approval: ไม่ต้อง
 
 ## 4. Phase 3 — Global Layout & Navigation
