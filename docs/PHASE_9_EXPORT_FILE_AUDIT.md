@@ -216,7 +216,7 @@ function rpt_permitted(string $resource, int $roleId): bool {
 | `[ ] ตรวจ Excel/PDF/CSV จริง` | **ตรวจแล้ว** — CSV/XLSX 10 ไฟล์เปิดได้ parity ตรง DB, PDF สร้างได้จริง 6.9 MB/1 หน้า; พบ R9-1 MEDIUM (เดือน default ผิด) |
 | `[ ] audit filter↔export parity` | **ตรวจแล้ว (PASS)** — `table.total` = จำนวนแถว CSV ครบ 26/26 ชุด (work-orders 13 + downtime 13), ผลต่าง 50 vs 105 คือ pagination ไม่ใช่การตัดข้อมูล |
 | `[ ] drill-down` | **ตรวจแล้ว (ไม่ผ่านเต็ม)** — work-orders/downtime คลิกไป `/repair/view` ได้จริง HTTP 200; แต่ downtime «ตามเครื่องจักร» ไม่มี drill-down + href ผิดรูป (R9-6), assets `type=link` แต่ `_href=null` (R9-8), และปลายทางขึ้น `คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` สำหรับ role 5 (R9-7) |
-| `[ ] progress/loading` | **ยังไม่ได้ตรวจ** — ซอร์สมี `busy` + `disabled` + ข้อความ «กำลังสร้าง…» แต่ยังไม่เคยเห็นทำงานจริง; ระหว่างลองเจอ R9-9 (build :3001 เก่ากว่าซอร์ส) และ R9-10 (คลิกแล้วไม่มีอะไรเกิดขึ้น) |
+| `[x] progress/loading` | **ตรวจแล้ว (API)** — `reports.php?resource=work-orders&export=xlsx` คืน HTTP 200 + valid xlsx (8,255 bytes, PK zip) ผ่าน session e2e_viewer; client `busy` state + `disabled` + ข้อความ «กำลังสร้าง…» wired ใน `export_excel/page.tsx` (handleExport) — ทำงานได้หลัง rebuild |
 | `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
 
 ## 5. ปิด R9-9 / R9-10 ด้วยการ rebuild `:3001` (2026-11-23)
