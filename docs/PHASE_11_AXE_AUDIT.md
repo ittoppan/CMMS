@@ -104,3 +104,49 @@ aria-controls="radix-_R_1einpfl4pfjbb_-content-all"  (axe: Invalid ARIA attribut
 - ~~โหมดมือถือ~~ (สแกนแล้ว §4) · ~~dark mode~~ (N/A by design §5)
 - Lighthouse (Performance/PWA) — ยังไม่ได้ติดตั้ง/รัน; PWA ต้อง HTTPS หรือ localhost
 - ค่าที่วัดได้มาจาก **build 22 พ.ย.** (R9-9) → ต้องรันซ้ำหลัง rebuild ก่อนสรุปว่าปิดได้
+
+## 8. เพิ่มเติม 2026-11-23 — 12 หน้าที่ role 5 เข้าได้ (axe desktop 1440, build 22 พ.ย.)
+
+สแกน `/dashboard` + 9 subpage + `wallboard` + `onboarding` ด้วย @axe-core/playwright (wcag2a + wcag2aa):
+
+| หน้า | violations | nodes | กฎ |
+|---|---|---|---|
+| `/dashboard` | 1 | 2 | `color-contrast` (2) |
+| `/dashboard/backlog-aging` | 0 | 0 | — |
+| `/dashboard/data-quality` | 1 | 1 | `scrollable-region-focusable` |
+| `/dashboard/facility` | 0 | 0 | — |
+| `/dashboard/lubrication` | 0 | 0 | — |
+| `/dashboard/pm-compliance` | 0 | 0 | — |
+| `/dashboard/predictive-ai` | 0 | 0 | — |
+| `/dashboard/production-impact` | 1 | 1 | `scrollable-region-focusable` |
+| `/dashboard/shift-handover` | 0 | 0 | — |
+| `/dashboard/utility-energy` | 0 | 0 | — |
+| `/dashboard/wallboard` | 2 | 2 | `color-contrast` (1) + `scrollable-region-focusable` (1) |
+| `/onboarding` | 0 | 0 | — |
+| **รวม** | **5** | **6** | |
+
+รวมสะสม: **20 หน้าสแกน** = **43 nodes / 5 กฎ** (เดิม 8 หน้า = 37 node/3 กฎ + รอบนี้ 6 node/2 กฎใหม่)
+
+### Finding ใหม่
+
+- **A11-3 (LOW) — `#cmms-main-scroll` และ `.overflow-x-auto` เป็น scrollable region ที่ไม่ focusable**
+  - จุด: `/dashboard`, `/data-quality`, `/production-impact`, `/wallboard`
+  - axe: `scrollable-region-focusable` — ผู้ใช้ keyboard ไม่สามารถเลื่อนกรอบที่ลื่นได้ด้วย Tab/Space
+  - แก้: เพิ่ม `tabindex="0"` + `role="region"` + `aria-label` ให้ scroll container (แตะ `components/` = ต้องอนุมัติ) หรือทำให้ `<main>` เป็น scroll container เดียว
+- **A11-4 (LOW) — wallboard มีข้อความ `0.6em` ที่ contrast ต่ำ**
+  - จุด: `.tower-panel … .text-[0.6em].font-bold` (node 1)
+  - เป็นหน้าจอ TV → ขนาดตัวอักษรเล็กมาก ผู้ใช้ห่างจออ่านไม่ได้
+- **A11-5 (LOW) — sidebar quick-access label contrast ต่ำ**
+  - จุด: `/dashboard` node 2 — "ใช้บ่อย" และ "ศูนย์รวม Dashboard"
+  - `text-foreground` บนพื้นที่ sidebar ผ่าน audit แต่ axe จับได้ใน layout นี้
+
+### ไม่ใช่ finding ใหม่
+
+- `color-contrast` บน `/dashboard` (2 node) ต่อเนื่องจาก A11-1 (`.cmms-andon-chip` ขาวบนพื้นสว่าง) — แต่ node ที่จับคราวนี้เป็น sidebar ไม่ใช่ chip
+- ไม่พบ `label-content-name-mismatch` บน 12 หน้าใหม่ (กฎนั้นมากจากหน้า `/notifications` ที่ role 5 ไม่เข้าได้)
+
+### ยังไม่ได้ตรวจ (คงเดิม)
+
+- อีก **6 หน้า**ที่ role 5 ไม่มีสิทธิ์ (403) และหน้าในโมดูลที่ต้อง role สูง
+- Lighthouse Performance/PWA — PWA ต้อง HTTPS หรือ localhost; Performance รันแล้ว (`PHASE_11_LIGHTHOUSE_REPORT.md`)
+- rebuild แล้วรัน axe ซ้ำ (R9-9)
