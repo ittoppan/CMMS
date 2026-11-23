@@ -115,8 +115,8 @@
 
 ## 11. Phase 10 — Technician & Mobile
 
-- Tasks: [x] technician/field audit (6 pages), [x] responsive 390/768/1440 (overflow 0, h1 1, console 0), [x] touch target ≥44px (/field), [x] PWA manifest valid, [x] SW registers on production build, [x] offline routes + offline.html precached, [x] offline write queue (sendOrEnqueue/syncEngine) ใช้งานได้, [ ] push E2E (ต้อง HTTPS), [ ] Lighthouse PWA (ต้อง HTTPS), [ ] manual device UAT
-- Evidence: `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md`; Playwright 5/5 PASS (47.1 s) on `:3001`
+- Tasks: [x] technician/field audit (6 pages), [x] responsive 390/768/1440 (overflow 0, h1 1, console 0), [x] touch target ≥44px (/field), [x] PWA manifest valid, [x] SW registers on production build, [x] offline routes + offline.html precached, [x] offline write queue (sendOrEnqueue/syncEngine) ใช้งานได้, [ ] push E2E (ต้อง HTTPS), [x] Lighthouse (perf/a11y/BP/SEO) — `PHASE_11_LIGHTHOUSE_REPORT.md`: login 70/96/96/100, dashboard **63**/96/96/100, reports 66/**92**/96/100; LCP 7.2/10.2/9.7 s = ตัวฉุดหลัก; L11-1 403 `settings.php` ทุกหน้า; **Lighthouse 12 ไม่มีหมวด PWA แล้ว**,
+- Evidence: `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md`; Playwright 5/5 PASS (47.1 s) on `:3001`; Lighthouse รันแล้วเป็นบางส่วน (`PHASE_11_LIGHTHOUSE_REPORT.md` — perf 63–70) · PWA วัดด้วย LH ไม่ได้ใน v12
 - Known issues: TLS ยังไม่เปิด → push/Lighthouse ทดสอบไม่ได้; PM checksheet UX รายละเอียดรอ Phase 7 unblock
 - Approval: ไม่ต้อง
 
