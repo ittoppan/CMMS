@@ -34,7 +34,7 @@
 
 - Tasks: [x] รวม audit เดิม, [x] จัดระดับ C/H/M/L, [x] ลำดับความสำคัญ, [x] ระบุหน้าที่ต้องแก้
 - Files: `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md`
-- Known issues: per-page สำหรับ 13 route ใหม่ → **เสร็จ** `PHASE_1_PER_PAGE_EVIDENCE.md` (11 route เปิดจริง 200, h1 1 ตัว, overflow 0 ที่ 390/1440, เนื้อหาจริงครบ); การวัด **768 ยังไม่มี**; finding ใหม่ **P1-1** `PageShell` เป็น header ระบบที่สอง (10 หน้า)
+- Known issues: per-page สำหรับ 13 route ใหม่ → **เสร็จ** `PHASE_1_PER_PAGE_EVIDENCE.md` (11 route เปิดจริง 200, h1 1 ตัว, overflow 0 ที่ 390/1440, เนื้อหาจริงครบ); การวัด **768 เสร็จ** (`PHASE_1_TABLET_768_REPORT.md`: 12 หน้า overflowX=0 ทุกหน้า, ตารางพอดีกรอบ 726/728 แต่ไม่มี stacked card; **P1-2** เอกสารอ้าง `.cmms-stack-table` ที่ไม่มีในโค้ด = แก้ MASTER_UI_AUDIT แล้ว); finding ใหม่ **P1-1** `PageShell` เป็น header ระบบที่สอง (10 หน้า)
 - Approval: ไม่ต้อง
 
 ## 3. Phase 2 — Enterprise Design System

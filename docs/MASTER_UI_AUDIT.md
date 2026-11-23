@@ -10,7 +10,7 @@
 | Tokens | Corporate Navy/White/Teal, `--cmms-*` | ใช้ CSS vars ทั่วไป | ไม่มีไฟล์ `DESIGN_TOKENS.md` (ต้องสร้าง Phase 2) |
 | Typography | scale ตาม `DESIGN_SYSTEM.md` §3 | ใช้ `text-sm` เป็นหลัก (กฎห้ามต่ำกว่า `text-sm` สำหรับไทย) | ต้องตรวจ badge/caption ที่เล็กกว่า |
 | Cards | `.card` canonical | ผ่านการแปลง 78+72 จุด (2026-08-23) | อาจมี card-in-card ใน dashboard ใหม่ |
-| Tables | `.data-table.cmms-stack-table` + `data-label` | 37 ตาราง / 35 หน้า | 13 route ใหม่ยังไม่ตรวจ |
+| Tables | ❌ ของจริง = `overflow-x-auto` + `min-w-[…px]` (`.cmms-stack-table`/`.data-table` **ไม่มีในโค้ด**: 0 ครั้ง, `data-label` 4 ครั้ง) | 89 ตาราง / 55 ไฟล์ — ตรวจ 768/390/1440 แล้ว overflowX = 0 (`PHASE_1_TABLET_768_REPORT.md`) | ยังไม่มี stacked-card mode · ตารางคอลัมน์มากบนมือถือต้องทดสอบบนอุปกรณ์ |
 | Badges | `.status-*` / `.priority-*` + `src/components/badge.php` | ใช้แล้ว ~30 หน้า PHP + StatusChip/PriorityChip FE | ยังมี raw Tailwind สีเข้มในบางหน้าใหม่ |
 | Alerts/Banner | `.cmms-banner` 4 แบบ / `Alert` FE | 134 alert div ใน ~78 หน้า PHP | FE ใช้ `Alert` ไม่ครบทุกหน้า |
 | Modal | `.cmms-modal-*` + `CMMS_UI.openModal` | migrate แล้วบางจุด (smart-req) | dialog FE ยังใช้ `Dialog` ตรง ๆ หลายหน้า |
