@@ -35,9 +35,9 @@ try {
 
     requireLogin($pdo);
 
-    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — Admin เท่านั้น
+    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ settings:view ขึ้นไป
     if (isset($_GET['defaults'])) {
-        requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่ดูค่าเริ่มต้น');
+        requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
         echo json_encode(settingsDefaultValues(), JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -62,6 +62,7 @@ try {
 
     switch ($method) {
         case 'GET':
+            requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
                 // ?id= ต้อง Admin (settings:manage) เท่านั้น

@@ -61,12 +61,15 @@ test.describe("settings security: scope", () => {
   });
 
   for (const u of ["e2e_user", "e2e_viewer", "e2e_foreman", "e2e_officer", "e2e_officer_read"]) {
-    test(`${u}: ?id= and ?defaults require admin (403)`, async ({ page }) => {
+    test(`${u}: ?id= requires admin (403)`, async ({ page }) => {
       await loginApi(page, u);
       const r1 = await page.request.get(`${BASE}/api/v1/settings.php?id=1`);
       expect([401, 403]).toContain(r1.status());
+    });
+    test(`${u}: ?defaults is readable with settings:view (not 403)`, async ({ page }) => {
+      await loginApi(page, u);
       const r2 = await page.request.get(`${BASE}/api/v1/settings.php?defaults=1`);
-      expect([401, 403]).toContain(r2.status());
+      expect(r2.status()).not.toBe(403);
     });
   }
 });
