@@ -133,12 +133,48 @@ function rpt_permitted(string $resource, int $roleId): bool {
 
 เงื่อนไข `range_start`/`range_end` **ใช้ได้เฉพาะเมื่อ `range=custom`** (`kpi.php:89-100`) — ส่งเดี่ยวๆ จะถูกเพิกเฉย (ไม่ใช่บั๊ก แต่เป็นกับดักถ้า client ส่งแค่วันเริ่ม/สิ้นสุดโดยไม่ส่ง `range=custom`)
 
+## 4.7 Drill-down จากแถวรายงาน — ตรวจแล้ว (รอบที่ 4)
+
+กลไก: backend ใส่ `row._href` และ frontend จะสร้าง `<a>` **เฉพาะคอลัมน์ที่ `type='link'`** (`report-table.tsx:56-71`) — `_href` ที่ไม่มีคอลัมน์ link จะถูกเพิกเฉย
+
+### วัดจาก API (`table.rows[]._href`, role 5)
+
+| resource | `_href` ที่ได้ | มีคอลัมน์ `type=link`? | ผล |
+|---|---|---|---|
+| work-orders | `/repair/view?id=1171, 340, 323…` | ✅ `work_order_no` | ✅ คลิกได้ |
+| downtime (มุมมองเริ่มต้น) | `/repair/view?id=2058, 2055…` | ✅ `work_order_no` | ✅ คลิกได้ |
+| **downtime `group_by=asset`** | **`/reports/downtime?asset_id=`** (ไม่มี id) | ❌ ไม่มีคอลัมน์ link | ❌ **ไม่มี drill-down** + href ผิดรูป |
+| assets | `null` ทุกแถว | ✅ `code` = link | ❌ ตั้งใจเปิด link แต่ `_href=null` → แสดงเป็นข้อความธรรมดา |
+| sla | `null` | ❌ | ไม่มี drill-down |
+| pm | `null` | ✅ `work_order_no` (แต่ `wo_id` ว่าง) | ไม่มี drill-down |
+| requests / inspections | 0 แถว | — | ตรวจไม่ได้ (ไม่มีข้อมูล) |
+
+### วัดจาก UI จริง
+
+| การกระทำ | ผล |
+|---|---|
+| `/reports/downtime` → เลือก «จัดกลุ่มตาม: ตามเครื่องจักร» | ตารางแสดง 2 แถว (`A-BM06 6 14 ชม.`, `ผนังห้อง 1 0.8 ชม.`) — **`<a>` ในตาราง = 0 ตัว** → แถวคลิกไม่ได้ |
+| `/reports/work-orders` แถวแรก → คลิก | ไปที่ `/repair/view?id=1171` **HTTP 200** เนื้อหา 2,577 ตัวอักษร |
+| เนื้อหาที่ได้หลังคลิก | แสดงรายละเอียดงานซ่อม **แต่ท้ายหน้าเป็น** `เกิดข้อผิดพลาด คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` |
+| `GET /api/v1/repair.php?id=1` (role 5) | **403** (148 bytes) |
+
+### Findings
+
+| ID | ระดับ | อาการ | หลักฐาน |
+|---|---|---|---|
+| R9-6 | MEDIUM | `downtime` มุมมอง «ตามเครื่องจักร» **ไม่มี drill-down** และ href ที่เตรียมไว้ผิดรูป — ไม่ได้ต่อ id: `$r['_href'] = '/reports/downtime?asset_id='` (branch นี้ยังไม่ได้ `SELECT a.id` ด้วย) → ถ้ามีใครไปตั้ง `type=link` จะได้ลิงก์ `?asset_id=` เปล่า (กรองไม่ออก) | `src/helpers/reports.php:1095-1104` |
+| R9-7 | MEDIUM | ผู้ใช้ role 5 เห็นข้อมูลในรายงาน (เช่น 105 ใบงาน) แต่คลิกเข้า `/repair/view` แล้วเจอ `คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` — report เปิดข้อมูลแต่หน้ารายละเอียดปิด → เดินต่อไม่ได้ (สิทธิ์สองระบบไม่ตรงกัน) | ทดสอบ UI §4.7 + `repair.php?id=1` = 403 |
+| R9-8 | LOW | `assets` ประกาศคอลัมน์ `code` เป็น `type=link` แต่ `_href=null` ทุกแถว → ดูเหมือนลิงก์แต่คลิกไม่ได้ | `reports.php:814, 819` |
+
+> R9-6/R9-7/R9-8 ต้องแก้ใน `src/helpers/reports.php` (backend logic) → **รออนุมัติ** ตามกฎ UI Migration
+
 ## 5. สิ่งที่ยังไม่ได้ตรวจ
 
 - สิทธิ์แบบ **ราย resource ที่ไม่ใช่ cost/technicians** — ไม่มีกฎให้ทดสอบ; ต้องใช้บัญชีที่ `menu_permissions` เป็น 0 สำหรับ resource นั้น แล้วดูว่า API ยังให้โหลดหรือไม่
 - การคลิกเปลี่ยนหน้าจริงบนตาราง (มี `onPage` ในโค้ดและ `total` ถูกต้อง แต่ยังไม่ได้คลิกดูหน้า 2/3)
 - filter ที่มาจาก dropdown บนหน้าจอ (ผมยิงผ่าน query string ตรง ไม่ได้คลิกเลือกใน UI)
-- drill-down และ progress/loading ระหว่าง export
+- **progress/loading ระหว่าง export** (ยังไม่ได้ตรวจ)
+- drill-down ของ `requests` และ `inspections` (ทั้งคู่ 0 แถวใน DB — ตรวจไม่ได้)
 - PDF หลายหน้า (รายงานที่ยาวเกิน 1 หน้า) — ยังไม่ทดสอบการแบ่งหน้า
 - เปิดไฟล์ด้วย Excel/LibreOffice จริง (ตรวจด้วย ZipArchive/ไบต์เท่านั้น)
 
@@ -148,4 +184,5 @@ function rpt_permitted(string $resource, int $roleId): bool {
 |---|---|
 | `[ ] ตรวจ Excel/PDF/CSV จริง` | **ตรวจแล้ว** — CSV/XLSX 10 ไฟล์เปิดได้ parity ตรง DB, PDF สร้างได้จริง 6.9 MB/1 หน้า; พบ R9-1 MEDIUM (เดือน default ผิด) |
 | `[ ] audit filter↔export parity` | **ตรวจแล้ว (PASS)** — `table.total` = จำนวนแถว CSV ครบ 26/26 ชุด (work-orders 13 + downtime 13), ผลต่าง 50 vs 105 คือ pagination ไม่ใช่การตัดข้อมูล |
+| `[ ] drill-down` | **ตรวจแล้ว (ไม่ผ่านเต็ม)** — work-orders/downtime คลิกไป `/repair/view` ได้จริง HTTP 200; แต่ downtime «ตามเครื่องจักร» ไม่มี drill-down + href ผิดรูป (R9-6), assets `type=link` แต่ `_href=null` (R9-8), และปลายทางขึ้น `คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` สำหรับ role 5 (R9-7) |
 | `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
