@@ -51,7 +51,7 @@
 
 ## 5. Guard ที่มีอยู่แล้วในโค้ด (ไม่ต้องรอเมทริกซ์)
 
-- ทุก endpoint: `requireLogin()` (ยกเว้น `csrf.php`, `feedback.php` บางส่วน, `iot_ingest.php`, `line_webhook.php`, `spare_image.php`, `user_lookup.php` ที่เอกสารระบุว่า "ไม่มี guard")
+- ทุก endpoint: `requireLogin()` (ยกเว้น `csrf.php`, `iot_ingest.php`, `line_webhook.php`, `spare_image.php`, `user_lookup.php` ที่เอกสารระบุว่า "ไม่มี guard"; `feedback.php` มี `requireLogin($pdo, false)` จริง — แก้ตาม `PHASE_11_GUARD_VERIFICATION.md`)
 - Mutation: CSRF (`src/csrf.php`) — ต้องคงไว้ 100%
 - Role-based เฉพาะทาง: `requireRole(...)` ใน `cost`, `dashboard`, `inspections`, `planning`, `spare_issue_request`, `spare_usage`, `supervisor`, `notifications`
 - Read-only UI: `my_permissions.php?module=` + `ui_permissions.php` + `useCan()` (fail-closed)
