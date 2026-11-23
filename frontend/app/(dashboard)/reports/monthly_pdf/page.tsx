@@ -79,22 +79,18 @@ export default function MonthlyPdfReportPage() {
     setLoading(true);
     setError(null);
     try {
-      const [mRes, woRes, aRes, pmRes, meRes] = await Promise.all([
+      const [mRes, aRes, pmRes, meRes] = await Promise.all([
         fetch(`/api/v1/analytics_monthly.php?year=${year}`),
-        fetch("/api/v1/index.php"),
         fetch("/api/v1/index.php?resource=assets"),
         fetch("/api/v1/pm_am.php"),
-        fetch("/api/v1/menu_permissions.php?user=1"),
+        fetch("/api/v1/profile.php"),
       ]);
       const mJson = await mRes.json();
-      const woJson = await woRes.json();
       const aJson = await aRes.json();
       const pmJson = await pmRes.json();
       const meJson = await meRes.json();
 
       setMonthly(mJson?.data || []);
-      const wo = Array.isArray(woJson?.data) ? woJson.data : Array.isArray(woJson) ? woJson : [];
-      setWorkOrders(wo);
       const aArr = aJson?.data || aJson?.assets;
       setAssets(Array.isArray(aArr) ? aArr.length : 0);
       const pm = Array.isArray(pmJson) ? pmJson : pmJson?.data || [];
@@ -120,11 +116,8 @@ export default function MonthlyPdfReportPage() {
   const closeRate = monthTotal > 0 ? (cur.completed / monthTotal) * 100 : 0;
   const monthCost = cur.cost * 10000; // API ส่งค่าเป็น หมื่นบาท
 
-  // ค่าใช้จ่ายรวมทั้งปี (บาท) — จากใบสั่งงานจริง
-  const yearCost = workOrders.reduce(
-    (s, w) => s + (parseFloat(String(w.cost_parts)) || 0) + (parseFloat(String(w.cost_labor)) || 0) + (parseFloat(String(w.cost_outsource)) || 0),
-    0
-  );
+  // ค่าใช้จ่ายรวมทั้งปี (บาท) — รวมจากข้อมูล analytics_monthly (cost หน่วย หมื่นบาท) เพื่อไม่ต้องดึงใบงานทั้งหมดมาคำนวณซ้ำ
+  const yearCost = monthly.reduce((s, m) => s + (Number(m.cost) || 0) * 10000, 0);
 
   // สรุป PM/AM จัดกลุ่มตามความถี่
   const pmGroups = (() => {
