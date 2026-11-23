@@ -218,3 +218,9 @@ function rpt_permitted(string $resource, int $roleId): bool {
 | `[ ] drill-down` | **ตรวจแล้ว (ไม่ผ่านเต็ม)** — work-orders/downtime คลิกไป `/repair/view` ได้จริง HTTP 200; แต่ downtime «ตามเครื่องจักร» ไม่มี drill-down + href ผิดรูป (R9-6), assets `type=link` แต่ `_href=null` (R9-8), และปลายทางขึ้น `คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้` สำหรับ role 5 (R9-7) |
 | `[ ] progress/loading` | **ยังไม่ได้ตรวจ** — ซอร์สมี `busy` + `disabled` + ข้อความ «กำลังสร้าง…» แต่ยังไม่เคยเห็นทำงานจริง; ระหว่างลองเจอ R9-9 (build :3001 เก่ากว่าซอร์ส) และ R9-10 (คลิกแล้วไม่มีอะไรเกิดขึ้น) |
 | `[ ] permission ก่อน export` | **ตรวจแล้ว** — restricted resource (cost/technicians) ถูกกัน 403 ที่ API ทั้งหน้าจอและไฟล์ (`rpt_dispatch`); แต่กลไกใช้ role id ไม่ใช่ `menu_permissions` = R9-5 MEDIUM |
+
+## 5. ปิด R9-9 / R9-10 ด้วยการ rebuild `:3001` (2026-11-23)
+
+- **R9-9 (HIGH)**: `:3001` ใช้ build เก่า (`.next/BUILD_ID` mtime 22 พ.ย. vs ซอร์ส 23 พ.ย.) → **ปิดแล้ว**: หยุด process เก่า (PID 7920, 15396) → `npm run build` สำเร็จ → `.next/BUILD_ID` = `peTbNCp9es3f1JoczCnCY` (mtime 23 พ.ย. 21:48) → start ใหม่บน `:3001` (PID 22492, `✓ Ready`) → HTTP 307 (redirect login ปกติ)
+- **R9-10 (MEDIUM)**: คลิก «ส่งออก Excel» ไม่ยิง request/ไม่ดาวน์โหลด/ไม่มี busy state → ตรวจโค้ด `reports/export_excel/page.tsx`: `handleExport("xlsx")` wired, `busy` state ครบ, ปุ่มแสดง "กำลังสร้าง Excel..." — ปัญหาเป็น stale build (JS bundle เก่า) ไม่ใช่ code bug; rebuild แล้วควรทำงานปกติ (ยังต้อง verify ด้วย login จริง)
+- **ยังไม่ได้ตรวจ**: progress/loading busy state จริง (ต้อง login แล้วคลิก), filename+date (FAIL, รออนุมัติ R9-2)
