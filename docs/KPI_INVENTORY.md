@@ -109,13 +109,14 @@
 | Escalation count | งานที่ trigger escalation | `repair.*` | — |
 
 ### 1.5 Shift Handover — `/dashboard/shift-handover`
-**refresh:** PAGE-LOAD / ON-DEMAND | **source:** `shift_handover` (สร้างใหม่) + `repair` active
+**refresh:** PAGE-LOAD / ON-DEMAND | **source:** `shift_handovers` + `repair` active
+> 2026-11-23: แก้ชื่อตารางจาก `shift_handover` → **`shift_handovers`** (พหูพจน์) ตามสคีมาจริง (`public/api/v1/shift_handover.php` ใช้ชื่อนี้) — ตารางมีอยู่แต่ **0 แถว**
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
 | งานค้างส่งต่อ | `COUNT(repair active AND assigned_to ∈ shift)` | `repair.*` | V2 |
-| เหตุการณ์กะ | นับจาก `shift_handover.events` | `shift_handover.*` | — |
-| เครื่องที่ต้องจับตา | รายการจาก `shift_handover.watch_assets` | `shift_handover.*` | — |
+| เหตุการณ์กะ | นับจาก `shift_handovers.events` | `shift_handovers.*` | — |
+| เครื่องที่ต้องจับตา | รายการจาก `shift_handovers.watch_assets` | `shift_handovers.*` | — |
 
 ---
 
@@ -166,7 +167,8 @@
 | ความถี่ตามเครื่อง | group by `asset_id` | `inspection_schedules.asset_id` | — |
 
 ### 2.5 Shutdown & Turnaround — `/shutdown`
-**refresh:** PAGE-LOAD | **source:** `shutdown_plans`, `repair`
+**refresh:** PAGE-LOAD | **source:** `sd_shutdowns`, `sd_activity`, `repair`
+> 2026-11-23: ไม่มีตาราง `shutdown_plans` ในสคีมานี้ — ของจริงคือตระกูล `sd_*` (`sd_shutdowns`, `sd_activity`, `sd_scopes`, `sd_planned_parts`, …) ทั้ง 9 ตาราง **0 แถว**; `public/api/v1/shutdown.php` อ่าน `sd_activity` + master data (`asset_registry`, `departments`, `users`, `spare_parts`, `work_permits`)
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
@@ -212,12 +214,13 @@
 | Repeat count | จำนวน breakdown ต่อเครื่อง | `repair.source_type='breakdown'` | — |
 
 ### 3.4 Calibration Management — `/calibration/dashboard`
-**refresh:** PAGE-LOAD | **source:** `calibration_records`, `asset_registry`
+**refresh:** PAGE-LOAD | **source:** `calibration`, `calibration_instruments`, `asset_registry`
+> 2026-11-23: ไม่มีตาราง `calibration_records` — ของจริงคือ `calibration` (`public/api/v1/calibration.php:23`) พร้อมตระกูล `calibration_*` อีก 9 ตาราง ทั้งหมด **0 แถว**
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
-| สอบเทียบที่ครบกำหนด | `COUNT(status=completed AND completed_at ∈ range)` | `calibration_records.*` | V4 |
-| สอบเทียบที่ค้างกำหนด | `COUNT(due_date < CURDATE() AND status≠completed)` | `calibration_records.due_date` | — |
+| สอบเทียบที่ครบกำหนด | `COUNT(status=completed AND completed_at ∈ range)` | `calibration.*` | V4 |
+| สอบเทียบที่ค้างกำหนด | `COUNT(due_date < CURDATE() AND status≠completed)` | `calibration.due_date` | — |
 | Compliance % | `completed / total × 100` | derived | V1 |
 
 ### 3.5 Root Cause Analysis — `/rca`
@@ -297,12 +300,14 @@
 | ผู้รับเหมา active | `COUNT(status=active)` | `contractors.status` | — |
 
 ### 4.5 Procurement & Purchasing — `/spare_parts/sage_po`
-**refresh:** MANUAL/DAILY-BATCH | **source:** `sage_po`, `spare_parts`
+**refresh:** MANUAL/DAILY-BATCH | **source:** `spare_parts` (+ `spare_issue_sage_shipments` สำหรับการรับเข้า)
+> 2026-11-23: **ไม่มีตาราง `sage_po` ในสคีมานี้** และหน้า `/spare_parts/sage_po` ไม่ได้อ่าน PO — อ่าน/บันทึกรับเข้าผ่าน `/api/v1/spare_parts.php` (`spare_parts` = 1,870 แถว). KPI "PO count/value" และ "Pending PO" ในหัวข้อนี้ **ยังไม่มีแหล่งข้อมูลจริง** จึงยังไม่ถูก implement
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
-| PO count/value | `COUNT(*)`, `SUM(total)` | `sage_po.*` | — |
-| Pending PO | `COUNT(status=pending)` | `sage_po.status` | — |
+| PO count/value | ❌ ยังไม่มีแหล่งข้อมูล (ไม่มีตาราง `sage_po`) | — | ไม่ implement |
+| Pending PO | ❌ ยังไม่มีแหล่งข้อมูล | — | ไม่ implement |
+| รายการอะไหล่รอรับเข้า (ของจริงที่หน้านี้แสดง) | rows จาก `spare_parts.php` | `spare_parts.*` | — |
 
 ---
 
@@ -356,7 +361,8 @@
 | Overdue points | `COUNT(next_due < CURDATE())` | `lubrication_points.next_due` | — |
 
 ### 6.3 Utility & Energy — `/dashboard/utility-energy`
-**refresh:** PAGE-LOAD / DAILY-BATCH | **source:** `utility_meters`, `utility_readings`
+**refresh:** PAGE-LOAD / DAILY-BATCH | **source:** `utility_readings`
+> 2026-11-23: ไม่มีตาราง `utility_meters` — `public/api/v1/utility_energy.php` ใช้ `utility_readings` เดียว (0 แถว). ถ้าต้องผูกมิเตอร์กับเครื่องจักรให้ใช้ `asset_meters` / `asset_meter_readings` (0 แถวเช่นกัน)
 
 | KPI | สูตร | Source | Validation |
 |---|---|---|---|
