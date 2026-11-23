@@ -5,6 +5,9 @@
  * Usage:
  *   require_once __DIR__ . '/../helpers/xlsx.php';
  *   xlsx_download('report.xlsx', ['คอลัมน์ A','คอลัมน์ B'], [['1','x'],['2','y']]);
+ *
+ * The sheet XML is streamed to a temp file first, so large exports (up to the
+ * 50,000-row cap enforced by the report layer) do not balloon memory.
  */
 if (!function_exists('xlsx_download')) {
     function xlsx_col(int $i): string {
@@ -27,23 +30,34 @@ if (!function_exists('xlsx_download')) {
     }
 
     function xlsx_download(string $filename, array $headers, array $rows): void {
-        $sheet = '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
-        $sheet .= '<row r="1">';
+        // 1) Stream the sheet XML to a temp file (avoid holding 50k+ rows in memory).
+        $sheetTmp = tempnam(sys_get_temp_dir(), 'xlsxsheet');
+        $fh = fopen($sheetTmp, 'wb');
+        if ($fh === false) {
+            http_response_code(500);
+            exit('ไม่สามารถสร้างไฟล์ Excel ได้');
+        }
+        fwrite($fh, '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>');
+        fwrite($fh, '<row r="1">');
         foreach ($headers as $i => $h) {
             $ref = xlsx_col($i) . '1';
             $t = htmlspecialchars((string)$h, ENT_XML1 | ENT_QUOTES, 'UTF-8');
-            $sheet .= "<c r=\"$ref\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">$t</t></is></c>";
+            fwrite($fh, "<c r=\"$ref\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">$t</t></is></c>");
         }
-        $sheet .= '</row>';
+        fwrite($fh, '</row>');
         $r = 2;
         foreach ($rows as $row) {
-            $sheet .= "<row r=\"$r\">";
-            foreach (array_values($row) as $c => $v) { $sheet .= xlsx_cell($r, $c, $v); }
-            $sheet .= '</row>';
+            fwrite($fh, "<row r=\"$r\">");
+            foreach (array_values($row) as $c => $v) {
+                fwrite($fh, xlsx_cell($r, $c, $v));
+            }
+            fwrite($fh, '</row>');
             $r++;
         }
-        $sheet .= '</sheetData></worksheet>';
+        fwrite($fh, '</sheetData></worksheet>');
+        fclose($fh);
 
+        // 2) Build the zip, referencing the sheet file on disk (not in memory).
         $contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
             . '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
@@ -76,6 +90,7 @@ if (!function_exists('xlsx_download')) {
         $tmp = tempnam(sys_get_temp_dir(), 'xlsx');
         $zip = new ZipArchive();
         if ($zip->open($tmp, ZipArchive::OVERWRITE) !== true) {
+            @unlink($sheetTmp);
             http_response_code(500);
             exit('ไม่สามารถสร้างไฟล์ Excel ได้');
         }
@@ -83,9 +98,10 @@ if (!function_exists('xlsx_download')) {
         $zip->addFromString('_rels/.rels', $rels);
         $zip->addFromString('xl/workbook.xml', $workbook);
         $zip->addFromString('xl/_rels/workbook.xml.rels', $workbookRels);
-        $zip->addFromString('xl/worksheets/sheet1.xml', $sheet);
+        $zip->addFile($sheetTmp, 'xl/worksheets/sheet1.xml');
         $zip->addFromString('xl/styles.xml', $styles);
         $zip->close();
+        @unlink($sheetTmp);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . addslashes($filename) . '"');
