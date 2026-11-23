@@ -18,7 +18,7 @@
 | 7 | Maintenance & PM | **BLOCKED** | `pm_am`=3 แถว แต่ทั้งหมดเป็น `E2E-SEED` (seed จาก e2e) → ตรวจ workflow/PM compliance ด้วยข้อมูลผลิตจริงไม่ได้; ยังไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
 | 9 | Reports, Analytics & Export | IN PROGRESS | audit filter↔export parity เสร็จ 2026-11-23 (`PHASE_9_REPORTS_EXPORT_REPORT.md`): พบ E1 (หน้า export ไม่ใช้ filter + ยิง `/api/v1/index.php` ไม่มี scope/audit) และ E2 (export ตัดที่ 50 แถว) → แก้แล้ว; parity 9 resource MATCH (work-orders 50→105, assets 50→82), E2E ดาวน์โหลด CSV/XLSX ผ่าน, tsc+build ผ่าน; **P9-4 (monthly PDF) audit เสร็จ** (`PHASE_9_P9_4_MONTHLY_PDF_AUDIT.md`): ตัด raw dump `/api/v1/index.php` + hardcode `user=1` ออก, yearCost คำนวณจาก analytics_monthly, tsc+build ผ่าน — ค้าง P9-4a/b/c + P9-1/P9-2/P9-3; **รออนุมัติการแตะ `rpt_page_params()` (backend, gated ด้วย export flag)** |
-| 10 | Technician & Mobile | NOT STARTED | มี baseline 390 อย่างเดียว; 768/1440, offline/PWA ยังไม่ทดสอบ |
+| 10 | Technician & Mobile | IN PROGRESS | audit 2026-11-23: responsive 6 pages × 3 viewports PASS (overflow 0, h1 1, console 0); touch targets >=44 PASS; PWA manifest valid + SW registered; offline routes declared; push/Lighthouse BLOCKED on HTTPS — `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md` |
 | 11 | QA / Security / Performance / Deployment | **BLOCKED** | ไม่มี Staging, HTTPS/TLS ยังไม่เปิด, ต้องอนุมัติเจ้าของระบบก่อน deploy; audit บางส่วนมีแล้ว (security/settings/asset) |
 
 ## 1. Phase 0 — System Discovery & Baseline
@@ -114,8 +114,9 @@
 
 ## 11. Phase 10 — Technician & Mobile
 
-- Tasks: [ ] technician dashboard audit, [ ] my jobs/field 390+768, [ ] checksheet บนแท็บเล็ต (UX-1), [ ] PWA installability + SW + offline fallback, [ ] push ทดสอบ (ต้อง HTTPS), [ ] touch target ≥44px
-- Known issues: TLS ยังไม่เปิด → push ทดสอบไม่ได้
+- Tasks: [x] technician/field audit (6 pages), [x] responsive 390/768/1440 (overflow 0, h1 1, console 0), [x] touch target ≥44px (/field), [x] PWA manifest valid, [x] SW registers on production build, [x] offline routes + offline.html precached, [x] offline write queue (sendOrEnqueue/syncEngine) ใช้งานได้, [ ] push E2E (ต้อง HTTPS), [ ] Lighthouse PWA (ต้อง HTTPS), [ ] manual device UAT
+- Evidence: `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md`; Playwright 5/5 PASS (47.1 s) on `:3001`
+- Known issues: TLS ยังไม่เปิด → push/Lighthouse ทดสอบไม่ได้; PM checksheet UX รายละเอียดรอ Phase 7 unblock
 - Approval: ไม่ต้อง
 
 ## 12. Phase 11 — QA / Security / Performance / Deployment — **BLOCKED**
