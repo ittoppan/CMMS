@@ -661,6 +661,7 @@ export default function DashboardPage() {
               <div className="tower-clock-date">
                 {online ? "เชื่อมต่อแล้ว" : "ออฟไลน์"}
                 {lastOk ? ` · รีเฟรช ${lastOk.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}` : ""}
+                {ov?.last_updated ? ` · ข้อมูล ณ ${String(ov.last_updated).slice(11, 16)}` : ""}
               </div>
             </div>
             <span className="tower-chip">
