@@ -91,6 +91,7 @@
   - [x] D3.8 docs ครบ 4 ไฟล์: `PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_ROLE_PERMISSION_TEST.md`, `PHASE_D3_TEST_RESULTS.md` (perf/Lighthouse ใหม่ยังไม่วัด — ระบุใน TEST_RESULTS §5)
 - Known issues: บัญชี `e2e_*` ทั้ง 10 ตัว `is_active=1` แล้ว → D3.5/D3.6 วัดด้วยเบราว์เซอร์จริงได้; filter department/date ต้องอนุมัติแก้ API; D3.7 role E2E ยังไม่ทำ; โหมดมืดยังไม่วัด contrast
 - Known issues (D3.4): `aging` คำนวณตอน render (ไม่ tick ข้ามวัน); ตารางผลค้นหา Sage ยัง `overflow-x-auto`; `statusLabel`/`statusLabels` เป็น dead code รอเก็บกวาด Phase 2
+- Card-in-card: **8 nested openings ใน 5 ไฟล์** (`PHASE_2_CARD_AUDIT.md`: `scan`, `asset_registry/view`, `forms`, `spare_parts/sage_sync`, `EmailNotifySettings`) — ไม่ใช่ 247 หน้าอื่น; แก้ต้องอนุมัติ (แตะ UI)
 - Known issues (D3.7 — ต้องอนุมัติก่อนแก้): **S1 HIGH** `GET supervisor.php` ทั้ง 8 action เรียกแค่ `requireLogin()` → role 3/9 อ่าน `kpis`/`queue` ผ่าน API ตรงได้ (ยืนยันด้วย `queue&limit=5` = 200, 5 แถว); **S2 MEDIUM** `ApiFetchInterceptor` ขึ้น “ไม่มีสิทธิ์ดูข้อมูลส่วนนี้” เมื่อ sub-resource 403 ทั้งที่หน้าใช้งานได้
 - Files: `app/(dashboard)/supervisor/queue/page.tsx`, `components/supervisor/WorkOrderTrendChart.tsx`, `app/(dashboard)/repair/view/page.tsx`
 - Approval: ไม่ต้องสำหรับ UI; **ต้องอนุมัติ** ถ้าจะแก้ `supervisor.php`
