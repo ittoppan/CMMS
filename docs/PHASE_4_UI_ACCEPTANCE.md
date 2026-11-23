@@ -61,6 +61,32 @@ DOM 878 โหนด, ไม่มี request ที่ error (`PROBE_FAILURES =
 - ~360 ms จาก 2 task แรก (467–751 ms) = hydration + เรนเดอร์ panel/กราฟชุดแรก
 - ~90–110 ms จาก task ที่ 1.2–1.8 วินาที = งานโหลดข้อมูลรอง (12 เดือน, plant map, spare, MTBF) ที่ defer ไว้แล้ว
 
+### 4.2 ลองแยกกราฟเป็น lazy chunk — **ไม่ได้ผล (ย้อนกลับแล้ว)**
+
+**ที่ทำ:** แยก JSX ของกราฟทั้ง 4 ชนิด (5 ตัวบนจอ) ออกเป็น `components/wallboard/charts.tsx`
+แล้ว import ด้วย `next/dynamic(..., { ssr: false })` เพื่อให้ Recharts หลุดจาก chunk แรก
+
+| build | รอบ | TBT (FCP→+5s, CPU 4×) | `charts_rendered` |
+|---|---|---|---|
+| ก่อนแยก (§4.1) | 3 | 367 / 375 / 372 | ไม่ได้นับ |
+| หลังแยก lazy chunk | 3 | **481 / 334 / 418** | **0** |
+| หลังย้อนกลับ | 2 | **504 / 366** | **0** |
+
+**ผล:** ไม่ดีขึ้น (ช่วงทับกับ baseline) และ **กราฟไม่ mount เลย** ทั้ง build ก่อนและหลังแยก
+สาเหตุคือ `IdleChart` (IntersectionObserver, `page.tsx`) จะ render children เมื่อ panel อยู่ในระยะ intersect เท่านั้น —
+ใน viewport 1280×720 ของ layout wallboard ที่ถูก clip ด้วย `overflow-hidden` panel กราฟอยู่นอกพื้นที่จึงไม่เคย intersect
+→ Recharts ไม่เคยอยู่ใน blocking window ตั้งแต่ต้น การย้ายมันออกจาก chunk แรกจึงไม่มีผลกับ TBT
+
+**การย้อนกลับ:** `git checkout` หน้าหลัก + ลบ `components/wallboard/` — `tsc --noEmit` ผ่าน, production build ผ่าน,
+วัดซ้ำได้ 504/366 ms (ช่วงเดิม) ไม่มีไฟล์ค้างใน working tree
+
+**ข้อสังเกตที่ต้องตัดสินใจ (ยังไม่แก้):** บน build เก่าที่ `:3001` กราฟ mount ครบ 5/5 (`recharts-surface = 5`)
+แต่บน source ปัจจุบันกราฟไม่ mount ถ้า panel ไม่ intersect — ถ้าจอจริงอยู่ในสภาพเดียวกันจะเห็นกราฟว่างตลอด
+ควรเพิ่ม fallback/timeout ให้ `IdleChart` (เช่น force render หลัง 1.5 วิ แม้ยังไม่ intersect)
+
+**ทางลด TBT ที่เหลือ:** ~360 ms มาจาก hydration ของหน้า (878 โหนด, panel 10 ใบ) ไม่ใช่กราฟ
+และ ~90–110 ms มาจากชุด fetch รองที่ defer อยู่แล้ว → แนวทางถัดไปคือลดจำนวน node/panel ที่ hydrate รอบแรก
+
 **สรุป:** เป้า TBT < 300 ms **ผ่านบน desktop (0 ms)** แต่ **ไม่ผ่านเมื่อ throttle CPU 4×** — วัดในหน้าต่างมาตรฐาน (FCP→+5s) ได้ **367 / 375 / 372 ms** (median 372) และ **ไม่มี long task ก่อน load event** แปลว่าต้องลดงาน hydration/เรนเดอร์กราฟชุดแรก (~360 ms) ไม่ใช่ลดงานโหลดข้อมูล
 
 ## 5. Acceptance
