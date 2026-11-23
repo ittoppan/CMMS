@@ -87,7 +87,34 @@ DOM 878 โหนด, ไม่มี request ที่ error (`PROBE_FAILURES =
 **ทางลด TBT ที่เหลือ:** ~360 ms มาจาก hydration ของหน้า (878 โหนด, panel 10 ใบ) ไม่ใช่กราฟ
 และ ~90–110 ms มาจากชุด fetch รองที่ defer อยู่แล้ว → แนวทางถัดไปคือลดจำนวน node/panel ที่ hydrate รอบแรก
 
-**สรุป:** เป้า TBT < 300 ms **ผ่านบน desktop (0 ms)** แต่ **ไม่ผ่านเมื่อ throttle CPU 4×** — วัดในหน้าต่างมาตรฐาน (FCP→+5s) ได้ **367 / 375 / 372 ms** (median 372) และ **ไม่มี long task ก่อน load event** แปลว่าต้องลดงาน hydration/เรนเดอร์กราฟชุดแรก (~360 ms) ไม่ใช่ลดงานโหลดข้อมูล
+**สรุป:** เป้า TBT < 300 ms **ผ่านบน desktop (0 ms)**
+
+### 4.3 แก้ bug: กราฟ wallboard ไม่เคยถูกวาดจริง + TBT ที่วัดได้จริง
+
+**อาการ:** `.recharts-surface` = **0** ทุก build ของ source ปัจจุบัน (ทั้งก่อน/หลังทดลอง lazy chunk) ขณะที่ build เก่าที่ `:3001` ได้ 5/5
+→ ตัวเลข TBT 367–375 ms ใน §4.1 วัดจากหน้า **ที่ไม่มีกราฟเลย** จึงใช้เป็น baseline ไม่ได้
+
+**สาเหตุ 2 ชั้น (`page.tsx`, `IdleChart`)**
+1. render children เมื่อ panel intersect เท่านั้น — ใน layout ที่ clip ด้วย `overflow-hidden` panel กราฟไม่ intersect จึงไม่เคย mount
+2. div ครอบมีแค่ `style={{ minHeight: 120 }}` ไม่มี height จริง → `ResponsiveContainer height="100%"` วัดได้ **0px** → Recharts ไม่วาด
+
+**ที่แก้**
+- เพิ่ม timeout fallback 1.5 วิ (และ `IntersectionObserver` ไม่มี → render ทันที)
+- เปลี่ยน div ครอบเป็น `className="h-full w-full"` คง `minHeight: 120` → ได้ความสูงจริงจาก flex parent (168px)
+
+**ผลหลังแก้** — วัดที่ production build :3003 (CPU 4×, FCP→+5s)
+
+| รอบ | TBT | long task หลัก | กราฟ | DOM nodes |
+|---|---|---|---|---|
+| 1 | **1,084 ms** | 392 ms (chart mount) + 291 ms | 5/5 | 1,289 |
+| 2 | **1,255 ms** | 411 ms + 333 ms | 5/5 | 1,289 |
+| 3 | **1,060 ms** | 404 ms + 299 ms | 5/5 | 1,289 |
+
+ตรวจภาพด้วยตาแล้ว: `docs/wallboard-after-idlechart-fix.png` (monthly bar+line, donut Asset Health 100%, donut Work Orders 105, MTBF/MTTR, Top 5 Downtime — ครบ ไม่เพี้ยน)
+
+**สรุป:** เป้า TBT < 300 ms **ยังไม่ผ่าน** เมื่อกราฟแสดงจริง (median **1,084 ms**)
+ภาระหลัก = การ mount กราฟ Recharts 5 ตัว (~400 ms + ~300 ms ในหน้าต่างวัด) ไม่ใช่ hydration ของ panel
+แนวทางถัดไป: แยก Recharts เป็น chunk (`next/dynamic`) **และ** mount กราฟทีละตัวผ่าน `requestIdleCallback`/staggered delay แล้ววัดซ้ำด้วย baseline ใหม่นี้ แต่ **ไม่ผ่านเมื่อ throttle CPU 4×** — วัดในหน้าต่างมาตรฐาน (FCP→+5s) ได้ **367 / 375 / 372 ms** (median 372) และ **ไม่มี long task ก่อน load event** แปลว่าต้องลดงาน hydration/เรนเดอร์กราฟชุดแรก (~360 ms) ไม่ใช่ลดงานโหลดข้อมูล
 
 ## 5. Acceptance
 

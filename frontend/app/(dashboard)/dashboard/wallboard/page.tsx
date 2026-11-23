@@ -199,9 +199,11 @@ function IdleChart({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // fallback: layout จอ TV/clip อาจทำให้ panel ไม่ intersect เลย → ต้องยังแสดงกราฟภายใน 1.5 วิ
+    const timer = window.setTimeout(() => setReady(true), 1500);
     if (typeof IntersectionObserver === "undefined") {
       setReady(true);
-      return;
+      return () => window.clearTimeout(timer);
     }
     const io = new IntersectionObserver(
       (entries) => {
@@ -213,9 +215,17 @@ function IdleChart({ children }: { children: React.ReactNode }) {
       { rootMargin: "0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      window.clearTimeout(timer);
+    };
   }, []);
-  return <div ref={ref} style={{ minHeight: 120 }}>{ready ? children : null}</div>;
+  // ต้องมี height จริง (h-full) ไม่ใช่แค่ minHeight ไม่งั้น ResponsiveContainer ของ Recharts จะวัดได้ 0px แล้วไม่วาดกราฟ
+  return (
+    <div ref={ref} className="h-full w-full" style={{ minHeight: 120 }}>
+      {ready ? children : null}
+    </div>
+  );
 }
 
 function PanelLink({ href, label }: { href: string; label: string }) {
