@@ -44,7 +44,7 @@
 | 35 | `onboarding` | 1 | — | ทุก role | NEW (ไม่มีในตาราง migration) | — | 3 |
 | 36 | `alert-center`, `andon-board`, `feedback`, `home`, `profile`, `predictive-maintenance`, `spare-reorder`, `sync-center`, `audit-log` | 9 | `predictive_maintenance.php`, `spare_reorder.php`, `feedback.php`, `audit_logs.php`, `asset_hub.php` | ตาม role | COMPLETE | — | 4 |
 | 37 | นอก shell: `login`, `register`, `install`, `change-password`, `scan`, `tv`, `qr-sheet`, `my-repairs`, `repair-request`, `repair` | 10 | `api/auth/login.php`, `scan.php`, `my_repairs.php` | public/ทุก role | COMPLETE | — | 5,10 |
-| 38 | `ui-demo`, `ui-kit` | 2 | — | dev | **DEMO — ต้องลบ** | — | 2 |
+| 38 | ~~`ui-demo`, `ui-kit`~~ | ~~2~~ | — | dev | **ลบแล้ว 2026-11-23 (Phase 2)** — build เหลือ 247 หน้า | — | 0 |
 
 ## 2. งานค้างรายโมดูล (อ้างจากรายงานเดิม)
 

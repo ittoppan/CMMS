@@ -318,4 +318,4 @@
 - `frontend/components/layout/`: `PageHeader`, `KpiStrip`, `ListToolbar`, `DetailHeader`, `InfoGrid`, `FormPage`, `FormSection`, `FormActions`, `HubGrid`, `HubCard`, primitives
 - `frontend/components/ui/`: `EmptyState`, `Skeleton` (ใช้ต่อ ไม่สร้างใหม่)
 - `ChartTip`/`Legend` ยังไม่ได้ดึงเป็น component กลาง — อยู่ใน `dashboard/page.tsx`, ดึงในขั้น dashboard (โมดูล 12)
-- Demo ชั่วคราว: `/ui-demo` (PageHeader/KpiStrip/ListToolbar), `/ui-kit` (DetailHeader/InfoGrid/Form*/Hub*/EmptyState) — ลบทีหลัง
+- ~~Demo ชั่วคราว~~ **ลบแล้ว 2026-11-23 (Phase 2)**: `/ui-demo`, `/ui-kit` — ตัวอย่างการใช้งานจริงดู `/supervisor`, `/supervisor/queue`, `/repair/view` และ `docs/COMPONENT_LIBRARY.md`

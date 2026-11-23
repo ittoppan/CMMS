@@ -10,7 +10,7 @@
 |---|---|---|---|
 | 0 | System Discovery & Baseline | **COMPLETE** | `MASTER_SYSTEM_DISCOVERY.md`, `MASTER_MODULE_INVENTORY.md`, `MASTER_API_INVENTORY.md`, `MASTER_ROLE_PERMISSION_MATRIX.md`, `MASTER_BASELINE.md` |
 | 1 | Full UX/UI Audit | **COMPLETE (consolidated)** | `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md` — 13 route ใหม่ยังไม่มี per-page evidence (ไปต่อ Phase 4/6) |
-| 2 | Enterprise Design System | IN PROGRESS | `docs/DESIGN_SYSTEM.md` v3 + primitives มีแล้ว; **ขาด** `COMPONENT_LIBRARY.md`, `DESIGN_TOKENS.md`; demo pages ยังอยู่ |
+| 2 | Enterprise Design System | **PASS** | `DESIGN_SYSTEM.md` v3 + primitives + `COMPONENT_LIBRARY.md` + `DESIGN_TOKENS.md` (จากโค้ดจริง); ลบ `/ui-demo`, `/ui-kit` แล้ว (247/247 pages, tsc/build PASS); ค้างเก็บกวาด card-in-card/tile ในหน้าที่ยังไม่ย้าย |
 | 3 | Global Layout & Navigation | IN PROGRESS | PageShell/PageHeader/DetailHeader, Breadcrumb, EmployeeAvatar, NotificationCenter (commit `114f0dba`, `d7a12f6a`, `3f2d792b`); ยังไม่ตรวจ role menu/mobile nav/global search ครบ |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; ค้าง KPI validation, drill-down, last-updated, TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
@@ -39,9 +39,10 @@
 
 ## 3. Phase 2 — Enterprise Design System
 
-- Tasks: [x] `DESIGN_SYSTEM.md` v3 (มีอยู่), [x] primitives (PageHeader/KpiStrip/…), [x] tokens ใน `globals.css` (`--cmms-*`), [ ] `DESIGN_TOKENS.md`, [ ] `COMPONENT_LIBRARY.md`, [ ] ลบ `/ui-demo`,`/ui-kit`, [ ] ตรวจ card-in-card/tile มาตรฐานเดียว
-- Files (ที่มี): `frontend/components/layout/*`, `frontend/components/ui/*`, `docs/DESIGN_SYSTEM.md`
-- Known issues: U4, U7, U8 (badge/colour/tile ไม่ตรงกัน)
+- Tasks: [x] `DESIGN_SYSTEM.md` v3, [x] primitives (PageHeader/KpiStrip/…), [x] tokens ใน `globals.css` (`--cmms-*`), [x] `DESIGN_TOKENS.md` (ค่าจริง + กฏคู่สี AA + ข้อจำกัด dark mode ที่ยังไม่มีในสไตล์ชีต), [x] `COMPONENT_LIBRARY.md` (layout/primitives/ตาราง/โดเมนซ่อม + สิ่งที่ห้ามทำ), [x] ลบ `/ui-demo`,`/ui-kit` — [ ] ตรวจ card-in-card/tile มาตรฐานเดียว (ทยอยในหน้าที่ยังไม่ย้าย)
+- Files: `frontend/components/layout/*`, `frontend/components/ui/*`, `frontend/components/supervisor/*`, `docs/DESIGN_SYSTEM.md`, `docs/DESIGN_TOKENS.md`, `docs/COMPONENT_LIBRARY.md`
+- Tests: `npx tsc --noEmit` PASS + `NEXT_DIST_DIR=.next-verify npm run build` PASS (247/247 pages หลังลบ 2 route)
+- Known issues: U4, U7, U8 (badge/colour/tile ไม่ตรงกันในหน้าที่ยังไม่ย้าย); dark theme ใน `DESIGN_SYSTEM.md` §2.2 ยังไม่มีใน `globals.css`
 - Approval: ไม่ต้อง
 
 ## 4. Phase 3 — Global Layout & Navigation
