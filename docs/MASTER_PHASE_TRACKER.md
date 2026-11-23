@@ -55,6 +55,7 @@
 ## 5. Phase 4 — Dashboard & Data Visualization
 
 > 2026-11-23: KPI validation เสร็จ — ดู §4/§5 ด้านล่างและ `docs/PHASE_4_KPI_VALIDATION_REPORT.md`
+> 2026-11-23 (เพิ่ม): **KPI parity on screen vs SQL = 8/8 ตรง** (`PHASE_4_KPI_PARITY_REPORT.md`) — พบ **K4-1** ใบ `completed` ถูกนับเป็นทั้งงานค้าง (106) และปิดแล้ว (6), **K4-2** 105/106 ใบไม่มีวันครบกำหนด → Overdue เป็น 0 เชิงโครงสร้าง (ข้อมูล ไม่ใช่โค้ด)
 
 - Tasks: [x] 36 modules + registry, [x] KPI inventory (สูตร/แหล่ง/refresh/validation), [x] ChartTip/Legend กลาง, [x] wallboard loading/error state, [x] validate KPI กับ SQL จริงทีละตัว (dashboard/wallboard/supervisor, 5 ช่วงเวลา, role 2/3/4) — `PHASE_4_KPI_VALIDATION_REPORT.md` + `PHASE_4_KPI_RAW.json`, [x] แก้ K1–K7 ตามอนุมัติเจ้าของระบบ — `f86634f6`, [x] K8–K10 + `reports.php:246` — `50e9e23a`, [x] last-updated + filter/range + drill-down — `b55e4046` (`PHASE_4_UI_ACCEPTANCE.md`), [x] INSUFFICIENT DATA ตรวจ 12 หน้า (`PHASE_4_INSUFFICIENT_DATA_AUDIT.md` — 5/12 แสดง empty state ถูกต้อง, 7/12 ติดสิทธิ์ Viewer; แก้ชื่อตารางต้นทาง 5 จุดใน `KPI_INVENTORY.md`), [ ] TBT <300ms — วัดแล้ว 0 ms (desktop) / 512 ms median (CPU 4×) ต้องลด
 - Tests: KPI validation 2026-11-23 14:06 (+07) บน DB `cmms_tpt` (repair 105 / pm_am 3 / mtbf_mttr 18) — 13 ฟิลด์ตรงสูตร, ค่าดิบใน `PHASE_4_KPI_RAW.json`
