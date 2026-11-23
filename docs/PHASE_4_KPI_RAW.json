@@ -1,0 +1,1391 @@
+{
+    "generated_at": "2026-11-23T14:06:42+07:00",
+    "db_now": "2026-11-23 14:06:42",
+    "status_dist": [
+        {
+            "status": "open",
+            "c": 74
+        },
+        {
+            "status": "in_progress",
+            "c": 22
+        },
+        {
+            "status": "completed",
+            "c": 6
+        },
+        {
+            "status": "pending",
+            "c": 2
+        },
+        {
+            "status": "assigned",
+            "c": 1
+        }
+    ],
+    "repair_total": 105,
+    "pm_am_total": 3,
+    "mr_total": 0,
+    "assets": [
+        {
+            "status": "active",
+            "c": 82
+        }
+    ],
+    "projects_note": "pm_am \/ mtbf_mttr \/ production_hours are separate tables; empty tables mean KPI is INSUFFICIENT DATA, not zero.",
+    "table_counts": {
+        "mtbf_mttr": 18,
+        "pm_am_plans": 0,
+        "production_hours": 540,
+        "repair_spare_parts": 0
+    },
+    "scenarios": {
+        "default_no_range": {
+            "range": null,
+            "impl": {
+                "total_wo_created": 105,
+                "wo_completed_in_range": 6,
+                "wo_completion_rate": 5.7,
+                "breakdown_count": 105,
+                "breakdown_rate": 100,
+                "downtime_minutes": 885,
+                "mttr_hours": 2.5,
+                "mtbf_hours": 734.4,
+                "avg_response_minutes": null,
+                "sla_compliance_pct": null,
+                "pm_compliance_pct": 0,
+                "counts": {
+                    "requests_open": 0,
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "critical_active": 0,
+                    "completed_today": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "overdue": 74
+                },
+                "open_wo": 105,
+                "overdue_wo": 74,
+                "critical_asset_downtime_minutes": 0
+            },
+            "truth": {
+                "total_wo_created": 105,
+                "wo_completed_in_range": 6,
+                "wo_completion_rate": 5.7,
+                "breakdown_count": 105,
+                "breakdown_rate": 100,
+                "downtime_minutes": 885,
+                "counts": {
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "open_wo": 105,
+                    "critical_active_doc": 1,
+                    "critical_active_impl": 0
+                },
+                "overdue_doc": 74,
+                "overdue_impl_rule": 74,
+                "overdue_planned_end_only": 0,
+                "status_not_in_active_nor_done": [
+                    "pending"
+                ],
+                "mttr_doc_hours": 2.5,
+                "mttr_rows_field": 1,
+                "mttr_rows_fallback_candidates": 0,
+                "mtbf_doc_nostatus": 734.4,
+                "mtbf_impl_status": 734.4,
+                "sla_due_total": 0,
+                "sla_on_time": 0,
+                "sla_compliance_pct": null,
+                "sla_due_total_completed_status": 0,
+                "sla_compliance_pct_completed_status": null,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "critical_open": 1
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "waiting_parts": 0,
+                "pm_overdue": 0,
+                "pm_due_today": 1,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 6,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 6
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "trend": {
+                "days": 30,
+                "sum_created": 17,
+                "sum_completed": 1
+            },
+            "compare": [
+                {
+                    "kpi": "total_wo_created",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total Work Orders; supervisor trend"
+                },
+                {
+                    "kpi": "wo_completed_in_range",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard Completed"
+                },
+                {
+                    "kpi": "wo_completion_rate",
+                    "impl": 5.7,
+                    "doc": 5.7,
+                    "match": true,
+                    "surface_source": "wallboard Completed badge"
+                },
+                {
+                    "kpi": "breakdown_count",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "dashboard core.breakdown_count"
+                },
+                {
+                    "kpi": "downtime_minutes",
+                    "impl": 885,
+                    "doc": 885,
+                    "match": true,
+                    "surface_source": "wallboard Downtime hours \/ Top5 downtime"
+                },
+                {
+                    "kpi": "mttr_hours",
+                    "impl": 2.5,
+                    "doc": 2.5,
+                    "match": true,
+                    "surface_source": "wallboard MTTR tile; supervisor MTTR"
+                },
+                {
+                    "kpi": "mtbf_hours",
+                    "impl": 734.4,
+                    "doc": 734.4,
+                    "match": true,
+                    "surface_source": "wallboard MTBF badge; supervisor MTBF"
+                },
+                {
+                    "kpi": "sla_compliance_pct",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "supervisor % ปิดงานใน SLA"
+                },
+                {
+                    "kpi": "critical_active(counts)",
+                    "impl": 0,
+                    "doc": 1,
+                    "match": false,
+                    "surface_source": "wallboard วิกฤตเปิดอยู่"
+                },
+                {
+                    "kpi": "overdue(counts.overdue)",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue; supervisor Overdue"
+                },
+                {
+                    "kpi": "open_wo",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total badge; supervisor Total Open"
+                },
+                {
+                    "kpi": "unassigned",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard ยังไม่มีผู้รับผิดชอบ; supervisor queue"
+                },
+                {
+                    "kpi": "pending_verification",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard รอตรวจ; queue"
+                },
+                {
+                    "kpi": "verified",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor card labelled Completed"
+                },
+                {
+                    "kpi": "waiting_parts",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor Waiting for Parts"
+                },
+                {
+                    "kpi": "trend.sum(created) vs total_wo_created",
+                    "impl": 17,
+                    "doc": 105,
+                    "match": false,
+                    "surface_source": "supervisor WorkOrderTrendChart \/ wallboard sparkline"
+                },
+                {
+                    "kpi": "alerts.overdue_open vs counts.overdue",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue + SLA panel"
+                }
+            ]
+        },
+        "today": {
+            "range": {
+                "start": "2026-11-23 00:00:00",
+                "end": "2026-11-23 23:59:59"
+            },
+            "impl": {
+                "total_wo_created": 0,
+                "wo_completed_in_range": 0,
+                "wo_completion_rate": null,
+                "breakdown_count": 0,
+                "breakdown_rate": null,
+                "downtime_minutes": 0,
+                "mttr_hours": null,
+                "mtbf_hours": 734.4,
+                "avg_response_minutes": null,
+                "sla_compliance_pct": null,
+                "pm_compliance_pct": 0,
+                "counts": {
+                    "requests_open": 0,
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "critical_active": 0,
+                    "completed_today": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "overdue": 74
+                },
+                "open_wo": 105,
+                "overdue_wo": 74,
+                "critical_asset_downtime_minutes": 0
+            },
+            "truth": {
+                "total_wo_created": 0,
+                "wo_completed_in_range": 0,
+                "wo_completion_rate": null,
+                "breakdown_count": 0,
+                "breakdown_rate": null,
+                "downtime_minutes": 0,
+                "counts": {
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "open_wo": 105,
+                    "critical_active_doc": 1,
+                    "critical_active_impl": 0
+                },
+                "overdue_doc": 74,
+                "overdue_impl_rule": 74,
+                "overdue_planned_end_only": 0,
+                "status_not_in_active_nor_done": [
+                    "pending"
+                ],
+                "mttr_doc_hours": null,
+                "mttr_rows_field": 0,
+                "mttr_rows_fallback_candidates": 0,
+                "mtbf_doc_nostatus": 734.4,
+                "mtbf_impl_status": 734.4,
+                "sla_due_total": 0,
+                "sla_on_time": 0,
+                "sla_compliance_pct": null,
+                "sla_due_total_completed_status": 0,
+                "sla_compliance_pct_completed_status": null,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "critical_open": 1
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "waiting_parts": 0,
+                "pm_overdue": 0,
+                "pm_due_today": 1,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 6,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 6
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "trend": {
+                "days": 1,
+                "sum_created": 0,
+                "sum_completed": 0
+            },
+            "compare": [
+                {
+                    "kpi": "total_wo_created",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "wallboard Total Work Orders; supervisor trend"
+                },
+                {
+                    "kpi": "wo_completed_in_range",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "wallboard Completed"
+                },
+                {
+                    "kpi": "wo_completion_rate",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "wallboard Completed badge"
+                },
+                {
+                    "kpi": "breakdown_count",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "dashboard core.breakdown_count"
+                },
+                {
+                    "kpi": "downtime_minutes",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "wallboard Downtime hours \/ Top5 downtime"
+                },
+                {
+                    "kpi": "mttr_hours",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "wallboard MTTR tile; supervisor MTTR"
+                },
+                {
+                    "kpi": "mtbf_hours",
+                    "impl": 734.4,
+                    "doc": 734.4,
+                    "match": true,
+                    "surface_source": "wallboard MTBF badge; supervisor MTBF"
+                },
+                {
+                    "kpi": "sla_compliance_pct",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "supervisor % ปิดงานใน SLA"
+                },
+                {
+                    "kpi": "critical_active(counts)",
+                    "impl": 0,
+                    "doc": 1,
+                    "match": false,
+                    "surface_source": "wallboard วิกฤตเปิดอยู่"
+                },
+                {
+                    "kpi": "overdue(counts.overdue)",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue; supervisor Overdue"
+                },
+                {
+                    "kpi": "open_wo",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total badge; supervisor Total Open"
+                },
+                {
+                    "kpi": "unassigned",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard ยังไม่มีผู้รับผิดชอบ; supervisor queue"
+                },
+                {
+                    "kpi": "pending_verification",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard รอตรวจ; queue"
+                },
+                {
+                    "kpi": "verified",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor card labelled Completed"
+                },
+                {
+                    "kpi": "waiting_parts",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor Waiting for Parts"
+                },
+                {
+                    "kpi": "trend.sum(created) vs total_wo_created",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor WorkOrderTrendChart \/ wallboard sparkline"
+                },
+                {
+                    "kpi": "alerts.overdue_open vs counts.overdue",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue + SLA panel"
+                }
+            ]
+        },
+        "this_month": {
+            "range": {
+                "start": "2026-11-01 00:00:00",
+                "end": "2026-11-23 23:59:59"
+            },
+            "impl": {
+                "total_wo_created": 12,
+                "wo_completed_in_range": 1,
+                "wo_completion_rate": 8.3,
+                "breakdown_count": 12,
+                "breakdown_rate": 100,
+                "downtime_minutes": 195,
+                "mttr_hours": 2.5,
+                "mtbf_hours": 734.4,
+                "avg_response_minutes": null,
+                "sla_compliance_pct": null,
+                "pm_compliance_pct": 0,
+                "counts": {
+                    "requests_open": 0,
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "critical_active": 0,
+                    "completed_today": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "overdue": 74
+                },
+                "open_wo": 105,
+                "overdue_wo": 74,
+                "critical_asset_downtime_minutes": 0
+            },
+            "truth": {
+                "total_wo_created": 12,
+                "wo_completed_in_range": 1,
+                "wo_completion_rate": 8.3,
+                "breakdown_count": 12,
+                "breakdown_rate": 100,
+                "downtime_minutes": 195,
+                "counts": {
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "open_wo": 105,
+                    "critical_active_doc": 1,
+                    "critical_active_impl": 0
+                },
+                "overdue_doc": 74,
+                "overdue_impl_rule": 74,
+                "overdue_planned_end_only": 0,
+                "status_not_in_active_nor_done": [
+                    "pending"
+                ],
+                "mttr_doc_hours": 2.5,
+                "mttr_rows_field": 1,
+                "mttr_rows_fallback_candidates": 0,
+                "mtbf_doc_nostatus": 734.4,
+                "mtbf_impl_status": 734.4,
+                "sla_due_total": 0,
+                "sla_on_time": 0,
+                "sla_compliance_pct": null,
+                "sla_due_total_completed_status": 0,
+                "sla_compliance_pct_completed_status": null,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "critical_open": 1
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "waiting_parts": 0,
+                "pm_overdue": 0,
+                "pm_due_today": 1,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 6,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 6
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "trend": {
+                "days": 23,
+                "sum_created": 12,
+                "sum_completed": 1
+            },
+            "compare": [
+                {
+                    "kpi": "total_wo_created",
+                    "impl": 12,
+                    "doc": 12,
+                    "match": true,
+                    "surface_source": "wallboard Total Work Orders; supervisor trend"
+                },
+                {
+                    "kpi": "wo_completed_in_range",
+                    "impl": 1,
+                    "doc": 1,
+                    "match": true,
+                    "surface_source": "wallboard Completed"
+                },
+                {
+                    "kpi": "wo_completion_rate",
+                    "impl": 8.3,
+                    "doc": 8.3,
+                    "match": true,
+                    "surface_source": "wallboard Completed badge"
+                },
+                {
+                    "kpi": "breakdown_count",
+                    "impl": 12,
+                    "doc": 12,
+                    "match": true,
+                    "surface_source": "dashboard core.breakdown_count"
+                },
+                {
+                    "kpi": "downtime_minutes",
+                    "impl": 195,
+                    "doc": 195,
+                    "match": true,
+                    "surface_source": "wallboard Downtime hours \/ Top5 downtime"
+                },
+                {
+                    "kpi": "mttr_hours",
+                    "impl": 2.5,
+                    "doc": 2.5,
+                    "match": true,
+                    "surface_source": "wallboard MTTR tile; supervisor MTTR"
+                },
+                {
+                    "kpi": "mtbf_hours",
+                    "impl": 734.4,
+                    "doc": 734.4,
+                    "match": true,
+                    "surface_source": "wallboard MTBF badge; supervisor MTBF"
+                },
+                {
+                    "kpi": "sla_compliance_pct",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "supervisor % ปิดงานใน SLA"
+                },
+                {
+                    "kpi": "critical_active(counts)",
+                    "impl": 0,
+                    "doc": 1,
+                    "match": false,
+                    "surface_source": "wallboard วิกฤตเปิดอยู่"
+                },
+                {
+                    "kpi": "overdue(counts.overdue)",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue; supervisor Overdue"
+                },
+                {
+                    "kpi": "open_wo",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total badge; supervisor Total Open"
+                },
+                {
+                    "kpi": "unassigned",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard ยังไม่มีผู้รับผิดชอบ; supervisor queue"
+                },
+                {
+                    "kpi": "pending_verification",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard รอตรวจ; queue"
+                },
+                {
+                    "kpi": "verified",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor card labelled Completed"
+                },
+                {
+                    "kpi": "waiting_parts",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor Waiting for Parts"
+                },
+                {
+                    "kpi": "trend.sum(created) vs total_wo_created",
+                    "impl": 12,
+                    "doc": 12,
+                    "match": true,
+                    "surface_source": "supervisor WorkOrderTrendChart \/ wallboard sparkline"
+                },
+                {
+                    "kpi": "alerts.overdue_open vs counts.overdue",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue + SLA panel"
+                }
+            ]
+        },
+        "last_month": {
+            "range": {
+                "start": "2026-10-01 00:00:00",
+                "end": "2026-10-31 23:59:59"
+            },
+            "impl": {
+                "total_wo_created": 21,
+                "wo_completed_in_range": 1,
+                "wo_completion_rate": 4.8,
+                "breakdown_count": 21,
+                "breakdown_rate": 100,
+                "downtime_minutes": 240,
+                "mttr_hours": 4,
+                "mtbf_hours": 734.4,
+                "avg_response_minutes": null,
+                "sla_compliance_pct": null,
+                "pm_compliance_pct": 0,
+                "counts": {
+                    "requests_open": 0,
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "critical_active": 0,
+                    "completed_today": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "overdue": 74
+                },
+                "open_wo": 105,
+                "overdue_wo": 74,
+                "critical_asset_downtime_minutes": 0
+            },
+            "truth": {
+                "total_wo_created": 21,
+                "wo_completed_in_range": 1,
+                "wo_completion_rate": 4.8,
+                "breakdown_count": 21,
+                "breakdown_rate": 100,
+                "downtime_minutes": 240,
+                "counts": {
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "open_wo": 105,
+                    "critical_active_doc": 1,
+                    "critical_active_impl": 0
+                },
+                "overdue_doc": 74,
+                "overdue_impl_rule": 74,
+                "overdue_planned_end_only": 0,
+                "status_not_in_active_nor_done": [
+                    "pending"
+                ],
+                "mttr_doc_hours": 4,
+                "mttr_rows_field": 1,
+                "mttr_rows_fallback_candidates": 0,
+                "mtbf_doc_nostatus": 734.4,
+                "mtbf_impl_status": 734.4,
+                "sla_due_total": 0,
+                "sla_on_time": 0,
+                "sla_compliance_pct": null,
+                "sla_due_total_completed_status": 0,
+                "sla_compliance_pct_completed_status": null,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "critical_open": 1
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "waiting_parts": 0,
+                "pm_overdue": 0,
+                "pm_due_today": 1,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 6,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 6
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "trend": {
+                "days": 31,
+                "sum_created": 21,
+                "sum_completed": 1
+            },
+            "compare": [
+                {
+                    "kpi": "total_wo_created",
+                    "impl": 21,
+                    "doc": 21,
+                    "match": true,
+                    "surface_source": "wallboard Total Work Orders; supervisor trend"
+                },
+                {
+                    "kpi": "wo_completed_in_range",
+                    "impl": 1,
+                    "doc": 1,
+                    "match": true,
+                    "surface_source": "wallboard Completed"
+                },
+                {
+                    "kpi": "wo_completion_rate",
+                    "impl": 4.8,
+                    "doc": 4.8,
+                    "match": true,
+                    "surface_source": "wallboard Completed badge"
+                },
+                {
+                    "kpi": "breakdown_count",
+                    "impl": 21,
+                    "doc": 21,
+                    "match": true,
+                    "surface_source": "dashboard core.breakdown_count"
+                },
+                {
+                    "kpi": "downtime_minutes",
+                    "impl": 240,
+                    "doc": 240,
+                    "match": true,
+                    "surface_source": "wallboard Downtime hours \/ Top5 downtime"
+                },
+                {
+                    "kpi": "mttr_hours",
+                    "impl": 4,
+                    "doc": 4,
+                    "match": true,
+                    "surface_source": "wallboard MTTR tile; supervisor MTTR"
+                },
+                {
+                    "kpi": "mtbf_hours",
+                    "impl": 734.4,
+                    "doc": 734.4,
+                    "match": true,
+                    "surface_source": "wallboard MTBF badge; supervisor MTBF"
+                },
+                {
+                    "kpi": "sla_compliance_pct",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "supervisor % ปิดงานใน SLA"
+                },
+                {
+                    "kpi": "critical_active(counts)",
+                    "impl": 0,
+                    "doc": 1,
+                    "match": false,
+                    "surface_source": "wallboard วิกฤตเปิดอยู่"
+                },
+                {
+                    "kpi": "overdue(counts.overdue)",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue; supervisor Overdue"
+                },
+                {
+                    "kpi": "open_wo",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total badge; supervisor Total Open"
+                },
+                {
+                    "kpi": "unassigned",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard ยังไม่มีผู้รับผิดชอบ; supervisor queue"
+                },
+                {
+                    "kpi": "pending_verification",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard รอตรวจ; queue"
+                },
+                {
+                    "kpi": "verified",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor card labelled Completed"
+                },
+                {
+                    "kpi": "waiting_parts",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor Waiting for Parts"
+                },
+                {
+                    "kpi": "trend.sum(created) vs total_wo_created",
+                    "impl": 21,
+                    "doc": 21,
+                    "match": true,
+                    "surface_source": "supervisor WorkOrderTrendChart \/ wallboard sparkline"
+                },
+                {
+                    "kpi": "alerts.overdue_open vs counts.overdue",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue + SLA panel"
+                }
+            ]
+        },
+        "this_year": {
+            "range": {
+                "start": "2026-01-01 00:00:00",
+                "end": "2026-11-23 23:59:59"
+            },
+            "impl": {
+                "total_wo_created": 105,
+                "wo_completed_in_range": 6,
+                "wo_completion_rate": 5.7,
+                "breakdown_count": 105,
+                "breakdown_rate": 100,
+                "downtime_minutes": 885,
+                "mttr_hours": 2.33,
+                "mtbf_hours": 734.4,
+                "avg_response_minutes": null,
+                "sla_compliance_pct": null,
+                "pm_compliance_pct": 0,
+                "counts": {
+                    "requests_open": 0,
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "critical_active": 0,
+                    "completed_today": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "overdue": 74
+                },
+                "open_wo": 105,
+                "overdue_wo": 74,
+                "critical_asset_downtime_minutes": 0
+            },
+            "truth": {
+                "total_wo_created": 105,
+                "wo_completed_in_range": 6,
+                "wo_completion_rate": 5.7,
+                "breakdown_count": 105,
+                "breakdown_rate": 100,
+                "downtime_minutes": 885,
+                "counts": {
+                    "pending_approval": 0,
+                    "unassigned": 74,
+                    "assigned": 1,
+                    "active": 22,
+                    "pending_verification": 6,
+                    "verified": 0,
+                    "waiting_parts": 0,
+                    "waiting_external": 0,
+                    "open_wo": 105,
+                    "critical_active_doc": 1,
+                    "critical_active_impl": 0
+                },
+                "overdue_doc": 74,
+                "overdue_impl_rule": 74,
+                "overdue_planned_end_only": 0,
+                "status_not_in_active_nor_done": [
+                    "pending"
+                ],
+                "mttr_doc_hours": 2.33,
+                "mttr_rows_field": 6,
+                "mttr_rows_fallback_candidates": 0,
+                "mtbf_doc_nostatus": 734.4,
+                "mtbf_impl_status": 734.4,
+                "sla_due_total": 0,
+                "sla_on_time": 0,
+                "sla_compliance_pct": null,
+                "sla_due_total_completed_status": 0,
+                "sla_compliance_pct_completed_status": null,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "critical_open": 1
+            },
+            "alerts": {
+                "critical_open": 1,
+                "overdue_open": 74,
+                "sla_at_risk": 0,
+                "sla_risk_hours": 24,
+                "waiting_parts": 0,
+                "pm_overdue": 0,
+                "pm_due_today": 1,
+                "sla_by_priority": [
+                    {
+                        "priority": "critical",
+                        "total": 1,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 1
+                    },
+                    {
+                        "priority": "high",
+                        "total": 6,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 6
+                    },
+                    {
+                        "priority": "medium",
+                        "total": 96,
+                        "due_set": 1,
+                        "at_risk": 0,
+                        "overdue": 1,
+                        "no_due": 95
+                    },
+                    {
+                        "priority": "low",
+                        "total": 0,
+                        "due_set": 0,
+                        "at_risk": 0,
+                        "overdue": 0,
+                        "no_due": 0
+                    }
+                ]
+            },
+            "trend": {
+                "days": 62,
+                "sum_created": 33,
+                "sum_completed": 2
+            },
+            "compare": [
+                {
+                    "kpi": "total_wo_created",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total Work Orders; supervisor trend"
+                },
+                {
+                    "kpi": "wo_completed_in_range",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard Completed"
+                },
+                {
+                    "kpi": "wo_completion_rate",
+                    "impl": 5.7,
+                    "doc": 5.7,
+                    "match": true,
+                    "surface_source": "wallboard Completed badge"
+                },
+                {
+                    "kpi": "breakdown_count",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "dashboard core.breakdown_count"
+                },
+                {
+                    "kpi": "downtime_minutes",
+                    "impl": 885,
+                    "doc": 885,
+                    "match": true,
+                    "surface_source": "wallboard Downtime hours \/ Top5 downtime"
+                },
+                {
+                    "kpi": "mttr_hours",
+                    "impl": 2.33,
+                    "doc": 2.33,
+                    "match": true,
+                    "surface_source": "wallboard MTTR tile; supervisor MTTR"
+                },
+                {
+                    "kpi": "mtbf_hours",
+                    "impl": 734.4,
+                    "doc": 734.4,
+                    "match": true,
+                    "surface_source": "wallboard MTBF badge; supervisor MTBF"
+                },
+                {
+                    "kpi": "sla_compliance_pct",
+                    "impl": null,
+                    "doc": null,
+                    "match": true,
+                    "surface_source": "supervisor % ปิดงานใน SLA"
+                },
+                {
+                    "kpi": "critical_active(counts)",
+                    "impl": 0,
+                    "doc": 1,
+                    "match": false,
+                    "surface_source": "wallboard วิกฤตเปิดอยู่"
+                },
+                {
+                    "kpi": "overdue(counts.overdue)",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue; supervisor Overdue"
+                },
+                {
+                    "kpi": "open_wo",
+                    "impl": 105,
+                    "doc": 105,
+                    "match": true,
+                    "surface_source": "wallboard Total badge; supervisor Total Open"
+                },
+                {
+                    "kpi": "unassigned",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard ยังไม่มีผู้รับผิดชอบ; supervisor queue"
+                },
+                {
+                    "kpi": "pending_verification",
+                    "impl": 6,
+                    "doc": 6,
+                    "match": true,
+                    "surface_source": "wallboard รอตรวจ; queue"
+                },
+                {
+                    "kpi": "verified",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor card labelled Completed"
+                },
+                {
+                    "kpi": "waiting_parts",
+                    "impl": 0,
+                    "doc": 0,
+                    "match": true,
+                    "surface_source": "supervisor Waiting for Parts"
+                },
+                {
+                    "kpi": "trend.sum(created) vs total_wo_created",
+                    "impl": 33,
+                    "doc": 105,
+                    "match": false,
+                    "surface_source": "supervisor WorkOrderTrendChart \/ wallboard sparkline"
+                },
+                {
+                    "kpi": "alerts.overdue_open vs counts.overdue",
+                    "impl": 74,
+                    "doc": 74,
+                    "match": true,
+                    "surface_source": "wallboard Overdue + SLA panel"
+                }
+            ]
+        }
+    },
+    "pm_metrics": {
+        "default_no_range": {
+            "due_total": 3,
+            "completed": 1,
+            "on_time": 0,
+            "late": 0,
+            "overdue_pending": 0,
+            "completion_rate": 33.3,
+            "on_time_pct": 0
+        },
+        "today": {
+            "due_total": 3,
+            "completed": 0,
+            "on_time": 0,
+            "late": 0,
+            "overdue_pending": 0,
+            "completion_rate": 0,
+            "on_time_pct": null
+        },
+        "this_month": {
+            "due_total": 3,
+            "completed": 0,
+            "on_time": 0,
+            "late": 0,
+            "overdue_pending": 0,
+            "completion_rate": 0,
+            "on_time_pct": null
+        },
+        "last_month": {
+            "due_total": 3,
+            "completed": 0,
+            "on_time": 0,
+            "late": 0,
+            "overdue_pending": 0,
+            "completion_rate": 0,
+            "on_time_pct": null
+        },
+        "this_year": {
+            "due_total": 3,
+            "completed": 0,
+            "on_time": 0,
+            "late": 0,
+            "overdue_pending": 0,
+            "completion_rate": 0,
+            "on_time_pct": null
+        }
+    },
+    "asset_health": {
+        "total_assets": 82,
+        "running": 82,
+        "down": 81,
+        "under_maintenance": 0,
+        "inactive": 0,
+        "critical_assets": 0,
+        "repeated_failure_assets": 4,
+        "high_downtime_assets": 0,
+        "high_cost_assets": 0
+    },
+    "asset_health_truth": {
+        "total_assets": 82,
+        "sum_running_under_repair_inactive": 82,
+        "critical_A_not_disposed": 0
+    },
+    "department_filter_test": {
+        "department_id": 10,
+        "unfiltered": {
+            "total_wo_created": 105,
+            "mttr_hours": 2.5,
+            "mtbf_hours": 734.4,
+            "sla_compliance_pct": null,
+            "downtime_minutes": 885
+        },
+        "filtered_impl": {
+            "total_wo_created": 14,
+            "mttr_hours": 2.5,
+            "mtbf_hours": 734.4,
+            "sla_compliance_pct": null,
+            "downtime_minutes": 0
+        },
+        "filtered_truth": {
+            "total_wo_created": 14,
+            "mttr_doc_hours": null,
+            "mtbf_doc_nostatus": null,
+            "sla_compliance_pct": null,
+            "downtime_minutes": 0
+        }
+    },
+    "role_scope_test": {
+        "technician": {
+            "user_id": 1,
+            "sql_scoped_rows": 6,
+            "impl_total_wo_created": 6,
+            "impl_counts": {
+                "requests_open": 0,
+                "pending_approval": 0,
+                "unassigned": 0,
+                "assigned": 0,
+                "active": 0,
+                "pending_verification": 6,
+                "verified": 0,
+                "critical_active": 0,
+                "completed_today": 0,
+                "waiting_parts": 0,
+                "waiting_external": 0,
+                "overdue": 0
+            }
+        },
+        "operator": {
+            "user_id": 1,
+            "sql_scoped_rows": 9,
+            "impl_total_wo_created": 9
+        }
+    },
+    "inspection_kpi_view": {
+        "total_schedules": 0,
+        "due_today": null,
+        "overdue": null,
+        "in_progress": null,
+        "completed": null,
+        "passed": null,
+        "failed": null,
+        "critical_fail": null,
+        "avg_score_pct": "0.00",
+        "compliance_pct": "0.00"
+    }
+}

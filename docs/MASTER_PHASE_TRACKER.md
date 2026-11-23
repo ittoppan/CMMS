@@ -12,10 +12,10 @@
 | 1 | Full UX/UI Audit | **COMPLETE (consolidated)** | `MASTER_UX_AUDIT.md`, `MASTER_UI_AUDIT.md`, `MASTER_UX_PRIORITY.md` — 13 route ใหม่ยังไม่มี per-page evidence (ไปต่อ Phase 4/6) |
 | 2 | Enterprise Design System | **PASS** | `DESIGN_SYSTEM.md` v3 + primitives + `COMPONENT_LIBRARY.md` + `DESIGN_TOKENS.md` (จากโค้ดจริง); ลบ `/ui-demo`, `/ui-kit` แล้ว (247/247 pages, tsc/build PASS); ค้างเก็บกวาด card-in-card/tile ในหน้าที่ยังไม่ย้าย |
 | 3 | Global Layout & Navigation | **PASS (มี finding N1–N3)** | bottom nav 390 = 6 ปุ่ม hit 59px/padding 96px/overflow 0; keyboard PASS (skip link, Enter→main, ring 2–3px, Ctrl+K palette 130→5, Esc ปิด); role menu เทียบ API 9 บทบาท: ไม่มีเมนูที่ไม่ได้สิทธิ์ถูกแสดง ยกเว้น `/dashboard` — `docs/PHASE_3_LAYOUT_NAV_REPORT.md` |
-| 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; ค้าง KPI validation, drill-down, last-updated, TBT |
+| 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); ค้าง drill-down, last-updated, TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
-| 7 | Maintenance & PM | **BLOCKED** | `pm_am`=0 แถว → ตรวจ workflow/PM compliance ด้วยข้อมูลจริงไม่ได้; ไม่มีคำสั่งสร้างข้อมูลทดแทน |
+| 7 | Maintenance & PM | **BLOCKED** | `pm_am`=3 แถว แต่ทั้งหมดเป็น `E2E-SEED` (seed จาก e2e) → ตรวจ workflow/PM compliance ด้วยข้อมูลผลิตจริงไม่ได้; ยังไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
 | 9 | Reports, Analytics & Export | NOT STARTED | ต้องเริ่มด้วย audit filter↔export parity |
 | 10 | Technician & Mobile | NOT STARTED | มี baseline 390 อย่างเดียว; 768/1440, offline/PWA ยังไม่ทดสอบ |
@@ -54,8 +54,11 @@
 
 ## 5. Phase 4 — Dashboard & Data Visualization
 
-- Tasks: [x] 36 modules + registry, [x] KPI inventory (สูตร/แหล่ง/refresh/validation), [x] ChartTip/Legend กลาง, [x] wallboard loading/error state, [ ] validate KPI กับ SQL จริงทีละตัว, [ ] last-updated + filter/range + drill-down, [ ] INSUFFICIENT DATA ทุก KPI, [ ] TBT <300ms
-- Known issues: C2, H4, M6
+> 2026-11-23: KPI validation เสร็จ — ดู §4/§5 ด้านล่างและ `docs/PHASE_4_KPI_VALIDATION_REPORT.md`
+
+- Tasks: [x] 36 modules + registry, [x] KPI inventory (สูตร/แหล่ง/refresh/validation), [x] ChartTip/Legend กลาง, [x] wallboard loading/error state, [x] validate KPI กับ SQL จริงทีละตัว (dashboard/wallboard/supervisor, 5 ช่วงเวลา, role 2/3/4) — `PHASE_4_KPI_VALIDATION_REPORT.md` + `PHASE_4_KPI_RAW.json`, [ ] last-updated + filter/range + drill-down, [ ] INSUFFICIENT DATA ทุก KPI, [ ] TBT <300ms
+- Tests: KPI validation 2026-11-23 14:06 (+07) บน DB `cmms_tpt` (repair 105 / pm_am 3 / mtbf_mttr 18) — 13 ฟิลด์ตรงสูตร, ค่าดิบใน `PHASE_4_KPI_RAW.json`
+- Known issues (ต้องอนุมัติก่อนแก้สูตร/นิยาม): **K1 HIGH** `counts.critical_active`=0 แต่ `alerts.critical_open`=1 จากลิสต์สถานะคนละชุด (`kpi.php:321` vs `:547`); **K2 HIGH** PM completion ใช้ `due_total` ทั้งตารางไม่ผูกช่วง → today/this_month/last_month/this_year แสดง 0% แทน null + PM `completed` 1 แต่ `on_time+late`=0 + `v_inspection_dashboard_kpis.compliance_pct`=0 ทั้งที่ `total_schedules`=0; **K3 HIGH** กราฟ MTBF wallboard เฉลี่ยค่าเฉลี่ยรายเครื่อง (พ.ย. 459 vs 691 ชม., มิ.ย. 598 vs 1,802) และ MTBF สองนิยามบนจอเดียว (734.4 vs 459); **K4** ตัวกรองแผนกไม่ถูกใช้กับ MTTR/MTBF/SLA (แผนก 10: total 14, downtime 0 แต่ MTTR 2.5/MTBF 734.4 ทั้งที่ความจริงเป็น null); **K5** สถานะ `pending` 2 ใบไม่อยู่ในกลุ่มใด → donut 103 vs open 105, SLA panel 103; **K6** การ์ด supervisor "Completed" = verified+closed = 0 ทั้งที่มี completed 6; **K7** Overdue 74 vs แผง SLA overdue 1; **K8** trend 30 วัน/62 วันวางข้าง KPI all-time; K9–K11 (planned_end_at, MTTR fallback, PM DATE()) ยังไม่มีผลเป็นตัวเลข; C2, H4, M6
 - Approval: ไม่ต้อง (ห้ามเปลี่ยนสูตร KPI)
 
 ## 6. Phase 5 — Repair Request & Employee Experience
