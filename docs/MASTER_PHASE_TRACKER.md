@@ -14,7 +14,7 @@
 | 3 | Global Layout & Navigation | IN PROGRESS | PageShell/PageHeader/DetailHeader, Breadcrumb, EmployeeAvatar, NotificationCenter (commit `114f0dba`, `d7a12f6a`, `3f2d792b`); ยังไม่ตรวจ role menu/mobile nav/global search ครบ |
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; ค้าง KPI validation, drill-down, last-updated, TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`) — เหลือ my-repairs/history polish |
-| 6 | Work Order Control | IN PROGRESS | D3.0–D3.1 audit done; **D3.2 code done + tsc PASS, ยังไม่ commit/ยังไม่เขียนผลเทส**; D3.3–D3.8 ไม่เริ่ม |
+| 6 | Work Order Control | IN PROGRESS | D3.0–D3.1 audit done; D3.2 commit `023fdc6c` (tsc PASS); **D3.3 queue redesign เสร็จ + tsc/build PASS** (`docs/PHASE_D3_QUEUE_REPORT.md`); D3.4–D3.8 ไม่เริ่ม |
 | 7 | Maintenance & PM | **BLOCKED** | `pm_am`=0 แถว → ตรวจ workflow/PM compliance ด้วยข้อมูลจริงไม่ได้; ไม่มีคำสั่งสร้างข้อมูลทดแทน |
 | 8 | Asset, Inventory & Spare Parts | IN PROGRESS | Asset detail redesign + permission hardening (commit `b7f0c6e4`); spare list ยังไม่มี server-side pagination |
 | 9 | Reports, Analytics & Export | NOT STARTED | ต้องเริ่มด้วย audit filter↔export parity |
@@ -67,16 +67,18 @@
 - Scope: `/supervisor`, `/supervisor/queue`, `/repair/view`, assignment/priority/status/overdue/history, role test
 - Tasks:
   - [x] D3.0 inspection + D3.1 audit (`PHASE_D3_UX_AUDIT.md`)
-  - [x] D3.2 supervisor overview (timestamp, priority, attention center, trend lazy, recent WO, empty/skeleton/no-permission) — โค้ดใน working tree
-  - [x] `tsc --noEmit` PASS (2026-11-23)
-  - [ ] commit D3.2 + อัปเดต tracker
-  - [ ] D3.3 queue: mobile card view, debounce, total/pagination, assignee filter, states
+  - [x] D3.2 supervisor overview (timestamp, priority, attention center, trend lazy, recent WO, empty/skeleton/no-permission) — commit `023fdc6c`
+  - [x] D3.2 `tsc --noEmit` PASS (2026-11-23)
+  - [x] commit D3.2 + อัปเดต tracker
+  - [x] D3.3 queue: mobile card view, debounce 350ms, pagination 50/หน้า + total, assignee filter, skeleton/empty/read-only/error-retry states — `PHASE_D3_QUEUE_REPORT.md`
+  - [x] D3.3 `tsc --noEmit` PASS + production build (`.next-verify`) PASS
   - [ ] D3.4 detail: compact summary + aging + mobile
   - [ ] D3.5 responsive 1440/768/390
   - [ ] D3.6 axe
   - [ ] D3.7 role E2E (User/Operate/Foreman)
   - [ ] D3.8 perf + regression + docs (DESIGN_REPORT/BEFORE_AFTER/ROLE_PERMISSION_TEST/TEST_RESULTS)
-- Known issues: ต้องมีบัญชี e2e ที่ active (ตอนนี้ `is_active=0`); filter department/date ต้องอนุมัติแก้ API
+- Known issues: ต้องมีบัญชี e2e ที่ active (ตอนนี้ `is_active=0`); filter department/date ต้องอนุมัติแก้ API; D3.3 ยังไม่ทดสอบกับ API จริง (ต้อง login) — เหลือ D3.5–D3.7
+- Files: `app/(dashboard)/supervisor/queue/page.tsx`, `components/supervisor/WorkOrderTrendChart.tsx`
 - Approval: ไม่ต้องสำหรับ UI; **ต้องอนุมัติ** ถ้าจะแก้ `supervisor.php`
 
 ## 8. Phase 7 — Maintenance & PM — **BLOCKED**
