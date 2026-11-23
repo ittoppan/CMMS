@@ -114,7 +114,24 @@ DOM 878 โหนด, ไม่มี request ที่ error (`PROBE_FAILURES =
 
 **สรุป:** เป้า TBT < 300 ms **ยังไม่ผ่าน** เมื่อกราฟแสดงจริง (median **1,084 ms**)
 ภาระหลัก = การ mount กราฟ Recharts 5 ตัว (~400 ms + ~300 ms ในหน้าต่างวัด) ไม่ใช่ hydration ของ panel
-แนวทางถัดไป: แยก Recharts เป็น chunk (`next/dynamic`) **และ** mount กราฟทีละตัวผ่าน `requestIdleCallback`/staggered delay แล้ววัดซ้ำด้วย baseline ใหม่นี้ แต่ **ไม่ผ่านเมื่อ throttle CPU 4×** — วัดในหน้าต่างมาตรฐาน (FCP→+5s) ได้ **367 / 375 / 372 ms** (median 372) และ **ไม่มี long task ก่อน load event** แปลว่าต้องลดงาน hydration/เรนเดอร์กราฟชุดแรก (~360 ms) ไม่ใช่ลดงานโหลดข้อมูล
+แนวทางถัดไป: แยก Recharts เป็น chunk (`next/dynamic`) **และ** mount กราฟทีละตัวผ่าน `requestIdleCallback`/staggered delay แล้ววัดซ้ำด้วย baseline ใหม่นี้
+
+### 4.4 แยก Recharts เป็น lazy chunk + เกลี่ยการ mount (stagger) — ได้ผลเล็กน้อย
+
+**ที่ทำ**
+- ย้าย leaf component ของกราฟ 4 ชนิดไป `components/wallboard/charts.tsx` แล้วโหลดด้วย `next/dynamic(ssr:false)` → Recharts หลุดจาก chunk แรก
+- `IdleChart` รับ prop `delay` เพิ่ม: monthly 0, asset donut 200, status donut 400, MTBF 600, downtime 800 ms (เริ่มนับหลัง intersect หรือหลัง fallback 1.5 วิ)
+
+| build | รอบ | TBT (FCP→+5s) | long task ≥100 ms | กราฟ |
+|---|---|---|---|---|
+| §4.3 inline (baseline) | 3 | 1,084 / 1,255 / 1,060 (median **1,084**) | 392–411, 291–333 | 5/5 |
+| §4.4 lazy + stagger | 3 | **1,038 / 1,016 / 1,145** (median **1,038**) | สูงสุด **314** (ก้อนใหญ่สุดหายไป) | 5/5 |
+
+- TBT median ดีขึ้น **46 ms (~4%)**, long task ก้อนใหญ่สุดลดจาก **411 → 314 ms** แต่จำนวน task 120–225 ms เพิ่มขึ้น (งานเท่าเดิม แค่ถูกแบ่ง) → TBT รวมจึงแทบไม่ขยับ เพราะ TBT บวกส่วนเกิน 50 ms ของทุก task
+- DOM 1,290 โหนด, load event 396–481 ms, ไม่มี console/network error, ภาพตรงกับของเดิม (`docs/wallboard-lazy-charts.png`)
+
+**สรุป:** เป้า TBT < 300 ms **ยังไม่ผ่าน** (median 1,038 ms) — พื้นของงานคือการ mount กราฟ Recharts 5 ตัวจริง ๆ (~600–700 ms ที่ CPU 4×) การเกลี่ยช่วยลด long task ก้อนใหญ่สุดได้ แต่ไม่ลดภาระรวม
+**ทางที่จะแตะ 300 ms ได้จริง:** ลดจำนวน/ความซับซ้อนของกราฟที่ render รอบแรก (เช่น แสดงเฉพาะกราฟหลัก 1–2 ตัว แล้วให้ผู้ใช้กดดูที่เหลือ), หรือวาดกราฟด้วย SVG/CSS เบา ๆ แทน Recharts ในหน้า wallboard — ทั้งสองทางเป็นการเปลี่ยนรูปลักษณ์/สเปก ต้องให้เจ้าของระบบอนุมัติก่อน แต่ **ไม่ผ่านเมื่อ throttle CPU 4×** — วัดในหน้าต่างมาตรฐาน (FCP→+5s) ได้ **367 / 375 / 372 ms** (median 372) และ **ไม่มี long task ก่อน load event** แปลว่าต้องลดงาน hydration/เรนเดอร์กราฟชุดแรก (~360 ms) ไม่ใช่ลดงานโหลดข้อมูล
 
 ## 5. Acceptance
 

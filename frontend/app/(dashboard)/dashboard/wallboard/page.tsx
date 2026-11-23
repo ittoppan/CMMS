@@ -37,20 +37,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Line,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import * as D from "@/lib/dashboard";
 import { useTvRotate } from "@/lib/use-tv-rotate";
 import {
@@ -71,9 +58,31 @@ import {
   type PlantMapAsset,
   type SpareReorderRow,
 } from "@/lib/dashboard-tower";
-import { ChartTip, ChartLegend as Legend } from "@/components/charts";
+import { ChartLegend as Legend } from "@/components/charts";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
+
+/**
+ * แยก Recharts ออกจาก chunk แรก: กราฟถูกโหลดหลัง first paint แล้ว mount ทีละตัว (stagger)
+ * เพื่อไม่ให้เกิด long task ก้อนใหญ่ก้อนเดียว
+ */
+const chartFallback = () => <div style={{ minHeight: 120 }} aria-hidden />;
+const MonthlyOverviewChart = dynamic(() => import("@/components/wallboard/charts").then((m) => m.MonthlyOverviewChart), {
+  ssr: false,
+  loading: chartFallback,
+});
+const DonutChart = dynamic(() => import("@/components/wallboard/charts").then((m) => m.DonutChart), {
+  ssr: false,
+  loading: chartFallback,
+});
+const MtbfMttrChart = dynamic(() => import("@/components/wallboard/charts").then((m) => m.MtbfMttrChart), {
+  ssr: false,
+  loading: chartFallback,
+});
+const TopDowntimeChart = dynamic(() => import("@/components/wallboard/charts").then((m) => m.TopDowntimeChart), {
+  ssr: false,
+  loading: chartFallback,
+});
 
 /* ── สถานะใบงาน → ป้ายสี ─────────────────────────────────────────────── */
 const WO_STATUS: Record<string, { label: string; tone: string }> = {
@@ -193,22 +202,28 @@ function Panel({
   );
 }
 
-function IdleChart({ children }: { children: React.ReactNode }) {
+function IdleChart({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // fallback: layout จอ TV/clip อาจทำให้ panel ไม่ intersect เลย → ต้องยังแสดงกราฟภายใน 1.5 วิ
-    const timer = window.setTimeout(() => setReady(true), 1500);
+    const timers: number[] = [];
+    // delay ใช้เกลี่ยการ mount กราฟแต่ละใบไม่ให้เกิด long task ก้อนเดียว
+    const show = () => {
+      if (delay > 0) timers.push(window.setTimeout(() => setReady(true), delay));
+      else setReady(true);
+    };
+    // fallback: layout จอ TV/clip อาจทำให้ panel ไม่ intersect เลย → ต้องยังแสดงกราฟแน่นอน
+    timers.push(window.setTimeout(show, 1500));
     if (typeof IntersectionObserver === "undefined") {
-      setReady(true);
-      return () => window.clearTimeout(timer);
+      show();
+      return () => timers.forEach((t) => window.clearTimeout(t));
     }
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          setReady(true);
+          show();
           io.disconnect();
         }
       },
@@ -217,9 +232,9 @@ function IdleChart({ children }: { children: React.ReactNode }) {
     io.observe(el);
     return () => {
       io.disconnect();
-      window.clearTimeout(timer);
+      timers.forEach((t) => window.clearTimeout(t));
     };
-  }, []);
+  }, [delay]);
   // ต้องมี height จริง (h-full) ไม่ใช่แค่ minHeight ไม่งั้น ResponsiveContainer ของ Recharts จะวัดได้ 0px แล้วไม่วาดกราฟ
   return (
     <div ref={ref} className="h-full w-full" style={{ minHeight: 120 }}>
@@ -881,49 +896,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="min-h-0 flex-1">
-                <IdleChart><ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={monthly ?? []} margin={{ top: 8, right: 2, bottom: 0, left: -22 }}>
-                    <CartesianGrid stroke={C.grid} vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fill: C.text3, fontSize: chartFont }}
-                      tickLine={false}
-                      axisLine={false}
-                      interval={0}
-                    />
-                    <YAxis
-                      yAxisId="left"
-                      tick={{ fill: C.text3, fontSize: chartFont }}
-                      tickLine={false}
-                      axisLine={false}
-                      allowDecimals={false}
-                      width={42}
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      domain={[0, 100]}
-                      tick={{ fill: C.text3, fontSize: chartFont }}
-                      tickLine={false}
-                      axisLine={false}
-                      width={40}
-                      tickFormatter={(v: number) => `${v}%`}
-                    />
-                    <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(140, 180, 225, 0.08)" }} />
-                    <Bar yAxisId="left" dataKey="created" name="Work Orders" fill={C.blue} radius={[2, 2, 0, 0]} maxBarSize={22} isAnimationActive={false} />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="rate"
-                      name="Completion Rate"
-                      stroke={C.green}
-                      strokeWidth={2}
-                      connectNulls
-                      dot={{ r: 2.4, fill: C.green, strokeWidth: 0 }}
-                      isAnimationActive={false}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer></IdleChart>
+                <IdleChart><MonthlyOverviewChart data={monthly ?? []} font={chartFont} /></IdleChart>
               </div>
             </>
           )}
@@ -944,16 +917,7 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <IdleChart><ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={assetSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none" isAnimationActive={false}>
-                        {assetSlices.map((s) => (
-                          <Cell key={s.name} fill={s.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<ChartTip />} />
-                    </PieChart>
-                  </ResponsiveContainer></IdleChart>
+                  <IdleChart delay={200}><DonutChart slices={assetSlices} /></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{healthyPct === null ? "N/A" : `${healthyPct}%`}</span>
                     <span className="tower-donut-label">Overall Health</span>
@@ -996,16 +960,7 @@ export default function DashboardPage() {
             <>
               <div className="flex min-h-0 flex-1 items-stretch gap-2">
                 <div className="tower-donut w-[43%]">
-                  <IdleChart><ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={statusSlices} dataKey="value" nameKey="name" innerRadius="68%" outerRadius="97%" paddingAngle={2} stroke="none" isAnimationActive={false}>
-                        {statusSlices.map((s) => (
-                          <Cell key={s.name} fill={s.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<ChartTip />} />
-                    </PieChart>
-                  </ResponsiveContainer></IdleChart>
+                  <IdleChart delay={400}><DonutChart slices={statusSlices} /></IdleChart>
                   <div className="tower-donut-center">
                     <span className="tower-donut-pct">{fmtNumber(statusTotal)}</span>
                     <span className="tower-donut-label">งานค้าง</span>
@@ -1126,17 +1081,7 @@ export default function DashboardPage() {
             <div className="flex min-h-0 flex-1 flex-col gap-1">
               <Legend items={[{ label: "MTBF (ชม.)", color: C.blue }, { label: "MTTR (ชม.)", color: C.green, line: true }]} />
               <div className="min-h-0 flex-1">
-                <IdleChart><ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={data.mtbfPoints} margin={{ top: 8, right: 2, bottom: 0, left: -22 }}>
-                    <CartesianGrid stroke={C.grid} vertical={false} />
-                    <XAxis dataKey="label" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} />
-                    <YAxis yAxisId="left" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} width={40} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} width={34} />
-                    <Tooltip content={<ChartTip unit="ชม." />} />
-                    <Line yAxisId="left" type="monotone" dataKey="mtbf" name="MTBF" stroke={C.blue} strokeWidth={2} dot={{ r: 2.4, fill: C.blue, strokeWidth: 0 }} isAnimationActive={false} />
-                    <Line yAxisId="right" type="monotone" dataKey="mttr" name="MTTR" stroke={C.green} strokeWidth={2} dot={{ r: 2.4, fill: C.green, strokeWidth: 0 }} isAnimationActive={false} />
-                  </ComposedChart>
-                </ResponsiveContainer></IdleChart>
+                <IdleChart delay={600}><MtbfMttrChart points={data.mtbfPoints} font={chartFont} /></IdleChart>
               </div>
             </div>
           )}
@@ -1161,22 +1106,7 @@ export default function DashboardPage() {
             />
           ) : (
             <div className="min-h-0 flex-1">
-              <IdleChart><ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topDowntime} layout="vertical" margin={{ top: 4, right: 34, bottom: 0, left: 4 }}>
-                  <CartesianGrid stroke={C.grid} horizontal={false} />
-                  <XAxis type="number" tick={{ fill: C.text3, fontSize: chartFont }} tickLine={false} axisLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="code"
-                    width={70}
-                    tick={{ fill: C.text3, fontSize: chartFont }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip content={<ChartTip unit="ชม." />} cursor={{ fill: "rgba(140, 180, 225, 0.08)" }} />
-                  <Bar dataKey="hours" name="Downtime" fill={C.blue} radius={[0, 3, 3, 0]} maxBarSize={16} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer></IdleChart>
+              <IdleChart delay={800}><TopDowntimeChart rows={topDowntime} font={chartFont} /></IdleChart>
             </div>
           )}
         </Panel>
