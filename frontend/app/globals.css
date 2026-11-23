@@ -2480,6 +2480,13 @@ next-route-announcer {
   border-radius: 99px;
   font-size: 0.8125rem;
   font-weight: 600;
+  background: var(--cmms-bg-muted, #f1f5f9);
+  border: 1px solid var(--cmms-border, #e2e8f0);
+  color: var(--cmms-text-secondary, #475569);
+}
+/* บนพื้นเข้ม (hero) ใช้ .cmms-hero-on-dark หรือ inline style override */
+.cmms-hero-on-dark .cmms-andon-chip,
+.cmms-andon-chip[data-on-dark="true"] {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.9);

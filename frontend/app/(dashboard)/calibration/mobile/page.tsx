@@ -10,6 +10,7 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { QrScanner } from "@/components/field/QrScanner";
 import { ScanLine, Smartphone, ChevronRight, RefreshCw, FileText } from "lucide-react";
+import { PageHeader } from "@/components/layout";
 
 interface InstrumentStatus {
   asset_id: number;
@@ -104,11 +105,11 @@ export default function CalibrationMobilePage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 pt-5">
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <h1 className="text-xl font-bold">สอบเทียบเครื่องมือจากหน้างาน</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          สแกน QR/บาร์โค้ดเครื่องมือวัดเพื่อเปิดใบสอบเทียบ — ตรวจสถานะ, เริ่มรอบ, และบันทึกผลแบบง่าย
-        </p>
+        <PageHeader
+          eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+          title="สอบเทียบเครื่องมือจากหน้างาน"
+          description="สแกน QR/บาร์โค้ดเครื่องมือวัดเพื่อเปิดใบสอบเทียบ — ตรวจสถานะ, เริ่มรอบ, และบันทึกผลแบบง่าย"
+        />
 
         {status === "idle" && (
           <div className="mt-6 flex flex-col items-center gap-4">

@@ -593,7 +593,7 @@ export default function AssetRegistryViewPage() {
         const urlId = Number(assetId) || 0;
 
         const [p1, p2, p3, p4, p5, p6] = await Promise.allSettled([
-          fetch(`/api/v1/repair.php?asset_code=${encodeURIComponent(code)}`),
+          fetch(`/api/v1/repair.php?asset_code=${encodeURIComponent(code)}&limit=100`),
           fetch("/api/v1/index.php?resource=pm-plans"),
           fetch("/api/v1/calibration.php"),
           fetch(`/api/v1/machine_bom.php?asset_id=${encodeURIComponent(assetId)}`),

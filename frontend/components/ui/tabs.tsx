@@ -51,11 +51,13 @@ function TabsTrigger({
 
 function TabsContent({
   className,
+  forceMount = true,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
-      className={cn("mt-4 focus-visible:outline-none", className)}
+      forceMount={forceMount}
+      className={cn("mt-4 focus-visible:outline-none data-[state=inactive]:hidden", className)}
       {...props}
     />
   );

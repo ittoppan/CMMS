@@ -62,7 +62,8 @@ try {
 
     switch ($method) {
         case 'GET':
-            requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
+            // อนุญาตให้ผู้ใช้ที่ล็อกอินทุกคนอ่านค่าการตั้งค่าที่ไม่ลับ (theme/branding/andon/kpi targets ฯลฯ)
+            // คีย์ admin-only จะถูกกรองออกด้านล่างสำหรับผู้ที่ไม่มี settings:manage — ไม่ใช่ 403
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
                 // ?id= ต้อง Admin (settings:manage) เท่านั้น

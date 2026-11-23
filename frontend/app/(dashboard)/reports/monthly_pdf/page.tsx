@@ -63,8 +63,8 @@ interface WorkOrder {
 export default function MonthlyPdfReportPage() {
   const hero = usePageHero("reports/monthly_pdf");
 
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(7);
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [monthly, setMonthly] = useState<MonthStat[]>([]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [assets, setAssets] = useState(0);
