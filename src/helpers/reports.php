@@ -1503,7 +1503,8 @@ function rpt_export_csv(PDO $pdo, array $user, string $resource, array $opts, st
     rpt_log_audit($pdo, (int)$user['id'], $user['full_name'] ?? '', $resource, 'csv', count($rows));
 
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $resource . '_' . date('Ymd_His') . '.csv"');
+    $rangeTag = (!empty($opts['range_start']) || !empty($opts['range_end'])) ? '_' . (string)($opts['range_start'] ?? '') . '_' . (string)($opts['range_end'] ?? '') : '';
+    header('Content-Disposition: attachment; filename="' . $resource . $rangeTag . '_' . date('Ymd_His') . '.csv"');
     $out = fopen('php://output', 'w');
     fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
     fputcsv($out, array_column($cols, 'label'));
@@ -1525,7 +1526,8 @@ function rpt_export_xlsx(PDO $pdo, array $user, string $resource, array $opts, s
     $headers = array_column($cols, 'label');
     $rows = rpt_export_rows($table['rows'], $cols);
     rpt_log_audit($pdo, (int)$user['id'], $user['full_name'] ?? '', $resource, 'xlsx', count($rows));
-    xlsx_download($resource . '_' . date('Ymd_His') . '.xlsx', $headers, $rows);
+    $rangeTag = (!empty($opts['range_start']) || !empty($opts['range_end'])) ? '_' . (string)($opts['range_start'] ?? '') . '_' . (string)($opts['range_end'] ?? '') : '';
+    xlsx_download($resource . $rangeTag . '_' . date('Ymd_His') . '.xlsx', $headers, $rows);
 }
 
 /* ───────────────────────── 5. Dispatch ───────────────────────── */

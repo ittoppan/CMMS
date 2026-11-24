@@ -150,7 +150,7 @@ export default function MonthlyPdfReportPage() {
         backgroundColor: "rgb(255, 255, 255)",
         logging: false,
       });
-      const img = canvas.toDataURL("image/png");
+      const img = canvas.toDataURL("image/jpeg", 0.92);
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
@@ -158,12 +158,12 @@ export default function MonthlyPdfReportPage() {
 
       let heightLeft = imgHeight;
       let position = 0;
-      pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+      pdf.addImage(img, "JPEG", 0, position, pw, imgHeight);
       heightLeft -= ph;
       while (heightLeft > 0) {
         position -= ph;
         pdf.addPage();
-        pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+        pdf.addImage(img, "JPEG", 0, position, pw, imgHeight);
         heightLeft -= ph;
       }
       pdf.save(`RPT-${year}-${String(month).padStart(2, "0")}-CMMS-Maintenance-Summary.pdf`);
