@@ -1,6 +1,8 @@
 node_modules/
 vendor/
 .env
+.env.*
+!.env.example
 frontend/.env.local
 *.log
 
