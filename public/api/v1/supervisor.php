@@ -49,6 +49,12 @@ try {
 
     switch ($method) {
         case 'GET':
+            // S1: คิวงาน/รายการ/ตาราง/ช่าง = เฉพาะหัวหน้างานขึ้นไป (kpis เปิดให้ผู้ใช้ที่ login ทุกคน — ใช้ใน home tile)
+            if (in_array($action, ['queue', 'requests', 'workorders', 'schedule', 'technicians'], true) && !canSupervisor()) {
+                http_response_code(403);
+                echo json_encode(['error' => 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้'], JSON_UNESCAPED_UNICODE);
+                break;
+            }
             switch ($action) {
                 case 'kpis':        supGetKpis($pdo); break;
                 case 'queue':       supGetQueue($pdo); break;
