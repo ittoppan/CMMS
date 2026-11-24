@@ -67,6 +67,8 @@ EYEBROW_EXEMPT = {
     "frontend/app/page.tsx",
     # route alias → approval/page.tsx (มี header จริง)
     "frontend/app/(dashboard)/approval/center/page.tsx",
+    # route alias → dashboard/my/page.tsx (มี header จริง)
+    "frontend/app/(dashboard)/home/page.tsx",
     # LINE Flex editor — หน้าเครื่องมือเต็มจอ (ไม่มีหัวหน้าเพจ)
     "frontend/app/(dashboard)/editor/page.tsx",
     # Report Center — หน้าแยก 12 หมวดแบบผอม: hero/eyebrow ถูก render ภายใน
