@@ -3,7 +3,11 @@
 /**
  * leaf components ของกราฟ wallboard — ใช้ SVG เขียนเอง (ไม่มี Recharts)
  * เพื่อลด Total Blocking Time (TBT) บน wallboard
+ *
+ * グラフはコンテナサイズに合わせて SVG の viewBox を動的に設定し、
+ * preserveAspectRatio="xMidYMid meet" で文字の比率を保ったままパネルを埋める。
  */
+import { useRef, useState, useEffect } from "react";
 import { TOWER_PALETTE as C } from "@/lib/dashboard-tower";
 import type { MonthlyPoint, MtbfMttrPoint } from "@/lib/dashboard-tower";
 
@@ -18,11 +22,30 @@ function maxOf(nums: number[]): number {
   return m || 1;
 }
 
+function useContainerSize(fallbackW = 320, fallbackH = 180) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: fallbackW, h: fallbackH });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) {
+        setSize({ w: Math.round(r.width), h: Math.round(r.height) });
+      }
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, ...size };
+}
+
 /* ── MonthlyOverviewChart ─────────────────────────────────────────── */
 
 export function MonthlyOverviewChart({ data, font }: { data: MonthlyPoint[]; font: number }) {
-  const W = 320;
-  const H = 180;
+  const { ref, w: W, h: H } = useContainerSize();
   const ml = 32;
   const mr = 34;
   const mt = 8;
@@ -57,44 +80,46 @@ export function MonthlyOverviewChart({ data, font }: { data: MonthlyPoint[]; fon
   });
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="none" style={{ display: "block" }}>
-      {/* grid */}
-      {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
-        <line key={i} x1={ml} x2={W - mr} y1={mt + ph * (1 - t)} y2={mt + ph * (1 - t)} stroke={C.grid} strokeWidth={0.5} />
-      ))}
-      {/* bars */}
-      {data.map((d, i) => {
-        const h = (d.created / maxCreated) * ph;
-        const x = xFor(i) - barW / 2;
-        const y = mt + ph - h;
-        return <rect key={i} x={x} y={y} width={barW} height={h} fill={C.blue} rx={2} />;
-      })}
-      {/* rate line */}
-      {linePath && <path d={linePath} fill="none" stroke={C.green} strokeWidth={2} />}
-      {/* dots */}
-      {data.map((d, i) => {
-        if (d.rate == null) return null;
-        return <circle key={i} cx={xFor(i)} cy={yRate(d.rate)} r={2.4} fill={C.green} />;
-      })}
-      {/* x labels */}
-      {data.map((d, i) => (
-        <text key={i} x={xFor(i)} y={H - 4} textAnchor="middle" fontSize={font} fill={C.text3}>
-          {d.label}
-        </text>
-      ))}
-      {/* left y labels */}
-      {[0, Math.round(maxCreated / 2), maxCreated].map((v, i) => (
-        <text key={i} x={ml - 4} y={yCreated(v) + 3} textAnchor="end" fontSize={font} fill={C.text3}>
-          {v}
-        </text>
-      ))}
-      {/* right y labels */}
-      {[0, 50, 100].map((v, i) => (
-        <text key={i} x={W - mr + 4} y={yRate(v) + 3} textAnchor="start" fontSize={font} fill={C.text3}>
-          {v}%
-        </text>
-      ))}
-    </svg>
+    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
+        {/* grid */}
+        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
+          <line key={i} x1={ml} x2={W - mr} y1={mt + ph * (1 - t)} y2={mt + ph * (1 - t)} stroke={C.grid} strokeWidth={0.5} />
+        ))}
+        {/* bars */}
+        {data.map((d, i) => {
+          const h = (d.created / maxCreated) * ph;
+          const x = xFor(i) - barW / 2;
+          const y = mt + ph - h;
+          return <rect key={i} x={x} y={y} width={barW} height={h} fill={C.blue} rx={2} />;
+        })}
+        {/* rate line */}
+        {linePath && <path d={linePath} fill="none" stroke={C.green} strokeWidth={2} />}
+        {/* dots */}
+        {data.map((d, i) => {
+          if (d.rate == null) return null;
+          return <circle key={i} cx={xFor(i)} cy={yRate(d.rate)} r={2.4} fill={C.green} />;
+        })}
+        {/* x labels */}
+        {data.map((d, i) => (
+          <text key={i} x={xFor(i)} y={H - 4} textAnchor="middle" fontSize={font} fill={C.text3}>
+            {d.label}
+          </text>
+        ))}
+        {/* left y labels */}
+        {[0, Math.round(maxCreated / 2), maxCreated].map((v, i) => (
+          <text key={i} x={ml - 4} y={yCreated(v) + 3} textAnchor="end" fontSize={font} fill={C.text3}>
+            {v}
+          </text>
+        ))}
+        {/* right y labels */}
+        {[0, 50, 100].map((v, i) => (
+          <text key={i} x={W - mr + 4} y={yRate(v) + 3} textAnchor="start" fontSize={font} fill={C.text3}>
+            {v}%
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
@@ -142,8 +167,7 @@ export function DonutChart({ slices }: { slices: Slice[] }) {
 /* ── MtbfMttrChart ────────────────────────────────────────────────── */
 
 export function MtbfMttrChart({ points, font }: { points: MtbfMttrPoint[]; font: number }) {
-  const W = 320;
-  const H = 180;
+  const { ref, w: W, h: H } = useContainerSize();
   const ml = 32;
   const mr = 30;
   const mt = 8;
@@ -182,38 +206,39 @@ export function MtbfMttrChart({ points, font }: { points: MtbfMttrPoint[]; font:
   const pathR = linePath(points.map((p) => p.mttr), yR);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="none" style={{ display: "block" }}>
-      {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
-        <line key={i} x1={ml} x2={W - mr} y1={mt + ph * (1 - t)} y2={mt + ph * (1 - t)} stroke={C.grid} strokeWidth={0.5} />
-      ))}
-      {pathL && <path d={pathL} fill="none" stroke={C.blue} strokeWidth={2} />}
-      {pathR && <path d={pathR} fill="none" stroke={C.green} strokeWidth={2} />}
-      {points.map((p, i) => {
-        if (p.mtbf != null) {
-          return <circle key={`l${i}`} cx={xFor(i)} cy={yL(p.mtbf)} r={2.4} fill={C.blue} />;
-        }
-        return null;
-      })}
-      {points.map((p, i) => {
-        if (p.mttr != null) {
-          return <circle key={`r${i}`} cx={xFor(i)} cy={yR(p.mttr)} r={2.4} fill={C.green} />;
-        }
-        return null;
-      })}
-      {points.map((p, i) => (
-        <text key={i} x={xFor(i)} y={H - 4} textAnchor="middle" fontSize={font} fill={C.text3}>
-          {p.label}
-        </text>
-      ))}
-    </svg>
+    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
+        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
+          <line key={i} x1={ml} x2={W - mr} y1={mt + ph * (1 - t)} y2={mt + ph * (1 - t)} stroke={C.grid} strokeWidth={0.5} />
+        ))}
+        {pathL && <path d={pathL} fill="none" stroke={C.blue} strokeWidth={2} />}
+        {pathR && <path d={pathR} fill="none" stroke={C.green} strokeWidth={2} />}
+        {points.map((p, i) => {
+          if (p.mtbf != null) {
+            return <circle key={`l${i}`} cx={xFor(i)} cy={yL(p.mtbf)} r={2.4} fill={C.blue} />;
+          }
+          return null;
+        })}
+        {points.map((p, i) => {
+          if (p.mttr != null) {
+            return <circle key={`r${i}`} cx={xFor(i)} cy={yR(p.mttr)} r={2.4} fill={C.green} />;
+          }
+          return null;
+        })}
+        {points.map((p, i) => (
+          <text key={i} x={xFor(i)} y={H - 4} textAnchor="middle" fontSize={font} fill={C.text3}>
+            {p.label}
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
 /* ── TopDowntimeChart (horizontal bars) ───────────────────────────── */
 
 export function TopDowntimeChart({ rows, font }: { rows: DowntimeRow[]; font: number }) {
-  const W = 320;
-  const H = 180;
+  const { ref, w: W, h: H } = useContainerSize();
   const ml = 74;
   const mr = 34;
   const mt = 4;
@@ -226,22 +251,24 @@ export function TopDowntimeChart({ rows, font }: { rows: DowntimeRow[]; font: nu
   const maxH = maxOf(rows.map((r) => r.hours));
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="none" style={{ display: "block" }}>
-      {rows.map((r, i) => {
-        const y = mt + slot * i + (slot - barH) / 2;
-        const w = (r.hours / maxH) * pw;
-        return (
-          <g key={i}>
-            <text x={ml - 4} y={y + barH / 2 + 3} textAnchor="end" fontSize={font} fill={C.text3}>
-              {r.code}
-            </text>
-            <rect x={ml} y={y} width={w} height={barH} fill={C.blue} rx={3} />
-            <text x={ml + w + 4} y={y + barH / 2 + 3} fontSize={font} fill={C.text3}>
-              {r.hours}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+    <div ref={ref} style={{ width: "100%", height: "100%" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
+        {rows.map((r, i) => {
+          const y = mt + slot * i + (slot - barH) / 2;
+          const w = (r.hours / maxH) * pw;
+          return (
+            <g key={i}>
+              <text x={ml - 4} y={y + barH / 2 + 3} textAnchor="end" fontSize={font} fill={C.text3}>
+                {r.code}
+              </text>
+              <rect x={ml} y={y} width={w} height={barH} fill={C.blue} rx={3} />
+              <text x={ml + w + 4} y={y + barH / 2 + 3} fontSize={font} fill={C.text3}>
+                {r.hours}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
