@@ -30,10 +30,26 @@ try {
         exit;
     }
 
+    // โฟลเดอร์ที่อนุญาต (รวม alias ที่หน้าเก่า/โมดูลอื่นอาจส่งมา เพื่อกัน "Invalid folder")
+    $folderAliases = [
+        'spare_parts'    => 'spares',
+        'spare'          => 'spares',
+        'repairs'        => 'repair',
+        'repair_request' => 'repair',
+        'repair_requests' => 'repair',
+        'pm'             => 'pm_am',
+        'pma'            => 'pm_am',
+        'cal'            => 'calibration',
+        'permits'        => 'work_permit',
+        'workpermit'     => 'work_permit',
+        'doc'            => 'documents',
+        'docs'           => 'documents',
+    ];
     $allowedFolders = ['spares', 'assets', 'avatars', 'repair', 'pm_am', 'calibration', 'rca', 'work_permit', 'contractor', 'documents'];
     $maxBytes = 6 * 1024 * 1024; // 6 MB
 
     $folder = trim($_POST['folder'] ?? '');
+    if (isset($folderAliases[$folder])) $folder = $folderAliases[$folder];
     if (!in_array($folder, $allowedFolders, true)) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid folder. Allowed: ' . implode('|', $allowedFolders)]);
@@ -88,6 +104,7 @@ try {
             exit;
         }
         $folder = isset($data['folder']) ? trim((string)$data['folder']) : $folder;
+        if (isset($folderAliases[$folder])) $folder = $folderAliases[$folder];
         if (!in_array($folder, $allowedFolders, true)) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid folder']);
