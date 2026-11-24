@@ -64,6 +64,7 @@ try {
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'users', 'manage');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             users_normalize_role($pdo, $data);
             $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
@@ -97,6 +98,7 @@ try {
             echo json_encode(['success' => true, 'id' => $newId]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'users', 'manage');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -147,6 +149,7 @@ try {
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'users', 'manage');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 

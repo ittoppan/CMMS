@@ -18,6 +18,7 @@ try {
     // POST = เฉพาะ admin ที่แก้ไข layout ได้ (CSRF ตรวจใน requireLogin)
     if ($method !== 'GET') {
         requireLogin($pdo, true); // page editor = งานดูแลระบบ → admin เท่านั้น
+        requirePerm($pdo, 'settings', 'manage');
     } else {
         requireLogin($pdo);
     }

@@ -26,6 +26,7 @@ requireLogin($pdo);
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'document', 'create');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $allowed = ['asset_id', 'title', 'description', 'file_path', 'file_type', 'version', 'uploaded_by'];
             $cols = []; $vals = [];
@@ -39,6 +40,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'document', 'create');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -55,6 +57,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true]);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'document', 'create');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM manuals WHERE id = ?');

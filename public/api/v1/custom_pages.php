@@ -38,6 +38,7 @@ try {
         }
     } else {
         requireLogin($pdo, true);
+        requirePerm($pdo, 'settings', 'manage');
     }
 
     // ตาราง custom_pages

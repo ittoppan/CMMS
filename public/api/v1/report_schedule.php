@@ -28,6 +28,7 @@ try {
         echo json_encode(['error' => 'เฉพาะผู้จัดการ/ผู้ดูแลระบบเท่านั้นที่ตั้งค่ากำหนดการรายงาน'], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    requirePerm($pdo, 'report', 'export');
 
     if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
         require_once __DIR__ . '/../../../src/csrf.php';

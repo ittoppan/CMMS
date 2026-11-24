@@ -181,6 +181,7 @@ requireLogin($pdo);
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'spare_parts', 'request');
         requireRole(canRequest(), 'ช่างเท่านั้นที่เพิ่มอะไหล่ในใบสั่งซ่อมได้');
         $data = json_decode(file_get_contents('php://input'), true) ?: [];
         $action = trim((string)($data['action'] ?? ''));

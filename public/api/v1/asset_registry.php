@@ -30,6 +30,7 @@ try {
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'asset_registry', 'edit');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             if (isset($data['brand']) && !isset($data['manufacturer'])) $data['manufacturer'] = $data['brand'];
             $allowed = ['code', 'name', 'description', 'category', 'location', 'criticality', 'department', 'manufacturer', 'model', 'serial_number', 'purchase_date', 'warranty_expiry', 'status', 'responsible_user_id', 'department_id', 'location_id', 'work_zone_id', 'barcode', 'qr_code_path', 'image_path', 'instruction_manual', 'in_place_edit'];
@@ -48,6 +49,7 @@ try {
             echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'asset_registry', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -69,6 +71,7 @@ try {
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'asset_registry', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 

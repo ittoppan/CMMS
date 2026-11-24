@@ -46,6 +46,7 @@ try {
             break;
 
         case 'POST':
+            requirePerm($pdo, 'reliability', 'write');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $cols = []; $vals = [];
             foreach ($allowed as $col) {
@@ -61,6 +62,7 @@ try {
             break;
 
         case 'PUT':
+            requirePerm($pdo, 'reliability', 'write');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -77,6 +79,7 @@ try {
             break;
 
         case 'DELETE':
+            requirePerm($pdo, 'reliability', 'write');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM production_hours WHERE id = ?');

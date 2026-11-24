@@ -72,6 +72,7 @@ requireLogin($pdo);
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'spare_parts', 'issue');
         $data = json_decode(file_get_contents('php://input'), true) ?: [];
         if (($data['action'] ?? '') !== 'return') {
             http_response_code(400);

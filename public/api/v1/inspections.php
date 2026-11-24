@@ -53,6 +53,7 @@ try {
     // SCHEDULES (ต้องมาก่อน POST create template เพราะ action ต่างกัน)
     // ============================================================
     if ($method === 'POST' && $action === 'schedule') {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงสร้างรอบตรวจได้');
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
         if (empty($data['template_id']) || empty($data['asset_id'])) {
@@ -77,6 +78,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'submit') {
+        requirePerm($pdo, 'inspection', 'create');
         submitSchedule($pdo, (int)($_GET['schedule'] ?? 0));
         exit;
     }
@@ -113,6 +115,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'item') {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงจัดการ Template ได้');
         $tplId = (int)($_GET['template'] ?? 0);
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -145,6 +148,7 @@ try {
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงสร้าง Template ได้');
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
         foreach (['code', 'title'] as $f) {
@@ -164,6 +168,7 @@ try {
     }
 
     if ($method === 'PUT' && isset($_GET['item'])) {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงจัดการ Template ได้');
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
         $fields = []; $vals = [];
@@ -196,6 +201,7 @@ try {
     }
 
     if ($method === 'PUT') {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงจัดการ Template ได้');
         $tplId = (int)($_GET['template'] ?? 0);
         if (!$tplId) { http_response_code(400); echo json_encode(['error' => 'Missing template id']); exit; }
@@ -213,6 +219,7 @@ try {
     }
 
     if ($method === 'DELETE' && isset($_GET['item'])) {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงจัดการ Template ได้');
         $stmt = $pdo->prepare('DELETE FROM inspection_template_items WHERE id = ?');
         $stmt->execute([(int)$_GET['item']]);
@@ -221,6 +228,7 @@ try {
     }
 
     if ($method === 'DELETE' && isset($_GET['schedule'])) {
+        requirePerm($pdo, 'inspection', 'create');
         requireRole(roleCanPlanWork($inspRoleId), 'เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) จึงลบรอบตรวจได้');
         $stmt = $pdo->prepare('DELETE FROM inspection_schedules WHERE id = ?');
         $stmt->execute([(int)$_GET['schedule']]);

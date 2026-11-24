@@ -71,6 +71,7 @@ try {
             break;
 
         case 'POST':
+            requirePerm($pdo, 'repair', 'verify');
             enforceCsrf();
             if ($action === 'create_request') {
                 apiCreateRequest($pdo);
@@ -81,6 +82,7 @@ try {
             break;
 
         case 'PUT':
+            requirePerm($pdo, 'repair', 'verify');
             switch ($action) {
                 case 'approve_request': requireRole(canReviewRequest(), 'เฉพาะผู้จัดการ/หัวหน้างานที่อนุมัติคำขอได้'); apiApproveRequest($pdo); break;
                 case 'reject_request':  requireRole(canReviewRequest(), 'เฉพาะผู้จัดการ/หัวหน้างานที่อนุมัติคำขอได้'); apiRejectRequest($pdo); break;

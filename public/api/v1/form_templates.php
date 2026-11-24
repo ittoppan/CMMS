@@ -110,6 +110,7 @@ try {
             echo json_encode(['status' => 'error', 'message' => 'เฉพาะผู้ดูแลระบบเท่านั้นที่ออกแบบแบบฟอร์ม'], JSON_UNESCAPED_UNICODE);
             exit;
         }
+        requirePerm($pdo, 'inspection', 'create');
         $code = trim((string)($body['code'] ?? ''));
         $title = trim((string)($body['title'] ?? ''));
         $rev = trim((string)($body['rev'] ?? ''));
@@ -150,6 +151,7 @@ try {
             echo json_encode(['status' => 'error', 'message' => 'เฉพาะผู้ดูแลระบบ'], JSON_UNESCAPED_UNICODE);
             exit;
         }
+        requirePerm($pdo, 'inspection', 'create');
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
             http_response_code(400);

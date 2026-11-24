@@ -761,6 +761,7 @@ try {
 
     /* ---------- นำเข้าจริง (ตรวจซ้ำบนเซิร์ฟเวอร์) ---------- */
     if ($action === 'import') {
+        requirePerm($pdo, 'settings', 'manage');
         $rowsIn = is_array($body['rows'] ?? null) ? $body['rows'] : null;
         if ($rowsIn === null) imp_json(400, ['error' => 'ไม่มีข้อมูลแถวที่ยืนยันการนำเข้า']);
         if (count($rowsIn) > IMP_MAX_ROWS) imp_json(400, ['error' => 'จำนวนแถวเกิน ' . IMP_MAX_ROWS]);

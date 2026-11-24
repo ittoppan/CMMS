@@ -987,6 +987,7 @@ try {
             break;
 
         case 'PUT':
+            requirePerm($pdo, 'repair', 'schedule');
             requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
             // idempotency (กัน re-sync ซ้ำ) — ใช้สำหรับทุก mutate ที่มี ref ได้
             $did = pln_input();
@@ -1020,6 +1021,7 @@ try {
             break;
 
         case 'POST':
+            requirePerm($pdo, 'repair', 'schedule');
             requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
             $body = pln_input();
             $idemKey = clientActionKeyFromRequest($body);

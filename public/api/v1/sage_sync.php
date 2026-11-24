@@ -154,6 +154,7 @@ try {
     }
 
     if ($method === 'POST') {
+        requirePerm($pdo, 'sage', 'write');
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
         $action = $input['action'] ?? ($input['category'] ? 'sync' : '');
 

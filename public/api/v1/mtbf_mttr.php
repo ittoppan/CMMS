@@ -26,6 +26,7 @@ requireLogin($pdo);
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'reliability', 'write');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $allowed = ['asset_id', 'year', 'month', 'operating_hours', 'total_failures', 'total_downtime_minutes', 'mtbf_hours', 'mttr_minutes'];
             $cols = []; $vals = [];
@@ -39,6 +40,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'reliability', 'write');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -55,6 +57,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true]);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'reliability', 'write');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM mtbf_mttr WHERE id = ?');

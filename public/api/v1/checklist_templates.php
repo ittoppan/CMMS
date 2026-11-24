@@ -56,6 +56,7 @@ requireLogin($pdo);
             break;
 
         case 'POST':
+            requirePerm($pdo, 'inspection', 'create');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
             // ---- Action: sort items ----
@@ -117,6 +118,7 @@ requireLogin($pdo);
             break;
 
         case 'PUT':
+            requirePerm($pdo, 'inspection', 'create');
             // ---- Action: update item ----
             if (isset($_GET['action']) && $_GET['action'] === 'item') {
                 $itemId = (int)($_GET['item_id'] ?? 0);
@@ -161,6 +163,7 @@ requireLogin($pdo);
             break;
 
         case 'DELETE':
+            requirePerm($pdo, 'inspection', 'create');
             // ---- Delete item ----
             if (isset($_GET['action']) && $_GET['action'] === 'item') {
                 $itemId = (int)($_GET['item_id'] ?? 0);

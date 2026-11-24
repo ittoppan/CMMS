@@ -30,6 +30,7 @@ try {
             break;
 
         case 'POST':
+            requirePerm($pdo, 'asset', 'edit');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $assetId = isset($data['asset_id']) ? (int)$data['asset_id'] : 1;
             $sparePartId = isset($data['spare_part_id']) ? (int)$data['spare_part_id'] : 1;
@@ -47,6 +48,7 @@ try {
             break;
 
         case 'DELETE':
+            requirePerm($pdo, 'asset', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare("DELETE FROM machine_bom WHERE id = ?");

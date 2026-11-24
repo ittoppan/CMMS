@@ -110,6 +110,7 @@ try {
             break;
 
         case 'POST':
+            requirePerm($pdo, 'spare_parts', 'request');
             requireRole(canRequest(), 'ช่างเท่านั้นที่ขอเบิกอะไหล่ได้ (ยกเว้น Viewer)');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
@@ -202,6 +203,7 @@ try {
             break;
 
         case 'PUT':
+            requirePerm($pdo, 'spare_parts', 'request');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 
@@ -302,6 +304,7 @@ try {
             break;
 
         case 'DELETE':
+            requirePerm($pdo, 'spare_parts', 'request');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 
