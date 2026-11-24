@@ -260,7 +260,7 @@ const API_PERMISSION_ENFORCED = [
  */
 const API_ENDPOINT_MENU_KEYS = [
     'pm_am.php'              => 'pm_am',
-    'pm_plans.php'           => 'pm_am',
+    // 'pm_plans.php' => 'pm_am' — ถูกถอดออกจาก menu check (ดูหมายเหตุด้านบน)
     'pm_reminders.php'       => 'pm_am',
     'stock_take.php'         => 'spare_parts/stock_take',
     'spare_parts.php'        => 'spare_parts',
@@ -310,10 +310,11 @@ const API_ENDPOINT_MENU_KEYS = [
     'feedback.php'           => 'feedback',
     'knowledge.php'          => 'knowledge',
     'notifications_log.php'  => 'notifications',
-    'repair.php'             => 'repair',
-    'repair_options.php'     => 'repair',
+    // 'repair.php' => 'repair' — ถอดออกจาก menu check: ข้อมูลใบงานถูกใช้ในฟิลด์/งานของฉัน
+    // แม้เมนู "repair" (รายการทั้งหมด) จะถูกซ่อนจากบางบทบาท แต่ข้อมูลยังต้องอ่านได้ตาม matrix (repair:view)
+    // 'repair_options.php' => 'repair' — ถอดออกจาก menu check: ใช้เติม dropdown ในฟอร์มแจ้งซ่อม (ทุกบทบาท)
     'reports.php'            => 'reports',
-    'settings.php'           => 'settings',
+    // 'settings.php' => 'settings' — ถอดออกจาก menu check (theme/branding สำหรับทุกบทบาท)
     'shutdown.php'           => 'shutdown',
     'supervisor.php'         => 'supervisor',
     'work_permit.php'        => 'safety',

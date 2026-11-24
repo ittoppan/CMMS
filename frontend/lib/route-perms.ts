@@ -11,6 +11,7 @@
  *    (key ที่ไม่มีใน map = ไม่ระบุ = อนุญาต ตามพฤติกรรม canShow เดิม)
  */
 import { NAV_GROUPS } from "@/components/dashboard/sidebar-nav";
+import { ROUTE_PERM_MAP } from "./route-perm-map";
 
 export interface RequiredPerms {
   /** perm keys ที่ต้องมี "ตัวใดตัวหนึ่ง" จึงผ่าน */
@@ -28,7 +29,6 @@ const EXACT_MAP = new Map<string, string[]>();
 const PREFIX_MAP = new Map<string, string[]>(); // prefix → union perms ทั้งกลุ่ม
 
 for (const group of NAV_GROUPS) {
-  const groupPerms = [...new Set(group.items.map((it) => it.perm))];
   for (const it of group.items) {
     const list = EXACT_MAP.get(norm(it.href));
     if (list) {
@@ -37,12 +37,15 @@ for (const group of NAV_GROUPS) {
       EXACT_MAP.set(norm(it.href), [it.perm]);
     }
   }
-  for (const pre of group.pathPrefixes) {
-    const key = norm(pre);
-    const cur = PREFIX_MAP.get(key);
-    if (!cur) PREFIX_MAP.set(key, [...groupPerms]);
-    else for (const p of groupPerms) if (!cur.includes(p)) cur.push(p);
-  }
+}
+
+// Prefix map: derived from independent ROUTE_PERM_MAP (not sidebar grouping)
+for (const [pre, perms] of Object.entries(ROUTE_PERM_MAP)) {
+  const key = norm(pre);
+  const cur = PREFIX_MAP.get(key);
+  const arr = [...new Set(perms)];
+  if (!cur) PREFIX_MAP.set(key, arr);
+  else for (const p of arr) if (!cur.includes(p)) cur.push(p);
 }
 
 /**

@@ -35,9 +35,9 @@ try {
 
     requireLogin($pdo);
 
-    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ settings:view ขึ้นไป
+    // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — ค่าเริ่มต้นไม่อ่อนไหว
+    // จึงอ่านได้โดยผู้ที่ล็อกอินทุกคน (สอดคล้องกับ test settings-security: ?defaults readable)
     if (isset($_GET['defaults'])) {
-        requirePerm($pdo, 'settings', 'view', 'เฉพาะผู้มีสิทธิ์อ่านการตั้งค่าเท่านั้น');
         echo json_encode(settingsDefaultValues(), JSON_UNESCAPED_UNICODE);
         exit;
     }

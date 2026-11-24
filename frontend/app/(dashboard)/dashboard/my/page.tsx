@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { t, useLang, usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { PageHeader } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -121,7 +121,9 @@ const CHART_COLORS = [
   "var(--cmms-info)",
 ];
 export default function MyDashboardPage() {
-  const hero = usePageHero("dashboard");
+  const lang = useLang();
+  const tr = (key: string) => t(key, lang);
+  const hero = usePageHero("dashboard/my");
   const { userFullName, avatar: menuAvatar } = useMenuPermission();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +149,7 @@ export default function MyDashboardPage() {
       setProfile(profJson?.user ?? profJson ?? null);
       setOverview(ovJson);
       const items = Array.isArray(woJson?.items) ? woJson.items : Array.isArray(woJson) ? woJson : [];
-      setWo(items.slice(0, 3));
+      setWo(items.slice(0, 5));
       setWoTotal(typeof woJson?.total === "number" ? woJson.total : items.length);
     } catch (e: any) {
       setError(e?.message || "ไม่สามารถโหลดข้อมูลแดชบอร์ดส่วนบุคคลได้");
@@ -173,15 +175,26 @@ export default function MyDashboardPage() {
   const inProgress = Number(counts.active ?? 0);
   const completed = Number(counts.verified ?? 0) + Number(counts.pending_verification ?? 0);
   const overdue = Number(counts.overdue ?? 0);
-  const totalJobs = assigned + inProgress + Number(counts.pending_verification ?? 0) + Number(counts.verified ?? 0) + overdue;
+  // overdue เป็น "ธง" ของงานที่ยังเปิดอยู่ ไม่ใช่สถานะเพิ่ม — ไม่บวกซ้ำในยอดรวม
+  const waitingParts =
+    Number(counts.waiting_parts ?? 0) +
+    Number(counts.pending_parts ?? 0) +
+    Number(counts.waiting_external ?? 0) +
+    Number(counts.waiting_approval ?? 0);
+  const totalJobs =
+    assigned +
+    inProgress +
+    waitingParts +
+    Number(counts.pending_verification ?? 0) +
+    Number(counts.verified ?? 0);
   const completionRate = totalJobs > 0 ? Math.round((Number(counts.verified ?? 0) / totalJobs) * 1000) / 10 : 0;
 
   const statusSlices = useMemo(() => {
     const rows = [
-      { name: "Assigned", value: assigned, color: "var(--cmms-primary)" },
-      { name: "In Progress", value: inProgress, color: "var(--cmms-warning)" },
-      { name: "Waiting for Parts", value: Number(counts.waiting_parts ?? 0) + Number(counts.pending_parts ?? 0), color: "var(--cmms-info)" },
-      { name: "Completed", value: Number(counts.verified ?? 0), color: "var(--cmms-success)" },
+      { name: t("mydash.assigned", lang), value: assigned, color: "var(--cmms-primary)" },
+      { name: t("mydash.in_progress", lang), value: inProgress, color: "var(--cmms-warning)" },
+      { name: t("status.waiting_parts", lang), value: waitingParts, color: "var(--cmms-info)" },
+      { name: t("mydash.completed", lang), value: Number(counts.verified ?? 0), color: "var(--cmms-success)" },
     ].filter((r) => r.value > 0);
     if (rows.length > 0) return rows;
     const by: Record<string, number> = {};
@@ -189,16 +202,22 @@ export default function MyDashboardPage() {
       const st = String(it.status || "unknown");
       by[st] = (by[st] || 0) + 1;
     }
-    return Object.entries(by).map(([name, value], i) => ({ name, value, color: CHART_COLORS[i % CHART_COLORS.length] }));
-  }, [counts, wo, assigned, inProgress]);
+    return Object.entries(by).map(([name, value], i) => ({ name: STATUS_LABEL[name] || name, value, color: CHART_COLORS[i % CHART_COLORS.length] }));
+  }, [counts, wo, assigned, inProgress, waitingParts, lang]);
 
   const statusTotal = statusSlices.reduce((s, r) => s + r.value, 0);
 
+  const upcomingDue = useMemo(() => {
+    return [...wo]
+      .filter((it) => it.due_at)
+      .sort((a, b) => String(a.due_at).localeCompare(String(b.due_at)))
+      .slice(0, 5);
+  }, [wo]);
   const perfMetrics = [
-    { icon: <Clock className="h-4 w-4 text-blue-600" />, value: "N/A", label: "Avg. Repair Time", note: "ไม่มีแหล่งข้อมูล" },
-    { icon: <Target className="h-4 w-4 text-emerald-600" />, value: "N/A", label: "SLA Achievement", note: "ไม่มีแหล่งข้อมูล" },
-    { icon: <Wrench className="h-4 w-4 text-amber-600" />, value: fmtNum(counts.verified ?? 0), label: "Jobs Completed / Month", note: "ข้อมูลจริง" },
-    { icon: <RotateCcw className="h-4 w-4 text-red-600" />, value: "N/A", label: "Rework Rate", note: "ไม่มีแหล่งข้อมูล" },
+    { icon: <Clock className="h-4 w-4 text-blue-600" />, value: "N/A", label: tr("mydash.avg_repair"), note: tr("mydash.no_source") },
+    { icon: <Target className="h-4 w-4 text-emerald-600" />, value: "N/A", label: tr("mydash.sla"), note: tr("mydash.no_source") },
+    { icon: <Wrench className="h-4 w-4 text-amber-600" />, value: fmtNum(counts.verified ?? 0), label: tr("mydash.jobs_month"), note: tr("mydash.real_data") },
+    { icon: <RotateCcw className="h-4 w-4 text-red-600" />, value: "N/A", label: tr("mydash.rework"), note: tr("mydash.no_source") },
   ];
 
     const quickActions = [
@@ -206,16 +225,16 @@ export default function MyDashboardPage() {
     { icon: <Pause className="h-5 w-5" />, label: "พักงาน", color: "bg-amber-500 text-slate-900", href: "/repair/my_tasks" },
     { icon: <CheckCircle2 className="h-5 w-5" />, label: "เสร็จงาน", color: "bg-emerald-600 text-slate-900", href: "/repair/my_tasks" },
     { icon: <Camera className="h-5 w-5" />, label: "อัปโหลดรูป", color: "bg-slate-100 text-slate-700", href: "/repair/my_tasks" },
-    { icon: <Package className="h-5 w-5" />, label: "ขออะไหล่", color: "bg-amber-100 text-amber-700", href: "/spare_parts/requests" },
+    { icon: <Package className="h-5 w-5" />, label: "ขออะไหล่", color: "bg-amber-100 text-amber-700", href: "/spare_parts/issue_center" },
     { icon: <MessageSquareWarning className="h-5 w-5" />, label: "แจ้งปัญหา", color: "bg-blue-100 text-blue-700", href: "/repair/request" },
   ];
   return (
     <>
       <PageHeader
-        breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "My Dashboard", href: "/dashboard/my" }]}
-        eyebrow={<p className="cmms-eyebrow">MY DASHBOARD · CMMS-TPT</p>}
-        title={hero?.title || "My Dashboard"}
-        description="แดชบอร์ดส่วนบุคคลจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน"
+        breadcrumbs={[{ label: tr("nav.overview"), href: "/dashboard" }, { label: tr("mydash.title"), href: "/home" }]}
+        eyebrow={<p className="cmms-eyebrow">{hero?.eyebrow || "MY WORKSPACE · CMMS-TOPPAN"}</p>}
+        title={hero?.title || tr("mydash.title")}
+        description={hero?.desc || "แดชบอร์ดส่วนบุคคลจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน"}
         actions={[
           <Button variant="secondary" onClick={load} disabled={loading} key="refresh">
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" /> รีเฟรช
@@ -243,15 +262,12 @@ export default function MyDashboardPage() {
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-4 w-4" aria-hidden="true" /> {deptName}
                   </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="h-4 w-4" aria-hidden="true" /> N/A (ไม่มีแหล่งข้อมูลกะ)
-                  </span>
                 </div>
               </div>
             </div>
             <div className="relative p-5 sm:pr-6">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-3 py-1 text-xs font-semibold text-white">
-                <span className="h-2 w-2 rounded-full bg-white" /> On Duty
+                <span className="h-2 w-2 rounded-full bg-white" /> {tr("mydash.on_duty")}
               </span>
             </div>
           </CardContent>
@@ -259,14 +275,14 @@ export default function MyDashboardPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { key: "assigned", label: "My Assigned Jobs", value: assigned, color: "blue", icon: <ClipboardList className="h-5 w-5 text-blue-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-blue-100 text-blue-600", href: "/repair/my_tasks" },
-            { key: "in_progress", label: "In Progress", value: inProgress, color: "orange", icon: <Wrench className="h-5 w-5 text-orange-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-orange-100 text-orange-600", href: "/repair/my_tasks" },
-            { key: "completed", label: "Completed", value: completed, color: "green", icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-emerald-100 text-emerald-600", href: "/repair/tracking" },
-            { key: "overdue", label: "Overdue Jobs", value: overdue, color: "red", icon: <AlertTriangle className="h-5 w-5 text-red-600" />, sub: "N/A vs last week (ไม่มีข้อมูล)", arrow: "bg-red-100 text-red-600", href: "/repair/tracking" },
+            { key: "assigned", label: tr("mydash.assigned"), value: assigned, icon: <ClipboardList className="h-5 w-5 text-blue-600" />, sub: tr("mydash.assigned_hint"), bg: "bg-blue-100", arrow: "bg-blue-100 text-blue-600", href: "/repair/my_tasks" },
+            { key: "in_progress", label: tr("mydash.in_progress"), value: inProgress, icon: <Wrench className="h-5 w-5 text-orange-600" />, sub: tr("mydash.in_progress_hint"), bg: "bg-orange-100", arrow: "bg-orange-100 text-orange-600", href: "/repair/my_tasks" },
+            { key: "completed", label: tr("mydash.completed"), value: completed, icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />, sub: tr("mydash.completed_hint"), bg: "bg-emerald-100", arrow: "bg-emerald-100 text-emerald-600", href: "/repair/tracking" },
+            { key: "overdue", label: tr("mydash.overdue"), value: overdue, icon: <AlertTriangle className="h-5 w-5 text-red-600" />, sub: tr("mydash.overdue_hint"), bg: "bg-red-100", arrow: "bg-red-100 text-red-600", href: "/repair/tracking" },
           ].map((c) => (
             <Card key={c.key}>
               <CardContent className="flex items-center gap-4 p-4">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-${c.color === "blue" ? "blue" : c.color === "orange" ? "orange" : c.color === "green" ? "emerald" : "red"}-100`}>
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${c.bg}`}>
                   {c.icon}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -285,10 +301,10 @@ export default function MyDashboardPage() {
           <Card className="lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardList className="h-4 w-4" aria-hidden="true" /> My Work Orders
+                <ClipboardList className="h-4 w-4" aria-hidden="true" /> {tr("mydash.work_orders")}
               </CardTitle>
               <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                {loading ? "…" : `${wo.length} Jobs`}
+                {loading ? "…" : `${fmtNum(woTotal ?? wo.length)} ${tr("mydash.jobs")}`}
               </span>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -313,10 +329,10 @@ export default function MyDashboardPage() {
                         </div>
                         <p className="truncate text-xs text-[var(--cmms-text-secondary)]">
                           <MapPin className="mr-0.5 inline h-3 w-3" aria-hidden="true" />
-                          {it.asset_name || it.asset_code || "ไม่ระบุเครื่องจักร"}
+                          {it.asset_name || it.asset_code || tr("mydash.no_asset")}
                           {" · "}
                           <Clock className="mr-0.5 inline h-3 w-3" aria-hidden="true" />
-                          Due: {fmtDate(it.due_at)}
+                          {tr("mydash.due")}: {fmtDate(it.due_at)}
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                           <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${PRIORITY_COLOR[prio] || "bg-slate-100 text-slate-700"}`}>
@@ -336,7 +352,7 @@ export default function MyDashboardPage() {
               )}
               <div className="pt-1 text-center">
                 <Link href="/repair/my_tasks" className="text-sm font-semibold text-[var(--cmms-primary)] hover:underline">
-                  View All Work Orders →
+                  {tr("mydash.view_all")} →
                 </Link>
               </div>
             </CardContent>
@@ -344,9 +360,9 @@ export default function MyDashboardPage() {
           <Card className="lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <BarChart3 className="h-4 w-4" aria-hidden="true" /> My Workload &amp; Progress
+                <BarChart3 className="h-4 w-4" aria-hidden="true" /> {tr("mydash.workload")}
               </CardTitle>
-              <span className="text-xs text-[var(--cmms-text-muted)]">This Month</span>
+              <span className="text-xs text-[var(--cmms-text-muted)]">{tr("mydash.this_month")}</span>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -368,7 +384,7 @@ export default function MyDashboardPage() {
                     </ResponsiveContainer>
                     <div className="-mt-32 flex flex-col items-center justify-center text-center">
                       <span className="text-2xl font-bold tabular-nums">{completionRate}%</span>
-                      <span className="text-xs text-[var(--cmms-text-muted)]">Completion Rate</span>
+                      <span className="text-xs text-[var(--cmms-text-muted)]">{tr("mydash.completion_rate")}</span>
                     </div>
                   </div>
                   <ul className="space-y-1 text-sm">
@@ -383,7 +399,7 @@ export default function MyDashboardPage() {
                     ))}
                   </ul>
                   <p className="text-xs text-[var(--cmms-text-muted)]">
-                    {fmtNum(Number(counts.verified ?? 0))} completed from {fmtNum(totalJobs)} assigned jobs
+                    {tr("mydash.completed_from").replace("{done}", fmtNum(Number(counts.verified ?? 0))).replace("{total}", fmtNum(totalJobs))}
                   </p>
                 </div>
               )}
@@ -392,7 +408,7 @@ export default function MyDashboardPage() {
           <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Trophy className="h-4 w-4" aria-hidden="true" /> My Performance
+                <Trophy className="h-4 w-4" aria-hidden="true" /> {tr("mydash.performance")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -416,23 +432,58 @@ export default function MyDashboardPage() {
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4" aria-hidden="true" /> Today&apos;s Timeline
+                <Clock className="h-4 w-4" aria-hidden="true" /> {tr("mydash.timeline")}
               </CardTitle>
               <Link href="/repair/my_tasks" className="text-xs font-semibold text-[var(--cmms-primary)] hover:underline">
-                View All →
+                {tr("mydash.view_all")} →
               </Link>
             </CardHeader>
             <CardContent>
-              <p className="py-6 text-sm text-[var(--cmms-text-muted)]">
-                N/A — ไม่มีแหล่งข้อมูลไทม์ไลน์กิจกรรมส่วนบุคคลแบบละเอียด
-              </p>
+              {loading ? (
+                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">{tr("mydash.loading")}</p>
+              ) : upcomingDue.length === 0 ? (
+                <div className="py-6 text-center">
+                  <p className="text-sm text-[var(--cmms-text-muted)]">{tr("mydash.no_due")}</p>
+                  <p className="mt-1 text-xs text-[var(--cmms-text-muted)]">{tr("mydash.no_due_hint")}</p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {upcomingDue.map((it: any) => {
+                    const st = String(it.status || "");
+                    return (
+                      <li key={it.id} className="flex items-center gap-3 rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700">
+                          {(it.asset_code || "?").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="font-mono text-xs font-semibold text-[var(--cmms-primary)]">{it.work_order_no || `#${it.id}`}</span>
+                            <span className="truncate text-sm font-medium">{it.title || "-"}</span>
+                          </div>
+                          <p className="truncate text-xs text-[var(--cmms-text-secondary)]">
+                            {it.asset_name || it.asset_code || tr("mydash.no_asset")}
+                            {" · "}
+                            {tr("mydash.due")}: {fmtDate(it.due_at)}
+                          </p>
+                        </div>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
+                          {STATUS_LABEL[st] || st || "N/A"}
+                        </span>
+                        <Link href={`/repair/view?id=${it.id}`} className="flex shrink-0 items-center text-[var(--cmms-primary)]" aria-label={tr("mydash.view_all")}>
+                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </CardContent>
           </Card>
 
           <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <ZapIcon /> Quick Actions
+                <ZapIcon /> {tr("mydash.quick_actions")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -457,8 +508,7 @@ export default function MyDashboardPage() {
         </div>
 
         <p className="text-xs text-[var(--cmms-text-secondary)]">
-          หมายเหตุ: หน้า My Dashboard นี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอินตาม API)
-          ตัวชี้วัดที่ไม่มีแหล่งข้อมูลจริงจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ
+          {tr("mydash.footnote")}
         </p>
       </div>
     </>

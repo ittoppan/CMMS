@@ -286,7 +286,7 @@ export function assignWork(payload: AssignPayload): Promise<{
 /** ดึงรายชื่อเครื่องจักรย่อ ๆ (ใช้ในฟอร์ม assign/filter) */
 export async function fetchAssets(): Promise<{ id: number; code: string; name: string }[]> {
   try {
-    const res = await apiFetch("/api/v1/assets.php?limit=2000", { credentials: "include" });
+    const res = await apiFetch("/api/v1/asset_registry.php", { credentials: "include" });
     const json = await res.json().catch(() => null);
     if (Array.isArray(json)) {
       return (json as any[]).map((a) => ({ id: Number(a.id), code: String(a.code || a.asset_code || ""), name: String(a.name || a.asset_name || "") }));

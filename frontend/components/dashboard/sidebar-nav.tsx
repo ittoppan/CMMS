@@ -156,14 +156,21 @@ export interface NavGroupDef {
 
 export const NAV_GROUPS: NavGroupDef[] = [
   {
-    titleKey: "nav.work_orders",
-    pathPrefixes: ["/repair", "/dashboard", "/approval", "/forms", "/manuals", "/field"],
+    titleKey: "nav.overview",
+    pathPrefixes: ["/dashboard", "/repair/my_tasks", "/notifications", "/home", "/my-repairs", "/alert-center"],
     items: [
       { perm: "dashboard", labelKey: "menu.dashboard", href: "/dashboard", icon: Home },
+      { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
+      { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
+    ],
+  },
+  {
+    titleKey: "nav.work_orders",
+    pathPrefixes: ["/repair", "/approval", "/forms", "/field"],
+    items: [
       { perm: "repair", labelKey: "menu.repairs", href: "/repair", icon: Wrench },
       { perm: "repair/request", labelKey: "menu.repair_request", href: "/repair/request", icon: FilePlus2 },
       { perm: "repair/assign", labelKey: "menu.repair_assign", href: "/repair/assign", icon: UserCheck },
-      { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
       { perm: "repair/tracking", labelKey: "menu.tracking", href: "/repair/tracking", icon: Route },
       { perm: "field", labelKey: "menu.field_work", href: "/field", icon: ScanLine, secondary: true },
       { perm: "repair/workload", labelKey: "menu.workload", href: "/repair/workload", icon: Activity, secondary: true },
@@ -172,24 +179,34 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "approval", labelKey: "menu.approval", href: "/approval", icon: BadgeCheck, secondary: true },
       { perm: "forms", labelKey: "menu.forms", href: "/forms", icon: FileDown, secondary: true },
       { perm: "forms/designer", labelKey: "menu.forms_designer", href: "/forms/designer", icon: FileText, secondary: true },
-      { perm: "manuals", labelKey: "menu.manuals", href: "/manuals", icon: BookOpen, secondary: true },
     ],
   },
   {
-    titleKey: "nav.pm_machines",
-    pathPrefixes: ["/pm_am", "/inspections", "/asset_registry", "/assets", "/qr-sheet", "/equipment_borrowing", "/facility-layout"],
+    titleKey: "nav.planning",
+    pathPrefixes: ["/pm_am", "/inspections", "/planning", "/field/plan", "/shutdown", "/process-flows", "/predictive-maintenance"],
     items: [
       { perm: "pm_am", labelKey: "menu.pm_am", href: "/pm_am", icon: CalendarDays },
       { perm: "pm_am/calendar", labelKey: "menu.pm_calendar", href: "/pm_am/calendar", icon: CalendarDays },
       { perm: "pm_am/checksheet", labelKey: "menu.pm_checksheet", href: "/pm_am/checksheet", icon: ClipboardList },
       { perm: "pm_am/create", labelKey: "menu.pm_create", href: "/pm_am/create", icon: FilePlus2 },
       { perm: "inspections", labelKey: "menu.inspections", href: "/inspections", icon: ListChecks },
-      { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
-      { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
-      { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: QrCode },
+      { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
+      { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
+      { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
+      { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },
       { perm: "inspections/templates", labelKey: "menu.inspections_templates", href: "/inspections/templates", icon: ListChecks, secondary: true },
+      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
+    ],
+  },
+  {
+    titleKey: "nav.pm_machines",
+    pathPrefixes: ["/asset_registry", "/assets", "/qr-sheet", "/equipment_borrowing", "/facility-layout"],
+    items: [
+      { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
+      { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
+      { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: QrCode },
       { perm: "asset_registry/bom_tree", labelKey: "menu.bom_tree", href: "/asset_registry/bom_tree", icon: Box, secondary: true },
       { perm: "asset_registry/criticality", labelKey: "menu.criticality", href: "/asset_registry/criticality", icon: Scale, secondary: true },
       { perm: "equipment_borrowing", labelKey: "menu.equipment_borrowing", href: "/equipment_borrowing", icon: ArrowLeftRight, secondary: true },
@@ -233,17 +250,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "spare_parts/optimization", labelKey: "menu.optimization", href: "/spare_parts/optimization", icon: Sparkles, secondary: true },
       { perm: "contractor", labelKey: "menu.contractors", href: "/contractors", icon: HardHat, secondary: true },
       { perm: "contractor/work", labelKey: "menu.contractors_work", href: "/contractors/work", icon: ClipboardList, secondary: true },
-    ],
-  },
-  {
-    titleKey: "nav.planning",
-    pathPrefixes: ["/planning", "/field/plan", "/shutdown", "/process-flows"],
-    items: [
-      { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
-      { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
-      { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
-      { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
-      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
     ],
   },
   {
@@ -323,7 +329,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.knowledge_ops",
-    pathPrefixes: ["/knowledge", "/documents", "/engineering-changes", "/safety", "/iot"],
+    pathPrefixes: ["/knowledge", "/documents", "/engineering-changes", "/safety", "/iot", "/manuals"],
     items: [
       { perm: "knowledge", labelKey: "menu.knowledge", href: "/knowledge", icon: GraduationCap },
       { perm: "knowledge/search", labelKey: "menu.knowledge_search", href: "/knowledge/search", icon: Search },
@@ -337,15 +343,15 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "knowledge/reviews", labelKey: "menu.knowledge_reviews", href: "/knowledge/reviews", icon: GraduationCap, secondary: true },
       { perm: "knowledge/categories", labelKey: "menu.knowledge_categories", href: "/knowledge/taxonomy", icon: ListChecks, secondary: true },
       { perm: "knowledge/usage", labelKey: "menu.knowledge_usage", href: "/knowledge/usage", icon: ChartPie, secondary: true },
+      { perm: "manuals", labelKey: "menu.manuals", href: "/manuals", icon: BookOpen, secondary: true },
     ],
   },
   {
     titleKey: "nav.system",
-    pathPrefixes: ["/notifications", "/settings", "/pages", "/editor", "/audit-log", "/feedback", "/users", "/roles", "/register"],
+    pathPrefixes: ["/notifications/history", "/settings", "/pages", "/editor", "/audit-log", "/feedback", "/users", "/roles", "/register"],
     items: [
       { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
       { perm: "users", labelKey: "menu.users", href: "/users", icon: Users },
-      { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
       { perm: "register", labelKey: "menu.register", href: "/register", icon: MessageSquareText },
       { perm: "roles", labelKey: "menu.roles", href: "/roles", icon: UsersRound, secondary: true },
       { perm: "notifications/history", labelKey: "menu.notifications_history", href: "/notifications/history", icon: ClipboardList, secondary: true },

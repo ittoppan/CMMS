@@ -23,6 +23,7 @@ export type Lang = "th" | "en";
 // ════════════════ พจนานุกรมหลัก ════════════════
 const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
+  "nav.overview": { th: "ภาพรวม", en: "Overview" },
   "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
   "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "nav.shutdown": { th: "หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
@@ -51,6 +52,40 @@ const DICT: Record<string, { th: string; en: string }> = {
 
   // ── เมนูหลัก (SideNav items) ──
   "menu.dashboard": { th: "ศูนย์รวม Dashboard", en: "Dashboard Hub" },
+  // ── แดชบอร์ดส่วนบุคคล (My Dashboard) ──
+  "mydash.title": { th: "แดชบอร์ดของฉัน", en: "My Dashboard" },
+  "mydash.assigned": { th: "งานที่ได้รับมอบหมาย", en: "Assigned to me" },
+  "mydash.in_progress": { th: "กำลังดำเนินการ", en: "In progress" },
+  "mydash.completed": { th: "เสร็จสิ้น", en: "Completed" },
+  "mydash.overdue": { th: "เกินกำหนด", en: "Overdue" },
+  "mydash.assigned_hint": { th: "รอรับงาน / ยังไม่เริ่ม", en: "Waiting to start" },
+  "mydash.in_progress_hint": { th: "งานที่กำลังทำอยู่", en: "Currently being worked on" },
+  "mydash.completed_hint": { th: "รอตรวจรับ + ตรวจรับแล้ว", en: "Awaiting verification + verified" },
+  "mydash.overdue_hint": { th: "ต้องจัดการก่อน", en: "Needs attention first" },
+  "mydash.work_orders": { th: "ใบงานของฉัน", en: "My Work Orders" },
+  "mydash.workload": { th: "ภาระงานและความคืบหน้า", en: "Workload & Progress" },
+  "mydash.performance": { th: "ผลงานของฉัน", en: "My Performance" },
+  "mydash.timeline": { th: "งานที่ใกล้ถึงกำหนด", en: "Upcoming Due" },
+  "mydash.quick_actions": { th: "ทางลัด", en: "Quick Actions" },
+  "mydash.completion_rate": { th: "อัตราความสำเร็จ", en: "Completion rate" },
+  "mydash.this_month": { th: "เดือนนี้", en: "This month" },
+  "mydash.view_all": { th: "ดูทั้งหมด", en: "View all" },
+  "mydash.jobs": { th: "งาน", en: "jobs" },
+  "mydash.on_duty": { th: "พร้อมปฏิบัติงาน", en: "On duty" },
+  "mydash.avg_repair": { th: "เวลาเฉลี่ยต่องาน", en: "Avg. repair time" },
+  "mydash.sla": { th: "อัตราตาม SLA", en: "SLA achievement" },
+  "mydash.jobs_month": { th: "งานเสร็จ / เดือน", en: "Jobs completed / month" },
+  "mydash.rework": { th: "อัตรางานแก้", en: "Rework rate" },
+  "mydash.no_source": { th: "ยังไม่มีแหล่งข้อมูล", en: "No data source yet" },
+  "mydash.real_data": { th: "ข้อมูลจริง", en: "Real data" },
+  "mydash.no_due": { th: "ยังไม่มีงานที่ใกล้ถึงกำหนด", en: "No upcoming due dates" },
+  "mydash.no_due_hint": { th: "เมื่อมีงานที่ได้รับมอบหมาย กำหนดส่งจะแสดงที่นี่", en: "Assigned work with due dates will appear here" },
+  "mydash.loading": { th: "กำลังโหลด...", en: "Loading..." },
+  "mydash.footnote": { th: "หน้านี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอิน) ตัวชี้วัดที่ยังไม่มีแหล่งข้อมูลจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ", en: "This page shows only real system data (scoped to the signed-in user's permissions). Metrics without a real source are labelled N/A — no sample data is used." },
+  "mydash.due": { th: "กำหนดส่ง", en: "Due" },
+  "mydash.no_asset": { th: "ไม่ระบุเครื่องจักร", en: "No machine specified" },
+  "mydash.completed_from": { th: "เสร็จแล้ว {done} จาก {total} งานที่เกี่ยวข้อง", en: "{done} completed out of {total} related jobs" },
+  "mydash.no_status": { th: "ยังไม่มีข้อมูลสถานะงาน", en: "No job status data yet" },
   "menu.repairs": { th: "ใบสั่งงานซ่อมทั้งหมด", en: "All Work Orders" },
   "menu.repair_request": { th: "แจ้งซ่อมด่วน", en: "Quick Repair Request" },
   "menu.repair_assign": { th: "มอบหมายงาน", en: "Assign Jobs" },
@@ -702,7 +737,9 @@ DICT["menu.process_flows"] = { th: "ผังกระบวนการซ่�
 // ════════════════
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
-  "/dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
+  "/dashboard": { th: "ศูนย์รวม Dashboard", en: "Dashboard Hub" },
+  "/home": { th: "แดชบอร์ดของฉัน", en: "My Dashboard" },
+  "/dashboard/my": { th: "แดชบอร์ดของฉัน", en: "My Dashboard" },
   "/dashboard/list": { th: "วิเคราะห์ลงลึก", en: "Drill-down" },
   "/repair": { th: "ใบสั่งงานซ่อม", en: "Work Orders" },
   "/repair/request": { th: "ฟอร์มแจ้งซ่อมด่วน", en: "Quick Repair Request" },
@@ -902,6 +939,8 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
 
 // หมวด breadcrumb
 const SECTION_MAP: Record<string, { th: string; en: string }> = {
+  "/dashboard": { th: "ภาพรวม", en: "Overview" },
+  "/home": { th: "ภาพรวม", en: "Overview" },
   "/repair": { th: "งานซ่อมบำรุง", en: "Maintenance" },
   "/planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "/approval": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
@@ -949,6 +988,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   dashboard: {
     th: { eyebrow: "Plant command center · CMMS-TOPPAN", title: "แดชบอร์ดภาพรวม (KPI)", desc: "KPI งานซ่อม สิ่งที่ต้องสนใจ Downtime ค่าใช้จ่าย และภาพรวมเครื่องจักร — ตามขอบเขตบทบาทของคุณ" },
     en: { eyebrow: "Plant command center · CMMS-TOPPAN", title: "Dashboard (KPI Overview)", desc: "Maintenance KPIs, attention alerts, downtime, cost and machine health — scoped to your role" },
+  },
+  "dashboard/my": {
+    th: { eyebrow: "My workspace · CMMS-TOPPAN", title: "แดชบอร์ดของฉัน", desc: "งานที่ได้รับมอบหมาย ภาระงาน และผลงานส่วนบุคคล — สรุปจากข้อมูลจริงของผู้ใช้ที่ล็อกอิน" },
+    en: { eyebrow: "My workspace · CMMS-TOPPAN", title: "My Dashboard", desc: "Your assigned jobs, workload and personal performance — summarized from real data for the signed-in user" },
   },
   "dashboard/list": {
     th: { eyebrow: "Dashboard drill-down · CMMS-TOPPAN", title: "วิเคราะห์ลงลึก", desc: "ลงลึกจาก KPI บนแดชบอร์ด — รายการงานซ่อม งานค้างเกินกำหนด PM และวิเคราะห์แนวโน้ม" },
