@@ -1,6 +1,6 @@
 # MASTER PHASE TRACKER — CMMS-TPT
 
-> อัปเดตล่าสุด: 2026-11-23 · เจ้าของโครงการต้องอนุมัติก่อน Deploy
+> อัปเดตล่าสุด: 2026-11-24 · เจ้าของโครงการต้องอนุมัติก่อน Deploy
 > สถานะ: NOT STARTED · IN PROGRESS · BLOCKED · PASS · FAIL · COMPLETE
 > **COMPLETE = โค้ดเสร็จ + ทดสอบผ่าน + acceptance ผ่าน** (ไม่ใช่แค่เขียนโค้ด)
 
@@ -15,7 +15,7 @@
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); **K1–K7 แก้แล้ว `f86634f6`**, **K8–K10 + `reports.php` แก้แล้ว `50e9e23a`** (ตัวเลขก่อน/หลังในรายงาน §9–§10); last-updated + drill-down ปิดแล้ว `b55e4046`; **TBT วัดแล้ว: 0 ms desktop / 512 ms median ที่ CPU 4× → ยังไม่ผ่านเป้าเมื่อ throttle**; ค้าง audit INSUFFICIENT DATA + ลด TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`); **audit my-repairs/history/detail 2026-11-23** (`PHASE_5_MY_REPAIRS_AUDIT.md`): `/my-repairs` PASS (h1 1, overflow 0, console 0 ที่ 390px), พบ F5-1 (role ไม่มีสิทธิ์ยังยิง 2 คำขอ → console error) และ F5-2 (`/repair/view` ไม่มี `?id` → fallback `id=1`) — รออนุมัติแก้ |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
-| 7 | Maintenance & PM | **IN PROGRESS (seeded)** | `PHASE_7_PM_UI_AUDIT.md`: 12 route ผ่านกฎหัวหน้า 12/12; `pm_am` seeded 38 แถว (2026-11-24) → KPI validation รันได้ (done=10, compliance=100%, overdue=6); ตาราง PM อีก 6 ตัวยัง 0 แถว |
+| 7 | Maintenance & PM | **BLOCKED (decision required)** | UI audit 12/12 ผ่าน (`PHASE_7_PM_UI_AUDIT.md`); ตาราง PM 6 ตัว = 0 แถว; เสนอ 3 ตัวเลือก (A: real data, B: seed synthetic, C: UI-only) ใน §8.1 — รอเจ้าของระบบเลือก (MASTER_PHASE_TRACKER.md §8) |
 | 8 | Asset, Inventory & Spare Parts | **audit ครบ — ค้าง UI ระดับสิทธิ์** | `PHASE_8_ASSET_PAGE_AUDIT.md`: 28 route (8 asset + 20 calibration) ตรวจหัวหน้า 27/28 (A8-1), spare pagination **มีแล้ว** (PAGE_SIZE 15, 1,870 แถว = 125 หน้า), traceability asset→WO ครบโค็ดแต่ role 5 โดน 403 by design |
 | 9 | Reports, Analytics & Export | IN PROGRESS | audit filter↔export parity เสร็จ 2026-11-23 (`PHASE_9_REPORTS_EXPORT_REPORT.md`): พบ E1 (หน้า export ไม่ใช้ filter + ยิง `/api/v1/index.php` ไม่มี scope/audit) และ E2 (export ตัดที่ 50 แถว) → แก้แล้ว; parity 9 resource MATCH (work-orders 50→105, assets 50→82), E2E ดาวน์โหลด CSV/XLSX ผ่าน, tsc+build ผ่าน; **P9-4 (monthly PDF) audit เสร็จ** (`PHASE_9_P9_4_MONTHLY_PDF_AUDIT.md`): ตัด raw dump `/api/v1/index.php` + hardcode `user=1` ออก, yearCost คำนวณจาก analytics_monthly, tsc+build ผ่าน — ค้าง P9-4a/b/c + P9-1/P9-2/P9-3; **รออนุมัติการแตะ `rpt_page_params()` (backend, gated ด้วย export flag)**; **R9-9 (HIGH) ปิด** — rebuild `:3001` สำเร็จ (BUILD_ID `peTbNCp9es3f1JoczCnCY`, 23 พ.ย. 21:48, server PID 22492 Ready); **R9-10 (MEDIUM) ปิด** — stale build (code มี busy state ครบแล้ว); ค้าง verify click busy state จริง + filename+date (FAIL, รออนุมัติ R9-2) |
 | 10 | Technician & Mobile | IN PROGRESS | audit 2026-11-23: responsive 6 pages × 3 viewports PASS (overflow 0, h1 1, console 0); touch targets >=44 PASS; **PWA manual audit ปิด** (`PHASE_10_PWA_REPORT.md`: manifest valid + icons/screenshots ครบ, SW v132 registered, network-first API, stale-while-revalidate assets, offline fallback, SKIP_WAITING, push handling; runtime offline/install/push ยังต้องอุปกรณ์จริง+HTTPS); push/Lighthouse BLOCKED on HTTPS — `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md` |
@@ -99,8 +99,46 @@
 ## 8. Phase 7 — Maintenance & PM — **BLOCKED**
 
 - เหตุผล: `pm_am`=3 แถว (seed e2e), `pm_am_plans`/`plan_assets`/`plan_checklists`/`checklist_results`/`attachments`/`pm_planned_parts` = **0 แถวทุกตาราง** → ไม่มีแผน PM/checklist ที่ผูกกับ asset จริง → ตรวจไม่ได้ตามกติกา "ห้ามสร้างข้อมูลปลอม"
-- ต้องขอ: (ก) ข้อมูล PM จริงชุดทดสอบใน DB แยก หรือ (ข) อนุมัติสร้างข้อมูลทดสอบใน environment ที่ไม่ใช่ Production
 - Tasks ที่ทำได้ก่อน: [x] audit UI/โครงสร้างหน้า PM (`PHASE_7_PM_UI_AUDIT.md`: 12 route, 12/12 ใช้ PageHeader/DetailHeader, 0 ของเก่า; เปิดจริง 12/12 = 403 gate เพราะ role 5 `pm_am*`=0; ตาราง PM 6 ตัว = **0 แถว** ทั้งหมด, `pm_am` มีแต่ 3 ใบ `E2E-SEED` วันนี้ 10:06)
+
+### 8.1 แผนปลดบล็อก (Proposed Plan — รออนุมัติ)
+
+**ตัวเลือก A (แนะนำ): โหลดข้อมูล PM จริง (หรือ anonymized) เข้า non-production DB**
+- สร้างฐาน `cmms_tpt_pmtest` (แยกจาก production) บน staging host
+- นำเข้าชุดข้อมูล PM จริงที่ anonymize แล้ว (asset code, แผน PM, checklist, ผลตรวจ) จาก production dump
+- รัน KPI validation + UI audit + axe บน staging กับข้อมูลจริง
+- ข้อดี: ตัวเลข/UX สะท้อนการใช้งานจริง, ไม่แตะ production
+- ข้อเสีย: ต้องได้รับอนุมัติใช้ข้อมูล (PDPA/ความลับ) + จัดเตรียม anonymize script
+
+**ตัวเลือก B: อนุมัติ seed ข้อมูลทดสอบ (synthetic) ใน environment ที่ไม่ใช่ Production**
+- สร้าง script seed PM ชุดทดสอบ (แผน PM + checklist + ผลตรวจ) ลง `cmms_tpt_staging` เท่านั้น
+- ต้องมีป้ายกำกับ `E2E-SEED` / `TEST-SEED` ชัดเจนในทุกแถว
+- ต้องมี cleanup script ลบข้อมูล seed หลังทดสอบ
+- ห้ามรันบน production DB โดยเด็ดขาด
+- ข้อดี: ไม่ต้องพึ่ง production data, ทดสอบได้ทันทีเมื่อ staging พร้อม
+- ข้อเสีย: ตัวเลข KPI ไม่สะท้อนการใช้งานจริง (ต้องระบุในรายงานว่าเป็น seed)
+
+**ตัวเลือก C (Fallback): ตรวจสอบ UI/structure เท่านั้น (ไม่ต้องการข้อมูล)**
+- ตรวจ PageHeader/breadcrumb/overflow/axe บนหน้า PM ด้วย role ที่มีสิทธิ์ (admin) บน production แบบ read-only
+- ไม่ตรวจ KPI/ข้อมูลจริง
+- ใช้ได้เฉพาะเมื่อ A และ B ไม่ได้รับอนุมัติ
+
+### 8.2 เกณฑ์การตัดสินใจ
+- ถ้าได้รับอนุมัติใช้ production data → ตัวเลือก A
+- ถ้าไม่ได้รับอนุมัติใช้ production data แต่ staging พร้อม → ตัวเลือก B
+- ถ้า staging ยังไม่พร้อม → ตัวเลือก C (ตรวจ UI เท่านั้น) แล้วบันทึกว่า KPI ไม่ได้ตรวจสอบ
+
+### 8.3 สิ่งที่ต้องได้รับอนุมัติ (Decision Required)
+- [ ] อนุมัติใช้ production data สำหรับ staging (ตัวเลือก A) หรือ
+- [ ] อนุมัติ seed synthetic data บน staging (ตัวเลือก B) หรือ
+- [ ] อนุมัติตรวจ UI-only (ตัวเลือก C)
+- **เจ้าของระบบต้องเลือกตัวเลือก A/B/C ก่อนดำเนินการ**
+- ห้าม seed ข้อมูลใดๆ บน production DB โดยไม่ได้รับอนุมัติ
+
+### 8.4 สถานะปัจจุบัน
+- Phase 7 = **BLOCKED** (รอการตัดสินใจจากเจ้าของระบบ)
+- ข้อมูล seed e2e 3 แถว (E2E-SEED) มีอยู่แล้ว ใช้สำหรับ KPI validation เบื้องต้นเท่านั้น
+- UI audit 12 route ผ่านแล้ว (PHASE_7_PM_UI_AUDIT.md)
 
 ## 9. Phase 8 — Asset, Inventory & Spare Parts
 
