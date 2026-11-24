@@ -148,7 +148,26 @@ function __rpt_month_th(string $m): string {
 
 /* ───────────────────────── 2. Permission / Meta ───────────────────────── */
 
-function rpt_permitted(string $resource, int $roleId): bool {
+function rpt_permitted(string $resource, int $roleId, ?PDO $pdo = null): bool {
+    // R9-5: honor menu_permissions when PDO available (changes in /roles take effect)
+    $menuKey = null;
+    if ($resource === 'technicians') $menuKey = 'workforce';
+    elseif ($resource === 'cost') $menuKey = null; // cost visibility is role-based business rule
+    else $menuKey = 'reports';
+
+    if ($pdo !== null && $menuKey !== null) {
+        try {
+            $st = $pdo->prepare('SELECT is_granted FROM menu_permissions WHERE role_id = ? AND menu_key = ?');
+            $st->execute([$roleId, $menuKey]);
+            $row = $st->fetchColumn();
+            if ($row !== false) {
+                if ((int)$row === 0) return false;
+            }
+        } catch (Throwable $e) {
+            // fall through to role-based logic
+        }
+    }
+
     switch ($resource) {
         case 'cost':            return kpi_can_see_cost($roleId); // 1,2,6
         case 'technicians':     return in_array($roleId, [1, 2, 6, 7], true);
@@ -1513,7 +1532,7 @@ function rpt_export_xlsx(PDO $pdo, array $user, string $resource, array $opts, s
 
 function rpt_dispatch(PDO $pdo, array $user, string $resource, array $opts): array {
     $roleId = kpi_resolve_role($pdo, $user);
-    if (!rpt_permitted($resource, $roleId)) {
+    if (!rpt_permitted($resource, $roleId, $pdo)) {
         http_response_code(403);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'ไม่มีสิทธิ์ดูรายงานนี้ (Report Permission)'], JSON_UNESCAPED_UNICODE);
