@@ -72,6 +72,7 @@ requireLogin($pdo);
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'supplier', 'edit');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $allowed = ['code', 'name', 'contact_person', 'email', 'phone', 'address', 'tax_id', 'is_active'];
             $cols = [];
@@ -89,6 +90,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'supplier', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -109,6 +111,7 @@ requireLogin($pdo);
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'supplier', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM suppliers WHERE id = ?');

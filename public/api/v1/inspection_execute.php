@@ -51,6 +51,8 @@ try {
         exit;
     }
 
+    requirePerm(getDb(), 'inspection', 'execute');
+
     switch ($action) {
         case 'start':
             actionStart($pdo, $scheduleId);

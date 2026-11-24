@@ -134,6 +134,7 @@ try {
             }
             break;
         case 'POST':
+            requirePerm($pdo, 'spare_parts', 'edit');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $allowed = ['supplier_id', 'code', 'name', 'description', 'category', 'sage_category', 'unit', 'stock_qty', 'min_stock', 'max_stock', 'location', 'unit_price', 'sage_item_no', 'sage_sync_status', 'image_url'];
             $cols = []; $vals = [];
@@ -147,6 +148,7 @@ try {
             echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
             break;
         case 'PUT':
+            requirePerm($pdo, 'spare_parts', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
@@ -163,6 +165,7 @@ try {
             echo json_encode(['success' => true]);
             break;
         case 'DELETE':
+            requirePerm($pdo, 'spare_parts', 'edit');
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 

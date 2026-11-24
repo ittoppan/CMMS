@@ -279,6 +279,9 @@ const API_ENDPOINT_MENU_KEYS = [
     'planning.php'           => 'planning',
     'asset_registry.php'     => 'asset_registry',
     'machine_bom.php'        => 'asset_registry',
+    'repair_attachment.php'  => 'repair',
+    'inspections.php'        => 'inspections',
+    'inspection_execute.php' => 'inspections',
 ];
 
 /** ชื่อไฟล์ endpoint ปัจจุบัน (ทนต่อ IIS rewrite / proxy) */
