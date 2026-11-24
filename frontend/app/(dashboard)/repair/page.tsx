@@ -684,7 +684,7 @@ export default function WorkOrdersPage() {
             disabled={excelBuilding || filtered.length === 0}
             onClick={handleExportExcel}
             title={selected.size > 0 ? `ส่งออก ${selected.size} รายการที่เลือก` : "ส่งออกรายการที่กรองทั้งหมด"}
-            className="border-transparent bg-[var(--cmms-success)] text-white hover:opacity-90"
+            className="border-transparent bg-[var(--cmms-success-dark)] text-white hover:opacity-90"
           >
             <TableCellsIcon className="h-4 w-4" />
             {excelBuilding ? "กำลังสร้าง Excel..." : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
