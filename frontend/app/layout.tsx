@@ -59,7 +59,6 @@ const SPLASH_CSS = `
 .cmms-splash-loading {
   width: 160px; height: 160px; object-fit: contain;
 }
-@keyframes cmmsSplashSpin { to { transform: rotate(360deg); } }
 @keyframes cmmsSplashPop { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 `;
 
