@@ -692,14 +692,7 @@ export default function RepairOptionsPage() {
       description="จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน" />
       <div className="space-y-6">
 
-      <ModuleGuide
-        name="ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง"
-        summary="จัดการรายการตัวเลือกที่ใช้ในกระบวนการแจ้งซ่อมและข้อมูลอ้างอิง (เช่น แผนก/ที่ตั้ง/ตัวเลือก dropdown) เพื่อความสอดคล้องในการบันทึกงาน"
-        steps={["ตรวจรายการตัวเลือกปัจจุบันที่ใช้จริงในฟอร์มแจ้งซ่อม","เพิ่ม/แก้ไข/จัดลำดับ (ถ้ามี) แล้วบันทึก","ทดสอบที่หน้าฟอร์มแจ้งซ่อมหรือหน้าที่เกี่ยวข้อง"]}
-        source="อ่าน/บันทึกผ่าน API ตัวเลือกแจ้งซ่อม/ข้อมูลอ้างอิงที่หน้านี้เรียกใช้"
-        note="การลบตัวเลือกที่เคยถูกใช้อาจส่งผลต่อข้อมูลย้อนหลัง — ควรระวังและตรวจสอบก่อนดำเนินการ"
-        related={[{"href":"/repair/request","label":"แจ้งซ่อม"},{"href":"/settings","label":"ตั้งค่าระบบ"}]}
-      />
+
       <VStack gap={6}>
         <Card>
           <CardContent className="p-2">
@@ -713,8 +706,8 @@ export default function RepairOptionsPage() {
                     type="button"
                     onClick={() => setTab(t.key)}
                     className={
-                      "inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-3 py-2 text-sm font-medium transition-colors " +
-                      (active ? "bg-[var(--cmms-primary)] text-white" : "bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-primary)] hover:bg-[var(--cmms-primary-light)]")
+                      "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors " +
+                      (active ? "border-[var(--cmms-primary)] text-[var(--cmms-primary)]" : "border-transparent text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)] hover:border-[var(--cmms-border)]")
                     }
                   >
                     <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
