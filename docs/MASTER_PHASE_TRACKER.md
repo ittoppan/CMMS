@@ -1,6 +1,6 @@
 # MASTER PHASE TRACKER — CMMS-TPT
 
-> อัปเดตล่าสุด: 2026-11-24 (approval granted, Phase7 Option B, seed_demo_pm.php) · เจ้าของโครงการต้องอนุมัติก่อน Deploy
+> อัปเดตล่าสุด: 2026-11-24 (staging DB seeded, .env.staging, zrok staging names created, production restored) · เจ้าของโครงการต้องอนุมัติก่อน Deploy
 > สถานะ: NOT STARTED · IN PROGRESS · BLOCKED · PASS · FAIL · COMPLETE
 > **COMPLETE = โค้ดเสร็จ + ทดสอบผ่าน + acceptance ผ่าน** (ไม่ใช่แค่เขียนโค้ด)
 
