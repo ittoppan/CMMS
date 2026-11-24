@@ -317,6 +317,22 @@ function api_enforce_endpoint_permission(PDO $pdo): void
         return;
     }
 
+    // E11-1: honor menu_permissions ให้สอดคล้องกับเมนูจริง (ปิดช่องอ่านข้อมูลตรง ๆ)
+    // ตรวจก่อน spec/null เพื่อให้ endpoint ที่ write spec เป็น null (เช่น stock_take) ยังถูกบล็อกตามเมนู
+    $menuKey = API_ENDPOINT_MENU_KEYS[$endpoint] ?? null;
+    if (is_string($menuKey) && $menuKey !== '') {
+        try {
+            $mst = $pdo->prepare('SELECT is_granted FROM menu_permissions WHERE role_id = ? AND menu_key = ? LIMIT 1');
+            $mst->execute([(int)($_SESSION['role_id'] ?? 0), $menuKey]);
+            $granted = $mst->fetchColumn();
+            if ($granted !== false && (int)$granted === 0) {
+                api_forbidden($pdo, 'FORBIDDEN', 'คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้');
+            }
+        } catch (Throwable $e) {
+            // fall through to matrix-based check
+        }
+    }
+
     $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
     $isWrite = !in_array($method, ['GET', 'HEAD', 'OPTIONS'], true);
     $spec = $isWrite ? ($cfg['write'] ?? null) : ($cfg['read'] ?? null);
@@ -330,21 +346,6 @@ function api_enforce_endpoint_permission(PDO $pdo): void
         $val = $_GET[$requiredParam] ?? null;
         if ($val === null || $val === '') {
             return; // endpoint เดียวกันแต่โหมดรายการ — ไม่บังคับ (ดูเหตุผลใน matrix)
-        }
-    }
-
-    // E11-1: honor menu_permissions ให้สอดคล้องกับเมนูจริง (ปิดช่องอ่านข้อมูลตรง ๆ)
-    $menuKey = API_ENDPOINT_MENU_KEYS[$endpoint] ?? null;
-    if (is_string($menuKey) && $menuKey !== '') {
-        try {
-            $mst = $pdo->prepare('SELECT is_granted FROM menu_permissions WHERE role_id = ? AND menu_key = ? LIMIT 1');
-            $mst->execute([(int)($_SESSION['role_id'] ?? 0), $menuKey]);
-            $granted = $mst->fetchColumn();
-            if ($granted !== false && (int)$granted === 0) {
-                api_forbidden($pdo, 'FORBIDDEN', 'คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้ (' . $module . ':' . $action . ')');
-            }
-        } catch (Throwable $e) {
-            // fall through to matrix-based check
         }
     }
 

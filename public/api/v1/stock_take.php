@@ -113,6 +113,10 @@ try {
         if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
         $action = (string)($data['action'] ?? '');
+        if (!in_array($action, ['item', 'complete', 'cancel'], true)) { http_response_code(400); echo json_encode(['error' => 'ไม่รู้จัก action (item/complete/cancel)']); exit; }
+        // ตรวจสิทธิ์ก่อนอ่านรอบ (กัน probe รอบนับ)
+        if ($action === 'item' && !in_array($stockTakeRoleId, [1, 2, 3, 6, 7], true)) { http_response_code(403); echo json_encode(['error' => 'คุณไม่มีสิทธิ์บันทึกยอดนับ'], JSON_UNESCAPED_UNICODE); exit; }
+        if (in_array($action, ['complete', 'cancel'], true) && !in_array($stockTakeRoleId, [1, 2, 6, 7], true)) { http_response_code(403); echo json_encode(['error' => 'คุณไม่มีสิทธิ์ปิดรอบ/ปรับยอดสต็อก'], JSON_UNESCAPED_UNICODE); exit; }
 
         $round = $pdo->prepare('SELECT * FROM stock_take WHERE id = ?');
         $round->execute([$id]);
@@ -120,7 +124,6 @@ try {
         if (!$r) { http_response_code(404); echo json_encode(['error' => 'ไม่พบรอบนับสต็อก']); exit; }
 
         if ($action === 'item') {
-            if (!in_array($stockTakeRoleId, [1, 2, 3, 6, 7], true)) { http_response_code(403); echo json_encode(['error' => 'คุณไม่มีสิทธิ์บันทึกยอดนับ'], JSON_UNESCAPED_UNICODE); exit; }
             if ($r['status'] !== 'draft') { http_response_code(400); echo json_encode(['error' => 'รอบนี้ปิดแล้ว ไม่สามารถแก้ไขได้']); exit; }
             $partId = (int)($data['spare_part_id'] ?? 0);
             $qty = isset($data['counted_qty']) && $data['counted_qty'] !== '' && $data['counted_qty'] !== null
