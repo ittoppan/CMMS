@@ -65,9 +65,6 @@ try {
     if ($export === 'xlsx') {
         rpt_export_xlsx($pdo, $user, $resource, $opts, '');
     }
-    if ($export !== '') {
-        audit_log($pdo, 'REPORT_EXPORT', 'report', $resource, 'ส่งออกรายงาน ' . $resource . ' (' . $export . ')', null, ['resource' => $resource, 'format' => $export, 'range' => $opts['range'] ?? null], 'info');
-    }
 
     $data = rpt_dispatch($pdo, $user, $resource, $opts);
     $meta = rpt_meta($pdo, $user, $resource);

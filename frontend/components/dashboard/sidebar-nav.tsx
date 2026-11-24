@@ -431,7 +431,7 @@ export function SidebarNav({
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent("cmms:open-palette"))}
-                aria-label="เปิดค้นหาทั่วทั้งแอป ⌘K (Ctrl+K)"
+                aria-label="⌘K — เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"
                 title="ค้นหาทั่วทั้งแอป — Ctrl/⌘ K"
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-border bg-card px-1.5 py-0.5 text-[0.6rem] font-bold text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
               >
