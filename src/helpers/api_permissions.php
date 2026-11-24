@@ -253,6 +253,34 @@ const API_PERMISSION_ENFORCED = [
     'production_hours.php',
 ];
 
+/**
+ * Mapping endpoint → menu_key สำหรับการบังคับ permission ที่ชั้น API ให้สอดคล้องกับ menu_permissions
+ * (E11-1): ปิดช่องอ่านข้อมูลตรง ๆ ด้วย session ของผู้ใช้ที่ถูกล็อกเมนู
+ * menu_key = null/ไม่มีใน map → ไม่ตรวจ menu_permissions (ใช้ matrix เดิม)
+ */
+const API_ENDPOINT_MENU_KEYS = [
+    'pm_am.php'              => 'pm_am',
+    'pm_plans.php'           => 'pm_am',
+    'pm_reminders.php'       => 'pm_am',
+    'stock_take.php'         => 'spare_parts/stock_take',
+    'spare_parts.php'        => 'spare_parts',
+    'spare_issue.php'        => 'spare_parts',
+    'spare_issue_request.php'=> 'spare_parts',
+    'spare_usage.php'        => 'spare_parts',
+    'spare_optimization.php' => 'spare_parts',
+    'equipment_borrowing.php'=> 'equipment_borrowing',
+    'suppliers.php'          => 'suppliers',
+    'manuals.php'            => 'manuals',
+    'mtbf_mttr.php'          => 'mtbf_mttr',
+    'production_hours.php'   => 'mtbf_mttr',
+    'checklist_templates.php'=> 'forms',
+    'form_templates.php'     => 'forms',
+    'forms.php'              => 'forms',
+    'planning.php'           => 'planning',
+    'asset_registry.php'     => 'asset_registry',
+    'machine_bom.php'        => 'asset_registry',
+];
+
 /** ชื่อไฟล์ endpoint ปัจจุบัน (ทนต่อ IIS rewrite / proxy) */
 function api_current_endpoint(): string
 {
@@ -299,6 +327,21 @@ function api_enforce_endpoint_permission(PDO $pdo): void
         $val = $_GET[$requiredParam] ?? null;
         if ($val === null || $val === '') {
             return; // endpoint เดียวกันแต่โหมดรายการ — ไม่บังคับ (ดูเหตุผลใน matrix)
+        }
+    }
+
+    // E11-1: honor menu_permissions ให้สอดคล้องกับเมนูจริง (ปิดช่องอ่านข้อมูลตรง ๆ)
+    $menuKey = API_ENDPOINT_MENU_KEYS[$endpoint] ?? null;
+    if (is_string($menuKey) && $menuKey !== '') {
+        try {
+            $mst = $pdo->prepare('SELECT is_granted FROM menu_permissions WHERE role_id = ? AND menu_key = ? LIMIT 1');
+            $mst->execute([(int)($_SESSION['role_id'] ?? 0), $menuKey]);
+            $granted = $mst->fetchColumn();
+            if ($granted !== false && (int)$granted === 0) {
+                api_forbidden($pdo, 'FORBIDDEN', 'คุณไม่มีสิทธิ์ดูข้อมูลส่วนนี้ (' . $module . ':' . $action . ')');
+            }
+        } catch (Throwable $e) {
+            // fall through to matrix-based check
         }
     }
 
