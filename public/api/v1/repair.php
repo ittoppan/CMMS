@@ -79,17 +79,14 @@ try {
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
-                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment, uc.full_name AS creator_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN users uc ON uc.id = r.created_by LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id) WHERE r.id = ?');
-                $stmt->execute([$id]);
-                $row = $stmt->fetch();
-                if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
-                // User (role 9) เห็นเฉพาะใบงานที่ตัวเองแจ้ง
-                if (is_array($repairMe) && (int)($repairMe['role_id'] ?? 0) === 9 && (int)($row['created_by'] ?? 0) !== (int)($repairMe['id'] ?? 0)) {
-                    http_response_code(403); echo json_encode(['error' => 'คุณไม่มีสิทธิ์เข้าถึงใบงานนี้']); exit;
+                $row = RepairService::findById($pdo, $id, $repairMe);
+                if (isset($row['__forbidden'])) {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'คุณไม่มีสิทธิ์เข้าถึงใบงานนี้']);
+                    exit;
                 }
-                $single = [$row];
-                attachWorkTeams($single, 'repair');
-                echo json_encode($single[0]);
+                if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+                echo json_encode($row);
             } else {
                 // รายการงานซ่อม — logic ฝั่ง query/ownership อยู่ใน RepairService::list
                 $result = RepairService::list($pdo, $repairMe, $_GET);
