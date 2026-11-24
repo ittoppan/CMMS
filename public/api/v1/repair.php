@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../../src/helpers/sla.php';
 require_once __DIR__ . '/../../../src/helpers/repair_owner.php';
 require_once __DIR__ . '/../../../src/helpers/repair_links.php';
 require_once __DIR__ . '/../../../src/helpers/repair_rating.php';
+require_once __DIR__ . '/../../../src/services/RepairService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -51,21 +52,12 @@ try {
 
     switch ($method) {
         case 'GET':
-            // กลุ่มอ้างอิงรหัส F/R: ?reference=codes -> { failure_codes, repair_codes } (สำหรับ dropdown ปิดใบงาน/แก้ไข)
+            // กลุ่มอ้างอิงรหัส F/R
             if (isset($_GET['reference']) && $_GET['reference'] === 'codes') {
-                $fCodes = $pdo->query("SELECT id, code, name, category FROM failure_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
-                $rCodes = $pdo->query("SELECT id, code, name, category FROM repair_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
-                // SLA ตามระดับความสำคัญ — ให้หน้าจ่ายงานตั้งเวลาคาดเสร็จเริ่มต้นได้ตรงกับที่ server ใช้จริง
-                $sla = [
-                    'hours' => sla_hours_map($pdo),
-                    'auto_apply' => sla_auto_apply_enabled($pdo),
-                    // เกณฑ์ "ใกล้ครบกำหนด" ชุดเดียวกับ KPI alerts — ให้ drill-down ตรงกับตัวเลขบนแดชบอร์ด
-                    'risk_hours' => max(1, (int)setting_value('planning_sla_risk_hours', '24')),
-                ];
-                echo json_encode(['failure_codes' => $fCodes, 'repair_codes' => $rCodes, 'sla' => $sla], JSON_UNESCAPED_UNICODE);
+                echo json_encode(RepairService::referenceCodes($pdo), JSON_UNESCAPED_UNICODE);
                 break;
             }
-            // อะไหล่ที่ใช้ซ่อม: ?parts=1&id=N (รายเดียว -> array) หรือ ?parts=1&ids=1,2,3 (หลาย -> map keyed by repair_id)
+            // อะไหล่ที่ใช้ซ่อม
             if (isset($_GET['parts'])) {
                 $ids = [];
                 if (!empty($_GET['ids'])) {
@@ -74,33 +66,15 @@ try {
                     $ids = [(int)$_GET['id']];
                 }
                 if (!$ids) { echo json_encode([]); break; }
-                $in = implode(',', array_fill(0, count($ids), '?'));
-                $stmt = $pdo->prepare("SELECT rsp.repair_id, sp.id AS spare_part_id, sp.code, sp.name, sp.image_url, rsp.quantity_used, rsp.unit_price
-                                       FROM repair_spare_parts rsp
-                                       JOIN spare_parts sp ON rsp.spare_part_id = sp.id
-                                       WHERE rsp.repair_id IN ($in)
-                                       ORDER BY rsp.repair_id, sp.code");
-                $stmt->execute($ids);
-                $rows = $stmt->fetchAll();
-                if (count($ids) === 1) {
-                    echo json_encode($rows);
-                } else {
-                    $map = [];
-                    foreach ($rows as $r) { $map[(int)$r['repair_id']][] = $r; }
-                    echo json_encode($map);
-                }
+                $result = RepairService::parts($pdo, $ids);
+                echo json_encode($result, JSON_UNESCAPED_UNICODE);
                 break;
             }
-            // ไทม์ไลน์การซ่อม: ?activity=1&id=N (จาก repair_activity_log)
+            // ไทม์ไลน์การซ่อม
             if (isset($_GET['activity'])) {
                 $rid = (int)($_GET['id'] ?? 0);
                 if (!$rid) { echo json_encode([]); break; }
-                $stmt = $pdo->prepare('SELECT a.id, a.repair_id, a.action, a.description, a.old_value, a.new_value, a.created_at, u.full_name AS user_name
-                                       FROM repair_activity_log a
-                                       LEFT JOIN users u ON a.user_id = u.id
-                                       WHERE a.repair_id = ? ORDER BY a.created_at ASC, a.id ASC');
-                $stmt->execute([$rid]);
-                echo json_encode($stmt->fetchAll());
+                echo json_encode(RepairService::activity($pdo, $rid), JSON_UNESCAPED_UNICODE);
                 break;
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -117,104 +91,17 @@ try {
                 attachWorkTeams($single, 'repair');
                 echo json_encode($single[0]);
             } else {
-                // รายการงานซ่อม (รองรับกรอง/แบ่งหน้าแบบ opt-in เพื่อความเข้ากันได้ย้อนหลัง)
-                $ratingJoin = ' LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id)';
-                $baseSelect = 'SELECT r.*, a.name AS asset_name, a.code AS asset_code, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment, uc.full_name AS creator_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN users uc ON uc.id = r.created_by LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin;
-                $baseCount = 'SELECT COUNT(*) FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id';
-
-                $where = [];
-                $params = [];
-                // User (role 9) เห็นเฉพาะใบงานที่ตัวเองแจ้ง
-                if (is_array($repairMe) && (int)($repairMe['role_id'] ?? 0) === 9) {
-                    $where[] = 'r.created_by = ?';
-                    $params[] = (int)$repairMe['id'];
-                }
-                if (!empty($_GET['asset_code'])) {
-                    $where[] = 'a.code = ?';
-                    $params[] = (string)$_GET['asset_code'];
-                }
-                if (isset($_GET['status']) && $_GET['status'] !== '' && $_GET['status'] !== 'all') {
-                    $stFilter = strtolower(trim((string)$_GET['status']));
-                    // รองรับกลุ่มสถานะที่ UI ใช้บ่อย
-                    if ($stFilter === 'overdue') {
-                        // ใช้กำหนดส่งจริง (sla_due_at ก่อน → estimated_completion_date) ให้ตรงกับ kpi_is_overdue()
-                        $where[] = "COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL AND COALESCE(r.sla_due_at, r.estimated_completion_date) < NOW() AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
-                    } elseif ($stFilter === 'sla_risk') {
-                        // ใกล้ครบกำหนด SLA (ยังไม่เกิน) — ใช้เกณฑ์ชั่วโมงเดียวกับ KPI planning_sla_risk_hours
-                        require_once __DIR__ . '/../../../src/helpers/settings.php';
-                        $riskHours = max(1, (int)setting_value('planning_sla_risk_hours', '24'));
-                        $where[] = "COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL AND COALESCE(r.sla_due_at, r.estimated_completion_date) >= NOW() AND COALESCE(r.sla_due_at, r.estimated_completion_date) <= DATE_ADD(NOW(), INTERVAL " . $riskHours . " HOUR) AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
-                    } elseif ($stFilter === 'open_active') {
-                        $where[] = "LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
-                    } elseif ($stFilter === 'completed_all') {
-                        $where[] = "LOWER(COALESCE(r.status,'')) IN ('completed','closed','resolved')";
-                    } else {
-                        $where[] = 'LOWER(COALESCE(r.status,"")) = ?';
-                        $params[] = $stFilter;
-                    }
-                }
-                if (!empty($_GET['assigned_to'])) {
-                    $where[] = 'r.assigned_to = ?';
-                    $params[] = (int)$_GET['assigned_to'];
-                }
-                if (!empty($_GET['created_from'])) {
-                    $where[] = 'DATE(r.created_at) >= ?';
-                    $params[] = (string)$_GET['created_from'];
-                }
-                if (!empty($_GET['created_to'])) {
-                    $where[] = 'DATE(r.created_at) <= ?';
-                    $params[] = (string)$_GET['created_to'];
-                }
-                if (!empty($_GET['q'])) {
-                    $q = trim((string)$_GET['q']);
-                    if ($q !== '') {
-                        $where[] = '(r.work_order_no LIKE ? OR r.title LIKE ? OR r.description LIKE ? OR a.name LIKE ? OR a.code LIKE ? OR u.full_name LIKE ?)';
-                        $like = '%' . $q . '%';
-                        array_push($params, $like, $like, $like, $like, $like, $like);
-                    }
-                }
-                $whereSql = $where ? (' WHERE ' . implode(' AND ', $where)) : '';
-                $orderSql = ' ORDER BY r.created_at DESC';
-
-                $hasLimit = isset($_GET['limit']) || isset($_GET['offset']) || isset($_GET['page']);
-                $wantTotal = isset($_GET['with_total']) || isset($_GET['paginate']);
-                $limit = isset($_GET['limit']) ? max(1, min(500, (int)$_GET['limit'])) : 0;
-                $offset = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
-                if (isset($_GET['page']) && $limit > 0) {
-                    $page = max(1, (int)$_GET['page']);
-                    $offset = ($page - 1) * $limit;
-                } elseif (isset($_GET['page']) && $limit === 0) {
-                    $limit = 50;
-                    $page = max(1, (int)$_GET['page']);
-                    $offset = ($page - 1) * $limit;
-                }
-
-                $total = null;
-                if ($wantTotal) {
-                    $cStmt = $pdo->prepare($baseCount . $whereSql);
-                    $cStmt->execute($params);
-                    $total = (int)$cStmt->fetchColumn();
-                }
-
-                $sql = $baseSelect . $whereSql . $orderSql;
-                if ($limit > 0) {
-                    $sql .= ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset;
-                }
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
-                $rows = $stmt->fetchAll();
-                attachWorkTeams($rows, 'repair');
-
-                // คงรูปแบบผลลัพธ์เดิม (array) เพื่อความเข้ากันได้; คืนรูปแบบ object เมื่อขอ with_total/paginate อย่างชัดเจน
-                if ($wantTotal) {
+                // รายการงานซ่อม — logic ฝั่ง query/ownership อยู่ใน RepairService::list
+                $result = RepairService::list($pdo, $repairMe, $_GET);
+                if (isset($result['items'])) {
                     echo json_encode([
-                        'items' => $rows,
-                        'total' => $total,
-                        'limit' => $limit > 0 ? $limit : null,
-                        'offset' => $limit > 0 ? $offset : 0,
+                        'items' => $result['items'],
+                        'total' => $result['total'],
+                        'limit' => $result['limit'],
+                        'offset' => $result['offset'],
                     ], JSON_UNESCAPED_UNICODE);
                 } else {
-                    echo json_encode($rows);
+                    echo json_encode($result, JSON_UNESCAPED_UNICODE);
                 }
             }
             break;
