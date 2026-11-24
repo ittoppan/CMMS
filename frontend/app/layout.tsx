@@ -56,10 +56,8 @@ const SPLASH_CSS = `
 }
 .cmms-splash-title { font-size: 18px; font-weight: 700; letter-spacing: 0.01em; }
 .cmms-splash-sub { font-size: 12px; opacity: 0.72; font-weight: 500; letter-spacing: 0.04em; }
-.cmms-splash-spinner {
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff;
-  animation: cmmsSplashSpin 0.8s linear infinite; margin-top: 6px;
+.cmms-splash-loading {
+  width: 160px; height: 160px; object-fit: contain;
 }
 @keyframes cmmsSplashSpin { to { transform: rotate(360deg); } }
 @keyframes cmmsSplashPop { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -77,12 +75,11 @@ export default function RootLayout({
       <body>
         <style>{SPLASH_CSS}</style>
         <div id="cmms-splash" aria-hidden="true">
-          <div className="cmms-splash-logo">C</div>
+          <img src="/loading.svg" alt="" className="cmms-splash-loading" width={200} height={200} />
           <div>
             <div className="cmms-splash-title">CMMS-TOPPAN</div>
             <div className="cmms-splash-sub">ระบบบริหารงานซ่อมบำรุง</div>
           </div>
-          <div className="cmms-splash-spinner" />
         </div>
         <PwaRegister />
         <SplashScreen />
