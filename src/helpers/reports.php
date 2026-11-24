@@ -811,7 +811,7 @@ function rpt_build_assets(PDO $pdo, array $user, array $opts): array {
         if ((float)$r['dt_hours'] >= 24) $score -= 20;
         if (in_array($r['last_insp'], ['fail', 'critical_fail'], true)) $score -= 25;
         $r['health'] = $score >= 80 ? 'แข็งแรง' : ($score >= 50 ? 'เฝ้าระวัง' : 'เสี่ยง');
-        $r['_href'] = null;
+        $r['_href'] = '/asset_registry/view?id=' . (int)($r['id'] ?? 0);
     }
     unset($r);
     $total = (int)$pdo->query('SELECT COUNT(*) FROM asset_registry')->fetchColumn();
@@ -1095,15 +1095,15 @@ function rpt_build_downtime(PDO $pdo, array $user, array $opts): array {
     $pg = rpt_page_params($opts);
     $groupBy = $pg['group_by'];
     if ($groupBy === 'asset') {
-        $st = $pdo->prepare('SELECT a.code AS code, a.name AS name, COALESCE(SUM(COALESCE(r.downtime_minutes,0)),0) AS minutes,
+        $st = $pdo->prepare('SELECT a.id AS asset_id, a.code AS code, a.name AS name, COALESCE(SUM(COALESCE(r.downtime_minutes,0)),0) AS minutes,
                 SUM(CASE WHEN r.downtime_minutes > 0 THEN 1 ELSE 0 END) AS events
             FROM repair r LEFT JOIN asset_registry a ON a.id = r.asset_id' . $w['where'] . $rangeSql . '
             GROUP BY a.id, a.code, a.name HAVING minutes > 0 ORDER BY minutes DESC LIMIT ' . $pg['limit'] . ' OFFSET ' . $pg['offset']);
         $st->execute($params);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($rows as &$r) { $r['dt_hours'] = round((float)$r['minutes'] / 60, 1); $r['_href'] = '/reports/downtime?asset_id='; }
+        foreach ($rows as &$r) { $r['dt_hours'] = round((float)$r['minutes'] / 60, 1); $r['_href'] = '/reports/downtime?asset_id=' . (int)($r['asset_id'] ?? 0); }
         unset($r);
-        $cols = [rpt_col('code', 'รหัสเครื่อง', 'left', 'text'), rpt_col('name', 'ชื่อ', 'left', 'text'),
+        $cols = [rpt_col('code', 'รหัสเครื่อง', 'left', 'link'), rpt_col('name', 'ชื่อ', 'left', 'text'),
             rpt_col('events', 'รอบที่หยุด', 'center', 'number'), rpt_col('dt_hours', 'Downtime (ชม.)', 'right', 'hours')];
         $table = ['columns' => $cols, 'rows' => $rows, 'total' => count($rows), 'page' => 0, 'page_size' => count($rows)];
     } else {

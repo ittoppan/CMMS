@@ -54,6 +54,14 @@ const SILENT_403_ENDPOINTS = new Set([
   "menu_permissions.php",
   "planning",
   "planning.php",
+  // sub-resource ที่อาจ 403 ได้โดยไม่ทำให้หน้าหลักใช้งานไม่ได้ (S2) —
+  // ให้ caller จัดการเอง ไม่ toast "ไม่มีสิทธิ์"
+  "repair_attachment",
+  "repair_attachment.php",
+  "repair_video",
+  "repair_video.php",
+  "repair_form_attachment",
+  "repair_form_attachment.php",
 ]);
 
 const TOAST_DEDUP_MS = 10_000;
