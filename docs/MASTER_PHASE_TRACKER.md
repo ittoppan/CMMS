@@ -1,6 +1,6 @@
 # MASTER PHASE TRACKER — CMMS-TPT
 
-> อัปเดตล่าสุด: 2026-11-24 (E11-1/E11-2, TBT Option1 SVG, /home, loading.svg) · เจ้าของโครงการต้องอนุมัติก่อน Deploy
+> อัปเดตล่าสุด: 2026-11-24 (approval granted, Phase7 Option B, seed_demo_pm.php) · เจ้าของโครงการต้องอนุมัติก่อน Deploy
 > สถานะ: NOT STARTED · IN PROGRESS · BLOCKED · PASS · FAIL · COMPLETE
 > **COMPLETE = โค้ดเสร็จ + ทดสอบผ่าน + acceptance ผ่าน** (ไม่ใช่แค่เขียนโค้ด)
 
@@ -15,7 +15,7 @@
 | 4 | Dashboard & Data Visualization | IN PROGRESS | 36 modules registered (`DASHBOARD_BUILD.md` done 35/36 + wallboard), `KPI_INVENTORY.md` ครบ; **KPI validation กับ SQL จริงเสร็จ 2026-11-23** — 13 ฟิลด์ตรง, พบ K1–K8 (`PHASE_4_KPI_VALIDATION_REPORT.md`); **K1–K7 แก้แล้ว `f86634f6`**, **K8–K10 + `reports.php` แก้แล้ว `50e9e23a`** (ตัวเลขก่อน/หลังในรายงาน §9–§10); last-updated + drill-down ปิดแล้ว `b55e4046`; **TBT วัดแล้ว: 0 ms desktop / 512 ms median ที่ CPU 4× → ยังไม่ผ่านเป้าเมื่อ throttle**; ค้าง audit INSUFFICIENT DATA + ลด TBT |
 | 5 | Repair Request & Employee Experience | **PASS (D1)** / IN PROGRESS | D1: 4 คลิก, tsc+build pass, e2e User pass (`PHASE_D_EXECUTION_REPORT.md`); **audit my-repairs/history/detail 2026-11-23** (`PHASE_5_MY_REPAIRS_AUDIT.md`): `/my-repairs` PASS (h1 1, overflow 0, console 0 ที่ 390px), พบ F5-1 (role ไม่มีสิทธิ์ยังยิง 2 คำขอ → console error) และ F5-2 (`/repair/view` ไม่มี `?id` → fallback `id=1`) — รออนุมัติแก้ |
 | 6 | Work Order Control | **PASS (UI) — ค้าง S1/S2 รออนุมัติ** | D3.2 `023fdc6c` · D3.3 (`PHASE_D3_QUEUE_REPORT.md`) · D3.4 (`PHASE_D3_DETAIL_REPORT.md`) · D3.5/D3.6 (`PHASE_D3_RESPONSIVE_A11Y_REPORT.md`) · D3.7 (`PHASE_D3_ROLE_PERMISSION_TEST.md`) · D3.8 (`PHASE_D3_DESIGN_REPORT.md`, `PHASE_D3_BEFORE_AFTER.md`, `PHASE_D3_TEST_RESULTS.md`); tsc/build PASS, axe 0 Critical/0 Serious 12 เคส, overflow 0 ทุก viewport |
-| 7 | Maintenance & PM | **BLOCKED (decision required)** | UI audit 12/12 ผ่าน (`PHASE_7_PM_UI_AUDIT.md`); ตาราง PM 6 ตัว = 0 แถว; เสนอ 3 ตัวเลือก (A: real data, B: seed synthetic, C: UI-only) ใน §8.1 — รอเจ้าของระบบเลือก (MASTER_PHASE_TRACKER.md §8) |
+| 7 | Maintenance & PM | **IN PROGRESS (Option B approved)** | UI audit 12/12 ผ่าน (`PHASE_7_PM_UI_AUDIT.md`); เลือก Option B (seed synthetic บน staging) — สร้าง `scripts/seed_demo_pm.php` (idempotent, production-guarded, --clean) แล้ว; รอรันบน staging DB; ตาราง PM 6 ตัว = 0 แถวบน production (ไม่แตะ) |
 | 8 | Asset, Inventory & Spare Parts | **audit ครบ — ค้าง UI ระดับสิทธิ์** | `PHASE_8_ASSET_PAGE_AUDIT.md`: 28 route (8 asset + 20 calibration) ตรวจหัวหน้า 27/28 (A8-1), spare pagination **มีแล้ว** (PAGE_SIZE 15, 1,870 แถว = 125 หน้า), traceability asset→WO ครบโค็ดแต่ role 5 โดน 403 by design |
 | 9 | Reports, Analytics & Export | IN PROGRESS | audit filter↔export parity เสร็จ 2026-11-23 (`PHASE_9_REPORTS_EXPORT_REPORT.md`): พบ E1 (หน้า export ไม่ใช้ filter + ยิง `/api/v1/index.php` ไม่มี scope/audit) และ E2 (export ตัดที่ 50 แถว) → แก้แล้ว; parity 9 resource MATCH (work-orders 50→105, assets 50→82), E2E ดาวน์โหลด CSV/XLSX ผ่าน, tsc+build ผ่าน; **P9-4 (monthly PDF) audit เสร็จ** (`PHASE_9_P9_4_MONTHLY_PDF_AUDIT.md`): ตัด raw dump `/api/v1/index.php` + hardcode `user=1` ออก, yearCost คำนวณจาก analytics_monthly, tsc+build ผ่าน — ค้าง P9-4a/b/c + P9-1/P9-2/P9-3; **รออนุมัติการแตะ `rpt_page_params()` (backend, gated ด้วย export flag)**; **R9-9 (HIGH) ปิด** — rebuild `:3001` สำเร็จ (BUILD_ID `peTbNCp9es3f1JoczCnCY`, 23 พ.ย. 21:48, server PID 22492 Ready); **R9-10 (MEDIUM) ปิด** — stale build (code มี busy state ครบแล้ว); ค้าง verify click busy state จริง + filename+date (FAIL, รออนุมัติ R9-2) |
 | 10 | Technician & Mobile | IN PROGRESS | audit 2026-11-23: responsive 6 pages × 3 viewports PASS (overflow 0, h1 1, console 0); touch targets >=44 PASS; **PWA manual audit ปิด** (`PHASE_10_PWA_REPORT.md`: manifest valid + icons/screenshots ครบ, SW v132 registered, network-first API, stale-while-revalidate assets, offline fallback, SKIP_WAITING, push handling; runtime offline/install/push ยังต้องอุปกรณ์จริง+HTTPS); push/Lighthouse BLOCKED on HTTPS — `docs/PHASE_10_TECHNICIAN_MOBILE_REPORT.md` |
@@ -136,7 +136,9 @@
 - ห้าม seed ข้อมูลใดๆ บน production DB โดยไม่ได้รับอนุมัติ
 
 ### 8.4 สถานะปัจจุบัน
-- Phase 7 = **BLOCKED** (รอการตัดสินใจจากเจ้าของระบบ)
+- Phase 7 = **IN PROGRESS (Option B approved โดยเจ้าของระบบ 2026-11-24)**
+- สร้าง `scripts/seed_demo_pm.php` แล้ว (idempotent, production-guarded ด้วย DB_NAME check + --force, --clean)
+- รอรันบน staging DB (staging host ยังไม่พร้อม) — ห้ามรันบน production
 - ข้อมูล seed e2e 3 แถว (E2E-SEED) มีอยู่แล้ว ใช้สำหรับ KPI validation เบื้องต้นเท่านั้น
 - UI audit 12 route ผ่านแล้ว (PHASE_7_PM_UI_AUDIT.md)
 
@@ -166,7 +168,7 @@
 - Tasks ที่ทำได้ตอนนี้: [x] security audit บางส่วน (`SECURITY_FIX_REPORT`, `SETTINGS_AUDIT`, `ASSET_DETAIL_REPORT`, `API_SECURITY_AUDIT`), [x] axe 20 หน้า (`PHASE_11_AXE_AUDIT.md` §1+§8: 43 node/5 กฎ; A11-3/A11-4/A11-5 ใหม่), [x] Lighthouse (`PHASE_11_LIGHTHOUSE_REPORT.md`), [ ] regression (`SECURITY_FIX_REPORT`, `SETTINGS_AUDIT`, `ASSET_DETAIL_REPORT`, `API_SECURITY_AUDIT`), [ ] regression เต็ม, [x] axe เริ่มแล้ว (8 หน้า × WCAG 2.1 AA — `PHASE_11_AXE_AUDIT.md`: 37 node / 3 rule, A11-1/A11-2 HIGH contrast 1.07/1.04 = อ่านไม่ออก, A11-5 CRITICAL `aria-controls` ชี้ target ที่ไม่มีที่ `/notifications`; อีก 6 หน้า 403 + Lighthouse ยังไม่ได้รัน; มือถือ 390×844 5 หน้า overflowX=0, 13 node ต้นเหตุเดิม; dark mode = N/A by design `Providers.tsx:11` forced light), [ ] Lighthouse, [ ] regression เต็ม (suite 30 spec ในเครื่องนี้: 28 passed / 131 failed — ขาด fixture/บทบาท, ยังไม่สรุปว่า regression) [x] API enforcement — ตรวจ CSRF ครบ 113 endpoint (บังคับที่ `src/auth.php:92-97`), permission หลุด 10/16 endpoint (`PHASE_11_API_ENFORCEMENT_AUDIT.md`; E11-1 HIGH รออนุมัติ)
 - Tasks ที่ต้องรอ: Staging, HTTPS, backup/restore drill, rollback plan, production deploy approval
 - Known issues: E11-1 (HIGH, **ปิดแล้ว 2026-11-24** — `api_permissions.php` + `API_ENDPOINT_MENU_KEYS` ตรวจ `menu_permissions` บน ~20 endpoint, menu_key mappings เพิ่ม ~70+ endpoint `f4e17394`; stock_take PUT leak ปิด `71ace7a1`; role 5 ได้ 403 บน endpoint ที่ granted=0 ยืนยันด้วย curl) · E11-2 (MEDIUM, **ปิดแล้ว 2026-11-24** — เพิ่ม `requirePerm()` บน 23 SQL-writing endpoint `c34bc292`: spare_parts, pm_am, suppliers, inspection_execute, repair_attachment, asset_registry, checklist_templates, machine_bom, manuals, mtbf_mttr, production_hours, spare_issue_request, roles, users, sage_shipments, spare_issue, spare_usage, form_templates, inspections, planning, supervisor, sage_sync, import_excel, custom_pages, page_editor) · E11-3 (MEDIUM, `spare_parts.php` คืน 1,870 แถวเมื่อเรียกโดยไม่ส่ง `limit`/`page` — **มี pagination อยู่แล้ว** (Phase 8 §6) จึงเหลือแค่เรื่อง backward-compat path ที่ไม่จำกัดจำนวน) · A11-1 (HIGH contrast 1.07 chip `/reports`) · A11-2 (HIGH contrast 1.04 «ใช้บ่อย» sidebar) · A11-3/A11-4/A11-5/A11-6/A11-7 ตาม `PHASE_11_AXE_AUDIT.md`
-- Blockers: ไม่มี Staging env; TLS/cert; เจ้าของระบบยังไม่อนุมัติ
+- Blockers: ไม่มี Staging env; TLS/cert; (อนุมัติจากเจ้าของระบบได้รับแล้ว 2026-11-24 — ยังต้องมี infrastructure)
 - Approval: **ต้องอนุมัติเป็นลายลักษณ์อักษรก่อนทุก deployment**
 
 ## 13. ลำดับงานถัดไป (ทำต่อทันที)
