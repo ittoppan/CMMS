@@ -287,13 +287,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           กลายเป็นตัวอักษรเข้มบนพื้นเข้มและอ่านไม่ออก */}
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
         {/* Sidebar */}
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
+        <aside className="relative hidden w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-[var(--cmms-bg-sidebar)] lg:flex">
+          {/* Subtle scanline texture — Andon board aesthetic */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, currentColor 2px, currentColor 3px)" }} aria-hidden="true" />
           {/* แบรนด์: โลโก้ TOPPAN กว้างตามสัดส่วนจริง (6.09:1) — ต้องจำกัดความกว้าง
               ไม่งั้นโลโก้กินพื้นที่จนชื่อระบบถูกตัดเหลือ "C..." */}
           <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
             <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
+            {/* จุดสถานะเป็นเพียงลวดลาย (decoration) — ไม่ผูกกับสถานะจริง จึงไม่ประกาศให้ screen reader
+                (ใช้ ConnectivityStatus ใน topbar สำหรับสถานะเชื่อมต่อจริง) */}
+            <span className="ml-auto inline-flex items-center gap-1.5 shrink-0" aria-hidden="true">
+              <span className="h-2 w-2 rounded-full bg-[var(--cmms-success)] shadow-[0_0_0_3px_var(--cmms-success-light)]" />
+            </span>
           </Link>
           <SidebarNav canShow={canShow} isSelected={isSelected} frequentItems={frequentItems} />
           <div className="border-t border-border p-3">
@@ -321,7 +328,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
-          <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card/90 px-6 backdrop-blur lg:flex">
+          <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card/90 px-6 backdrop-blur lg:flex shadow-[0_1px_3px_rgba(15,35,75,0.04)]">
             <Breadcrumb className="min-w-0">
               <BreadcrumbList className="text-xs text-muted-foreground">
                 <BreadcrumbItem>
@@ -395,7 +402,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-label="ไม่มีสิทธิ์เข้าถึงหน้านี้"
                   className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center"
                 >
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600" aria-hidden="true">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)]" aria-hidden="true">
                     <ShieldAlert className="h-7 w-7" />
                   </span>
                   <h1 className="text-xl font-bold text-foreground">403 — ไม่มีสิทธิ์เข้าใช้หน้านี้</h1>
@@ -417,8 +424,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button
                       type="button"
                       onClick={() => router.back()}
-                      className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                       aria-label="ย้อนกลับหน้าก่อนหน้า"
+                      className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                     >
                       <Undo2 className="h-4 w-4" aria-hidden="true" />
                       <span>ย้อนกลับ</span>
@@ -443,7 +450,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               aria-label="เปิดเมนู"
               onClick={() => setDrawerOpen(true)}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
             </button>
             {canGoBack && (
               <button
@@ -452,7 +459,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-label="ย้อนกลับ"
                 onClick={() => router.back()}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6" /></svg>
               </button>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -487,7 +494,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <SheetContent side="left" showCloseButton={false} className="bg-sidebar p-0">
+            <SheetContent side="left" showCloseButton={false} className="bg-[var(--cmms-bg-sidebar)] p-0">
               <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
               <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

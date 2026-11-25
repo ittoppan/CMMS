@@ -77,7 +77,7 @@ import {
   Workflow,
   type LucideIcon,
 } from "lucide-react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 
@@ -431,6 +431,7 @@ export function SidebarNav({
               onChange={(e) => setQuery(e.target.value)}
               placeholder={`${t("sidebar.search")} · ${totalVisible}`}
               aria-label="ค้นหาเมนู"
+              autoComplete="off"
               className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-all placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
             />
             {!query && (
@@ -448,10 +449,10 @@ export function SidebarNav({
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                aria-label="clear"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+                aria-label="ล้างคำค้นหา"
+                className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center text-muted-foreground transition-colors hover:text-foreground"
               >
-                ✕
+                <X size={14} strokeWidth={2} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -477,7 +478,7 @@ export function SidebarNav({
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all",
+                        "flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all lg:h-9",
                         active
                           ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
                           : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"
@@ -513,7 +514,7 @@ export function SidebarNav({
           />
         ))}
         {groups.length === 0 && (
-          <div className="mx-2 rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-10 text-center">
+          <div role="status" className="mx-2 rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-10 text-center">
             <Search size={20} aria-hidden="true" className="mx-auto mb-2 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">{t("sidebar.no_results") ?? "ไม่พบเมนูที่ค้นหา"}</p>
           </div>
@@ -559,6 +560,8 @@ function SidebarGroup({
   const items = expanded ? group.visibleItems : primaryItems;
   const hiddenCount = secondaryItems.length;
   const isOpen = searching || openKey === group.titleKey;
+  // เชื่อมปุ่มกาง/พับกับรายการเมนูของหมวดนั้น (aria-controls) เพื่อให้ screen reader รู้ว่าควบคุมอะไร
+  const panelId = `sidebar-panel-${group.titleKey.replace(/[^a-z0-9]+/gi, "-")}`;
 
   return (
     <div
@@ -574,7 +577,8 @@ function SidebarGroup({
           setOpenKey((k) => (k === group.titleKey ? null : group.titleKey));
         }}
         aria-expanded={isOpen}
-        className="group flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
+        aria-controls={panelId}
+        className="group flex w-full cursor-pointer items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
       >
         <span
           aria-hidden="true"
@@ -605,7 +609,7 @@ function SidebarGroup({
         />
       </button>
       {isOpen && (
-        <ul className="mb-0.5 mt-1 space-y-0.5">
+        <ul id={panelId} className="mb-0.5 mt-1 space-y-0.5">
           {items.map((item) => {
             const active = isSelected(item.href);
             const Icon = item.icon;
@@ -616,7 +620,7 @@ function SidebarGroup({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "group/item relative flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all",
+                    "group/item relative flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all lg:h-9",
                     active
                       ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
                       : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"
