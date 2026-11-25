@@ -114,7 +114,7 @@ export default function PwaSettingsPage() {
     return (
       <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลไอคอน PWA...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลไอคอน PWA…</p>
       </div>
     );
   }

@@ -64,7 +64,7 @@ export default function PredictiveMaintenancePage() {
         <button onClick={exportCsv} className="border rounded px-3 py-1 text-sm">Export CSV</button>
       </div>
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading…</p>
       ) : items.length === 0 ? (
         <p>No at-risk assets within horizon.</p>
       ) : (

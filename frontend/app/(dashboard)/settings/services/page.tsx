@@ -194,7 +194,7 @@ export default function SystemServicesPage() {
       {notice && <Alert variant="info" title="ผลลัพธ์">{notice}</Alert>}
 
       {loading && services.length === 0 ? (
-        <HStack gap={2}><Spinner size={20} /><span className="text-sm">กำลังตรวจสอบ service...</span></HStack>
+        <HStack gap={2}><Spinner size={20} /><span className="text-sm">กำลังตรวจสอบ service…</span></HStack>
       ) : (
         <VStack gap={4}>
           <p className="text-sm text-muted-foreground">

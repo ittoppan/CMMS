@@ -44,7 +44,7 @@ export default function SpareReorderPage() {
       <div className="space-y-6">
       <div className="mb-4 text-sm">Estimated total cost: {total.toLocaleString()} ฿ · {items.length} items</div>
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading…</p>
       ) : items.length === 0 ? (
         <p>No parts below min stock.</p>
       ) : (

@@ -199,7 +199,7 @@ export default function InspectionTemplatesPage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลด Template...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลด Template…</span>
       </div>
     );
   }

@@ -288,7 +288,7 @@ function RegisterContent() {
           />
             <div className="flex flex-col gap-4">
               {liffStatus === "loading" && (
-                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล LINE...</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล LINE…</p>
               )}
 
               {liffStatus === "external" && (

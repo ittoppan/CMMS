@@ -62,7 +62,7 @@ export default function AlertCenterPage() {
       <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc} />
       <div className="space-y-6">
       <div className="mb-4"><button onClick={exportCsv} className="border rounded px-3 py-1 text-sm">Export CSV</button></div>
-      {loading ? <p>Loading...</p> : alerts.length === 0 ? <p>No active alerts.</p> : (
+      {loading ? <p>Loading…</p> : alerts.length === 0 ? <p>No active alerts.</p> : (
         <div className="grid gap-3">
           {alerts.map((a, i) => (
             <Card key={i} className="p-4 flex items-center justify-between">
