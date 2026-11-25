@@ -285,7 +285,7 @@ export default function PMPlansPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="cmms-icon-tile"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" /></div>
-                <h4 className="font-bold">PM ตามมิเตอร์ (CBM)</h4>
+                <h2 className="font-bold">PM ตามมิเตอร์ (CBM)</h2>
                 <span className="cmms-count-pill">{cbm.summary.pairs} คู่เครื่อง×แผน</span>
               </div>
               <div className="flex gap-2">
@@ -363,7 +363,7 @@ export default function PMPlansPage() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <div className="cmms-icon-tile"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" /></div>
-              <h4 className="font-bold">แผนงาน PM ทั้งหมด</h4>
+              <h2 className="font-bold">แผนงาน PM ทั้งหมด</h2>
               <span className="cmms-count-pill">{filtered.length} แผน</span>
             </div>
             <div className="relative min-w-0 max-w-[280px]">

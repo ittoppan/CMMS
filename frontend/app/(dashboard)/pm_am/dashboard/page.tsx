@@ -194,7 +194,7 @@ export default function PMDashboardPage() {
       <Card>
         <CardContent className="p-5">
           <div className="mb-4 flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
-            <h4 className="font-bold">งาน PM ที่ต้องดำเนินการ</h4>
+            <h2 className="font-bold">งาน PM ที่ต้องดำเนินการ</h2>
             <span className="cmms-count-pill">{recentTasks.length} งาน</span>
           </div>
           {loading ? (

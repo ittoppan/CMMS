@@ -207,7 +207,7 @@ export default function PMPlanViewPage() {
         <div className="space-y-4">
           <Card>
             <CardContent className="space-y-3 p-5">
-              <h4 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ข้อมูลแผน</h4>
+              <h2 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ข้อมูลแผน</h2>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-[var(--cmms-text-secondary)]">ประเภท</p><p className="font-semibold">{plan.plan_type === "single" ? "เครื่องเดียว" : plan.plan_type === "group" ? "กลุ่มเครื่อง" : "ตามการใช้งาน"}</p></div>
                 <div><p className="text-[var(--cmms-text-secondary)]">ความถี่</p><p className="font-semibold">{freqLabels[plan.frequency_type] || plan.frequency_type}{plan.frequency_interval ? ` (ทุก ${plan.frequency_interval})` : ""}</p></div>
@@ -245,7 +245,7 @@ export default function PMPlanViewPage() {
           {plan.instructions && (
             <Card>
               <CardContent className="space-y-2 p-5">
-                <h4 className="font-bold">ขั้นตอน / คำแนะนำ</h4>
+                <h2 className="font-bold">ขั้นตอน / คำแนะนำ</h2>
                 <p className="whitespace-pre-line text-sm" style={{ color: "var(--cmms-text-secondary)" }}>{plan.instructions}</p>
               </CardContent>
             </Card>
@@ -253,7 +253,7 @@ export default function PMPlanViewPage() {
 
           <Card>
             <CardContent className="space-y-2 p-5">
-              <h4 className="font-bold">เครื่องจักร ({plan.assets?.length || 0})</h4>
+              <h2 className="font-bold">เครื่องจักร ({plan.assets?.length || 0})</h2>
               {Array.isArray(plan.assets) && plan.assets.length ? (
                 <div className="space-y-1.5">
                   {plan.assets.map((a: any) => (
@@ -272,7 +272,7 @@ export default function PMPlanViewPage() {
           {plan.frequency_type === "meter_based" && (
             <Card>
               <CardContent className="space-y-3 p-5">
-                <h4 className="flex items-center gap-2 font-bold"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" />ความคืบหน้าตามมิเตอร์</h4>
+                <h2 className="flex items-center gap-2 font-bold"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" />ความคืบหน้าตามมิเตอร์</h2>
                 <p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
                   เป้าหมายรอบถัดไป (โดยประมาณ) = baseline ที่บันทึกจากรอบที่เสร็จล่าสุดของเครื่อง/แผน + {plan.meter_interval != null ? Number(plan.meter_interval).toLocaleString("th-TH") : "-"} {plan.meter_unit || ""}
                   {" "}— การถึงกำหนดจริงควรยึดค่ามิเตอร์ที่บันทึกและตรรกะ CBM ของระบบ
@@ -321,7 +321,7 @@ export default function PMPlanViewPage() {
 
           <Card>
             <CardContent className="space-y-2 p-5">
-              <h4 className="font-bold">Checklist Templates ({plan.templates?.length || 0})</h4>
+              <h2 className="font-bold">Checklist Templates ({plan.templates?.length || 0})</h2>
               {Array.isArray(plan.templates) && plan.templates.length ? (
                 <div className="space-y-1.5">
                   {plan.templates.map((tpl: any) => (
@@ -372,7 +372,7 @@ export default function PMPlanViewPage() {
           <Card>
             <CardContent className="p-5">
               <div className="mb-3 flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
-                <h4 className="flex items-center gap-2 font-bold"><CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />ประวัติรอบ PM</h4>
+                <h2 className="flex items-center gap-2 font-bold"><CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />ประวัติรอบ PM</h2>
                 <span className="cmms-count-pill">{cycleStats.total} รอบ</span>
               </div>
               {cycleStats.total === 0 ? (

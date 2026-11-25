@@ -421,7 +421,7 @@ export default function PMCalendarPage() {
       <Card>
         <CardContent className="space-y-4 p-4">
           <div className="flex flex-wrap items-center gap-3">
-            <h5 className="flex items-center gap-2 font-bold"><Search size={16} strokeWidth={1.75} aria-hidden="true" />กรอง (Filter)</h5>
+            <h2 className="flex items-center gap-2 font-bold"><Search size={16} strokeWidth={1.75} aria-hidden="true" />กรอง (Filter)</h2>
             <span className="cmms-count-pill">{filteredTasks.length} งาน</span>
             <div className="ml-auto relative w-full sm:w-64">
               <Search size={15} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
@@ -547,7 +547,7 @@ export default function PMCalendarPage() {
           </Card>
           <Card>
             <CardContent className="space-y-3 p-4">
-              <h5 className="font-bold">สัญลักษณ์ (Legend)</h5>
+              <h2 className="font-bold">สัญลักษณ์ (Legend)</h2>
               <div className="flex items-center gap-2"><AndonLamp status="down" size="sm" /><span className="text-sm">เกินกำหนด (Overdue)</span></div>
               <div className="flex items-center gap-2"><AndonLamp status="warn" size="sm" /><span className="text-sm">ถึงกำหนด / กำลังทำ</span></div>
               <div className="flex items-center gap-2"><AndonLamp status="idle" size="sm" /><span className="text-sm">รอดำเนินการ</span></div>
@@ -558,7 +558,7 @@ export default function PMCalendarPage() {
           <Card>
             <CardContent className="space-y-3 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h5 className="font-bold">วางแผนล่วงหน้า (ภาระงาน)</h5>
+                <h2 className="font-bold">วางแผนล่วงหน้า (ภาระงาน)</h2>
                 <div className="flex gap-1">
                   <Button type="button" size="sm" variant={lookaheadWeeks===4?"primary":"secondary"} onClick={()=>setLookaheadWeeks(4)}>4 สัปดาห์</Button>
                   <Button type="button" size="sm" variant={lookaheadWeeks===8?"primary":"secondary"} onClick={()=>setLookaheadWeeks(8)}>8 สัปดาห์</Button>
@@ -603,7 +603,7 @@ export default function PMCalendarPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
                 <div className="flex items-center gap-2">
                   <div className="cmms-icon-tile h-8 w-8 rounded-lg"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" /></div>
-                  <h4 className="font-bold">{viewAll ? "รอบ PM ทั้งหมด" : `รอบ PM ประจำวันที่ ${selectedDate}`}</h4>
+                  <h2 className="font-bold">{viewAll ? "รอบ PM ทั้งหมด" : `รอบ PM ประจำวันที่ ${selectedDate}`}</h2>
                 </div>
                 <span className="cmms-count-pill">{filteredTasks.length} งาน</span>
               </div>
@@ -637,7 +637,7 @@ export default function PMCalendarPage() {
                               </span>
                               {t.isOutsource && <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>ภายนอก</span>}
                             </div>
-                            <h5 className="font-bold" style={{ color: "var(--cmms-primary)" }}>{t.task}</h5>
+                            <h3 className="font-bold" style={{ color: "var(--cmms-primary)" }}>{t.task}</h3>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                               <p className="text-sm text-[var(--cmms-text-secondary)]"><span className="font-semibold">เครื่องจักร:</span> {t.asset}{t.assetCode ? ` (${t.assetCode})` : ""}</p>
                               <p className="text-sm text-[var(--cmms-text-secondary)]"><span className="font-semibold">ผู้รับผิดชอบ:</span> {t.assignee}</p>
