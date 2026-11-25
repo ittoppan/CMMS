@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { usePageHero } from "@/lib/i18n";
 import { DetailHeader } from "@/components/layout";
 import { useParams } from "next/navigation";
@@ -102,6 +103,10 @@ export default function WorkModePage() {
   const [resolution, setResolution] = useState("");
   const [diag, setDiag] = useState({ diagnosis: "", root_cause: "", solution: "" });
   const [photoCount, setPhotoCount] = useState(0);
+
+  // a11y ของ modal: Escape ปิด, Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const pauseDialogRef = useDialogA11y<HTMLDivElement>(pauseOpen, () => setPauseOpen(false));
+  const completeDialogRef = useDialogA11y<HTMLDivElement>(completeOpen, () => setCompleteOpen(false));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -404,7 +409,7 @@ export default function WorkModePage() {
 
       {/* ───── Pause modal ───── */}
       {pauseOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="หยุดพักงาน">
+        <div ref={pauseDialogRef} tabIndex={-1} className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="หยุดพักงาน">
           <Card style={{ width: "100%", maxWidth: 420 }}>
             <CardContent className="flex flex-col gap-3 p-4">
               <h2 className="m-0 text-lg font-bold">หยุดพักงาน</h2>
@@ -451,7 +456,7 @@ export default function WorkModePage() {
 
       {/* ───── Complete modal ───── */}
       {completeOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="ปิดงาน">
+        <div ref={completeDialogRef} tabIndex={-1} className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="ปิดงาน">
           <Card style={{ width: "100%", maxWidth: 460, maxHeight: "92dvh", overflowY: "auto" }}>
             <CardContent className="flex flex-col gap-3 p-4">
               <h2 className="m-0 text-lg font-bold">ปิดงาน — ส่งตรวจรับ</h2>

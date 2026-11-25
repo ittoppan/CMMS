@@ -8,6 +8,7 @@
  * การแก้ไขทึ้นใหม่ = new_version เสมอ (ฉบับที่เผยแพร่ immutable)
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
@@ -960,12 +961,16 @@ function Modal({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  const dialogRef = useDialogA11y<HTMLDivElement>(true, onClose);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
+    <div role="presentation" className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         className="w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-xl"
       >
         <h2 className="mb-3 text-base font-bold">{title}</h2>

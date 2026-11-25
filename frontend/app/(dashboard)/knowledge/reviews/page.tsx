@@ -9,6 +9,7 @@
  * ผลการทบทวนมีผลจริง: approved ตั้งวันทบทวนถัดไป, needs_revision ส่งบทความกลับเป็นร่าง
  */
 import { useCallback, useEffect, useState } from "react";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
 import { usePageLayout } from "@/lib/pageLayout";
@@ -82,6 +83,9 @@ export default function KnowledgeReviewsPage() {
 
   const [status, setStatus] = useState("");
   const [active, setActive] = useState<KnReview | null>(null);
+
+  // a11y ของ modal: Escape ปิด, Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const reviewDialogRef = useDialogA11y<HTMLDivElement>(active !== null, () => setActive(null));
   const [findings, setFindings] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [outcomeNote, setOutcomeNote] = useState("");
@@ -357,11 +361,13 @@ export default function KnowledgeReviewsPage() {
 
       {/* สรุปผลทบทวน */}
       {active && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
+        <div role="presentation" className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
           <div
+            ref={reviewDialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="สรุปผลการทบทวน"
+            tabIndex={-1}
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-xl"
           >
             <h2 className="text-base font-bold">สรุปผลการทบทวน</h2>
