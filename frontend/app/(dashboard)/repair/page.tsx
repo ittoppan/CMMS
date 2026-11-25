@@ -176,32 +176,12 @@ export default function WorkOrdersPage() {
     return JSON.stringify({ q: s.search.trim(), status: s.statusFilter || "", priority: s.priorityFilter || "", outsource: s.outsourceFilter || "all" });
   }, []);
 
-  const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cancelPendingUrlSync = useCallback(() => {
-    if (urlSyncTimerRef.current !== null) {
-      clearTimeout(urlSyncTimerRef.current);
-      urlSyncTimerRef.current = null;
-    }
-  }, []);
-
-  // เก็บค่าล่าสุดของตัวกรองไว้ใน ref เพื่อ flush ตอน blur/unmount (closure อาจ stale)
-  const latestFiltersRef = useRef({ search, statusFilter, priorityFilter, outsourceFilter });
-  latestFiltersRef.current = { search, statusFilter, priorityFilter, outsourceFilter };
-
   const syncUrl = useCallback((next: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, mode: "replace" | "push" = "replace") => {
-    // การ sync ที่สั่งตรง ๆ (เปลี่ยนตัวกรอง/มุมมอง) ต้องไม่ถูก debounce เขียนทับทีหลัง
-    cancelPendingUrlSync();
     const sp = buildRepairParams(next, new URLSearchParams(searchParams.toString()));
     const qs = sp.toString();
     const url = qs ? `${pathname}?${qs}` : pathname;
     if (mode === "push") router.push(url); else router.replace(url);
-  }, [cancelPendingUrlSync, pathname, router, searchParams]);
-
-  const flushPendingUrlSync = useCallback(() => {
-    if (urlSyncTimerRef.current === null) return;
-    cancelPendingUrlSync();
-    syncUrl(latestFiltersRef.current, "replace");
-  }, [cancelPendingUrlSync, syncUrl]);
+  }, [pathname, router, searchParams]);
 
   const setFilters = useCallback((patch: Partial<{ search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }>) => {
     const next = { search, statusFilter, priorityFilter, outsourceFilter, ...patch };
@@ -212,20 +192,11 @@ export default function WorkOrdersPage() {
     syncUrl(next, "replace");
   }, [outsourceFilter, priorityFilter, search, statusFilter, syncUrl]);
 
-  const SEARCH_URL_DEBOUNCE_MS = 350;
-
-  // ช่องค้นหา: อัปเดต state ทันที (ตารางกรองได้ทันที) แต่เลื่อนการเขียน URL
-  // ไปจนกว่าจะหยุดพิมพ์ ลด render/route replace ต่อคีย์ในตารางใหญ่
-  const changeSearch = useCallback((value: string) => {
-    setSearch(value);
-    cancelPendingUrlSync();
-    urlSyncTimerRef.current = setTimeout(() => {
-      urlSyncTimerRef.current = null;
-      syncUrl({ search: value, statusFilter, priorityFilter, outsourceFilter }, "replace");
-    }, SEARCH_URL_DEBOUNCE_MS);
-  }, [cancelPendingUrlSync, outsourceFilter, priorityFilter, statusFilter, syncUrl]);
-
-  useEffect(() => () => flushPendingUrlSync(), [flushPendingUrlSync]);
+  // ช่องค้นหา: ตารางกรองทันทีที่พิมพ์ แต่เขียน URL เฉพาะตอน blur หรือกด Enter
+  // (ไม่มี debounce timer/ref แล้ว — ตามข้อกำหนดให้ sync เฉพาะตอน commit)
+  const commitSearch = useCallback(() => {
+    syncUrl({ search, statusFilter, priorityFilter, outsourceFilter }, "replace");
+  }, [outsourceFilter, priorityFilter, search, statusFilter, syncUrl]);
 
   useEffect(() => {
     setSavedViews(listSavedViews(REPAIR_VIEW_ENTITY));
@@ -871,8 +842,14 @@ export default function WorkOrdersPage() {
             isLabelHidden
             placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
-            onChange={(e) => changeSearch(e.target.value)}
-            onBlur={flushPendingUrlSync}
+            onChange={(e) => setSearch(e.target.value)}
+            onBlur={commitSearch}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitSearch();
+              }
+            }}
             className="w-full sm:w-56"
           />
           <Select
