@@ -405,6 +405,9 @@ export function SidebarNav({
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
+  // เมนูที่ผ่านสิทธิ์และตรงคำค้น — ใช้กับตัวนับข้างช่องค้นหา
+  const totalVisible = groups.reduce((n, g) => n + g.visibleItems.length, 0);
+
   // Accordion: เปิดได้ทีละหมวด — เก็บ openKey ที่ SidebarNav
   const [openKey, setOpenKey] = React.useState<string | null>(() => {
     for (const g of NAV_GROUPS) {
@@ -417,7 +420,8 @@ export function SidebarNav({
     <div className="flex min-h-0 flex-1 flex-col">
       {showSearch && (
         <div className="shrink-0 px-3 pb-3 pt-3">
-          <div className="relative">
+          <div className="flex items-center gap-1.5">
+          <div className="relative min-w-0 flex-1">
             <Search
               size={15}
               strokeWidth={1.75}
@@ -453,6 +457,15 @@ export function SidebarNav({
                 <X size={14} strokeWidth={2} aria-hidden="true" />
               </button>
             )}
+          </div>
+            {/* ตัวนับเมนูที่แสดง — แยกจาก placeholder เพื่อให้ placeholder ลงท้ายด้วย … ตามกฎ */}
+            <span
+              className="shrink-0 rounded-full border border-border bg-muted/60 px-2 py-1 text-[0.65rem] font-bold tabular-nums text-muted-foreground"
+              title={`เมนูที่แสดงทั้งหมด ${totalVisible} รายการ`}
+            >
+              <span className="sr-only">เมนูที่แสดง </span>
+              {totalVisible}
+            </span>
           </div>
         </div>
       )}
