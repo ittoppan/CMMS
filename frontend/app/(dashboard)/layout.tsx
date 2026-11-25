@@ -228,6 +228,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return !deeper;
   };
 
+  // bottom nav: "หน้าแรก" ผูกกับ /home แต่หน้าที่ผู้ใช้เปิดจริงคือ /dashboard
+  // (รวมหน้าศูนย์รวมย่อยใต้ /dashboard/* ซึ่ง sidebar จัดอยู่ในหมวดเดียวกัน)
+  // — ไฮไลต์เฉพาะรายการนี้ ไม่กระทบการเลือกของเมนูอื่น
+  const isBottomNavSelected = (href: string) => {
+    if (href === "/home" && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) return true;
+    return isSelected(href);
+  };
+
   const section = getSection(pathname);
   const pageTitle = getPageTitle(pathname);
   // Dashboard = Maintenance Control Tower (TV wallboard) — ต้องเต็มจอ ไม่มี scroll บนจอ TV
@@ -568,8 +576,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Link
                     key={`${item.key}-${item.href}`}
                     href={item.href}
-                    className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
-                    aria-current={isSelected(item.href) ? "page" : undefined}
+                    className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isBottomNavSelected(item.href) ? "active" : ""}`}
+                    aria-current={isBottomNavSelected(item.href) ? "page" : undefined}
                     aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
                     title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
                   >
