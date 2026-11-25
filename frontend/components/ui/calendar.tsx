@@ -36,7 +36,7 @@ function Calendar({
           "h-9 w-9 rounded-lg p-0 font-normal transition-colors hover:bg-secondary aria-selected:opacity-100",
         range_middle: "",
         selected:
-          "[&>button]:bg-primary [&>button]:text-white [&>button]:hover:bg-primary-hover [&>button]:focus-visible:outline-none",
+          "[&>button]:bg-primary [&>button]:text-white [&>button]:hover:bg-primary-hover [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-offset-2 [&>button]:focus-visible:outline-[var(--cmms-border-focus)]",
         today: "[&>button]:border [&>button]:border-ring [&>button]:text-primary",
         outside: "day-outside opacity-40",
         disabled: "opacity-40 pointer-events-none",

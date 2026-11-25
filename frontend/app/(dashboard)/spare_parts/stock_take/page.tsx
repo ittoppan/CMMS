@@ -397,7 +397,7 @@ export default function StockTakePage() {
             </Card>
           ) : (
             rounds.map((r) => (
-              <Card key={r.id} className="cursor-pointer transition-shadow hover:shadow-[var(--cmms-shadow-md)]" onClick={() => openRound(r.id)}>
+              <Card key={r.id} role="button" tabIndex={0} className="cursor-pointer transition-shadow hover:shadow-[var(--cmms-shadow-md)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]" onClick={() => openRound(r.id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRound(r.id); } }}>
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
                   <div className="flex items-center gap-3">
                     <span className="cmms-andon-chip" style={STATUS_META[r.status]?.style ?? { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>

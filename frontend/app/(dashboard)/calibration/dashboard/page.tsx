@@ -148,7 +148,7 @@ export default function CalibrationDashboardPage() {
 
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         {stats.map((s) => (
-          <Card key={s.key} className="cursor-pointer p-4" onClick={() => router.push(s.href)}>
+          <Card key={s.key} role="button" tabIndex={0} className="cursor-pointer p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]" onClick={() => router.push(s.href)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(s.href); } }}>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
                 <s.icon className="w-6 h-6" strokeWidth={1.75} aria-hidden="true" />

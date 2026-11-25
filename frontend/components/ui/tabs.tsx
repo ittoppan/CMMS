@@ -57,7 +57,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       forceMount={forceMount}
-      className={cn("mt-4 focus-visible:outline-none data-[state=inactive]:hidden", className)}
+      className={cn("mt-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)] data-[state=inactive]:hidden", className)}
       {...props}
     />
   );
