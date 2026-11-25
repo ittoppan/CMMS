@@ -530,7 +530,7 @@ function ItemsCard({
                   <button
                     type="button"
                     onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
-                    className="cmms-focus-ring flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-[8px] text-left"
+                    className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)]"
                   >
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element

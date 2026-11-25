@@ -2174,13 +2174,6 @@ textarea:focus-visible,
   outline-offset: 2px;
   border-radius: var(--cmms-radius-sm);
 }
-/* ริงสำหรับเป้าที่กินพื้นที่ทั้งใบ (การ์ด hub, แถวรายการ) — ประกาศเป็นคลาสตรง ๆ
-   เพราะ variant utility อย่าง focus-visible:ring-* ไม่ประกอบเป็น box-shadow ใน build นี้
-   และ focus-visible:outline-none ใน utilities layer จะกลบกฎด้านบน */
-.cmms-focus-ring:focus-visible {
-  outline: 2px solid var(--cmms-border-focus);
-  outline-offset: 2px;
-}
 ::selection {
   background: var(--cmms-primary-glow);
 }
