@@ -6,7 +6,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 // ui/Pagination, ui/Badge, Lucide, MiniBar progressbar)
 // business logic ครบเดิม: batch image upload, Sage 300 sync, tab filter, side panel สรุปคลัง
 
-import { useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, type CSSProperties } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useCan } from "@/lib/useCan";
 import { useRouter } from "next/navigation";
@@ -268,6 +268,7 @@ function ItemsCard({
   filtered,
   search,
   setSearch,
+  onSearchBlur,
   sageTypeFilter,
   setSageTypeFilter,
   page,
@@ -303,6 +304,7 @@ function ItemsCard({
   onHistory: (item: SparePart) => void;
   totalItems?: number;
   serverPaged?: boolean;
+  onSearchBlur?: () => void;
 }) {
   const paged = serverPaged ? filtered : filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -460,6 +462,7 @@ function ItemsCard({
               placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ…"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onBlur={onSearchBlur}
               className="pl-9"
             />
           </div>
@@ -770,10 +773,52 @@ export default function SparePartsPage() {
   const [serverPaged, setServerPaged] = useState(false);
   const [summary, setSummary] = useState<StockSummary | null>(null);
 
+  const searchInputRef = useRef(searchInput);
+  searchInputRef.current = searchInput;
+
+  const searchDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    const t = setTimeout(() => setSearch(searchInput.trim()), 350);
-    return () => clearTimeout(t);
+    if (searchDebounceTimerRef.current) clearTimeout(searchDebounceTimerRef.current);
+    searchDebounceTimerRef.current = setTimeout(() => {
+      searchDebounceTimerRef.current = null;
+      setSearch(searchInput.trim());
+    }, 350);
+    return () => {
+      if (searchDebounceTimerRef.current) {
+        clearTimeout(searchDebounceTimerRef.current);
+        searchDebounceTimerRef.current = null;
+      }
+    };
   }, [searchInput]);
+
+  // flush ค่าค้นหาล่าสุดก่อน unmount (กัน URL/ค้นหาหายถ้าจากหน้าเร็ว)
+  useEffect(() => () => {
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
+      searchDebounceTimerRef.current = null;
+      const trimmed = (searchInputRef.current || "").trim();
+      if (trimmed && trimmed !== search) {
+        // เขียน URL โดยตรง (component กำลัง unmount, effect ปกติจะไม่รัน)
+        const params = new URLSearchParams(window.location.search);
+        params.set("q", trimmed);
+        const qs = params.toString();
+        const target = window.location.pathname + (qs ? `?${qs}` : "");
+        if (target !== window.location.pathname + window.location.search) {
+          window.history.replaceState(null, "", target);
+        }
+      }
+    }
+  }, [search]);
+
+  const flushSearchInput = useCallback(() => {
+    const trimmed = searchInput.trim();
+    if (trimmed === search) return;
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
+      searchDebounceTimerRef.current = null;
+    }
+    setSearch(trimmed);
+  }, [search, searchInput]);
 
   const fetchParts = async (opts?: { p?: number; q?: string; sage?: string; tab?: string; sortBy?: string }) => {
     setLoading(true);
@@ -1279,6 +1324,7 @@ export default function SparePartsPage() {
                 filtered={filtered}
                 search={searchInput}
                 setSearch={setSearchInput}
+                onSearchBlur={flushSearchInput}
                 sageTypeFilter={sageTypeFilter}
                 setSageTypeFilter={setSageTypeFilter}
                 page={page}
