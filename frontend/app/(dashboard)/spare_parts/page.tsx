@@ -862,9 +862,9 @@ export default function SparePartsPage() {
 
   // อ่าน state จาก query string (ใช้ทั้งตอนโหลดครั้งแรกและเมื่อกด Back/Forward)
   const applyUrlState = useCallback(() => {
+    // คำค้นหาไม่อยู่ใน URL แล้ว (เก็บเฉพาะ tab/sage/sort/page)
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
-    const q = params.get("q") ?? "";
     const sage = params.get("sage") ?? "";
     const sortParam = params.get("sort") ?? "";
     const pageParam = Number(params.get("page") ?? "1");
@@ -872,8 +872,6 @@ export default function SparePartsPage() {
     setSageTypeFilter(sage || "");
     setSort(SORT_OPTIONS.some((o) => o.value === sortParam) ? sortParam : "newest");
     setPage(Number.isFinite(pageParam) && pageParam > 1 ? Math.floor(pageParam) : 1);
-    setSearchInput(q);
-    setSearch(q.trim());
   }, []);
 
   // อ่านค่าเริ่มต้นจาก query string
@@ -894,7 +892,6 @@ export default function SparePartsPage() {
     if (!urlReady) return;
     const params = new URLSearchParams();
     if (activeTab !== "all") params.set("tab", activeTab);
-    if (search) params.set("q", search);
     if (sageTypeFilter) params.set("sage", sageTypeFilter);
     if (sort !== "newest") params.set("sort", sort);
     if (page > 1) params.set("page", String(page));
@@ -904,7 +901,7 @@ export default function SparePartsPage() {
     if (target !== current) {
       router.push(target, { scroll: false });
     }
-  }, [urlReady, activeTab, search, sageTypeFilter, sort, page, router]);
+  }, [urlReady, activeTab, sageTypeFilter, sort, page, router]);
 
   useEffect(() => {
     if (!urlReady) return;
