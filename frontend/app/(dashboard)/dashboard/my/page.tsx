@@ -309,7 +309,7 @@ export default function MyDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {loading ? (
-                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล...</p>
+                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล…</p>
               ) : wo.length === 0 ? (
                 <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่พบใบงานของคุณ" description="ยังไม่มีรายการใบงานที่มอบหมาย/เกี่ยวข้องกับผู้ใช้ที่ล็อกอิน" />
               ) : (
@@ -366,7 +366,7 @@ export default function MyDashboardPage() {
             </CardHeader>
             <CardContent>
               {loading ? (
-                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>
+                <p className="py-6 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
               ) : statusTotal === 0 ? (
                 <p className="py-6 text-sm text-[var(--cmms-text-muted)]">N/A — ยังไม่มีข้อมูลสถานะงาน</p>
               ) : (

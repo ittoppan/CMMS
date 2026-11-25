@@ -883,7 +883,7 @@ export default function MyTasksPage() {
             </Label>
             <Textarea
               id="close-root-cause"
-              placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน..."
+              placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน…"
               value={rootCause}
               onChange={(e) => setRootCause(e.target.value)}
               rows={2}
@@ -896,7 +896,7 @@ export default function MyTasksPage() {
             </Label>
             <Textarea
               id="close-solution"
-              placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี..."
+              placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี…"
               value={solution}
               onChange={(e) => setSolution(e.target.value)}
               rows={2}
@@ -999,7 +999,7 @@ export default function MyTasksPage() {
               </Label>
               <Input
                 id="mytasks-receiver-name"
-                placeholder="กรอกชื่อผู้รับมอบงาน..."
+                placeholder="กรอกชื่อผู้รับมอบงาน…"
                 value={receiverName}
                 onChange={(e) => setReceiverName(e.target.value)}
               />
@@ -1047,7 +1047,7 @@ export default function MyTasksPage() {
             className="gap-2"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>{closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}</span>
+            <span>{closing ? "กำลังบันทึก…" : "ยืนยันปิดใบงานซ่อม"}</span>
           </Button>
         </div>
       </AnimatedDialog>

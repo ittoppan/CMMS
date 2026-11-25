@@ -413,7 +413,7 @@ export default function PMPlanFormPage() {
                   {assetIds.length === 0 ? (
                     <p className="text-xs text-[var(--cmms-text-muted)]">เลือกเครื่องจักรในแผนก่อนเพื่อโหลดรายการมิเตอร์ของเครื่อง</p>
                   ) : metersLoading ? (
-                    <p className="text-xs text-[var(--cmms-text-muted)]">กำลังโหลดรายการมิเตอร์...</p>
+                    <p className="text-xs text-[var(--cmms-text-muted)]">กำลังโหลดรายการมิเตอร์…</p>
                   ) : meterOptions.length === 0 ? (
                     <p className="text-xs text-[var(--cmms-text-muted)]">ยังไม่พบรายการมิเตอร์ — สามารถระบุหน่วยมิเตอร์ด้านล่างเพื่อใช้งานแบบ fallback ได้</p>
                   ) : (
@@ -426,7 +426,7 @@ export default function PMPlanFormPage() {
                         setForm({ ...form, meter_id: opt.linkable && opt.id ? String(opt.id) : "", meter_unit: opt.unit || form.meter_unit });
                       }}
                     >
-                      <SelectTrigger aria-label="เลือกมิเตอร์"><SelectValue placeholder="เลือกมิเตอร์จากทะเบียน/รายการ..." /></SelectTrigger>
+                      <SelectTrigger aria-label="เลือกมิเตอร์"><SelectValue placeholder="เลือกมิเตอร์จากทะเบียน/รายการ…" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__manual__">ไม่ลิงก์ (ระบุหน่วยเอง / fallback)</SelectItem>
                         {meterOptions.map((o) => (
@@ -483,7 +483,7 @@ export default function PMPlanFormPage() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (Responsible)</label>
               <Select value={form.responsible_user_id || "__none__"} onValueChange={(v) => setForm({ ...form, responsible_user_id: v === "__none__" ? "" : v })}>
-                <SelectTrigger aria-label="ผู้รับผิดชอบ"><SelectValue placeholder="เลือกผู้รับผิดชอบ..." /></SelectTrigger>
+                <SelectTrigger aria-label="ผู้รับผิดชอบ"><SelectValue placeholder="เลือกผู้รับผิดชอบ…" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">ไม่ระบุ</SelectItem>
                   {users.map((u) => (
@@ -505,7 +505,7 @@ export default function PMPlanFormPage() {
             </div>
           </div>
 
-          <Textarea label="ขั้นตอน / คำแนะนำ (Instructions)" rows={4} placeholder="ขั้นตอนการตรวจเช็ค คำแนะนำความปลอดภัย มาตรฐานที่ต้องปฏิบัติ..."
+          <Textarea label="ขั้นตอน / คำแนะนำ (Instructions)" rows={4} placeholder="ขั้นตอนการตรวจเช็ค คำแนะนำความปลอดภัย มาตรฐานที่ต้องปฏิบัติ…"
             value={form.instructions}
             onChange={(e) => setForm({ ...form, instructions: e.target.value })} />
           <Textarea label="รายละเอียด (Description)" rows={2} placeholder="รายละเอียดเพิ่มเติมของแผน"
@@ -567,7 +567,7 @@ export default function PMPlanFormPage() {
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 className="w-full rounded-lg border border-input bg-card py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
-                placeholder="ค้นหา Item Code / ชื่ออะไหล่ใน Sage 300 (เช่น SUP001 · O-RING) และกด + เพื่อเพิ่ม..."
+                placeholder="ค้นหา Item Code / ชื่ออะไหล่ใน Sage 300 (เช่น SUP001 · O-RING) และกด + เพื่อเพิ่ม…"
                 value={ppSearch}
                 onChange={(e) => setPpSearch(e.target.value)}
                 aria-label="ค้นหาอะไหล่ตามแผน"
@@ -654,7 +654,7 @@ export default function PMPlanFormPage() {
           <div className="flex justify-end gap-3 border-t pt-4" style={{ borderColor: "var(--cmms-border)" }}>
             <Button variant="secondary" onClick={() => router.push("/pm_am/plans")}>ยกเลิก</Button>
             <Button disabled={loading} onClick={handleSubmit}>
-              {loading ? "กำลังบันทึก..." : editId ? "บันทึกการแก้ไข" : "บันทึกแผนงาน"}
+              {loading ? "กำลังบันทึก…" : editId ? "บันทึกการแก้ไข" : "บันทึกแผนงาน"}
             </Button>
           </div>
         </CardContent>

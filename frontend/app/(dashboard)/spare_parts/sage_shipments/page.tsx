@@ -196,7 +196,7 @@ export default function SageShipmentsPage() {
           showToast("error", msg);
         } finally {
           setUpdating((prev) => ({ ...prev, [key]: false }));
-          // ปิด dialog เสมอ ไม่งั้นฟอร์มค้างที่ "กำลังบันทึก..." และแก้ไขต่อไม่ได้
+          // ปิด dialog เสมอ ไม่งั้นฟอร์มค้างที่ "กำลังบันทึก…" และแก้ไขต่อไม่ได้
           closeModal();
         }
       },
@@ -304,7 +304,7 @@ export default function SageShipmentsPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหา WO, ช่าง, เลขที่ Sage Shipment..."
+              placeholder="ค้นหา WO, ช่าง, เลขที่ Sage Shipment…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -338,7 +338,7 @@ export default function SageShipmentsPage() {
 
       {loading ? (
         <div className="flex justify-center p-12">
-          <Spinner size={22} label="กำลังโหลดข้อมูล..." />
+          <Spinner size={22} label="กำลังโหลดข้อมูล…" />
         </div>
       ) : filteredRequests.length === 0 ? (
         <Card className="p-10 text-center">
@@ -616,7 +616,7 @@ function RequestShipmentModal({
         </Button>
       </DialogPrimitive.Close>
       <Button type="submit" disabled={submitting}>
-        {submitting ? "กำลังบันทึก..." : "บันทึก"}
+        {submitting ? "กำลังบันทึก…" : "บันทึก"}
       </Button>
     </form>
   );
@@ -665,7 +665,7 @@ function ItemQtyModal({
         </Button>
       </DialogPrimitive.Close>
       <Button type="submit" disabled={submitting}>
-        {submitting ? "กำลังบันทึก..." : "ถัดไป"}
+        {submitting ? "กำลังบันทึก…" : "ถัดไป"}
       </Button>
     </form>
   );
@@ -707,7 +707,7 @@ function ItemShipmentModal({
         </Button>
       </DialogPrimitive.Close>
       <Button type="submit" disabled={submitting}>
-        {submitting ? "กำลังบันทึก..." : "บันทึก"}
+        {submitting ? "กำลังบันทึก…" : "บันทึก"}
       </Button>
     </form>
   );

@@ -146,7 +146,7 @@ export default function BatchSchedulePage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล…</span>
       </div>
     );
   }
@@ -217,10 +217,10 @@ export default function BatchSchedulePage() {
                   <Label>มอบหมายผู้รับผิดชอบ (ไม่บังคับ)</Label>
                   <Select value={formData.assignee || "__none__"} onValueChange={(v) => setFormData({ ...formData, assignee: v === "__none__" ? "" : v })}>
                     <SelectTrigger aria-label="ผู้รับผิดชอบ">
-                      <SelectValue placeholder="เลือกช่าง / ทีม..." />
+                      <SelectValue placeholder="เลือกช่าง / ทีม…" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">เลือกช่าง / ทีม...</SelectItem>
+                      <SelectItem value="__none__">เลือกช่าง / ทีม…</SelectItem>
                       {users.map((u) => (
                         <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
                       ))}
@@ -258,7 +258,7 @@ export default function BatchSchedulePage() {
                 <Input
                   label="ค้นหาเครื่องจักร"
                   isLabelHidden
-                  placeholder="ค้นหารหัส หรือชื่อเครื่องจักร..."
+                  placeholder="ค้นหารหัส หรือชื่อเครื่องจักร…"
                   value={assetSearch}
                   onChange={(e) => setAssetSearch(e.target.value)}
                   className="pl-9"
@@ -327,7 +327,7 @@ export default function BatchSchedulePage() {
           onClick={handleSubmit}
         >
           <Layers size={16} strokeWidth={1.75} aria-hidden="true" />
-          {submitting ? "กำลังสร้างแผน..." : "ยืนยันการสร้างแผนแบบกลุ่ม"}
+          {submitting ? "กำลังสร้างแผน…" : "ยืนยันการสร้างแผนแบบกลุ่ม"}
         </Button>
       </div>
 

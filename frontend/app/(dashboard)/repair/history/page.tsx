@@ -312,7 +312,7 @@ export default function RepairHistoryPage() {
               />
               <Input
                 aria-label="ค้นหา"
-                placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ..."
+                placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"

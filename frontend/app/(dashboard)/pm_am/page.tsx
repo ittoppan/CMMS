@@ -661,7 +661,7 @@ export default function PMSchedulePage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาเลข PM, เครื่องจักร, ชื่องาน, ผู้รับผิดชอบ..."
+                placeholder="ค้นหาเลข PM, เครื่องจักร, ชื่องาน, ผู้รับผิดชอบ…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -799,7 +799,7 @@ export default function PMSchedulePage() {
               ยกเลิก
             </Button>
             <Button onClick={submitDeferral} disabled={deferSaving}>
-              {deferSaving ? "กำลังส่ง..." : "ส่งคำขอเลื่อนกำหนด"}
+              {deferSaving ? "กำลังส่ง…" : "ส่งคำขอเลื่อนกำหนด"}
             </Button>
           </div>
         </div>

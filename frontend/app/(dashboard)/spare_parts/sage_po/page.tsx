@@ -278,7 +278,7 @@ export default function SagePOReceiptPage() {
                 <Input
                   label="ค้นหาอะไหล่"
                   isLabelHidden
-                  placeholder="ค้นหารหัส / ชื่ออะไหล่..."
+                  placeholder="ค้นหารหัส / ชื่ออะไหล่…"
                   value={partSearch}
                   onChange={(e) => setPartSearch(e.target.value)}
                   className="pl-9"
@@ -292,10 +292,10 @@ export default function SagePOReceiptPage() {
                     onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="เลือกอะไหล่..." />
+                      <SelectValue placeholder="เลือกอะไหล่…" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__" disabled>เลือกอะไหล่...</SelectItem>
+                      <SelectItem value="__none__" disabled>เลือกอะไหล่…</SelectItem>
                       {partOptions.map((o) => (
                         <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                       ))}
@@ -347,7 +347,7 @@ export default function SagePOReceiptPage() {
                   onClick={handleSubmitReceipt}
                 >
                   <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
+                  {submitting ? "กำลังบันทึก…" : "ยืนยันการรับเข้าคลัง"}
                 </Button>
               </div>
             </div>

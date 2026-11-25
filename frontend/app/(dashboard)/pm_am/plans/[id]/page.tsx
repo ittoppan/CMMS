@@ -141,7 +141,7 @@ export default function PMPlanViewPage() {
     return () => { cancelled = true; };
   }, [plan?.id, plan?.frequency_type, plan?.meter_unit, plan?.meter_interval, JSON.stringify((plan?.assets || []).map((a: any) => a.id))]);
 
-  if (loading) return <p className="p-8 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>;
+  if (loading) return <p className="p-8 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>;
   if (error) return <div className="space-y-4 p-6"><Alert variant="danger" description={error} /><Button variant="secondary" onClick={() => router.push("/pm_am/plans")}><ArrowLeft size={16} aria-hidden="true" />กลับ</Button></div>;
   if (!plan) return null;
   if (!canShow("pm_am/plans")) {
@@ -187,7 +187,7 @@ export default function PMPlanViewPage() {
         primaryAction={
           <Button disabled={busy} onClick={handleGenerate}>
             <Play size={16} strokeWidth={1.75} aria-hidden="true" />
-            {busy ? "กำลังสร้าง..." : "สร้างรอบ PM"}
+            {busy ? "กำลังสร้าง…" : "สร้างรอบ PM"}
           </Button>
         }
         actions={[

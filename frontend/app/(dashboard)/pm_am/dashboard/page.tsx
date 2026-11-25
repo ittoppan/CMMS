@@ -198,7 +198,7 @@ export default function PMDashboardPage() {
             <span className="cmms-count-pill">{recentTasks.length} งาน</span>
           </div>
           {loading ? (
-            <p className="text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>
+            <p className="text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
           ) : recentTasks.length === 0 ? (
             <p className="text-sm text-[var(--cmms-text-muted)]">ไม่มีงาน PM ที่ต้องดำเนินการ</p>
           ) : (

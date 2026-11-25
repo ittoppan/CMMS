@@ -505,7 +505,7 @@ export default function RepairAssignPage() {
           />
           <Input
             aria-label="ค้นหา"
-            placeholder="ค้นหาเลขงาน, เครื่องจักร..."
+            placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -551,7 +551,7 @@ export default function RepairAssignPage() {
             </Button>
             <Button disabled={!selectedTech || saving} onClick={submitAssign} className="gap-2">
               <CheckCircle2 size={16} strokeWidth={2} aria-hidden="true" />
-              {saving ? "กำลังบันทึก..." : "ยืนยันการจ่ายงาน"}
+              {saving ? "กำลังบันทึก…" : "ยืนยันการจ่ายงาน"}
             </Button>
           </>
         }
@@ -577,10 +577,10 @@ export default function RepairAssignPage() {
               onValueChange={(v) => setSelectedTech(v === "__none__" ? "" : v)}
             >
               <SelectTrigger aria-label="เลือกหัวหน้าชุด">
-                <SelectValue placeholder="เลือกหัวหน้าชุด..." />
+                <SelectValue placeholder="เลือกหัวหน้าชุด…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">เลือกหัวหน้าชุด...</SelectItem>
+                <SelectItem value="__none__">เลือกหัวหน้าชุด…</SelectItem>
                 {technicians.map((tech) => (
                   <SelectItem key={tech.value} value={tech.value}>
                     {tech.label}
@@ -671,7 +671,7 @@ export default function RepairAssignPage() {
             <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
               <p className="text-sm font-bold">ตรวจตารางก่อนจ่ายงาน</p>
               {assignCheckLoading && (
-                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังตรวจงานชนเวลาและกำลังคน...</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังตรวจงานชนเวลาและกำลังคน…</p>
               )}
               {!assignCheckLoading && assignCheckError && (
                 <p className="text-sm" style={{ color: "var(--cmms-warning-dark)" }}>{assignCheckError}</p>

@@ -118,7 +118,7 @@ export default function LubricationPage() {
           <FormActions
             primary={
               <button type="submit" disabled={submitting} className="inline-flex min-h-11 items-center justify-center rounded-[var(--cmms-radius)] bg-[var(--cmms-primary)] px-6 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
-                {submitting ? "กำลังบันทึก..." : "เพิ่มจุดหล่อลื่น"}
+                {submitting ? "กำลังบันทึก…" : "เพิ่มจุดหล่อลื่น"}
               </button>
             }
           />
@@ -139,7 +139,7 @@ export default function LubricationPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">กำลังโหลด...</td></tr>
+                <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">กำลังโหลด…</td></tr>
               ) : items.length === 0 ? (
                 <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">ยังไม่มีจุดหล่อลื่น — เพิ่มจากฟอร์มด้านบน</td></tr>
               ) : items.map((it) => (

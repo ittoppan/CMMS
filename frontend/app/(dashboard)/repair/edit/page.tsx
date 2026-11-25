@@ -347,7 +347,7 @@ function EditWorkOrderContent() {
       {loadingData ? (
         <div className="flex items-center justify-center gap-3 p-12 text-muted-foreground">
           <Spinner size={24} />
-          <span>กำลังโหลดข้อมูล...</span>
+          <span>กำลังโหลดข้อมูล…</span>
         </div>
       ) : (
         <div className="max-w-3xl space-y-6">
@@ -426,7 +426,7 @@ function EditWorkOrderContent() {
                 label={closing ? "Root Cause (สาเหตุของปัญหา) *" : "Root Cause (สาเหตุของปัญหา)"}
                 disabled={!closing}
                 hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
-                placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ..."
+                placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ…"
                 value={rootCause}
                 onChange={(e) => setRootCause(e.target.value)}
                 onBlur={() => iv.touch("rootCause")}
@@ -439,7 +439,7 @@ function EditWorkOrderContent() {
                 label={closing ? "Maintenance Description (รายละเอียดการซ่อม) *" : "Maintenance Description (รายละเอียดการซ่อม)"}
                 disabled={!closing}
                 hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
-                placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด..."
+                placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด…"
                 value={maintenanceDesc}
                 onChange={(e) => setMaintenanceDesc(e.target.value)}
                 onBlur={() => iv.touch("maintenanceDesc")}
@@ -450,7 +450,7 @@ function EditWorkOrderContent() {
               {/* Maintenance Note */}
               <Textarea
                 label="Maintenance Note (บันทึกการซ่อม)"
-                placeholder="บันทึกข้อมูลเพิ่มเติม เช่น ข้อควรระวัง, ควรตรวจสอบอีกครั้ง..."
+                placeholder="บันทึกข้อมูลเพิ่มเติม เช่น ข้อควรระวัง, ควรตรวจสอบอีกครั้ง…"
                 value={maintenanceNote}
                 onChange={(e) => setMaintenanceNote(e.target.value)}
                 rows={2}
@@ -666,7 +666,7 @@ function EditWorkOrderContent() {
               className="gap-2"
             >
               <Save className="w-4 h-4" />
-              <span>{submitting ? "กำลังบันทึก..." : "บันทึกข้อมูลซ่อม"}</span>
+              <span>{submitting ? "กำลังบันทึก…" : "บันทึกข้อมูลซ่อม"}</span>
             </Button>
           </div>
         </div>
@@ -689,7 +689,7 @@ export default function EditWorkOrderPage() {
   const hero = usePageHero("repair/edit");
 
   return (
-    <Suspense fallback={<div className="p-8 text-muted-foreground">กำลังโหลด...</div>}>
+    <Suspense fallback={<div className="p-8 text-muted-foreground">กำลังโหลด…</div>}>
       <EditWorkOrderContent />
     </Suspense>
   );

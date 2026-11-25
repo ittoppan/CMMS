@@ -261,7 +261,7 @@ export default function RepairKanbanPage() {
               />
               <Input
                 aria-label="ค้นหา"
-                placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง..."
+                placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -333,7 +333,7 @@ export default function RepairKanbanPage() {
               }}
             >
               {loading ? (
-                <p className="p-5 text-center text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>
+                <p className="p-5 text-center text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด…</p>
               ) : col.items.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--cmms-border)] p-6 text-center text-sm text-[var(--cmms-text-muted)]">
                   <Inbox size={24} strokeWidth={1.5} className="opacity-50" aria-hidden="true" />
@@ -430,7 +430,7 @@ export default function RepairKanbanPage() {
                               className="gap-1.5"
                             >
                               <ChevronLeft size={14} strokeWidth={2} aria-hidden="true" />
-                              {savingId === item.id ? "กำลังบันทึก..." : col.prevLabel}
+                              {savingId === item.id ? "กำลังบันทึก…" : col.prevLabel}
                             </Button>
                           ) : <div />}
 
@@ -443,7 +443,7 @@ export default function RepairKanbanPage() {
                               className="gap-1.5"
                             >
                               <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
-                              {savingId === item.id ? "กำลังบันทึก..." : col.nextLabel}
+                              {savingId === item.id ? "กำลังบันทึก…" : col.nextLabel}
                             </Button>
                           )}
                         </div>

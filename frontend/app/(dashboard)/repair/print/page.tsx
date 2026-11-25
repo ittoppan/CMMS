@@ -57,7 +57,7 @@ export default function RepairPrintPage() {
     return (
       <div className="p-10 text-center text-sm text-muted-foreground">
         <h1 className="sr-only">พิมพ์ใบบันทึกงานซ่อม</h1>
-        กำลังโหลดเอกสาร...
+        กำลังโหลดเอกสาร…
       </div>
     );
   }

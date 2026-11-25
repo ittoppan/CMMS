@@ -329,7 +329,7 @@ function ReturnEntryCard({
             onChange={(e) => setReason(e.target.value)}
           />
         </div>
-        <Button variant="primary" size="sm" disabled={busy} loading={busy} loadingText="กำลังบันทึก..." onClick={submit}>
+        <Button variant="primary" size="sm" disabled={busy} loading={busy} loadingText="กำลังบันทึก…" onClick={submit}>
           <Save className="h-4 w-4" />
           บันทึกคืนซาก
         </Button>

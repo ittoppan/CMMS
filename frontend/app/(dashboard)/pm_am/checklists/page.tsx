@@ -330,7 +330,7 @@ export default function PMChecklistsPage() {
                   <option value="other">อื่น ๆ</option>
                 </select>
               </div>
-              <Input label="คำอธิบาย" placeholder="รายละเอียดเกณฑ์การตรวจ..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <Input label="คำอธิบาย" placeholder="รายละเอียดเกณฑ์การตรวจ…" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <label className="inline-flex cursor-pointer items-center gap-2">
                 <input type="checkbox" checked={form.is_active === 1} onChange={(e) => setForm({ ...form, is_active: e.target.checked ? 1 : 0 })} />
                 <span className="text-sm font-semibold">เปิดใช้งาน</span>

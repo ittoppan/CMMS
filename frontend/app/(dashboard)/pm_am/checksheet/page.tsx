@@ -249,7 +249,7 @@ export default function PMChecksheetPage() {
         if (list.length === 0 && prefill?.assetCode) {
           setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่ถึงกำหนดทำในขณะนี้ (ทำเช็คชีตได้ตั้งแต่วันครบกำหนดเป็นต้นไป รวมงานที่เลยกำหนด)`);
         }
-        // บันทึกเวลา "อัปเดตล่าสุด" — ใช้แสดงบน banner offline (ข้อมูล ณ ... กี่นาทีที่แล้ว)
+        // บันทึกเวลา "อัปเดตล่าสุด" — ใช้แสดงบน banner offline (ข้อมูล ณ … กี่นาทีที่แล้ว)
         snapshotSave("pm_checksheet", { savedAt: Date.now() });
       }
     } catch (e) {
@@ -553,7 +553,7 @@ export default function PMChecksheetPage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดแผน PM...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดแผน PM…</span>
       </div>
     );
   }
@@ -639,7 +639,7 @@ export default function PMChecksheetPage() {
                 opacity: flushing || !navigator.onLine ? 0.6 : 1,
               }}
             >
-              {flushing ? "..." : tliff("liff.checksheet_send_now")}
+              {flushing ? "…" : tliff("liff.checksheet_send_now")}
             </button>
           </div>
           {flushMsg && <div className="text-xs opacity-85">{flushMsg}</div>}
@@ -674,10 +674,10 @@ export default function PMChecksheetPage() {
               disabled={plans.length === 0}
             >
               <SelectTrigger id="pm-plan" aria-label="เลือกแผน PM">
-                <SelectValue placeholder={plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM..."} />
+                <SelectValue placeholder={plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM…"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__" disabled>{plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM..."}</SelectItem>
+                <SelectItem value="__none__" disabled>{plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM…"}</SelectItem>
                 {plans.map((p) => (
                   <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                 ))}
@@ -776,7 +776,7 @@ export default function PMChecksheetPage() {
                                 <Input
                                   label="ค่า"
                                   isLabelHidden
-                                  placeholder="ระบุค่าตัวเลข..."
+                                  placeholder="ระบุค่าตัวเลข…"
                                   value={item.value}
                                   onChange={(e) => handleValue(item.id, e.target.value)}
                                 />
@@ -825,7 +825,7 @@ export default function PMChecksheetPage() {
                           </div>
                           <Textarea
                             label="สาเหตุที่พบ / หมายเหตุ *"
-                            placeholder="อธิบายอาการผิดปกติที่พบ..."
+                            placeholder="อธิบายอาการผิดปกติที่พบ…"
                             value={item.note}
                             onChange={(e) => handleNote(item.id, e.target.value)}
                           />
@@ -849,7 +849,7 @@ export default function PMChecksheetPage() {
                     className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white cmms-btn-success disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-                    {pdfBusy ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF ใบตรวจเช็ค"}
+                    {pdfBusy ? "กำลังสร้าง PDF…" : "ดาวน์โหลด PDF ใบตรวจเช็ค"}
                   </button>
                   <button
                     type="button"
@@ -858,7 +858,7 @@ export default function PMChecksheetPage() {
                     className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-                    {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
+                    {submitting ? "กำลังส่งข้อมูล…" : "บันทึกผลการทำ PM"}
                   </button>
                 </div>
               </div>
@@ -919,7 +919,7 @@ export default function PMChecksheetPage() {
                   id="operator-name-input"
                   label="ชื่อผู้ควบคุมเครื่อง"
                   isLabelHidden
-                  placeholder="กรอกชื่อผู้ควบคุมเครื่อง..."
+                  placeholder="กรอกชื่อผู้ควบคุมเครื่อง…"
                   value={operatorName}
                   onChange={(e) => setOperatorName(e.target.value)}
                 />
@@ -958,7 +958,7 @@ export default function PMChecksheetPage() {
               </Button>
               <Button onClick={confirmSave} disabled={submitting}>
                 <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-                {submitting ? "กำลังบันทึก..." : "ยืนยันและบันทึกผล PM"}
+                {submitting ? "กำลังบันทึก…" : "ยืนยันและบันทึกผล PM"}
               </Button>
             </div>
           </div>

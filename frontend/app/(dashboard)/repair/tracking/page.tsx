@@ -292,7 +292,7 @@ export default function RepairTrackingPage() {
 
           <Textarea
             label="ข้อเสนอแนะเพิ่มเติม"
-            placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง..."
+            placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง…"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}

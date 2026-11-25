@@ -132,7 +132,7 @@ export default function BacklogAgingPage() {
           หมายเหตุ: ใบงานค้างทั้งหมดเป็นข้อมูลนำเข้าเก่าที่ยังไม่ได้ยืนยัน (ดู docs/REPAIR_BACKLOG_REPORT.md) — ห้ามแก้หรือปิดใบงานในงานนี้
         </div>
         {loading ? (
-          <div className="text-sm text-muted-foreground">กำลังโหลด...</div>
+          <div className="text-sm text-muted-foreground">กำลังโหลด…</div>
         ) : error ? (
           <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)] bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-danger)]">{error}</div>
         ) : items.length === 0 ? (

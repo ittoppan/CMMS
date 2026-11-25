@@ -410,7 +410,7 @@ export default function WorkOrdersPage() {
     if (ids.length === 0 || pdfBuilding) return;
     setPdfBuilding(true);
     try {
-      setPdfProgress("กำลังโหลดข้อมูลอะไหล่...");
+      setPdfProgress("กำลังโหลดข้อมูลอะไหล่…");
       const partsRes = await fetch(`/api/v1/repair.php?parts=1&ids=${ids.join(",")}`);
       const partsJson = await partsRes.json();
       const partsMap: Record<number, WorkOrderPart[]> =
@@ -427,7 +427,7 @@ export default function WorkOrdersPage() {
         const row = rawMap[ids[i]];
         const node = row ? document.getElementById(`batch-doc-${row.id}`) : null;
         if (!row || !node) continue;
-        setPdfProgress(`กำลังสร้าง PDF... ${i + 1}/${ids.length}`);
+        setPdfProgress(`กำลังสร้าง PDF… ${i + 1}/${ids.length}`);
         const canvas = await html2canvas(node, {
           scale: 2,
           useCORS: true,
@@ -687,7 +687,7 @@ export default function WorkOrdersPage() {
             className="border-transparent bg-[var(--cmms-success-dark)] text-white hover:opacity-90"
           >
             <TableCellsIcon className="h-4 w-4" />
-            {excelBuilding ? "กำลังสร้าง Excel..." : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
+            {excelBuilding ? "กำลังสร้าง Excel…" : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
           </Button>
           <Button variant="ghost" onClick={fetchWO}>
             <ArrowPathIcon className="h-4 w-4" />{t("action.refresh")}
@@ -828,7 +828,7 @@ export default function WorkOrdersPage() {
           <Input
             label="ค้นหา"
             isLabelHidden
-            placeholder="ค้นหาเลขงาน, เครื่องจักร..."
+            placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
             onChange={(e) => setFilters({ search: e.target.value })}
             className="w-full sm:w-56"
@@ -902,7 +902,7 @@ export default function WorkOrdersPage() {
               }}
             >
               <SelectTrigger aria-label="มุมมองที่บันทึก" className="w-full sm:w-56">
-                <SelectValue placeholder="เลือกมุมมอง..." />
+                <SelectValue placeholder="เลือกมุมมอง…" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">— เลือกมุมมอง —</SelectItem>

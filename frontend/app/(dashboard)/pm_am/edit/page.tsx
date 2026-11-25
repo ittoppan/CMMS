@@ -245,10 +245,10 @@ function EditPMContent() {
                 <label htmlFor="pm-edit-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง) *</label>
                 <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
                   <SelectTrigger id="pm-edit-assignee" aria-label="ผู้รับผิดชอบ">
-                    <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..." />
+                    <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้…" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้...</SelectItem>
+                    <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้…</SelectItem>
                     {users.map((u) => (
                       <SelectItem key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</SelectItem>
                     ))}
@@ -344,7 +344,7 @@ function EditPMContent() {
                 {attMsg && (
                   <p className="text-sm" style={{ color: attMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)" }}>{attMsg.text}</p>
                 )}
-                {attUploading && <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังอัปโหลด...</p>}
+                {attUploading && <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังอัปโหลด…</p>}
                 {attachments.length > 0 && (
                   <div className="space-y-2">
                     {attachments.map((a) => (
@@ -387,7 +387,7 @@ function EditPMContent() {
                 <Input label="กำหนดการรอบนี้" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
               </div>
 
-              <Textarea label="บันทึกผลการตรวจเช็ค / หมายเหตุ" placeholder="บันทึกย่อ ข้อมูลที่พบจากการตรวจเช็ค..." value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <Textarea label="บันทึกผลการตรวจเช็ค / หมายเหตุ" placeholder="บันทึกย่อ ข้อมูลที่พบจากการตรวจเช็ค…" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
               {completedAt && (
                 <Input label="วันที่เสร็จสิ้น (บันทึก)" value={String(completedAt).replace("T", " ").slice(0, 16)} disabled />
@@ -402,7 +402,7 @@ function EditPMContent() {
 
               <div className="flex justify-end gap-3">
                 <Button variant="secondary" onClick={() => router.push("/pm_am")}>ยกเลิก</Button>
-                <Button disabled={submitting} onClick={handleSubmit}>{submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}</Button>
+                <Button disabled={submitting} onClick={handleSubmit}>{submitting ? "กำลังบันทึก…" : "บันทึกข้อมูล"}</Button>
               </div>
             </div>
           )}
@@ -416,7 +416,7 @@ export default function EditPMPage() {
   const hero = usePageHero("pm_am/edit");
 
   return (
-    <Suspense fallback={<p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>}>
+    <Suspense fallback={<p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด…</p>}>
       <EditPMContent />
     </Suspense>
   );

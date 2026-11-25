@@ -126,7 +126,7 @@ export default function ShiftHandoverPage() {
           <FormActions
             primary={
               <button type="submit" disabled={submitting} className="inline-flex min-h-11 items-center justify-center rounded-[var(--cmms-radius)] bg-[var(--cmms-primary)] px-6 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
-                {submitting ? "กำลังบันทึก..." : "บันทึกส่งกะ"}
+                {submitting ? "กำลังบันทึก…" : "บันทึกส่งกะ"}
               </button>
             }
           />
@@ -136,7 +136,7 @@ export default function ShiftHandoverPage() {
         <div className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">ประวัติส่งกะ</h2>
           {loading ? (
-            <div className="text-sm text-muted-foreground">กำลังโหลด...</div>
+            <div className="text-sm text-muted-foreground">กำลังโหลด…</div>
           ) : items.length === 0 ? (
             <div className="rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-10 text-center text-sm text-muted-foreground">
               ยังไม่มีบันทึกส่งกะ — เริ่มบันทึกจากฟอร์มด้านบน

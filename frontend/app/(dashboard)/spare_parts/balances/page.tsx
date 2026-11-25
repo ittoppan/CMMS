@@ -238,7 +238,7 @@ export default function SpareBalancesPage() {
           <Input
             label="ค้นหา"
             isLabelHidden
-            placeholder="ค้นหารหัส, ชื่อ, หมวดหมู่ หรือสถานที่..."
+            placeholder="ค้นหารหัส, ชื่อ, หมวดหมู่ หรือสถานที่…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"

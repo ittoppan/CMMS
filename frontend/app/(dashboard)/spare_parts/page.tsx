@@ -425,7 +425,7 @@ function ItemsCard({
               <>
                 <Button onClick={() => setBatchOpen(true)} disabled={selectedIds.size === 0 || batchUploading}>
                   <ImagePlus size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน..."}
+                  {selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน…"}
                 </Button>
                 <Button variant="secondary" disabled={batchUploading} onClick={() => { setSelectMode(false); setSelectedIds(new Set()); }}>
                   ยกเลิก
@@ -439,7 +439,7 @@ function ItemsCard({
             )}
             <Button variant="secondary" onClick={onExportCsv} disabled={exportingCsv}>
               <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-              {exportingCsv ? "กำลังส่งออก..." : "ส่งออก CSV"}
+              {exportingCsv ? "กำลังส่งออก…" : "ส่งออก CSV"}
             </Button>
             {canEdit && (
               <Button variant="secondary" onClick={() => onEdit({} as SparePart)}>
@@ -457,7 +457,7 @@ function ItemsCard({
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ..."
+              placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ…"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9"
@@ -700,7 +700,7 @@ function ItemsCard({
               disabled={batchUploading || selectedParts.filter((p) => batchFiles[p.rawId]).length === 0}
               onClick={uploadBatch}
             >
-              {batchUploading ? "กำลังอัปโหลด..." : "อัปโหลดทั้งหมด"}
+              {batchUploading ? "กำลังอัปโหลด…" : "อัปโหลดทั้งหมด"}
             </Button>
           </div>
         </div>
@@ -1118,7 +1118,7 @@ export default function SparePartsPage() {
   const sageSyncButton = (
     <Button variant="secondary" onClick={handleSageSync} disabled={syncingSage}>
       <Database size={16} strokeWidth={1.75} aria-hidden="true" />
-      {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
+      {syncingSage ? "กำลังดึง…" : "ดึงสต็อกจาก Sage"}
     </Button>
   );
   const createButton = (
@@ -1397,7 +1397,7 @@ export default function SparePartsPage() {
                     ยกเลิก
                   </Button>
                   <Button variant="danger" disabled={deleting} onClick={handleDelete}>
-                    {deleting ? "กำลังลบ..." : "ลบรายการ"}
+                    {deleting ? "กำลังลบ…" : "ลบรายการ"}
                   </Button>
                 </div>
               </>

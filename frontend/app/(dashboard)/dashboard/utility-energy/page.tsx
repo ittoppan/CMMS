@@ -112,7 +112,7 @@ export default function UtilityEnergyPage() {
           <FormActions
             primary={
               <button type="submit" disabled={submitting} className="inline-flex min-h-11 items-center justify-center rounded-[var(--cmms-radius)] bg-[var(--cmms-primary)] px-6 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
-                {submitting ? "กำลังบันทึก..." : "บันทึกค่ามิเตอร์"}
+                {submitting ? "กำลังบันทึก…" : "บันทึกค่ามิเตอร์"}
               </button>
             }
           />
@@ -145,7 +145,7 @@ export default function UtilityEnergyPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">กำลังโหลด...</td></tr>
+                <tr><td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">กำลังโหลด…</td></tr>
               ) : items.length === 0 ? (
                 <tr><td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">ไม่มีข้อมูล</td></tr>
               ) : items.map((it) => (

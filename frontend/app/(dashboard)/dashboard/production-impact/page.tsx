@@ -35,7 +35,7 @@ export default function ProductionImpactPage() {
       description="ชั่วโมงเดินเครื่อง ยอดผลิตรายกะ ผลกระทบงานซ่อมต่อการผลิต"
     >
       <div className="space-y-6">
-        {loading ? <div className="text-sm text-muted-foreground">กำลังโหลด...</div> :
+        {loading ? <div className="text-sm text-muted-foreground">กำลังโหลด…</div> :
         error ? <div className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)] bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-danger)]">{error}</div> :
         totalRecords === 0 ? (
           <div className="rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-10 text-center">

@@ -180,10 +180,10 @@ export default function PMCreatePage() {
             <label htmlFor="pm-create-asset" className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักรเป้าหมาย *</label>
             <Select value={assetId || "__none__"} onValueChange={(v) => setAssetId(v === "__none__" ? "" : v)}>
               <SelectTrigger id="pm-create-asset" aria-label="เครื่องจักรเป้าหมาย">
-                <SelectValue placeholder="เลือกเครื่องจักร..." />
+                <SelectValue placeholder="เลือกเครื่องจักร…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">เลือกเครื่องจักร...</SelectItem>
+                <SelectItem value="__none__">เลือกเครื่องจักร…</SelectItem>
                 {assets.map((a) => (
                   <SelectItem key={a.id} value={String(a.id)}>{`${a.code} - ${a.name}`}</SelectItem>
                 ))}
@@ -195,10 +195,10 @@ export default function PMCreatePage() {
             <label htmlFor="pm-create-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง) *</label>
             <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
               <SelectTrigger id="pm-create-assignee" aria-label="ผู้รับผิดชอบ">
-                <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..." />
+                <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้...</SelectItem>
+                <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้…</SelectItem>
                 {users.map((u) => (
                   <SelectItem key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</SelectItem>
                 ))}
@@ -325,7 +325,7 @@ export default function PMCreatePage() {
 
           <Textarea
             label="รายละเอียดวิธีตรวจเช็ค / ขอบเขตงาน"
-            placeholder="อธิบายขั้นตอนการตรวจเช็คที่ต้องทำ..."
+            placeholder="อธิบายขั้นตอนการตรวจเช็คที่ต้องทำ…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -341,7 +341,7 @@ export default function PMCreatePage() {
           <div className="flex justify-end gap-3">
             <Button variant="secondary" onClick={() => router.push("/pm_am")}>ยกเลิก</Button>
             <Button disabled={loading} onClick={handleSubmit}>
-              {loading ? "กำลังบันทึก..." : "บันทึกแผนงาน"}
+              {loading ? "กำลังบันทึก…" : "บันทึกแผนงาน"}
             </Button>
           </div>
         </CardContent>

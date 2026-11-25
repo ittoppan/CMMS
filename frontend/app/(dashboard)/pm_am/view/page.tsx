@@ -151,7 +151,7 @@ export default function PMDetailPage() {
         primaryAction={
           <Button disabled={busy} onClick={generateWO}>
             <FilePlus2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            {busy ? "กำลังสร้าง..." : "สร้าง Work Order"}
+            {busy ? "กำลังสร้าง…" : "สร้าง Work Order"}
           </Button>
         }
         actions={[
@@ -162,7 +162,7 @@ export default function PMDetailPage() {
       />
 
       {loading ? (
-        <p className="p-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>
+        <p className="p-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
       ) : error ? (
         <Alert variant="danger" description={error} />
       ) : !pm ? (

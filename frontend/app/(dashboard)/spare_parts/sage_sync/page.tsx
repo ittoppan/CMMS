@@ -265,7 +265,7 @@ export default function SageSyncConfigPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
-        <Spinner size={22} label="กำลังโหลดข้อมูลการซิงค์ Sage..." />
+        <Spinner size={22} label="กำลังโหลดข้อมูลการซิงค์ Sage…" />
       </div>
     );
   }
@@ -462,7 +462,7 @@ export default function SageSyncConfigPage() {
                 onClick={handleSaveConfig}
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {savingConfig ? "กำลังบันทึก..." : "บันทึกรูปแบบการดึง"}
+                {savingConfig ? "กำลังบันทึก…" : "บันทึกรูปแบบการดึง"}
               </button>
               <p className="text-sm text-[var(--cmms-text-secondary)]">
                 หมวดหมู่ที่เปิดใช้งาน: {categories.filter(c => c.enabled).map(c => c.id).join(" · ") || "—"}
@@ -532,7 +532,7 @@ export default function SageSyncConfigPage() {
                           className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" className={syncingCat === cat.id ? "animate-spin" : ""} />
-                          {syncingCat === cat.id ? "กำลังดึง..." : "ดึงข้อมูลทันที"}
+                          {syncingCat === cat.id ? "กำลังดึง…" : "ดึงข้อมูลทันที"}
                         </button>
                       </div>
                     </div>

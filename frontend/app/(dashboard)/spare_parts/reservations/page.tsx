@@ -127,7 +127,7 @@ export default function ReservationsPage() {
       <Card>
         <CardHeader><CardTitle className="text-base">ตารางการจองอะไหล่ (เรียงตามจำนวนจอง)</CardTitle></CardHeader>
         <CardContent>
-          {loading ? <p className="text-sm text-muted-foreground">กำลังโหลด...</p> : (
+          {loading ? <p className="text-sm text-muted-foreground">กำลังโหลด…</p> : (
             <SimpleDataTable columns={columns} data={rows} />
           )}
         </CardContent>

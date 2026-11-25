@@ -247,7 +247,7 @@ export default function InventoryOptimizationPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
-        <Spinner size={22} label="กำลังคำนวณข้อมูลคลังอะไหล่..." />
+        <Spinner size={22} label="กำลังคำนวณข้อมูลคลังอะไหล่…" />
       </div>
     );
   }

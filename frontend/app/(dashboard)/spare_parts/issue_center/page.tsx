@@ -415,10 +415,10 @@ export default function SageIssueCenterPage() {
                   onValueChange={(v) => setWorkOrder(v === "__none__" ? "" : v)}
                 >
                   <SelectTrigger size="lg">
-                    <SelectValue placeholder="เลือกใบสั่งงาน..." />
+                    <SelectValue placeholder="เลือกใบสั่งงาน…" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__" disabled>เลือกใบสั่งงาน...</SelectItem>
+                    <SelectItem value="__none__" disabled>เลือกใบสั่งงาน…</SelectItem>
                     {workOrders.map((w) => (
                       <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
                     ))}
@@ -432,10 +432,10 @@ export default function SageIssueCenterPage() {
                   onValueChange={(v) => setTechnician(v === "__none__" ? "" : v)}
                 >
                   <SelectTrigger size="lg">
-                    <SelectValue placeholder="เลือกช่าง..." />
+                    <SelectValue placeholder="เลือกช่าง…" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__" disabled>เลือกช่าง...</SelectItem>
+                    <SelectItem value="__none__" disabled>เลือกช่าง…</SelectItem>
                     {users.map((u) => (
                       <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
                     ))}
@@ -455,7 +455,7 @@ export default function SageIssueCenterPage() {
                 <Input
                   label="ค้นหาอะไหล่"
                   isLabelHidden
-                  placeholder="ค้นหารหัส / ชื่ออะไหล่..."
+                  placeholder="ค้นหารหัส / ชื่ออะไหล่…"
                   value={partSearch}
                   onChange={(e) => setPartSearch(e.target.value)}
                   className="pl-9 pr-14"
@@ -564,7 +564,7 @@ export default function SageIssueCenterPage() {
               size="lg"
               disabled={submitting || !workOrder || !technician || cart.length === 0}
               loading={submitting}
-              loadingText="กำลังเบิกจ่าย..."
+              loadingText="กำลังเบิกจ่าย…"
               onClick={handleSubmit}
             >
               <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />

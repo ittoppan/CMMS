@@ -216,7 +216,7 @@ export default function StockTakePage() {
   if (loading && rounds.length === 0) {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
-        <Spinner size={22} label="กำลังโหลดข้อมูลนับสต็อก..." />
+        <Spinner size={22} label="กำลังโหลดข้อมูลนับสต็อก…" />
       </div>
     );
   }
@@ -301,7 +301,7 @@ export default function StockTakePage() {
                 <Input
                   label="ค้นหาอะไหล่"
                   isLabelHidden
-                  placeholder="ค้นหา: รหัส / ชื่อ / ตำแหน่ง..."
+                  placeholder="ค้นหา: รหัส / ชื่อ / ตำแหน่ง…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -374,7 +374,7 @@ export default function StockTakePage() {
                               : "text-white cmms-btn-primary"
                           }`}
                         >
-                          {counted ? "บันทึกแล้ว ✓" : busy ? "กำลังบันทึก..." : "บันทึก"}
+                          {counted ? "บันทึกแล้ว ✓" : busy ? "กำลังบันทึก…" : "บันทึก"}
                         </button>
                       </div>
                     </CardContent>
@@ -450,7 +450,7 @@ export default function StockTakePage() {
           />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setShowCreate(false)}>ยกเลิก</Button>
-            <Button disabled={busy} onClick={createRound}>{busy ? "กำลังสร้าง..." : "สร้างรอบ"}</Button>
+            <Button disabled={busy} onClick={createRound}>{busy ? "กำลังสร้าง…" : "สร้างรอบ"}</Button>
           </div>
         </div>
       </Dialog>
@@ -463,7 +463,7 @@ export default function StockTakePage() {
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmComplete(false)}>ยังไม่ปิด</Button>
-            <Button disabled={busy} onClick={completeRound}>{busy ? "กำลังปิด..." : "ยืนยันปิดรอบ"}</Button>
+            <Button disabled={busy} onClick={completeRound}>{busy ? "กำลังปิด…" : "ยืนยันปิดรอบ"}</Button>
           </div>
         </div>
       </Dialog>

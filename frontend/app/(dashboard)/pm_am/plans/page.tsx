@@ -341,7 +341,7 @@ export default function PMPlansPage() {
                           <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/view?id=${r.open_pm_id}`)}>เปิดรอบ PM <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Button>
                         ) : (r.status === "due" || r.status === "near") ? (
                           <Button variant="primary" size="sm" disabled={!!cbmBusy[`${r.asset_id}-${r.plan_id}`]} onClick={() => generateFromCbm(r)}>
-                            {cbmBusy[`${r.asset_id}-${r.plan_id}`] ? "กำลังสร้าง..." : "สร้างรอบ PM"}
+                            {cbmBusy[`${r.asset_id}-${r.plan_id}`] ? "กำลังสร้าง…" : "สร้างรอบ PM"}
                           </Button>
                         ) : null}
                         <Button variant="ghost" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>แผน</Button>
@@ -368,12 +368,12 @@ export default function PMPlansPage() {
             </div>
             <div className="relative min-w-0 max-w-[280px]">
               <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
-              <Input aria-label="ค้นหา" className="pl-9" placeholder="ค้นหารหัส / ชื่อแผน..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input aria-label="ค้นหา" className="pl-9" placeholder="ค้นหารหัส / ชื่อแผน…" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
 
           {loading ? (
-            <p className="py-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล...</p>
+            <p className="py-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล…</p>
           ) : filtered.length === 0 ? (
             <EmptyState icon={<CalendarDays size={28} strokeWidth={1.5} aria-hidden="true" />} title={search ? "ไม่พบแผนที่ค้นหา" : "ยังไม่มีแผน PM"} description={search ? "ลองค้นหาด้วยคำอื่น" : 'กด "สร้างแผน PM ใหม่" เพื่อเริ่มต้น'} />
           ) : (
