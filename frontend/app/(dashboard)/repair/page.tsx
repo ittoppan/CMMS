@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { swalConfirm } from "@/lib/swal";
 import {
   ArrowPathIcon,
   BookmarkIcon,
@@ -659,14 +660,21 @@ export default function WorkOrdersPage() {
             aria-label="ลบงานซ่อม"
             onClick={async () => {
               const delId = row.original.rawId || row.original.id;
-              if (!confirm(`ยืนยันการลบงานซ่อม #${delId}? ข้อมูลที่เกี่ยวข้อง (spare parts / attachments / ratings) จะถูกลบด้วย`)) return;
+              const confirmed = await swalConfirm({
+                title: "ลบงานซ่อมนี้?",
+                text: `งานซ่อม #${delId} และข้อมูลที่เกี่ยวข้อง (spare parts / attachments / ratings) จะถูกลบถาวร`,
+                destructive: true,
+                confirmText: "ลบงานซ่อม",
+              });
+              if (!confirmed) return;
               try {
                 const res = await fetch(`/api/v1/repair.php?id=${delId}`, { method: "DELETE" });
                 if (!res.ok && res.status !== 204) throw new Error(await res.text());
                 await fetchWO();
+                showToast("success", `ลบงานซ่อม #${delId} แล้ว`);
               } catch (e) {
                 console.error("Delete repair failed", e);
-                alert("ลบงานซ่อมไม่สำเร็จ กรุณาลองใหม่");
+                showToast("error", "ลบงานซ่อมไม่สำเร็จ กรุณาลองใหม่");
               }
             }}
           >
