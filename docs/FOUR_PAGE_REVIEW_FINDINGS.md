@@ -8,7 +8,7 @@
 
 | หมวด | แก้แล้ว | ยังค้าง |
 |------|---------|---------|
-| Heading hierarchy (h1→KPI ไม่ใช่ h3) | repair, pm_am หลัก, pm_am/dashboard, pm_am/calendar | pm_am/plans (5), pm_am/plans/[id] (4) |
+| Heading hierarchy (h1→KPI ไม่ใช่ h3) | repair, pm_am หลัก, pm_am/dashboard, pm_am/calendar, pm_am/plans, pm_am/plans/[id] | — |
 | Heading skip (h1→h4/h5) | — | pm_am/calendar, pm_am/dashboard |
 | Ellipsis `...` → `…` | 4 โมดูลหลัก + shared components | — (gate ป้องกัน regression: `scripts/design-audit.py` check `thai-ellipsis`) |
 | Search URL debounce + flush | repair, spare_parts | — |
@@ -32,6 +32,8 @@
 | 5 | spare_parts | debounce searchInput 350ms + flush | `frontend/app/(dashboard)/spare_parts/page.tsx` (useEffect debounce, flushSearchInput) | `3c3b8b77` | build ผ่าน |
 | 6 | spare_parts | `<img>` lazy/async + width/height 40×40 | `frontend/app/(dashboard)/spare_parts/page.tsx:534,658,683` | `0f0c3d8f` | diff |
 | 7 | pm_am หลัก | KPI 5 ใบเป็น `<p className="cmms-kpi-value">` | `frontend/app/(dashboard)/pm_am/page.tsx:604,613,622,631,644` | `40b26fd0` | grep cmms-kpi-value |
+| 18 | pm_am/plans | KPI 5 ใบ h3→p | `frontend/app/(dashboard)/pm_am/plans/page.tsx:234,243,252,261,270` | `05a9a84e` | grep cmms-kpi-value |
+| 19 | pm_am/plans/[id] | KPI 4 ใบ h3→p | `frontend/app/(dashboard)/pm_am/plans/[id]/page.tsx:346,352,358,364` | `05a9a84e` | grep cmms-kpi-value |
 | 8 | pm_am/dashboard | KPI h3→p | `frontend/app/(dashboard)/pm_am/dashboard/page.tsx` | `40b26fd0` | commit |
 | 9 | pm_am/calendar | KPI h3→p | `frontend/app/(dashboard)/pm_am/calendar/page.tsx` | `40b26fd0` | commit |
 | 10 | pm_am/* | transition-all → transition (31 จุด) | หลายไฟล์ใน pm_am/ | `0f0c3d8f` | diff |
@@ -47,8 +49,6 @@
 
 | # | หน้า/ไฟล์ | ปัญหา | file:line | ความเสี่ยง | ข้อเสนอ |
 |---|-----------|--------|-----------|-----------|---------|
-| P1 | pm_am/plans | KPI 5 ใบยังเป็น `<h3 className="cmms-kpi-value">` | `frontend/app/(dashboard)/pm_am/plans/page.tsx:234,243,252,261,270` | heading hierarchy ผิด (h1→h3) | เปลี่ยนเป็น `<p>` เหมือน `pm_am/page.tsx:604` |
-| P2 | pm_am/plans/[id] | KPI 4 ใบยังเป็น `<h3>` | `frontend/app/(dashboard)/pm_am/plans/[id]/page.tsx:346,352,358,364` | heading hierarchy ผิด | เปลี่ยนเป็น `<p>` |
 | P3 | pm_am/calendar | heading skip h1→h5/h4 | `frontend/app/(dashboard)/pm_am/calendar/page.tsx:424,550,561,606,640` (h5/h4) | a11y heading order | normalize เป็น h2/h3 |
 | P4 | pm_am/dashboard | heading skip h1→h4 | `frontend/app/(dashboard)/pm_am/dashboard/page.tsx:197` | a11y heading order | normalize เป็น h2/h3 |
 
