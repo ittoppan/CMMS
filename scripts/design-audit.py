@@ -252,6 +252,77 @@ def audit_file(rel):
     return issues, summary
 
 
+# ---------------------------------------------------------------------------
+# Check 8: Thai UI string containing ASCII "..." (ellipsis typo) — FAIL
+# ---------------------------------------------------------------------------
+# จับ "..." (3 จุด ASCII) ที่หลุดเข้าไปในสตริงภาษาไทยของ UI
+# (เช่น "กำลังโหลด...") — ควรใช้ "…" (U+2026) แทน
+# ตรวจเฉพาะ string literal (single/double/backtick) ที่มีอักขระไทย + "..."
+# จึงไม่แตะ spread operator (...obj) และโค้ดอื่น
+THAI_RE = re.compile(r"[\u0e00-\u0e7f]")
+STR_LITERAL_RE = re.compile(r'''"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\\n]|\\.)*`''')
+
+
+def list_changed_frontend(diff_ref):
+    """คืนรายการไฟล์ frontend ที่เปลี่ยน (ทุก .ts/.tsx/.js/.jsx) เทียบ diff_ref."""
+    try:
+        out = subprocess.run(
+            ["git", "diff", "--name-only", diff_ref, "--", "frontend"],
+            cwd=ROOT, capture_output=True, text=True, timeout=20,
+        )
+        if out.returncode != 0:
+            raise subprocess.CalledProcessError(out.returncode, out.args)
+        changed = [l.strip().replace("\\", "/") for l in out.stdout.splitlines() if l.strip()]
+    except Exception:
+        out = subprocess.run(
+            ["git", "diff", "--name-only", "HEAD~1", "--", "frontend"],
+            cwd=ROOT, capture_output=True, text=True, timeout=20,
+        )
+        changed = [l.strip().replace("\\", "/") for l in out.stdout.splitlines() if l.strip()]
+    return [p for p in changed if p.endswith((".ts", ".tsx", ".js", ".jsx"))]
+
+
+def ellipsis_issues_for_file(rel):
+    """ตรวจไฟล์เดียว → list ของ (line, detail)."""
+    path = os.path.join(ROOT, rel)
+    if not os.path.isfile(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    lines = text.splitlines()
+    found = []
+    for m in STR_LITERAL_RE.finditer(text):
+        lit = m.group(0)
+        if "..." not in lit:
+            continue
+        if not THAI_RE.search(lit):
+            continue
+        # ข้ามกรณีที่ "..." ทั้งหมดเป็น spread/rest (ตามด้วยตัวอักษร/{/()
+        # เช่น ${...items} ใน template literal — ไม่ใช่ ellipsis ของข้อความ UI
+        ellipsis_like = False
+        for mm in re.finditer(r"\.\.\.", lit):
+            after = lit[mm.end():mm.end()+1]
+            if after and (after.isascii() and (after.isalnum() or after in "_{($")):
+                continue
+            # ถ้าตามด้วย space/tab แล้วตัวอักษร → อาจเป็น spread ในข้อความ? ถือเป็น ellipsis
+            ellipsis_like = True
+            break
+        if not ellipsis_like:
+            continue
+        lineno = text[:m.start()].count("\n") + 1
+        snippet = lit if len(lit) <= 80 else lit[:77] + "..."
+        found.append((lineno, snippet))
+    # de-dupe by line (หลาย literal ต่อบรรทัด)
+    seen = set()
+    out = []
+    for lineno, snippet in found:
+        if lineno in seen:
+            continue
+        seen.add(lineno)
+        out.append((lineno, snippet))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description="CMMS-TPT design-guideline audit")
     ap.add_argument("--strict", action="store_true", help="WARN ทุกตัว = FAIL (ใช้ gate งานใหม่)")
@@ -267,6 +338,19 @@ def main():
         issues, summary = audit_file(rel)
         all_issues[rel] = issues
         summaries[rel] = summary
+
+    # Check 8: Thai UI string containing ASCII "..." (regression gate, diff mode only)
+    if args.diff:
+        for rel in list_changed_frontend(args.diff):
+            res = ellipsis_issues_for_file(rel)
+            if not res:
+                continue
+            iss = [("thai-ellipsis", "FAIL", ln,
+                    "สตริงภาษาไทยมี \"...\" (3 จุด) — ใช้ \"…\" (U+2026) แทน: %s" % snip)
+                   for (ln, snip) in res]
+            all_issues.setdefault(rel, []).extend(iss)
+            summaries.setdefault(rel, {"eyebrow": True, "lines": 0, "emoji": 0, "hex": 0,
+                                      "gradient": 0, "banned_hex": 0, "andon": 0, "kpi": 0})
 
     n_fail = sum(1 for iss in all_issues.values() for (_k, lv, _i, _t) in iss if lv == "FAIL")
     n_warn = sum(1 for iss in all_issues.values() for (_k, lv, _i, _t) in iss if lv == "WARN")
