@@ -305,9 +305,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
           <SidebarNav canShow={canShow} isSelected={isSelected} frequentItems={frequentItems} />
           <div className="border-t border-border p-3">
-            <button
-              type="button"
-              onClick={() => router.push("/profile")}
+            <Link
+              href="/profile"
               className="flex w-full items-center gap-2.5 rounded-[var(--cmms-radius)] border border-border bg-card px-2.5 py-2 text-left shadow-sm transition-colors hover:border-[var(--cmms-border-hover)]"
             >
               <EmployeeAvatar
@@ -322,7 +321,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="ml-1 text-xs font-normal text-muted-foreground">(จำลอง)</span>
                 )}
               </span>
-            </button>
+            </Link>
           </div>
         </aside>
 
@@ -373,15 +372,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {lang === "th" ? "EN" : "TH"}
               </button>
               <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
-              <button
-                type="button"
+              <Link
+                href="/login"
                 aria-label={t("menu.logout")}
                 title={t("menu.logout")}
-                onClick={() => { router.push("/login"); }}
                 className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 {t("menu.logout")}
-              </button>
+              </Link>
             </div>
           </header>
 
@@ -473,7 +471,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <EmployeeAvatar name={currentUser?.name || "USER"} photoUrl={currentUser?.avatar} size={24} />
             </Link>
-            <a
+            <Link
               href="/repair/request"
               className="cmms-mobile-app-bar-btn"
               aria-label={`แจ้งซ่อม${pendingCount > 0 ? ` — มีงานค้างส่ง ${pendingCount} รายการ` : ""}`}
@@ -488,7 +486,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                 )}
               </span>
-            </a>
+            </Link>
             <ConnectivityStatus variant="icon" />
             <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
           </header>
@@ -554,7 +552,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 const ItemIcon = item.icon;
                 const isScan = forcedScan || item.key === "scan" || item.href === "/scan";
                 return (
-                  <a
+                  <Link
                     key={`${item.key}-${item.href}`}
                     href={item.href}
                     className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
@@ -571,7 +569,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       )}
                     </span>
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 );
               };
               return (
