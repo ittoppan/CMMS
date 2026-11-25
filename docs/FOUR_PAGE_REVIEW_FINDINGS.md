@@ -2,14 +2,14 @@
 
 เอกสารนี้รวม finding จากรีวิว 4 หน้าหลัก + sibling ที่เกี่ยวข้อง เพื่อกันสั่งแก้ซ้ำในสิ่งที่แก้ไปแล้ว และชี้ชัดว่าอะไรยังค้างจริง
 
-อัปเดตล่าสุด: 25 พ.ย. 2026 — commit `016b85ef` (main) — base สำหรับ review ควรเป็น origin/main (ล่าสุด) ไม่ใช่ commit เก่า
+อัปเดตล่าสุด: 25 พ.ย. 2026 — commit `96ffcc4e` (main) — base สำหรับ review ควรเป็น origin/main (ล่าสุด) ไม่ใช่ commit เก่า
 
 ## สถานะภาพรวม
 
 | หมวด | แก้แล้ว | ยังค้าง |
 |------|---------|---------|
 | Heading hierarchy (h1→KPI ไม่ใช่ h3) | repair, pm_am หลัก, pm_am/dashboard, pm_am/calendar, pm_am/plans, pm_am/plans/[id] | — |
-| Heading skip (h1→h4/h5) | — | pm_am/calendar, pm_am/dashboard |
+| Heading skip (h1→h4/h5) | pm_am/calendar, pm_am/dashboard (ปิดแล้วใน `77c302f0`, ตรวจ DOM ซ้ำ 25 พ.ย. 2026) | — |
 | Ellipsis `...` → `…` | 4 โมดูลหลัก + shared components | — (gate ป้องกัน regression: `scripts/design-audit.py` check `thai-ellipsis`) |
 | Search URL debounce + flush | repair, spare_parts | — |
 | transition-all → transition | 31 จุด (ยกเว้น progress bar width) | — |
@@ -44,13 +44,16 @@
 | 15 | 4 โมดูลหลัก | `...` → `…` | 40 ไฟล์ | `59a5b9bf` | diff 121 จุด |
 | 16 | design-audit | gate `thai-ellipsis` | `scripts/design-audit.py` | `b1995aa6` | ทดสอบจับ regression ได้ |
 | 17 | review cleanup | progress bar transition-all + ลบ blank lines | `frontend/app/(dashboard)/spare_parts/sage_shipments/page.tsx`, repair/workload, spare_parts/issue_center | `fc901023` | build ผ่าน |
+| 20 | pm_am/calendar | heading skip h1→h5/h4 → h2/h3 | `frontend/app/(dashboard)/pm_am/calendar/page.tsx:424,550,561,606` (h2), `:640` (h3) | `77c302f0` | DOM จริง 25 พ.ย. 2026: h1,h2,h2,h2,h2,h3 — skips none |
+| 21 | pm_am/dashboard | heading skip h1→h4 → h2 | `frontend/app/(dashboard)/pm_am/dashboard/page.tsx:197` (h2) | `77c302f0` | DOM จริง: h1,h2 — skips none; KPI ยังเป็น `<p className="cmms-kpi-value">` ตาม `40b26fd0` |
 
 ## ยังค้างจริง (Pending)
 
 | # | หน้า/ไฟล์ | ปัญหา | file:line | ความเสี่ยง | ข้อเสนอ |
 |---|-----------|--------|-----------|-----------|---------|
-| P3 | pm_am/calendar | heading skip h1→h5/h4 | `frontend/app/(dashboard)/pm_am/calendar/page.tsx:424,550,561,606,640` (h5/h4) | a11y heading order | normalize เป็น h2/h3 |
-| P4 | pm_am/dashboard | heading skip h1→h4 | `frontend/app/(dashboard)/pm_am/dashboard/page.tsx:197` | a11y heading order | normalize เป็น h2/h3 |
+| — | — | ไม่มีรายการค้างในขอบเขต 4 หน้าหลัก + sibling แล้ว | — | — | — |
+
+> P3 (pm_am/calendar) และ P4 (pm_am/dashboard) ปิดแล้ว — โค้ดถูก normalize เป็น h2/h3 ตั้งแต่ `77c302f0` และตรวจ DOM จริงซ้ำเมื่อ 25 พ.ย. 2026 แล้วไม่พบ skip (รายละเอียดในตาราง Fixed #20–#21)
 
 ## หมายเหตุสภาพแวดล้อม (ไม่ใช่ finding ของโค้ด)
 
