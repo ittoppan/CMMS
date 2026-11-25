@@ -238,7 +238,7 @@ export default function ContractorCreatePage() {
               <div className="flex items-center gap-2">
                 <input className={inputCls} value={c.line_id} onChange={(e) => setContact(i, "line_id", e.target.value)} placeholder="LINE ID" />
                 {contacts.length > 1 && (
-                  <Button variant="ghost" size="icon" onClick={() => setContacts((p) => p.filter((_, idx) => idx !== i))} title="ลบผู้ติดต่อ">
+                  <Button variant="ghost" size="icon" aria-label="ลบผู้ติดต่อ" onClick={() => setContacts((p) => p.filter((_, idx) => idx !== i))} title="ลบผู้ติดต่อ">
                     <Trash2 size={15} aria-hidden="true" />
                   </Button>
                 )}

@@ -310,10 +310,10 @@ export default function AssetReliabilityProfilePage() {
       key: "actions", header: "จัดการ", align: "right",
       renderCell: (r) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon-xs" title="เปลี่ยนชิ้นส่วน" onClick={() => { setReplDialog({ component: r }); setReplForm({ reason: "" }); setReplError(""); }}>
+          <Button variant="ghost" size="icon-xs" aria-label="เปลี่ยนชิ้นส่วน" title="เปลี่ยนชิ้นส่วน" onClick={() => { setReplDialog({ component: r }); setReplForm({ reason: "" }); setReplError(""); }}>
             <RefreshCw size={15} strokeWidth={1.75} aria-hidden="true" />
           </Button>
-          <Button variant="ghost" size="icon-xs" className="text-destructive" title="ลบชิ้นส่วน" onClick={() => void deleteComponent(r.id)}>
+          <Button variant="ghost" size="icon-xs" className="text-destructive" aria-label="ลบชิ้นส่วน" title="ลบชิ้นส่วน" onClick={() => void deleteComponent(r.id)}>
             <Trash2 size={15} strokeWidth={1.75} aria-hidden="true" />
           </Button>
         </div>
@@ -759,7 +759,7 @@ export default function AssetReliabilityProfilePage() {
                     { key: "method", header: "วิธีวัด", renderCell: (r) => r.method || "—" },
                     { key: "measured_at", header: "วัดเมื่อ", renderCell: (r) => r.measured_at || r.created_at || "—" },
                     { key: "notes", header: "หมายเหตุ", renderCell: (r) => r.notes || "—" },
-                    { key: "actions", header: "", align: "right", renderCell: (r) => <Button variant="ghost" size="icon-xs" className="text-destructive" title="ลบ" onClick={() => void deleteMeasurement(r.id)}><Trash2 size={15} strokeWidth={1.75} aria-hidden="true" /></Button> },
+                    { key: "actions", header: "", align: "right", renderCell: (r) => <Button variant="ghost" size="icon-xs" className="text-destructive" aria-label="ลบค่าวัดสภาพ" title="ลบ" onClick={() => void deleteMeasurement(r.id)}><Trash2 size={15} strokeWidth={1.75} aria-hidden="true" /></Button> },
                   ]}
                   data={data.measurements}
                   idKey="id"
