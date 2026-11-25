@@ -184,6 +184,10 @@ export default function WorkOrdersPage() {
     }
   }, []);
 
+  // เก็บค่าล่าสุดของตัวกรองไว้ใน ref เพื่อ flush ตอน blur/unmount (closure อาจ stale)
+  const latestFiltersRef = useRef({ search, statusFilter, priorityFilter, outsourceFilter });
+  latestFiltersRef.current = { search, statusFilter, priorityFilter, outsourceFilter };
+
   const syncUrl = useCallback((next: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, mode: "replace" | "push" = "replace") => {
     // การ sync ที่สั่งตรง ๆ (เปลี่ยนตัวกรอง/มุมมอง) ต้องไม่ถูก debounce เขียนทับทีหลัง
     cancelPendingUrlSync();
@@ -192,6 +196,12 @@ export default function WorkOrdersPage() {
     const url = qs ? `${pathname}?${qs}` : pathname;
     if (mode === "push") router.push(url); else router.replace(url);
   }, [cancelPendingUrlSync, pathname, router, searchParams]);
+
+  const flushPendingUrlSync = useCallback(() => {
+    if (urlSyncTimerRef.current === null) return;
+    cancelPendingUrlSync();
+    syncUrl(latestFiltersRef.current, "replace");
+  }, [cancelPendingUrlSync, syncUrl]);
 
   const setFilters = useCallback((patch: Partial<{ search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }>) => {
     const next = { search, statusFilter, priorityFilter, outsourceFilter, ...patch };
@@ -215,7 +225,7 @@ export default function WorkOrdersPage() {
     }, SEARCH_URL_DEBOUNCE_MS);
   }, [cancelPendingUrlSync, outsourceFilter, priorityFilter, statusFilter, syncUrl]);
 
-  useEffect(() => () => cancelPendingUrlSync(), [cancelPendingUrlSync]);
+  useEffect(() => () => flushPendingUrlSync(), [flushPendingUrlSync]);
 
   useEffect(() => {
     setSavedViews(listSavedViews(REPAIR_VIEW_ENTITY));
@@ -864,6 +874,7 @@ export default function WorkOrdersPage() {
             placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
             onChange={(e) => changeSearch(e.target.value)}
+            onBlur={flushPendingUrlSync}
             className="w-full sm:w-56"
           />
           <Select
