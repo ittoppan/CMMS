@@ -405,8 +405,6 @@ export function SidebarNav({
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
-  const totalVisible = groups.reduce((n, g) => n + g.visibleItems.length, 0);
-
   // Accordion: เปิดได้ทีละหมวด — เก็บ openKey ที่ SidebarNav
   const [openKey, setOpenKey] = React.useState<string | null>(() => {
     for (const g of NAV_GROUPS) {
@@ -429,20 +427,20 @@ export function SidebarNav({
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={`${t("sidebar.search")} · ${totalVisible}`}
+              placeholder={t("sidebar.search")}
               aria-label="ค้นหาเมนู"
               autoComplete="off"
-              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-all placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
+              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
             />
             {!query && (
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent("cmms:open-palette"))}
-                aria-label="⌘K — เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"
-                title="ค้นหาทั่วทั้งแอป — Ctrl/⌘ K"
+                aria-label={"⌘\u00A0K — เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"}
+                title={"ค้นหาทั่วทั้งแอป — Ctrl/⌘\u00A0K"}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-border bg-card px-1.5 py-0.5 text-[0.6rem] font-bold text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
               >
-                ⌘K
+                {"⌘\u00A0K"}
               </button>
             )}
             {query && (
@@ -478,7 +476,7 @@ export function SidebarNav({
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all lg:h-9",
+                        "flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-colors lg:h-9",
                         active
                           ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
                           : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"
@@ -620,7 +618,7 @@ function SidebarGroup({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "group/item relative flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all lg:h-9",
+                    "group/item relative flex h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-colors lg:h-9",
                     active
                       ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
                       : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"

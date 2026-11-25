@@ -49,7 +49,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Content
         className={cn(
-          "cmms-sheet-content fixed z-50 flex flex-col gap-4 bg-background shadow-xl",
+          "cmms-sheet-content fixed z-50 flex flex-col gap-4 overscroll-contain bg-background shadow-xl",
           side === "left" && "inset-y-0 left-0 h-full w-72 max-w-[85vw] border-r p-0",
           side === "right" && "inset-y-0 right-0 h-full w-72 max-w-[85vw] border-l p-0",
           side === "top" && "inset-x-0 top-0 h-auto border-b",

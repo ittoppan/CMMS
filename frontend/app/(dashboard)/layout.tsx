@@ -294,7 +294,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               ไม่งั้นโลโก้กินพื้นที่จนชื่อระบบถูกตัดเหลือ "C..." */}
           <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
+            <img src="/logo.png" alt="TOPPAN" width={554} height={91} className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
             <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">CMMS-TOPPAN</span>
             {/* จุดสถานะเป็นเพียงลวดลาย (decoration) — ไม่ผูกกับสถานะจริง จึงไม่ประกาศให้ screen reader
                 (ใช้ ConnectivityStatus ใน topbar สำหรับสถานะเชื่อมต่อจริง) */}
@@ -463,7 +463,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
+            <img src="/logo.png" alt="TOPPAN" width={554} height={91} className="cmms-mobile-app-bar-logo" />
             <div className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</div>
             <Link
               href="/profile"
@@ -498,7 +498,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
               <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto object-contain" />
+                <img src="/logo.png" alt="TOPPAN" width={554} height={91} className="h-7 w-auto object-contain" />
                 <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">
                   CMMS-TOPPAN
                 </span>

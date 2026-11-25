@@ -48,7 +48,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.frequent": { th: "ใช้บ่อย", en: "Frequently used" },
   "nav.show_more": { th: "แสดงเพิ่มเติม", en: "Show more" },
   "nav.show_less": { th: "ย่อรายการ", en: "Show less" },
-  "sidebar.search": { th: "ค้นหาเมนู...", en: "Search menu..." },
+  "sidebar.search": { th: "ค้นหาเมนู…", en: "Search menu…" },
   "sidebar.no_results": { th: "ไม่พบเมนูที่ค้นหา", en: "No menus found" },
 
   // ── เมนูหลัก (SideNav items) ──
