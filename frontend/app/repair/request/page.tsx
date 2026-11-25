@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import RepairRequestForm from "@/components/RepairRequestForm";
 import AssetHubCard from "@/components/AssetHubCard";
 import MyRepairs from "@/components/MyRepairs";
@@ -7,12 +7,6 @@ import LiffBridge from "@/components/LiffBridge";
 export const metadata: Metadata = {
   title: "แจ้งซ่อมด่วน — MAINTENANCE JOB REQUEST (F-EN-03)",
   description: "ฟอร์มแจ้งซ่อมสำหรับผู้ใช้งาน LINE (Engineering)",
-};
-
-// หน้าเต็มจอ (cmms-liff-page gradient) ไม่มี app bar ของ dashboard —
-// theme-color ต้องตรงกับพื้นบนสุดของ gradient ไม่ใช่ #FFFFFF ของ root
-export const viewport: Viewport = {
-  themeColor: "#f6fafe",
 };
 
 /**
