@@ -1,4 +1,11 @@
 import Link from "next/link";
+import type { Viewport } from "next";
+
+// หน้า 404 ระดับ root ไม่มี app bar ของ dashboard — พื้นหลังจริงคือ
+// var(--cmms-bg-page) ไม่ใช่ #FFFFFF ของ root layout
+export const viewport: Viewport = {
+  themeColor: "#F5F7FA",
+};
 
 export default function NotFound() {
   return (

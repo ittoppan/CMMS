@@ -1,5 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import MyRepairs from "@/components/MyRepairs";
+
+// หน้าเต็มจอ (cmms-liff-page gradient) ไม่มี app bar ของ dashboard —
+// theme-color ต้องตรงกับพื้นบนสุดของ gradient ไม่ใช่ #FFFFFF ของ root
+export const viewport: Viewport = {
+  themeColor: "#f6fafe",
+};
 
 export const metadata: Metadata = {
   title: "ติดตามงานของฉัน — CMMS-TOPPAN",
