@@ -650,7 +650,7 @@ export default function PMSchedulePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>แผนบำรุงรักษาเชิงป้องกัน (PM/AM)</CardTitle>
+          <CardTitle>รายการแผน PM ทั้งหมด</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {notice && <Alert variant={notice.kind === "success" ? "success" : "danger"} description={notice.text} />}
