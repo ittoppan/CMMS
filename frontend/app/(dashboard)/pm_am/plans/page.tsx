@@ -231,7 +231,7 @@ export default function PMPlansPage() {
             <AndonLamp status="idle" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">แผนทั้งหมด</p>
-              <h3 className="cmms-kpi-value">{plans.length} <span className="cmms-kpi-unit">แผน</span></h3>
+              <p className="cmms-kpi-value">{plans.length} <span className="cmms-kpi-unit">แผน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -240,7 +240,7 @@ export default function PMPlansPage() {
             <AndonLamp status="ok" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">เปิดใช้งาน</p>
-              <h3 className="cmms-kpi-value">{activeCount} <span className="cmms-kpi-unit">แผน</span></h3>
+              <p className="cmms-kpi-value">{activeCount} <span className="cmms-kpi-unit">แผน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -249,7 +249,7 @@ export default function PMPlansPage() {
             <AndonLamp status="warn" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">ครบกำหนดภายใน 7 วัน</p>
-              <h3 className="cmms-kpi-value">{dueSoonCount} <span className="cmms-kpi-unit">แผน</span></h3>
+              <p className="cmms-kpi-value">{dueSoonCount} <span className="cmms-kpi-unit">แผน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -258,7 +258,7 @@ export default function PMPlansPage() {
             <AndonLamp status={overduePlanCount > 0 ? "down" : "idle"} size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">รอบถัดไปเลยกำหนด (แผนใช้งาน)</p>
-              <h3 className="cmms-kpi-value">{overduePlanCount} <span className="cmms-kpi-unit">แผน</span></h3>
+              <p className="cmms-kpi-value">{overduePlanCount} <span className="cmms-kpi-unit">แผน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -267,7 +267,7 @@ export default function PMPlansPage() {
             <AndonLamp status="warn" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">รอบที่สร้างแล้ว</p>
-              <h3 className="cmms-kpi-value">{plans.reduce((s, p) => s + (p.cycle_count || 0), 0)} <span className="cmms-kpi-unit">รอบ</span></h3>
+              <p className="cmms-kpi-value">{plans.reduce((s, p) => s + (p.cycle_count || 0), 0)} <span className="cmms-kpi-unit">รอบ</span></p>
             </div>
           </CardContent>
         </Card>

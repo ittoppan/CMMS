@@ -343,25 +343,25 @@ export default function PMPlanViewPage() {
             <Card className="cmms-kpi-card green">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จสิ้น</p>
-                <h3 className="cmms-kpi-value">{cycleStats.completed}</h3>
+                <p className="cmms-kpi-value">{cycleStats.completed}</p>
               </CardContent>
             </Card>
             <Card className="cmms-kpi-card blue">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">รอ/กำลังดำเนินการ</p>
-                <h3 className="cmms-kpi-value">{cycleStats.pending + cycleStats.in_progress}</h3>
+                <p className="cmms-kpi-value">{cycleStats.pending + cycleStats.in_progress}</p>
               </CardContent>
             </Card>
             <Card className="cmms-kpi-card red">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด (ค้าง)</p>
-                <h3 className="cmms-kpi-value">{cycleStats.overdue}</h3>
+                <p className="cmms-kpi-value">{cycleStats.overdue}</p>
               </CardContent>
             </Card>
             <Card className="cmms-kpi-card cyan">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">รอบทั้งหมด</p>
-                <h3 className="cmms-kpi-value">{cycleStats.total}</h3>
+                <p className="cmms-kpi-value">{cycleStats.total}</p>
                 {(cycleStats.skipped > 0 || cycleStats.cancelled > 0) && (
                   <p className="text-[11px] text-[var(--cmms-text-muted)]">ข้าม {cycleStats.skipped} · ยกเลิก {cycleStats.cancelled}</p>
                 )}
