@@ -399,7 +399,7 @@ export default function DocumentsPage() {
             }}
           >
             <SelectTrigger aria-label="มุมมองที่บันทึก" className="w-full sm:w-56">
-              <SelectValue placeholder="เลือกมุมมอง..." />
+              <SelectValue placeholder="เลือกมุมมอง…" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">— เลือกมุมมอง —</SelectItem>

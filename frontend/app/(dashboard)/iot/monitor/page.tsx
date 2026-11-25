@@ -84,7 +84,7 @@ export default function IotMonitorPage() {
         <>
           <Badge variant={alarmDevices.length > 0 ? "danger" : "neutral"}>
             <Zap size={12} strokeWidth={1.75} aria-hidden="true" />
-            {loading ? "กำลังโหลด..." : sensors.length > 0 ? `เชื่อมต่อ ${sensors.length} ตัว` : "ไม่มีอุปกรณ์"}
+            {loading ? "กำลังโหลด…" : sensors.length > 0 ? `เชื่อมต่อ ${sensors.length} ตัว` : "ไม่มีอุปกรณ์"}
           </Badge>
           <Button variant="secondary" onClick={fetchDevices}>
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />

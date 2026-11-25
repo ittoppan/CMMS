@@ -372,7 +372,7 @@ export default function ContractorWorkPage() {
             <div className="sm:col-span-2 lg:col-span-3 flex items-center justify-end gap-2">
               <Button variant="secondary" onClick={() => setShowAssign(false)}>ยกเลิก</Button>
               <Button variant="primary" onClick={submitAssign} disabled={busy === "assign" || !aContractor || aTitle.trim() === ""}>
-                <Plus size={15} aria-hidden="true" /> {busy === "assign" ? "กำลังสร้าง..." : "สร้างงานภายนอก"}
+                <Plus size={15} aria-hidden="true" /> {busy === "assign" ? "กำลังสร้าง…" : "สร้างงานภายนอก"}
               </Button>
             </div>
           </CardContent>
@@ -477,7 +477,7 @@ export default function ContractorWorkPage() {
                               {trans.length > 0 && (
                                 <div className="flex flex-wrap items-center gap-2">
                                   <Select value={transTo[a.id] || ""} onValueChange={(v) => setTransTo((p) => ({ ...p, [a.id]: v }))}>
-                                    <SelectTrigger className="w-full"><SelectValue placeholder={`เปลี่ยนเป็น... (${trans.length} ขั้นถัดไป)`} /></SelectTrigger>
+                                    <SelectTrigger className="w-full"><SelectValue placeholder={`เปลี่ยนเป็น… (${trans.length} ขั้นถัดไป)`} /></SelectTrigger>
                                     <SelectContent>
                                       {trans.map((t) => <SelectItem key={t} value={t}>{ASSIGNMENT_STATUS_LABELS[t] || t}</SelectItem>)}
                                     </SelectContent>
@@ -486,7 +486,7 @@ export default function ContractorWorkPage() {
                                     <input className={inputCls + " h-9 text-xs"} value={transNote[a.id] || ""} onChange={(e) => setTransNote((p) => ({ ...p, [a.id]: e.target.value }))} placeholder="เหตุผลบังคับ" />
                                   ) : null}
                                   <Button variant="secondary" size="sm" onClick={() => transTo[a.id] && transition(a, transTo[a.id])} disabled={!transTo[a.id] || busy === `tr-${a.id}`}>
-                                    <ArrowRight size={14} aria-hidden="true" /> {busy === `tr-${a.id}` ? "เปลี่ยนสถานะ..." : "เปลี่ยนสถานะ"}
+                                    <ArrowRight size={14} aria-hidden="true" /> {busy === `tr-${a.id}` ? "เปลี่ยนสถานะ…" : "เปลี่ยนสถานะ"}
                                   </Button>
                                 </div>
                               )}

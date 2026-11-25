@@ -265,7 +265,7 @@ export default function MtbfMttrPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหาเครื่องจักร, รหัส หรือรอบเดือน..."
+              placeholder="ค้นหาเครื่องจักร, รหัส หรือรอบเดือน…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

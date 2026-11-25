@@ -253,7 +253,7 @@ export default function AuditLogPage() {
             <Input
               isLabelHidden
               label="ค้นหา"
-              placeholder="ค้นหา description / ผู้ใช้ / action..."
+              placeholder="ค้นหา description / ผู้ใช้ / action…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

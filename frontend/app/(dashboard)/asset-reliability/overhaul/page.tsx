@@ -127,7 +127,7 @@ export default function OverhaulPage() {
           footer={
             <>
               <Button variant="secondary" onClick={() => setOpen(false)}>ยกเลิก</Button>
-              <Button variant="primary" onClick={save} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึกแผน"}</Button>
+              <Button variant="primary" onClick={save} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึกแผน"}</Button>
             </>
           }
         >
@@ -164,7 +164,7 @@ export default function OverhaulPage() {
       />
       <div className="space-y-6">
       {isLoading && (
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
       )}
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error.message} />}
 
@@ -180,7 +180,7 @@ export default function OverhaulPage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาเครื่อง / รหัส / หัวข้อ..."
+                placeholder="ค้นหาเครื่อง / รหัส / หัวข้อ…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="max-w-[300px]"

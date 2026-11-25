@@ -275,7 +275,7 @@ export default function PwaSettingsPage() {
                     onClick={handleUpload}
                   >
                     <ArrowPathIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-                    {saving ? "กำลังบันทึก..." : "บันทึกไอคอนใหม่"}
+                    {saving ? "กำลังบันทึก…" : "บันทึกไอคอนใหม่"}
                   </Button>
                 </HStack>
               </HStack>

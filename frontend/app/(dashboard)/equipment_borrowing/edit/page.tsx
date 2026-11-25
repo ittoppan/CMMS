@@ -174,7 +174,7 @@ function EditBorrowingContent() {
                 <Label htmlFor="brw-edit-asset">อุปกรณ์ / เครื่องมือที่ยืม *</Label>
                 <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                   <SelectTrigger id="brw-edit-asset">
-                    <SelectValue placeholder="เลือกอุปกรณ์..." />
+                    <SelectValue placeholder="เลือกอุปกรณ์…" />
                   </SelectTrigger>
                   <SelectContent>
                     {assets.map((a) => (
@@ -190,7 +190,7 @@ function EditBorrowingContent() {
                 <Label htmlFor="brw-edit-borrower">ผู้ยืม *</Label>
                 <Select value={borrowerId || undefined} onValueChange={(v) => setBorrowerId(v)}>
                   <SelectTrigger id="brw-edit-borrower">
-                    <SelectValue placeholder="เลือกผู้ยืม..." />
+                    <SelectValue placeholder="เลือกผู้ยืม…" />
                   </SelectTrigger>
                   <SelectContent>
                     {users.map((u) => (
@@ -316,7 +316,7 @@ function EditBorrowingContent() {
             </Button>
             <Button variant="primary" disabled={submitting} onClick={handleSubmit}>
               <SquarePen className="w-4 h-4" />
-              {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              {submitting ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
             </Button>
           </CardFooter>
         )}

@@ -128,7 +128,7 @@ export default function ManualCreatePage() {
               </Label>
               <Input
                 id="manual-title"
-                placeholder="เช่น คู่มือการใช้งานปั๊มน้ำ..."
+                placeholder="เช่น คู่มือการใช้งานปั๊มน้ำ…"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -138,7 +138,7 @@ export default function ManualCreatePage() {
               <Label htmlFor="manual-description">รายละเอียด</Label>
               <Textarea
                 id="manual-description"
-                placeholder="อธิบายเนื้อหาโดยย่อ..."
+                placeholder="อธิบายเนื้อหาโดยย่อ…"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -189,7 +189,7 @@ export default function ManualCreatePage() {
               </Button>
               <Button disabled={loading} onClick={handleSubmit}>
                 <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {loading ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
               </Button>
             </div>
           </div>

@@ -171,7 +171,7 @@ export default function ApprovalCenterPage() {
                 onClick={() => handleAction(item, "approve")}
               >
                 <CheckCircle2 size={14} strokeWidth={1.75} aria-hidden="true" />
-                {processingId === item.id ? "กำลัง..." : "อนุมัติ"}
+                {processingId === item.id ? "กำลัง…" : "อนุมัติ"}
               </Button>
               <Button
                 size="sm"

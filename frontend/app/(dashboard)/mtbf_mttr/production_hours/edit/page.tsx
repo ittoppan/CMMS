@@ -161,7 +161,7 @@ function EditProductionHoursContent() {
                 </Label>
                 <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="เลือกเครื่องจักร..." />
+                    <SelectValue placeholder="เลือกเครื่องจักร…" />
                   </SelectTrigger>
                   <SelectContent>
                     {assets.map((a) => (
@@ -221,7 +221,7 @@ function EditProductionHoursContent() {
                 </Button>
                 <Button disabled={submitting} onClick={handleSubmit}>
                   <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                  {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                  {submitting ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
                 </Button>
               </div>
             </div>

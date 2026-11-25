@@ -133,7 +133,7 @@ export default function QrSheetPage() {
             สแกน QR แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
             {" · "}
             {filtered.length === machines.length ? `${machines.length} เครื่อง` : `${filtered.length} จาก ${machines.length} เครื่อง`}
-            {machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}
+            {machines.length > 0 && (generating ? " · กำลังสร้าง QR…" : "")}
           </p>
         </div>
         <div className="no-print">

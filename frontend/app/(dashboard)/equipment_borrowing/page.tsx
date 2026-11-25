@@ -269,7 +269,7 @@ export default function EquipmentBorrowingPage() {
             <Input
               label="ค้นหารายการยืม"
               isLabelHidden
-              placeholder="ค้นหาอุปกรณ์, ผู้ยืม หรือเลขที่การยืม..."
+              placeholder="ค้นหาอุปกรณ์, ผู้ยืม หรือเลขที่การยืม…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

@@ -256,7 +256,7 @@ export default function CreateAssetPage() {
           </Button>
           <Button disabled={submitting} onClick={handleSubmit}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            {submitting ? "กำลังบันทึก..." : "บันทึกเครื่องจักร"}
+            {submitting ? "กำลังบันทึก…" : "บันทึกเครื่องจักร"}
           </Button>
         </CardFooter>
       </Card>

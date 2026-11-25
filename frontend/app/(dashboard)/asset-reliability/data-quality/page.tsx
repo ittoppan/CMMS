@@ -84,7 +84,7 @@ export default function DataQualityPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {fleet.isLoading && <Spinner label="กำลังโหลด..." />}
+            {fleet.isLoading && <Spinner label="กำลังโหลด…" />}
             {fleet.error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={fleet.error.message} />}
             {!fleet.isLoading && !fleet.error && fleet.data && (
               <VStack gap={3}>
@@ -124,7 +124,7 @@ export default function DataQualityPage() {
               <Input label="ID เครื่องจักร" required placeholder="เช่น 89" value={aid} onChange={(e) => setAid(e.target.value)} className="max-w-[220px]" />
               <Button type="submit" variant="secondary">ตรวจเช็ค</Button>
             </form>
-            {assetId > 0 && asset.isLoading && <Spinner label="กำลังตรวจ..." />}
+            {assetId > 0 && asset.isLoading && <Spinner label="กำลังตรวจ…" />}
             {assetId > 0 && asset.error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={asset.error.message} />}
             {assetId > 0 && !asset.isLoading && asset.data && (
               <div className="space-y-3">

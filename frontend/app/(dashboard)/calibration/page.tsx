@@ -244,7 +244,7 @@ export default function CalibrationPage() {
             <Input
               label="ค้นหาเครื่องมือวัด"
               isLabelHidden
-              placeholder="ค้นหาชื่อเครื่องมือ, รหัส หรือใบเซอร์..."
+              placeholder="ค้นหาชื่อเครื่องมือ, รหัส หรือใบเซอร์…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

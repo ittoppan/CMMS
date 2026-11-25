@@ -837,7 +837,7 @@ export default function SettingsPage() {
             <Input
               label="ค้นหาการตั้งค่า"
               isLabelHidden
-              placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
+              placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               hint={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
@@ -936,7 +936,7 @@ export default function SettingsPage() {
                   disabled={totalDirty === 0}
                   onClick={handleSave}
                 >
-                  {saving ? "กำลังบันทึก..." : `บันทึกทั้งหมด (${totalDirty} รายการ)`}
+                  {saving ? "กำลังบันทึก…" : `บันทึกทั้งหมด (${totalDirty} รายการ)`}
                 </Button>
               )}
             </HStack>
@@ -1310,7 +1310,7 @@ export default function SettingsPage() {
                             disabled={isReadonly || !canManage}
                           >
                             <SelectTrigger aria-label={meta.label} className="sm:max-w-xs">
-                              <SelectValue placeholder="เลือกค่า..." />
+                              <SelectValue placeholder="เลือกค่า…" />
                             </SelectTrigger>
                             <SelectContent>
                               {selectOptions.map((o) => (
@@ -1399,7 +1399,7 @@ export default function SettingsPage() {
                     disabled={changedRows.length === 0}
                     onClick={handleSave}
                   >
-                    {saving ? "กำลังบันทึก..." : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
+                    {saving ? "กำลังบันทึก…" : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
                   </Button>
                 </HStack>
               </CardContent>
@@ -1467,7 +1467,7 @@ export default function SettingsPage() {
               ปิด
             </Button>
             <Button disabled={diffRows.length === 0} onClick={handleSave}>
-              {saving ? "กำลังบันทึก..." : `ยืนยันและบันทึก (${diffRows.length} รายการ)`}
+              {saving ? "กำลังบันทึก…" : `ยืนยันและบันทึก (${diffRows.length} รายการ)`}
             </Button>
           </HStack>
         </div>

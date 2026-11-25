@@ -316,7 +316,7 @@ export default function BOMTreePage() {
                     onValueChange={handleMachineChange}
                   >
                     <SelectTrigger aria-label="เลือกเครื่องจักร">
-                      <SelectValue placeholder="เลือกเครื่องจักร..." />
+                      <SelectValue placeholder="เลือกเครื่องจักร…" />
                     </SelectTrigger>
                     <SelectContent>
                       {machines.map((m) => (
@@ -585,7 +585,7 @@ export default function BOMTreePage() {
                     onValueChange={(v) => setSelectedSpareId(String(v))}
                   >
                 <SelectTrigger aria-label="รายการอะไหล่">
-                  <SelectValue placeholder="เลือกรายการอะไหล่..." />
+                  <SelectValue placeholder="เลือกรายการอะไหล่…" />
                 </SelectTrigger>
                 <SelectContent>
                   {spareParts.map((p) => (
@@ -613,7 +613,7 @@ export default function BOMTreePage() {
                 <Input
                   label="หมายเหตุ"
                   isLabelHidden
-                  placeholder="เช่น อะไหล่สำรองเปลี่ยนตามรอบ 500 ชม..."
+                  placeholder="เช่น อะไหล่สำรองเปลี่ยนตามรอบ 500 ชม…"
                   value={partRemarks}
                   onChange={(e) => setPartRemarks(e.target.value)}
                 />
@@ -628,7 +628,7 @@ export default function BOMTreePage() {
                 disabled={saving || !selectedSpareId}
                 onClick={handleAddComponent}
               >
-                {saving ? "กำลังบันทึก..." : "บันทึกเพิ่มชิ้นส่วน"}
+                {saving ? "กำลังบันทึก…" : "บันทึกเพิ่มชิ้นส่วน"}
               </Button>
             </div>
           </div>
@@ -652,7 +652,7 @@ export default function BOMTreePage() {
               </Button>
               <Button variant="danger" disabled={deleting} onClick={confirmDeletePart}>
                 <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
-                {deleting ? "กำลังลบ..." : "ยืนยันลบ"}
+                {deleting ? "กำลังลบ…" : "ยืนยันลบ"}
               </Button>
             </div>
           </div>

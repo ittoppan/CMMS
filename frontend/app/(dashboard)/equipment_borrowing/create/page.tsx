@@ -128,7 +128,7 @@ export default function BorrowingCreatePage() {
             <Label htmlFor="brw-create-asset">อุปกรณ์ / เครื่องมือที่ต้องการยืม *</Label>
             <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
               <SelectTrigger id="brw-create-asset">
-                <SelectValue placeholder="เลือกอุปกรณ์..." />
+                <SelectValue placeholder="เลือกอุปกรณ์…" />
               </SelectTrigger>
               <SelectContent>
                 {assets.map((a) => (
@@ -144,7 +144,7 @@ export default function BorrowingCreatePage() {
             <Label htmlFor="brw-create-borrower">ผู้ขอยืม *</Label>
             <Select value={borrowerId || undefined} onValueChange={(v) => setBorrowerId(v)}>
               <SelectTrigger id="brw-create-borrower">
-                <SelectValue placeholder="เลือกผู้ยืม..." />
+                <SelectValue placeholder="เลือกผู้ยืม…" />
               </SelectTrigger>
               <SelectContent>
                 {users.map((u) => (
@@ -200,7 +200,7 @@ export default function BorrowingCreatePage() {
             <Label htmlFor="brw-create-purpose">วัตถุประสงค์การยืม</Label>
             <Textarea
               id="brw-create-purpose"
-              placeholder="ระบุงานที่นำไปใช้ เช่น งานซ่อมปั๊มน้ำไลน์ 3..."
+              placeholder="ระบุงานที่นำไปใช้ เช่น งานซ่อมปั๊มน้ำไลน์ 3…"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
             />
@@ -210,7 +210,7 @@ export default function BorrowingCreatePage() {
             <Label htmlFor="brw-create-condition-before">สภาพอุปกรณ์ก่อนยืม</Label>
             <Textarea
               id="brw-create-condition-before"
-              placeholder="ระบุสภาพก่อนยืม เช่น สมบูรณ์ปกติ ไม่มีรอย..."
+              placeholder="ระบุสภาพก่อนยืม เช่น สมบูรณ์ปกติ ไม่มีรอย…"
               value={conditionBefore}
               onChange={(e) => setConditionBefore(e.target.value)}
             />
@@ -219,7 +219,7 @@ export default function BorrowingCreatePage() {
           <Input
             id="brw-create-notes"
             label="หมายเหตุ"
-            placeholder="ระบุเพิ่มเติม (ถ้ามี)..."
+            placeholder="ระบุเพิ่มเติม (ถ้ามี)…"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
@@ -231,7 +231,7 @@ export default function BorrowingCreatePage() {
           </Button>
           <Button variant="primary" disabled={loading} onClick={handleSubmit}>
             <Undo2 className="w-4 h-4" />
-            {loading ? "กำลังบันทึก..." : "ยืนยันยืมอุปกรณ์"}
+            {loading ? "กำลังบันทึก…" : "ยืนยันยืมอุปกรณ์"}
           </Button>
         </CardFooter>
       </Card>

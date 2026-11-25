@@ -297,7 +297,7 @@ function EditAssetContent() {
             </Button>
             <Button disabled={submitting} onClick={handleSubmit}>
               <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
-              {submitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+              {submitting ? "กำลังบันทึก…" : "บันทึกการแก้ไข"}
             </Button>
           </CardFooter>
         )}

@@ -284,8 +284,8 @@ export default function InspectionTemplatesPage() {
           </div>
           <Input label="ชื่อ Template * (เช่น ใบตรวจเช็ค CCTV ประจำวัน)" placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input label="หมวดหมู่" placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย..." value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-            <Input label="คำอธิบาย" placeholder="เทียบเอกสาร F-EN-xx..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <Input label="หมวดหมู่" placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย…" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            <Input label="คำอธิบาย" placeholder="เทียบเอกสาร F-EN-xx…" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
 
           {/* Items */}
@@ -407,7 +407,7 @@ export default function InspectionTemplatesPage() {
                         <Label className="sr-only">การจัดการเมื่อไม่ผ่าน</Label>
                         <Select value={it.failure_action || "none"} onValueChange={(v) => updateItem(idx, { failure_action: v === "none" ? "" : v })}>
                           <SelectTrigger>
-                            <SelectValue placeholder="ผลเมื่อไม่ผ่าน..." />
+                            <SelectValue placeholder="ผลเมื่อไม่ผ่าน…" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">ผลเมื่อไม่ผ่าน: ปกติ</SelectItem>

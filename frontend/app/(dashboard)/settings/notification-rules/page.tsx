@@ -394,7 +394,7 @@ export default function NotificationRulesPage() {
             <>
               <Button variant="outline" onClick={() => setFormOpen(false)}>ยกเลิก</Button>
               <Button onClick={handleSubmit} disabled={saving}>
-                {saving ? "กำลังบันทึก..." : editingId ? "บันทึกการแก้ไข" : "สร้างกฎ"}
+                {saving ? "กำลังบันทึก…" : editingId ? "บันทึกการแก้ไข" : "สร้างกฎ"}
               </Button>
             </>
           }

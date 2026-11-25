@@ -468,10 +468,10 @@ export default function InspectionRunPage() {
             <Label>เลือกรอบตรวจ *</Label>
             <Select value={selectedId || "__none__"} onValueChange={(v) => handleSelect(v === "__none__" ? "" : v)} disabled={schedules.length === 0}>
               <SelectTrigger>
-                <SelectValue placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."} />
+                <SelectValue placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ…"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__" disabled>{schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."}</SelectItem>
+                <SelectItem value="__none__" disabled>{schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ…"}</SelectItem>
                 {schedules.map((s) => (
                   <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                 ))}
@@ -554,7 +554,7 @@ export default function InspectionRunPage() {
                               <div className="max-w-[300px] space-y-1 pt-1">
                                 <Input
                                   label="ค่า" isLabelHidden inputMode="decimal"
-                                  placeholder={item.unit ? `ระบุค่า (${item.unit})...` : "ระบุค่าตัวเลข..."}
+                                  placeholder={item.unit ? `ระบุค่า (${item.unit})…` : "ระบุค่าตัวเลข…"}
                                   value={item.value} onChange={(e) => handleValue(index, e.target.value)}
                                 />
                                 {item.type === "measurement" && (
@@ -568,7 +568,7 @@ export default function InspectionRunPage() {
 
                             {(item.type === "text") && (
                               <div className="max-w-[420px] pt-1">
-                                <Textarea label="รายละเอียด" isLabelHidden placeholder="กรอกรายละเอียด/ข้อความ..." value={item.value} onChange={(e) => handleValue(index, e.target.value)} />
+                                <Textarea label="รายละเอียด" isLabelHidden placeholder="กรอกรายละเอียด/ข้อความ…" value={item.value} onChange={(e) => handleValue(index, e.target.value)} />
                               </div>
                             )}
 
@@ -581,7 +581,7 @@ export default function InspectionRunPage() {
                             {item.type === "dropdown" && (
                               <div className="max-w-[320px] pt-1">
                                 <Select value={item.value || "__none__"} onValueChange={(v) => updateItem(index, { value: v === "__none__" ? "" : v, status: v === "__none__" ? null : item.status ?? "pass" })}>
-                                  <SelectTrigger><SelectValue placeholder="เลือกตัวเลือก..." /></SelectTrigger>
+                                  <SelectTrigger><SelectValue placeholder="เลือกตัวเลือก…" /></SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="__none__" disabled>เลือกตัวเลือก...</SelectItem>
                                     {item.options.map((op) => <SelectItem key={op} value={op}>{op}</SelectItem>)}
@@ -648,7 +648,7 @@ export default function InspectionRunPage() {
                                 {isNg ? "พบความผิดปกติ — ระบุรายละเอียด" : item.remark_required ? "ระบุหมายเหตุ (จำเป็น)" : "ข้อสังเกต"}
                               </p>
                             </div>
-                            <Textarea label="สาเหตุที่พบ / หมายเหตุ" aria-label={`สาเหตุที่พบ / หมายเหตุ ข้อที่ ${index + 1}`} placeholder="อธิบายอาการ/รายละเอียด..." value={item.note} onChange={(e) => updateItem(index, { note: e.target.value })} />
+                            <Textarea label="สาเหตุที่พบ / หมายเหตุ" aria-label={`สาเหตุที่พบ / หมายเหตุ ข้อที่ ${index + 1}`} placeholder="อธิบายอาการ/รายละเอียด…" value={item.note} onChange={(e) => updateItem(index, { note: e.target.value })} />
                           </div>
                         </div>
                       )}
@@ -713,7 +713,7 @@ export default function InspectionRunPage() {
                     <button type="button" disabled={submitting || !valid} onClick={handleSubmit}
                       className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-6 py-3 text-sm font-semibold text-white disabled:pointer-events-none disabled:opacity-50">
                       {submitting ? <Loader2 size={16} className="animate-spin" strokeWidth={1.75} aria-hidden="true" /> : <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />}
-                      {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการตรวจ"}
+                      {submitting ? "กำลังส่งข้อมูล…" : "บันทึกผลการตรวจ"}
                     </button>
                   ) : (
                     <span className="cmms-status ok"><span className="cmms-status-dot" />บันทึกผลแล้ว</span>

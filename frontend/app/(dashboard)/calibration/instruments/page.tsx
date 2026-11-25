@@ -141,7 +141,7 @@ export default function CalibrationInstrumentsPage() {
         <CardContent className="flex flex-wrap items-end gap-3 py-4">
           <div className="relative min-w-[240px] flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <Input label="ค้นหา" isLabelHidden placeholder="รหัส, ชื่อ, serial..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            <Input label="ค้นหา" isLabelHidden placeholder="รหัส, ชื่อ, serial…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
             <SelectTrigger className="w-[200px]" aria-label="กรองสถานะ">

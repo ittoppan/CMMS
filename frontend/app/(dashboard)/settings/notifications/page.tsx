@@ -400,9 +400,9 @@ export default function NotificationsSettingsPage() {
         <HStack gap={3} vAlign="center">
           {message && <span className="text-sm text-[var(--cmms-success)]">{message}</span>}
           {hasChanges && <Badge variant="neutral">มีการแก้ไขที่ยังไม่บันทึก</Badge>}
-          <Button onClick={handleSave} loading={saving} loadingText="กำลังบันทึก...">
+          <Button onClick={handleSave} loading={saving} loadingText="กำลังบันทึก…">
             <Save size={16} strokeWidth={1.75} aria-hidden="true" />
-            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
           </Button>
         </HStack>
       ]} />
@@ -470,7 +470,7 @@ export default function NotificationsSettingsPage() {
             testBody={{ telegram_test: true }}
             testLabel="ยิงทดสอบเข้า Telegram"
             fields={[
-              { key: "telegram_bot_token", label: "Bot Token", hint: "จาก @BotFather (รูปแบบ 123456:ABC...)", secret: true },
+              { key: "telegram_bot_token", label: "Bot Token", hint: "จาก @BotFather (รูปแบบ 123456:ABC…)", secret: true },
               { key: "telegram_chat_id", label: "Chat ID", hint: "Chat ID ผู้รับ/กลุ่มแอดมิน" },
             ]}
             ready={!!(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) && !!(settings.telegram_chat_id || envInfo?.telegram_chat_id_set)}
@@ -746,9 +746,9 @@ function LineTab({
             ))}
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง...">
+              <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง…">
                 <Send size={16} strokeWidth={1.75} aria-hidden="true" />
-                {testing ? "กำลังส่ง..." : "ทดสอบส่ง LINE"}
+                {testing ? "กำลังส่ง…" : "ทดสอบส่ง LINE"}
               </Button>
               <Badge variant={me?.line_bound ? "info" : "neutral"}>
                 {me?.line_bound ? `บัญชีที่ผูก: ${me.full_name}` : "ยังไม่ผูก LINE"}
@@ -943,9 +943,9 @@ function ChannelTab({
             />
           ))}
 
-          <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง...">
+          <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง…">
             <Send size={16} strokeWidth={1.75} aria-hidden="true" />
-            {testing ? "กำลังส่ง..." : testLabel}
+            {testing ? "กำลังส่ง…" : testLabel}
           </Button>
           {result && (
             <p className={`text-sm font-medium ${result.ok ? "text-[var(--cmms-success)]" : "text-[var(--cmms-danger)]"}`}>
@@ -1064,9 +1064,9 @@ function NtfyTab({
             onChange={(c) => onSetting("ntfy_click_url", c ? "1" : "0")}
           />
 
-          <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง...">
+          <Button variant="secondary" onClick={sendTest} loading={testing} loadingText="กำลังส่ง…">
             <Send size={16} strokeWidth={1.75} aria-hidden="true" />
-            {testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า ntfy"}
+            {testing ? "กำลังส่ง…" : "ยิงทดสอบเข้า ntfy"}
           </Button>
           {result && (
             <p className={`text-sm font-medium ${result.ok ? "text-[var(--cmms-success)]" : "text-[var(--cmms-danger)]"}`}>

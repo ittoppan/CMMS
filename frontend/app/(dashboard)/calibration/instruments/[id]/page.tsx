@@ -211,7 +211,7 @@ export default function InstrumentDetailPage() {
       description={
         instrument
           ? `${[instrument.measurement_type, instrument.measurement_parameter].filter(Boolean).join(" · ") || "เครื่องมือวัด"} · กำหนดถัดไป: ${instrument.next_calibration_date || "-"}`
-          : "กำลังโหลด..."
+          : "กำลังโหลด…"
       }
       actions={[
         <Button variant="secondary" onClick={() => router.push("/calibration/instruments")}>

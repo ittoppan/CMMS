@@ -467,7 +467,7 @@ function renderByType(
 }
 
 const loadingHtml = (label: string) =>
-  `<div style="font-family:${FONT};font-size:13px;color:${C.muted};padding:14px 0">กำลังโหลด${label}...</div>`;
+  `<div style="font-family:${FONT};font-size:13px;color:${C.muted};padding:14px 0">กำลังโหลด${label}…</div>`;
 
 /**
  * หา [data-dynamic] ทุกตัวใน root แล้วแทนด้วยข้อมูลจริง (โหลดจาก endpoint เดียวกับ dashboard)

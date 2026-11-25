@@ -372,7 +372,7 @@ export default function ProfilePage() {
 
               <HStack hAlign="end">
                 <Button disabled={saving} onClick={handleSave}>
-                  {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                  {saving ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
                 </Button>
               </HStack>
             </VStack>

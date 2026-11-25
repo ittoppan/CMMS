@@ -483,7 +483,7 @@ export default function SuppliersPage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาตามรหัส, ชื่อ หรืออีเมล..."
+                placeholder="ค้นหาตามรหัส, ชื่อ หรืออีเมล…"
                 value={search}
                 onChange={(e) => setFilters({ search: e.target.value })}
                 className="pl-9"

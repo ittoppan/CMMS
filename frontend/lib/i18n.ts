@@ -81,7 +81,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "mydash.real_data": { th: "ข้อมูลจริง", en: "Real data" },
   "mydash.no_due": { th: "ยังไม่มีงานที่ใกล้ถึงกำหนด", en: "No upcoming due dates" },
   "mydash.no_due_hint": { th: "เมื่อมีงานที่ได้รับมอบหมาย กำหนดส่งจะแสดงที่นี่", en: "Assigned work with due dates will appear here" },
-  "mydash.loading": { th: "กำลังโหลด...", en: "Loading..." },
+  "mydash.loading": { th: "กำลังโหลด…", en: "Loading..." },
   "mydash.footnote": { th: "หน้านี้แสดงเฉพาะข้อมูลจริงจากระบบ (กรองตามสิทธิ์/ผู้ใช้ที่ล็อกอิน) ตัวชี้วัดที่ยังไม่มีแหล่งข้อมูลจะแสดง N/A อย่างชัดเจน และไม่มีการใส่ข้อมูลสมมติ", en: "This page shows only real system data (scoped to the signed-in user's permissions). Metrics without a real source are labelled N/A — no sample data is used." },
   "mydash.due": { th: "กำหนดส่ง", en: "Due" },
   "mydash.no_asset": { th: "ไม่ระบุเครื่องจักร", en: "No machine specified" },
@@ -335,7 +335,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "action.view_all": { th: "ดูทั้งหมด", en: "View All" },
   "action.edit_page": { th: "แก้ไขหน้า", en: "Edit Page" },
   "action.notifications": { th: "แจ้งเตือน", en: "Notifications" },
-  "action.search_menu": { th: "ค้นหาเมนู...", en: "Search menu..." },
+  "action.search_menu": { th: "ค้นหาเมนู…", en: "Search menu..." },
   "action.clear": { th: "ล้าง", en: "Clear" },
   "action.clear_search": { th: "ล้างการค้นหา", en: "Clear search" },
   "nav.expand_section": { th: "ขยายหมวด", en: "Expand section" },
@@ -377,11 +377,11 @@ const DICT: Record<string, { th: string; en: string }> = {
   "freq.yearly": { th: "รายปี", en: "Yearly" },
 
   // ── ทั่วไป ──
-  "common.loading": { th: "กำลังโหลด...", en: "Loading..." },
+  "common.loading": { th: "กำลังโหลด…", en: "Loading..." },
   "common.no_data": { th: "ไม่มีข้อมูล", en: "No data" },
   "common.all": { th: "ทั้งหมด", en: "All" },
   "common.none": { th: "ไม่มี", en: "None" },
-  "common.search_hint": { th: "ค้นหา...", en: "Search..." },
+  "common.search_hint": { th: "ค้นหา…", en: "Search..." },
   "common.confirm_delete": { th: "ยืนยันการลบรายการนี้?", en: "Delete this item?" },
   "common.saved": { th: "บันทึกเรียบร้อย", en: "Saved" },
   "common.error": { th: "เกิดข้อผิดพลาด", en: "Something went wrong" },
@@ -406,12 +406,12 @@ const DICT: Record<string, { th: string; en: string }> = {
   "action.reverse_entry": { th: "กลับรายการ", en: "Reverse Entry" },
   "action.save_data": { th: "บันทึกข้อมูล", en: "Save" },
   "action.save_edit": { th: "บันทึกการแก้ไข", en: "Save Changes" },
-  "common.creating": { th: "กำลังสร้าง...", en: "Creating..." },
-  "common.loading_data": { th: "กำลังโหลดข้อมูล...", en: "Loading data..." },
-  "common.loading_parts": { th: "กำลังโหลดข้อมูลอะไหล่...", en: "Loading part data..." },
-  "common.loading_users": { th: "กำลังโหลดข้อมูลผู้ใช้...", en: "Loading user data..." },
-  "common.saving": { th: "กำลังบันทึก...", en: "Saving..." },
-  "common.uploading": { th: "อัปโหลดรูปภาพ...", en: "Uploading..." },
+  "common.creating": { th: "กำลังสร้าง…", en: "Creating..." },
+  "common.loading_data": { th: "กำลังโหลดข้อมูล…", en: "Loading data..." },
+  "common.loading_parts": { th: "กำลังโหลดข้อมูลอะไหล่…", en: "Loading part data..." },
+  "common.loading_users": { th: "กำลังโหลดข้อมูลผู้ใช้…", en: "Loading user data..." },
+  "common.saving": { th: "กำลังบันทึก…", en: "Saving..." },
+  "common.uploading": { th: "อัปโหลดรูปภาพ…", en: "Uploading..." },
   "field.active": { th: "ใช้งาน", en: "Active" },
   "field.address": { th: "ที่อยู่", en: "Address" },
   "field.boiler": { th: "หม้อไอน้ำ", en: "Boiler" },
@@ -606,7 +606,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "placeholder.asset_name": { th: "เช่น Centrifugal Pump P-102", en: "e.g. Centrifugal Pump P-102" },
   "placeholder.certificate_no": { th: "เช่น CERT-2026-001", en: "e.g. CERT-2026-001" },
   "placeholder.company_name": { th: "ชื่อบริษัท หรือ ชื่อร้านค้า", en: "Company or store name" },
-  "placeholder.doc_address": { th: "ที่อยู่สำหรับออกเอกสาร...", en: "Address for documents..." },
+  "placeholder.doc_address": { th: "ที่อยู่สำหรับออกเอกสาร…", en: "Address for documents..." },
   "placeholder.email": { th: "เช่น somchai@toppan.co.th", en: "e.g. somchai@toppan.co.th" },
   "placeholder.employee_code": { th: "เช่น E01117", en: "e.g. E01117" },
   "placeholder.employee_code_line": { th: "เช่น E01117 — ใช้ผูกบัญชี LINE", en: "e.g. E01117 — used to link LINE account" },
@@ -618,9 +618,9 @@ const DICT: Record<string, { th: string; en: string }> = {
   "placeholder.part_description": { th: "เช่น SKF 6205 Bearing แบริ่งลูกกลิ้ง", en: "e.g. SKF 6205 Bearing, roller bearing" },
   "placeholder.phone": { th: "เช่น 081-234-5678", en: "e.g. 081-234-5678" },
   "placeholder.position": { th: "เช่น ช่างซ่อมบำรุงอาวุโส", en: "e.g. Senior Maintenance Technician" },
-  "placeholder.role_description": { th: "คำอธิบายหน้าที่และสิทธิ์เบื้องต้น...", en: "Description of duties and basic permissions..." },
+  "placeholder.role_description": { th: "คำอธิบายหน้าที่และสิทธิ์เบื้องต้น…", en: "Description of duties and basic permissions..." },
   "placeholder.roles": { th: "เช่น ช่างซ่อมบำรุง, ผู้จัดการ", en: "e.g. Maintenance technician, Manager" },
-  "placeholder.select_tool": { th: "เลือกเครื่องมือ...", en: "Select tool..." },
+  "placeholder.select_tool": { th: "เลือกเครื่องมือ…", en: "Select tool..." },
   "placeholder.specification": { th: "รายละเอียดเพิ่มเติม หรือ Specification", en: "Additional details or Specification" },
   "placeholder.storage": { th: "เช่น ชั้น A-02, แร็ค 3-B", en: "e.g. Shelf A-02, Rack 3-B" },
   "placeholder.supplier_code": { th: "เช่น SUP-001", en: "e.g. SUP-001" },
@@ -693,14 +693,14 @@ for (const k in _tbl) { DICT["tbl." + k] = _tbl[k]; }
 // ── ปุ่มเพิ่มเติม ──
 DICT["dashboard.footer"] = { th: "© CMMS-TOPPAN — ระบบบริหารงานซ่อมบำรุง", en: "© CMMS-TOPPAN — Maintenance Suite" };
 DICT["action.download_pdf"] = { th: "ดาวน์โหลด PDF", en: "Download PDF" };
-DICT["action.building_pdf"] = { th: "กำลังสร้าง PDF...", en: "Building PDF..." };
+DICT["action.building_pdf"] = { th: "กำลังสร้าง PDF…", en: "Building PDF..." };
 DICT["action.update_status"] = { th: "อัปเดตสถานะ", en: "Update Status" };
 DICT["action.select_all_page"] = { th: "เลือกทั้งหมดในหน้า", en: "Select all on page" };
 DICT["action.download_pdf_fen03"] = { th: "ดาวน์โหลด PDF (F-EN-03)", en: "Download PDF (F-EN-03)" };
 DICT["action.print_closure_doc"] = { th: "พิมพ์เอกสารปิดซ่อม", en: "Print Closure Document" };
 DICT["action.create_wo"] = { th: "สร้างใบสั่งงาน", en: "Create Work Order" };
 DICT["action.create_pm"] = { th: "สร้างแผน PM ใหม่", en: "Create PM Plan" };
-DICT["action.search_hint_full"] = { th: "ค้นหาเลขงาน, เครื่องจักรฯ...", en: "Search job no., machine..." };
+DICT["action.search_hint_full"] = { th: "ค้นหาเลขงาน, เครื่องจักรฯ…", en: "Search job no., machine..." };
 DICT["action.filter_all_status"] = { th: "ทุกสถานะ", en: "All Statuses" };
 DICT["action.filter_all_priority"] = { th: "ทุกความเร่งด่วน", en: "All Priorities" };
 

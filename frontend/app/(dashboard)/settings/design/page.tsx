@@ -587,7 +587,7 @@ export default function PageDesignerPage() {
                   value={form.design_card_radius ?? "12px"}
                   onValueChange={(v) => setField("design_card_radius", String(v))}
                 >
-                  <SelectTrigger aria-label="มุมโค้งการ์ด"><SelectValue placeholder="เลือกมุมโค้ง..." /></SelectTrigger>
+                  <SelectTrigger aria-label="มุมโค้งการ์ด"><SelectValue placeholder="เลือกมุมโค้ง…" /></SelectTrigger>
                   <SelectContent>
                     {RADIUS_OPTIONS.map((o) => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -603,7 +603,7 @@ export default function PageDesignerPage() {
                   value={form.design_card_shadow ?? SHADOW_OPTIONS[1].value}
                   onValueChange={(v) => setField("design_card_shadow", String(v))}
                 >
-                  <SelectTrigger aria-label="ความเข้มเงา"><SelectValue placeholder="เลือกความเข้มเงา..." /></SelectTrigger>
+                  <SelectTrigger aria-label="ความเข้มเงา"><SelectValue placeholder="เลือกความเข้มเงา…" /></SelectTrigger>
                   <SelectContent>
                     {SHADOW_OPTIONS.map((o) => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -703,7 +703,7 @@ export default function PageDesignerPage() {
                   value={form.design_font_family ?? FONT_OPTIONS[0].value}
                   onValueChange={(v) => setField("design_font_family", String(v))}
                 >
-                  <SelectTrigger aria-label="ฟอนต์หลัก"><SelectValue placeholder="เลือกฟอนต์..." /></SelectTrigger>
+                  <SelectTrigger aria-label="ฟอนต์หลัก"><SelectValue placeholder="เลือกฟอนต์…" /></SelectTrigger>
                   <SelectContent>
                     {FONT_OPTIONS.map((o) => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -719,7 +719,7 @@ export default function PageDesignerPage() {
                   value={form.design_font_size ?? "16px"}
                   onValueChange={(v) => setField("design_font_size", String(v))}
                 >
-                  <SelectTrigger aria-label="ขนาดตัวหนังสือฐาน"><SelectValue placeholder="เลือกขนาด..." /></SelectTrigger>
+                  <SelectTrigger aria-label="ขนาดตัวหนังสือฐาน"><SelectValue placeholder="เลือกขนาด…" /></SelectTrigger>
                   <SelectContent>
                     {FONT_SIZE_OPTIONS.map((o) => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -866,7 +866,7 @@ export default function PageDesignerPage() {
             คืนค่าเริ่มต้น
           </Button>
           <Button disabled={saving} onClick={handleSave}>
-            {saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการปรับแต่ง"}
           </Button>
         </>
       ]} />

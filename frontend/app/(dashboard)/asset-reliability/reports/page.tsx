@@ -119,7 +119,7 @@ export default function ReportsPage() {
           "ตรวจตาราง/ผลลัพธ์ที่ระบบสร้างจากข้อมูลจริง",
           "ใช้ผลประกอบการทบทวนและวางแผนบำรุง/ทดแทน (ส่งออก/นำไปใช้ตามความเหมาะสม)",
         ]}
-        source="อ่านจาก /api/v1/asset_reports.php?report=... — รายงานดึงจากข้อมูลจริงในระบบ"
+        source="อ่านจาก /api/v1/asset_reports.php?report=… — รายงานดึงจากข้อมูลจริงในระบบ"
         note="ผลรายงานขึ้นกับความครบถ้วนของข้อมูลต้นทาง — ค่าที่ไม่มีข้อมูลจะแสดงตามที่ระบบคืน"
         related={[
           { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
@@ -168,7 +168,7 @@ export default function ReportsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading && <Spinner label="กำลังโหลดรายงาน..." />}
+          {isLoading && <Spinner label="กำลังโหลดรายงาน…" />}
           {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error.message} />}
           {!isLoading && !error && data && (
             rows.length > 0 ? (

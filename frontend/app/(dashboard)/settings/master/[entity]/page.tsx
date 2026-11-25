@@ -142,7 +142,7 @@ const E: Record<string, EntityDef> = {
   },
   spare_part_units: {
     label: "หน่วยอะไหล่",
-    desc: "หน่วยนับของอะไหล่ (PCS, SET, M ...)",
+    desc: "หน่วยนับของอะไหล่ (PCS, SET, M …)",
     fields: [
       { key: "code", label: "รหัส", type: "text", required: true },
       { key: "name", label: "ชื่อหน่วย", type: "text", required: true },
@@ -412,7 +412,7 @@ export default function MasterDataPage() {
           ))}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>ยกเลิก</Button>
-            <Button onClick={save} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึก"}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึก"}</Button>
           </div>
         </div>
       </AnimatedDialog>

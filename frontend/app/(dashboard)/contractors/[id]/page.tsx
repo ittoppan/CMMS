@@ -195,7 +195,7 @@ export default function ContractorDetailPage() {
             <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="ระบุเหตุผลประกอบการเปลี่ยนสถานะ" />
           </label>
           <Button variant="primary" onClick={changeStatus} disabled={busyStatus || !toStatus}>
-            <RefreshCw size={15} aria-hidden="true" /> {busyStatus ? "กำลังเปลี่ยน..." : "เปลี่ยนสถานะ"}
+            <RefreshCw size={15} aria-hidden="true" /> {busyStatus ? "กำลังเปลี่ยน…" : "เปลี่ยนสถานะ"}
           </Button>
         </CardContent>
       </Card>
@@ -362,7 +362,7 @@ export default function ContractorDetailPage() {
               )}
               <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="หมายเหตุการประเมิน" />
               <Button variant="primary" className="w-full" onClick={reviewQual} disabled={busyQual || !decision}>
-                <ShieldCheck size={15} aria-hidden="true" /> {busyQual ? "กำลังบันทึก..." : "บันทึกผลประเมิน"}
+                <ShieldCheck size={15} aria-hidden="true" /> {busyQual ? "กำลังบันทึก…" : "บันทึกผลประเมิน"}
               </Button>
             </CardContent>
           </Card>

@@ -173,7 +173,7 @@ export default function RolesPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหาชื่อบทบาท..."
+              placeholder="ค้นหาชื่อบทบาท…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

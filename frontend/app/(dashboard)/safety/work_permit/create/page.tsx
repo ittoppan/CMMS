@@ -202,7 +202,7 @@ export default function WorkPermitCreatePage() {
                 <Label>รายละเอียดงาน <span className="text-destructive">*</span></Label>
                 <Textarea
                   rows={3}
-                  placeholder="อธิบายลักษณะงานที่จะทำ — สิ่งที่เกี่ยวข้องกับความเสี่ยง เช่น ตัด/เชื่อม/ปีน/เข้าอับอากาศ..."
+                  placeholder="อธิบายลักษณะงานที่จะทำ — สิ่งที่เกี่ยวข้องกับความเสี่ยง เช่น ตัด/เชื่อม/ปีน/เข้าอับอากาศ…"
                   value={form.work_description}
                   onChange={(e) => set("work_description", e.target.value)}
                 />
@@ -330,7 +330,7 @@ export default function WorkPermitCreatePage() {
                 </ul>
                 <Button className="mt-4 w-full" onClick={submit} disabled={submitting}>
                   <FileCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {submitting ? "กำลังสร้าง..." : "สร้างใบอนุญาต (ร่าง)"}
+                  {submitting ? "กำลังสร้าง…" : "สร้างใบอนุญาต (ร่าง)"}
                 </Button>
               </div>
             </CardContent>

@@ -336,7 +336,7 @@ export default function InspectionsPage() {
               <div className="space-y-1.5">
                 <Label>เทมเพลต *</Label>
                 <Select value={cf.template_id || "__none__"} onValueChange={(v) => setCf({ ...cf, template_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกเทมเพลต..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="เลือกเทมเพลต…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกเทมเพลต...</SelectItem>
                     {templates.map((tpl) => <SelectItem key={tpl.id} value={String(tpl.id)}>{tpl.title} ({tpl.code})</SelectItem>)}
@@ -346,7 +346,7 @@ export default function InspectionsPage() {
               <div className="space-y-1.5">
                 <Label>เครื่องจักร / อุปกรณ์ *</Label>
                 <Select value={cf.asset_id || "__none__"} onValueChange={(v) => setCf({ ...cf, asset_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกเครื่อง..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="เลือกเครื่อง…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกเครื่อง...</SelectItem>
                     {assets.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.name}{a.code ? ` (${a.code})` : ""}</SelectItem>)}
@@ -368,7 +368,7 @@ export default function InspectionsPage() {
               <div className="space-y-1.5">
                 <Label>ผู้รับผิดชอบ</Label>
                 <Select value={cf.assignee_id || "__none__"} onValueChange={(v) => setCf({ ...cf, assignee_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกผู้รับผิดชอบ..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="เลือกผู้รับผิดชอบ…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกผู้รับผิดชอบ...</SelectItem>
                     {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name || u.username || `ผู้ใช้ #${u.id}`}</SelectItem>)}
@@ -378,7 +378,7 @@ export default function InspectionsPage() {
               <div className="space-y-1.5">
                 <Label>แผนก</Label>
                 <Select value={cf.department_id || "__none__"} onValueChange={(v) => setCf({ ...cf, department_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกแผนก..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="เลือกแผนก…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกแผนก...</SelectItem>
                     {departments.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
@@ -388,7 +388,7 @@ export default function InspectionsPage() {
               <div className="space-y-1.5">
                 <Label>ที่ตั้ง</Label>
                 <Select value={cf.location_id || "__none__"} onValueChange={(v) => setCf({ ...cf, location_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกที่ตั้ง..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="เลือกที่ตั้ง…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกที่ตั้ง...</SelectItem>
                     {locations.map((l) => <SelectItem key={l.id} value={String(l.id)}>{l.name}</SelectItem>)}

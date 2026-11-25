@@ -55,7 +55,7 @@ export default function CalibrationConfigPage() {
   const groups = Object.keys(FIELD_META);
   const groupNames = [...new Set(groups.map((k) => FIELD_META[k].group))];
 
-  if (isLoading) return <><PageHeader title="ตั้งค่าสอบเทียบ" description="กำลังโหลด..." /><div className="space-y-6"><Skeleton className="h-48 w-full" /></div></>;
+  if (isLoading) return <><PageHeader title="ตั้งค่าสอบเทียบ" description="กำลังโหลด…" /><div className="space-y-6"><Skeleton className="h-48 w-full" /></div></>;
 
   return (
     <>
@@ -70,7 +70,7 @@ export default function CalibrationConfigPage() {
       description="นโยบายการสอบเทียบของระบบ — ใช้ร่วมกับการตั้งค่าระบบอื่น"
       actions={[
         <Button variant="primary" disabled={isPending} onClick={() => save()}>
-          <Save className="w-4 h-4" /> {isPending ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+          <Save className="w-4 h-4" /> {isPending ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
         </Button>
       ]}
       />

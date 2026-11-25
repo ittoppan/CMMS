@@ -146,7 +146,7 @@ export default function NotificationPrefsPage() {
             </Button>
           </Link>
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
           </Button>
         </>
       ]} />
@@ -198,7 +198,7 @@ export default function NotificationPrefsPage() {
             )}
             <div className="flex justify-end">
               <Button onClick={handleSaveQuietHours} disabled={qhSaving} size="sm">
-                {qhSaving ? "กำลังบันทึก..." : "บันทึก Quiet Hours"}
+                {qhSaving ? "กำลังบันทึก…" : "บันทึก Quiet Hours"}
               </Button>
             </div>
           </CardContent>
@@ -312,7 +312,7 @@ export default function NotificationPrefsPage() {
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving}>
             <CheckCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
           </Button>
         </div>
       </div>

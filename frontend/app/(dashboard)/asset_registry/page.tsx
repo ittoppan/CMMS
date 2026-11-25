@@ -388,7 +388,7 @@ export default function AssetRegistryPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหารหัส, ชื่อเครื่องจักร, Serial No..."
+              placeholder="ค้นหารหัส, ชื่อเครื่องจักร, Serial No…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -459,7 +459,7 @@ export default function AssetRegistryPage() {
                     ยกเลิก
                   </Button>
                   <Button variant="danger" disabled={deleting} onClick={handleDelete}>
-                    {deleting ? "กำลังลบ..." : "ลบเครื่องจักร"}
+                    {deleting ? "กำลังลบ…" : "ลบเครื่องจักร"}
                   </Button>
                 </div>
               </>

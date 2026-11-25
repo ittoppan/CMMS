@@ -138,9 +138,9 @@ export default function AssetReliabilityProfilePage() {
   if (isLoading) {
     return (
       <>
-      <PageHeader title={hero.title} description="กำลังโหลดโปรไฟล์..." breadcrumbs={[{ label: hero.title }]} />
+      <PageHeader title={hero.title} description="กำลังโหลดโปรไฟล์…" breadcrumbs={[{ label: hero.title }]} />
       <div className="space-y-6">
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
             </div>
     </>
     );
@@ -854,7 +854,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setLifecycleDialog(false)}>ยกเลิก</Button>
-            <Button disabled={lifeBusy || !lifeTo || !lifeReason.trim()} onClick={submitLifecycle}>{lifeBusy ? "กำลังบันทึก..." : "บันทึกการเปลี่ยน"}</Button>
+            <Button disabled={lifeBusy || !lifeTo || !lifeReason.trim()} onClick={submitLifecycle}>{lifeBusy ? "กำลังบันทึก…" : "บันทึกการเปลี่ยน"}</Button>
           </div>
         </div>
       </Dialog>
@@ -885,7 +885,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setCritDialog(false)}>ยกเลิก</Button>
-            <Button disabled={critBusy} onClick={submitCriticality}>{critBusy ? "กำลังประเมิน..." : "บันทึกการประเมิน"}</Button>
+            <Button disabled={critBusy} onClick={submitCriticality}>{critBusy ? "กำลังประเมิน…" : "บันทึกการประเมิน"}</Button>
           </div>
         </div>
       </Dialog>
@@ -902,7 +902,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setCompDialog(false)}>ยกเลิก</Button>
-            <Button disabled={compBusy} onClick={submitComponent}>{compBusy ? "กำลังบันทึก..." : "บันทึกชิ้นส่วน"}</Button>
+            <Button disabled={compBusy} onClick={submitComponent}>{compBusy ? "กำลังบันทึก…" : "บันทึกชิ้นส่วน"}</Button>
           </div>
         </div>
       </Dialog>
@@ -920,7 +920,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setReplDialog(null)}>ยกเลิก</Button>
-            <Button disabled={replBusy || !(replForm.reason || "").trim()} onClick={submitReplacement}>{replBusy ? "กำลังบันทึก..." : "บันทึกการเปลี่ยน"}</Button>
+            <Button disabled={replBusy || !(replForm.reason || "").trim()} onClick={submitReplacement}>{replBusy ? "กำลังบันทึก…" : "บันทึกการเปลี่ยน"}</Button>
           </div>
         </div>
       </Dialog>
@@ -939,7 +939,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setMeasDialog(false)}>ยกเลิก</Button>
-            <Button disabled={measBusy} onClick={submitMeasurement}>{measBusy ? "กำลังบันทึก..." : "บันทึกค่าวัด"}</Button>
+            <Button disabled={measBusy} onClick={submitMeasurement}>{measBusy ? "กำลังบันทึก…" : "บันทึกค่าวัด"}</Button>
           </div>
         </div>
       </Dialog>
@@ -957,7 +957,7 @@ export default function AssetReliabilityProfilePage() {
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setOhDialog(false)}>ยกเลิก</Button>
-            <Button disabled={ohBusy || !(ohForm.title || "").trim()} onClick={submitOverhaul}>{ohBusy ? "กำลังบันทึก..." : "บันทึกแผน Overhaul"}</Button>
+            <Button disabled={ohBusy || !(ohForm.title || "").trim()} onClick={submitOverhaul}>{ohBusy ? "กำลังบันทึก…" : "บันทึกแผน Overhaul"}</Button>
           </div>
         </div>
       </Dialog>

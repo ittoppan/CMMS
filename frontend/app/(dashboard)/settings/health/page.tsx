@@ -162,7 +162,7 @@ export default function SystemHealthPage() {
             {status === "ok" && !statusWarn ? "ระบบปกติ" : "ต้องตรวจสอบ"}
           </span>
           <Button variant="secondary" disabled={loading} onClick={() => fetchHealth()}>
-            {loading ? "กำลังโหลด..." : "รีเฟรช"}
+            {loading ? "กำลังโหลด…" : "รีเฟรช"}
           </Button>
         </>
       ]}

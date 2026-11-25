@@ -232,7 +232,7 @@ export default function RunDetailPage() {
       description={
         data
           ? `${data.asset_code ?? ""} · ${statusLabel[data.status] || data.status} · ใบรับรอง: ${data.certificate_number || "-"}`
-          : "กำลังโหลด..."
+          : "กำลังโหลด…"
       }
       actions={[
         <div className="flex gap-2">

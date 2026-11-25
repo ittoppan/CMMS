@@ -415,7 +415,7 @@ export default function InteractiveStylePageEditor() {
                   className="w-full"
                 >
                   <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {publishing ? "กำลังบันทึก..." : "บันทึกสไตล์ & โทนสี"}
+                  {publishing ? "กำลังบันทึก…" : "บันทึกสไตล์ & โทนสี"}
                 </Button>
                 <Button
                   variant="outline"

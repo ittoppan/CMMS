@@ -490,7 +490,7 @@ export default function ImportExcelPage() {
                 <input id="imp-file" type="file" accept=".xlsx" className="hidden" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setVal(null); setResult(null); setErrorMsg(""); setPage(1); }} />
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <Button disabled={validating || !file} onClick={handleValidate}><CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />{validating ? "กำลังตรวจสอบ..." : "ตรวจสอบไฟล์และสรุปผลกระทบ"}</Button>
+                <Button disabled={validating || !file} onClick={handleValidate}><CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />{validating ? "กำลังตรวจสอบ…" : "ตรวจสอบไฟล์และสรุปผลกระทบ"}</Button>
                 <Button variant="ghost" onClick={resetAll} disabled={validating || importing}><RotateCcw size={16} strokeWidth={1.75} aria-hidden="true" /> เริ่มใหม่</Button>
               </div>
             </CardContent>
@@ -627,7 +627,7 @@ export default function ImportExcelPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction onClick={performImport} disabled={importing}>{importing ? "กำลังนำเข้า..." : `ยืนยัน ${actionableCount} รายการ`}</AlertDialogAction>
+            <AlertDialogAction onClick={performImport} disabled={importing}>{importing ? "กำลังนำเข้า…" : `ยืนยัน ${actionableCount} รายการ`}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

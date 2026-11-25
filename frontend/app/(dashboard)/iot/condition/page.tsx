@@ -207,7 +207,7 @@ export default function IotConditionPage() {
             <Label htmlFor="iot-condition-asset">เครื่องจักร</Label>
             <Select value={assetId} onValueChange={setAssetId}>
               <SelectTrigger id="iot-condition-asset" aria-label="เลือกเครื่องจักร">
-                <SelectValue placeholder={assets.length ? "เลือกเครื่องจักร..." : "ยังไม่มีเครื่องจักรในระบบ"} />
+                <SelectValue placeholder={assets.length ? "เลือกเครื่องจักร…" : "ยังไม่มีเครื่องจักรในระบบ"} />
               </SelectTrigger>
               <SelectContent>
                 {assets.map((a) => (

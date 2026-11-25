@@ -256,7 +256,7 @@ export default function MenuPermissionsPage() {
             ตรวจ drift สิทธิ์
           </Button>
           <Button disabled={saving} onClick={handleSave}>
-            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
           </Button>
         </>
       ]} />
@@ -421,7 +421,7 @@ export default function MenuPermissionsPage() {
                   disabled={saving}
                   onClick={handleSave}
                 >
-                  {saving ? "กำลังบันทึก..." : "บันทึกสิทธิ์เมนูทั้งหมด"}
+                  {saving ? "กำลังบันทึก…" : "บันทึกสิทธิ์เมนูทั้งหมด"}
                 </Button>
               </HStack>
             </CardContent>

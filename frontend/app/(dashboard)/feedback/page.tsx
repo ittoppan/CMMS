@@ -208,7 +208,7 @@ export default function FeedbackPage() {
                 <span className="mb-1 block font-medium">รายละเอียด</span>
                 <textarea
                   className="min-h-[110px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  placeholder="อธิบายปัญหา / สิ่งที่อยากให้ปรับปรุง..."
+                  placeholder="อธิบายปัญหา / สิ่งที่อยากให้ปรับปรุง…"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -216,7 +216,7 @@ export default function FeedbackPage() {
 
               <HStack hAlign="end">
                 <Button disabled={submitting} onClick={submit}>
-                  {submitting ? "กำลังส่ง..." : "ส่งฟีดแบ็ก"}
+                  {submitting ? "กำลังส่ง…" : "ส่งฟีดแบ็ก"}
                 </Button>
               </HStack>
             </VStack>

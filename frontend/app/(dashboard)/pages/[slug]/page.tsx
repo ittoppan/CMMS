@@ -128,7 +128,7 @@ export default function CustomPageView() {
         { label: "ระบบ & ตั้งค่า" },
         { label: page?.title || "ดูหน้าที่สร้างเอง" },
       ]}
-      title={page?.title || "กำลังโหลดหน้า..."}
+      title={page?.title || "กำลังโหลดหน้า…"}
       description={page ? `CUSTOM PAGE · /pages/${page.slug}` : undefined}
       actions={[
         page ? (

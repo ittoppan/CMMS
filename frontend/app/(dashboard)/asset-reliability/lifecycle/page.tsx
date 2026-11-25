@@ -84,7 +84,7 @@ export default function LifecyclePage() {
         ]}
       />
       {dash.isLoading && (
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
       )}
       {dash.error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={dash.error.message} />}
 
@@ -140,7 +140,7 @@ export default function LifecyclePage() {
             </CardHeader>
             <CardContent>
               {list.isLoading ? (
-                <Spinner label="กำลังโหลด..." />
+                <Spinner label="กำลังโหลด…" />
               ) : list.error ? (
                 <Alert variant="danger" title="เกิดข้อผิดพลาด" description={list.error.message} />
               ) : rows.length > 0 ? (

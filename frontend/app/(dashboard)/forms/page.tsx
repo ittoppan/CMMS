@@ -321,7 +321,7 @@ export default function FormsPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหารหัสแบบฟอร์ม หรือชื่อ... เช่น F-EN-07, ตรวจเช็ค, ใบแจ้งซ่อม"
+              placeholder="ค้นหารหัสแบบฟอร์ม หรือชื่อ… เช่น F-EN-07, ตรวจเช็ค, ใบแจ้งซ่อม"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -458,7 +458,7 @@ export default function FormsPage() {
             </Button>
             <Button disabled={upLoading} onClick={handleUpload}>
               <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-              {upLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
+              {upLoading ? "กำลังอัปโหลด…" : "อัปโหลด"}
             </Button>
           </div>
         </div>

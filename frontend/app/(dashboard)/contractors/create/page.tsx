@@ -251,7 +251,7 @@ export default function ContractorCreatePage() {
       <div className="flex items-center justify-end gap-2">
         <a href="/contractors" className={buttonVariants({ variant: "secondary" })}>ยกเลิก</a>
         <Button variant="primary" onClick={submit} disabled={busy || companyName.trim() === ""}>
-          <Save size={15} aria-hidden="true" /> {busy ? "กำลังบันทึก..." : "สร้างผู้รับเหมา"}
+          <Save size={15} aria-hidden="true" /> {busy ? "กำลังบันทึก…" : "สร้างผู้รับเหมา"}
         </Button>
       </div>
     </div>

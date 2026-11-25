@@ -498,11 +498,11 @@ export default function FormRunPage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <Button onClick={saveSubmission} disabled={saving} className="gap-1.5">
                   <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                  {saving ? "กำลังบันทึก..." : "บันทึกผลการกรอก"}
+                  {saving ? "กำลังบันทึก…" : "บันทึกผลการกรอก"}
                 </Button>
                 <Button variant="secondary" onClick={exportPdf} disabled={exporting} className="gap-1.5">
                   <FileDown className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                  {exporting ? "กำลังสร้าง PDF..." : "สร้าง PDF"}
+                  {exporting ? "กำลังสร้าง PDF…" : "สร้าง PDF"}
                 </Button>
               </div>
             </CardContent>

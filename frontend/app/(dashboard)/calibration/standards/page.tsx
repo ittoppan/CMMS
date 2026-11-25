@@ -149,7 +149,7 @@ export default function CalibrationStandardsPage() {
             <Input label="วันที่สอบเทียบ" type="date" value={form.calibration_date || ""} onChange={(e) => set("calibration_date", e.target.value)} />
             <Input label="หมดอายุถัดไป" type="date" value={form.next_calibration_date || ""} onChange={(e) => set("next_calibration_date", e.target.value)} />
             <div className="sm:col-span-4">
-              <Textarea label="สายโซ่การสืบค้น (traceability)" value={form.traceability || ""} onChange={(e) => set("traceability", e.target.value)} placeholder="อ้างอิงไปมาตรฐานชาติ/สากล..." rows={2} />
+              <Textarea label="สายโซ่การสืบค้น (traceability)" value={form.traceability || ""} onChange={(e) => set("traceability", e.target.value)} placeholder="อ้างอิงไปมาตรฐานชาติ/สากล…" rows={2} />
             </div>
             <div className="sm:col-span-4 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setShowForm(false)}>ยกเลิก</Button>

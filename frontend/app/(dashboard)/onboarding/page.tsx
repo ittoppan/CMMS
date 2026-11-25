@@ -54,7 +54,7 @@ interface Step {
 
 const STEP_META: Omit<Step, "count" | "loading">[] = [
   { id: "settings", title: "1. ตั้งค่าระบบ (Settings)", description: "ชื่อบริษัท ที่อยู่ timezone สกุลเงิน และค่าพื้นฐานของระบบ", href: "/settings", icon: Settings, minCount: 5 },
-  { id: "roles", title: "2. บทบาท & สิทธิ์ (Roles)", description: "กำหนด role (Admin/Manager/Technician/...) และสิทธิ์เมนูต่อ role", href: "/roles", icon: ShieldCheck, minCount: 1 },
+  { id: "roles", title: "2. บทบาท & สิทธิ์ (Roles)", description: "กำหนด role (Admin/Manager/Technician/…) และสิทธิ์เมนูต่อ role", href: "/roles", icon: ShieldCheck, minCount: 1 },
   { id: "users", title: "3. ผู้ใช้งาน (Users)", description: "สร้างบัญชีผู้ใช้และกำหนด role + แผนก", href: "/users", icon: Users, minCount: 2 },
   { id: "departments", title: "4. แผนก (Departments)", description: "รายชื่อแผนก/ฝ่ายขององค์กร", href: "/settings/master/departments", icon: Building2, minCount: 1 },
   { id: "locations", title: "5. ที่ตั้ง/สถานที่ (Locations)", description: "อาคาร ชั้น พื้นที่ติดตั้งเครื่องจักร", href: "/settings/master/locations", icon: Building2, minCount: 1 },
@@ -347,7 +347,7 @@ export default function OnboardingPage() {
         breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "Onboarding" }]}
         title="Onboarding Wizard — เตรียมข้อมูลหลักก่อน Go Live"
         description="ทำตามลำดับขั้นตอนนี้เพื่อป้อน Master Data ให้ครบก่อนเริ่มใช้งานจริง (เพิ่มข้อมูลได้ทันทีในหน้านี้)"
-        actions={[<Button key="refresh" variant="secondary" onClick={refresh} disabled={refreshing}>{refreshing ? "กำลังตรวจสอบ..." : "ตรวจสอบใหม่"}</Button>]}
+        actions={[<Button key="refresh" variant="secondary" onClick={refresh} disabled={refreshing}>{refreshing ? "กำลังตรวจสอบ…" : "ตรวจสอบใหม่"}</Button>]}
       />
       <div className="space-y-6">
         {successMsg && <Alert variant="success">{successMsg}</Alert>}
@@ -370,7 +370,7 @@ export default function OnboardingPage() {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-semibold">{s.title}</h3>
                       <Badge variant={st === "done" ? "success" : st === "empty" ? "danger" : "warning"}>
-                        {s.loading ? "กำลังโหลด..." : st === "done" ? `เสร็จ (${s.count})` : s.count === 0 ? "ยังไม่มีข้อมูล" : `บางส่วน (${s.count}/${s.minCount})`}
+                        {s.loading ? "กำลังโหลด…" : st === "done" ? `เสร็จ (${s.count})` : s.count === 0 ? "ยังไม่มีข้อมูล" : `บางส่วน (${s.count}/${s.minCount})`}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{s.description}</p>
@@ -393,7 +393,7 @@ export default function OnboardingPage() {
                     <div className="flex justify-end gap-2 pt-2">
                       <Button variant="secondary" size="sm" onClick={() => setOpenForm(null)}>ยกเลิก</Button>
                       <Button size="sm" disabled={saving} onClick={() => submit(s.id)}>
-                        {saving ? "กำลังบันทึก..." : "บันทึก"}
+                        {saving ? "กำลังบันทึก…" : "บันทึก"}
                       </Button>
                     </div>
                   </div>

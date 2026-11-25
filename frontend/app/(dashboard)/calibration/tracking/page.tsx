@@ -286,7 +286,7 @@ export default function CalibrationTrackingPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหาเครื่องมือ, PO, ใบรับรอง หรือผู้ให้บริการ..."
+              placeholder="ค้นหาเครื่องมือ, PO, ใบรับรอง หรือผู้ให้บริการ…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

@@ -96,7 +96,7 @@ export default function ReplacementPage() {
         ]}
       />
       {isLoading && (
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
       )}
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error.message} />}
 
@@ -112,7 +112,7 @@ export default function ReplacementPage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาเครื่อง / ชิ้นส่วน..."
+                placeholder="ค้นหาเครื่อง / ชิ้นส่วน…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="max-w-[300px]"

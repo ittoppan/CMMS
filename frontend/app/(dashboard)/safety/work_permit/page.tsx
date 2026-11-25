@@ -172,7 +172,7 @@ export default function WorkPermitPage() {
               <Search size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--cmms-text-secondary)]" aria-hidden="true" />
               <Input
                 className="pl-8"
-                placeholder="ค้นหาเลขใบอนุญาต / งาน / เครื่องจักร..."
+                placeholder="ค้นหาเลขใบอนุญาต / งาน / เครื่องจักร…"
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               />

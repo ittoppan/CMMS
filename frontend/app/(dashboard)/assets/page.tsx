@@ -427,7 +427,7 @@ export default function AssetsPage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาด้วยรหัส ชื่อ หรือสถานที่..."
+                placeholder="ค้นหาด้วยรหัส ชื่อ หรือสถานที่…"
                 value={search}
                 onChange={(e) => setFilters({ search: e.target.value })}
                 className="pl-9"
@@ -471,7 +471,7 @@ export default function AssetsPage() {
               }}
             >
               <SelectTrigger aria-label="มุมมองที่บันทึก" className="w-full sm:w-56">
-                <SelectValue placeholder="เลือกมุมมอง..." />
+                <SelectValue placeholder="เลือกมุมมอง…" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">— เลือกมุมมอง —</SelectItem>

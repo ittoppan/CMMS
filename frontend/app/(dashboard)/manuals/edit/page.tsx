@@ -218,7 +218,7 @@ function EditManualContent() {
                 </Button>
                 <Button disabled={submitting} onClick={handleSubmit}>
                   <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                  {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                  {submitting ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
                 </Button>
               </div>
             </div>

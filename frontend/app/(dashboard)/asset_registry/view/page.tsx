@@ -678,12 +678,12 @@ export default function AssetRegistryViewPage() {
         <PageHeader
           breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "รายละเอียดเครื่องจักร" }]}
           title="รายละเอียดเครื่องจักร"
-          description="กำลังโหลดข้อมูล..."
+          description="กำลังโหลดข้อมูล…"
         />
         <div className="space-y-6">
           <Card>
             <CardContent className="flex items-center justify-center p-10">
-              <Spinner label="กำลังโหลดข้อมูลเครื่องจักร..." />
+              <Spinner label="กำลังโหลดข้อมูลเครื่องจักร…" />
             </CardContent>
           </Card>
         </div>
@@ -1096,7 +1096,7 @@ export default function AssetRegistryViewPage() {
               </div>
               <Input label="หมายเหตุ (ถ้ามี)" value={measForm.notes} onChange={(e) => setMeasForm({ ...measForm, notes: e.target.value })} placeholder="เช่น อ่านจากหน้าปัดรอบบ่าย" />
               <div className="flex flex-wrap items-center gap-3">
-                <Button onClick={saveMeasurement} disabled={measSaving || !canShow("asset_registry")}>{measSaving ? "กำลังบันทึก..." : "บันทึกค่ามิเตอร์"}</Button>
+                <Button onClick={saveMeasurement} disabled={measSaving || !canShow("asset_registry")}>{measSaving ? "กำลังบันทึก…" : "บันทึกค่ามิเตอร์"}</Button>
                 <span className="text-xs text-muted-foreground">บันทึกค่าจริงสม่ำเสมอเพื่อให้ PM ตามมิเตอร์ (CBM) และรอบถัดไปประเมินได้ถูกต้อง</span>
               </div>
 

@@ -403,7 +403,7 @@ function RegisterContent() {
                           disabled={submitting || !lineUserId}
                           onClick={handleBind}
                         >
-                          {submitting ? "กำลังตรวจสอบ..." : "ผูกบัญชีกับเลขพนักงานนี้"}
+                          {submitting ? "กำลังตรวจสอบ…" : "ผูกบัญชีกับเลขพนักงานนี้"}
                         </Button>
                         <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
                           ระบบตรวจสอบเลขพนักงานอัตโนมัติ

@@ -98,7 +98,7 @@ export default function ConfigPage() {
         ]}
       />
       {isLoading && (
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
       )}
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error.message} />}
 
@@ -149,7 +149,7 @@ export default function ConfigPage() {
               ))}
               {msg && <Alert variant={msg.ok ? "success" : "danger"} title={msg.ok ? "สำเร็จ" : "ผิดพลาด"} description={msg.text} />}
               <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
-                <Button variant="primary" onClick={save} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}</Button>
+                <Button variant="primary" onClick={save} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}</Button>
               </div>
             </CardContent>
           </Card>

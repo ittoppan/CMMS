@@ -120,7 +120,7 @@ export default function RcaEventsPage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitSearch()}
-              placeholder="ค้นหาเลขเหตุการณ์ / คำอธิบาย / เลข WO..."
+              placeholder="ค้นหาเลขเหตุการณ์ / คำอธิบาย / เลข WO…"
               className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] pl-9 pr-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
             />
           </div>

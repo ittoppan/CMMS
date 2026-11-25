@@ -449,7 +449,7 @@ function BudgetModal({ modal, symbol, departments, busy, onClose, onSave }: {
         <div className="flex justify-end gap-2 pt-1">
           <button type="button" onClick={onClose} disabled={busy} className="rounded-xl border border-[var(--cmms-border)] px-4 py-2 text-sm font-medium disabled:opacity-50">ยกเลิก</button>
           <button type="button" onClick={submit} disabled={busy} className="inline-flex items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {busy ? "กำลังบันทึก..." : "บันทึก"}
+            {busy ? "กำลังบันทึก…" : "บันทึก"}
           </button>
         </div>
       </div>

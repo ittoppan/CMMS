@@ -296,7 +296,7 @@ export default function NotificationCenterPage() {
                 <Input
                   label="ค้นหา"
                   isLabelHidden
-                  placeholder="ค้นหาข้อความแจ้งเตือน..."
+                  placeholder="ค้นหาข้อความแจ้งเตือน…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9"
@@ -322,7 +322,7 @@ export default function NotificationCenterPage() {
         {/* Notification Items List */}
         {loading && items.length === 0 ? (
           <div className="flex items-center justify-center gap-2 py-16">
-            <Spinner size={20} label="กำลังโหลดการแจ้งเตือน..." />
+            <Spinner size={20} label="กำลังโหลดการแจ้งเตือน…" />
           </div>
         ) : (
           <div className="space-y-3">

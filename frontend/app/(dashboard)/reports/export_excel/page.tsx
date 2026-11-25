@@ -203,11 +203,11 @@ export default function ExportExcelReportPage() {
             <div className="flex flex-wrap justify-end gap-2 pt-2">
               <Button variant="outline" disabled={busy !== ""} onClick={() => handleExport("xlsx")}>
                 <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-                {busy === "xlsx" ? "กำลังสร้าง Excel..." : "ส่งออก Excel"}
+                {busy === "xlsx" ? "กำลังสร้าง Excel…" : "ส่งออก Excel"}
               </Button>
               <Button variant="outline" disabled={busy !== ""} onClick={() => handleExport("csv")}>
                 <FileSpreadsheet size={16} strokeWidth={1.75} aria-hidden="true" />
-                {busy === "csv" ? "กำลังสร้าง CSV..." : "ส่งออก CSV"}
+                {busy === "csv" ? "กำลังสร้าง CSV…" : "ส่งออก CSV"}
               </Button>
             </div>
           </CardContent>

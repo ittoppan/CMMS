@@ -113,7 +113,7 @@ export default function AssetReliabilityPage() {
         ]}
       />
       {isLoading && (
-        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
+        <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด…" /></div>
       )}
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error.message} />}
 

@@ -215,7 +215,7 @@ export default function AssetCriticalityPage() {
                     onValueChange={handleSelect}
                   >
                     <SelectTrigger id="f-asset" aria-label="เลือกเครื่องจักร">
-                      <SelectValue placeholder="เลือกเครื่องจักร..." />
+                      <SelectValue placeholder="เลือกเครื่องจักร…" />
                     </SelectTrigger>
                     <SelectContent>
                       {assets.length === 0 ? (
@@ -329,7 +329,7 @@ export default function AssetCriticalityPage() {
                   onClick={handleSave}
                 >
                   <Scale size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}
+                  {submitting ? "กำลังบันทึก…" : "บันทึกผลการประเมินเกรด"}
                 </Button>
               </CardContent>
             </Card>

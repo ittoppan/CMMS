@@ -591,7 +591,7 @@ export default function FacilityLayoutPage() {
       actions={[
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={fetchData}><RefreshCw className="w-4 h-4" /> รีเฟรช</Button>
-          {canManage && <Button onClick={save} disabled={saving}><Save className="w-4 h-4" /> {saving?"กำลังบันทึก...":"บันทึกผัง/พอร์ต"}</Button>}
+          {canManage && <Button onClick={save} disabled={saving}><Save className="w-4 h-4" /> {saving?"กำลังบันทึก…":"บันทึกผัง/พอร์ต"}</Button>}
         </div>
       ]} />
       <div className="space-y-6">
@@ -800,7 +800,7 @@ export default function FacilityLayoutPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                 <div className="md:col-span-2">
                   <Label className="text-xs">URL รูปแปลนจริง (ห้อง/ชั้น)</Label>
-                  <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value } as any })} placeholder="https://.../floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+                  <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value } as any })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
                 </div>
                 <div className="flex gap-2">
                   {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any }); setSelectedPlanItemId(null); }}>ลบรูป</Button> : null}
@@ -1042,7 +1042,7 @@ export default function FacilityLayoutPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div className="md:col-span-2">
               <Label className="text-xs">ค้นหา (ชื่อ/เลขพอร์ต/ปลายทาง/สเปก/ห้อง/ตู้)</Label>
-              <Input value={portSearch} onChange={e=>setPortSearch(e.target.value)} placeholder="เช่น เลขเบรกเกอร์ DB1-12, ชื่อพอร์ต, ช่อง/เทอร์มินัล, สเปก 220V/Cat6, ปลายทาง/เครื่อง..." />
+              <Input value={portSearch} onChange={e=>setPortSearch(e.target.value)} placeholder="เช่น เลขเบรกเกอร์ DB1-12, ชื่อพอร์ต, ช่อง/เทอร์มินัล, สเปก 220V/Cat6, ปลายทาง/เครื่อง…" />
             </div>
             <div>
               <Label className="text-xs">ประเภทพอร์ต</Label>
@@ -1300,7 +1300,7 @@ export default function FacilityLayoutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
             <div className="md:col-span-2">
               <Label className="text-xs">URL รูปแปลนจริง (ชั้น/โซน)</Label>
-              <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value } })} placeholder="https://.../floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+              <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value } })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
             </div>
             <div className="flex gap-2">
               {floorCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: "" } }); setSelectedFloorPlanItemId(null); }}>ลบรูป</Button> : null}

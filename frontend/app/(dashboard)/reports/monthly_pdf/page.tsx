@@ -229,7 +229,7 @@ export default function MonthlyPdfReportPage() {
               </Button>
               <Button variant="outline" disabled={downloading} onClick={handleDownload}>
                 <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
-                {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
+                {downloading ? "กำลังสร้าง PDF…" : "ดาวน์โหลด PDF"}
               </Button>
               <Button onClick={handlePrint}>
                 <Printer size={16} strokeWidth={1.75} aria-hidden="true" />

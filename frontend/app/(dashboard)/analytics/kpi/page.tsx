@@ -484,7 +484,7 @@ export default function KpiDashboardPage() {
         footer={
           <>
             <Button variant="outline" onClick={() => setSettingsOpen(false)}>ยกเลิก</Button>
-            <Button onClick={saveKpiSettings} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึก"}</Button>
+            <Button onClick={saveKpiSettings} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึก"}</Button>
           </>
         }
       >

@@ -143,7 +143,7 @@ export default function MtbfMttrCreatePage() {
               </Label>
               <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="เลือกเครื่องจักร..." />
+                  <SelectValue placeholder="เลือกเครื่องจักร…" />
                 </SelectTrigger>
                 <SelectContent>
                   {assets.map((a) => (
@@ -173,7 +173,7 @@ export default function MtbfMttrCreatePage() {
                 </Label>
                 <Select value={month} onValueChange={(v) => setMonth(v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="เลือกเดือน..." />
+                    <SelectValue placeholder="เลือกเดือน…" />
                   </SelectTrigger>
                   <SelectContent>
                     {MONTH_OPTIONS.map((opt) => (
@@ -230,7 +230,7 @@ export default function MtbfMttrCreatePage() {
               </Button>
               <Button disabled={loading} onClick={handleSubmit}>
                 <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {loading ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
               </Button>
             </div>
           </div>

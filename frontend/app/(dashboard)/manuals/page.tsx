@@ -221,7 +221,7 @@ export default function ManualsPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหาชื่อเอกสาร, รหัส หรือเครื่องจักร..."
+              placeholder="ค้นหาชื่อเอกสาร, รหัส หรือเครื่องจักร…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

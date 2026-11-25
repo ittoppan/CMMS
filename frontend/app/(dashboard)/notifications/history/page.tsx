@@ -336,7 +336,7 @@ export default function LineDeliveryHistoryPage() {
               <Input
                 label="ค้นหา"
                 isLabelHidden
-                placeholder="ค้นหาชื่อ/ข้อความ..."
+                placeholder="ค้นหาชื่อ/ข้อความ…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-9"

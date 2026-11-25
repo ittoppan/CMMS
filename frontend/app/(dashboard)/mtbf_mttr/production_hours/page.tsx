@@ -251,7 +251,7 @@ export default function ProductionHoursPage() {
             <Input
               label="ค้นหา"
               isLabelHidden
-              placeholder="ค้นหาเครื่องจักร, รหัส หรือวันที่..."
+              placeholder="ค้นหาเครื่องจักร, รหัส หรือวันที่…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"

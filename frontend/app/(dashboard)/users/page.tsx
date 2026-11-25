@@ -594,7 +594,7 @@ export default function UsersPage() {
                 <Input
                   label="ค้นหา"
                   isLabelHidden
-                  placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
+                  placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร…"
                   value={search}
                   onChange={(e) => setFilters({ search: e.target.value })}
                   className="pl-9"
@@ -655,7 +655,7 @@ export default function UsersPage() {
               ยกเลิก
             </Button>
             <Button variant="danger" disabled={deleting} onClick={handleDelete}>
-              {deleting ? "กำลังลบ..." : "ยืนยันลบผู้ใช้"}
+              {deleting ? "กำลังลบ…" : "ยืนยันลบผู้ใช้"}
             </Button>
           </>
         }

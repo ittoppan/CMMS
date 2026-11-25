@@ -129,7 +129,7 @@ export default function ProductionHoursCreatePage() {
               </Label>
               <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="เลือกเครื่องจักร..." />
+                  <SelectValue placeholder="เลือกเครื่องจักร…" />
                 </SelectTrigger>
                 <SelectContent>
                   {assets.map((a) => (
@@ -196,7 +196,7 @@ export default function ProductionHoursCreatePage() {
               </Button>
               <Button disabled={loading} onClick={handleSubmit}>
                 <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
-                {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {loading ? "กำลังบันทึก…" : "บันทึกข้อมูล"}
               </Button>
             </div>
           </div>

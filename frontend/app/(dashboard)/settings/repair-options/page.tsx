@@ -650,7 +650,7 @@ function MasterEntitySection({ entityKey }: { entityKey: "departments" | "locati
           ))}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>ยกเลิก</Button>
-            <Button onClick={save} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึก"}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึก"}</Button>
           </div>
         </div>
       </AnimatedDialog>

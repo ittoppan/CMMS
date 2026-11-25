@@ -183,7 +183,7 @@ export default function SystemServicesPage() {
             disabled={loading}
             onClick={() => fetchStatus()}
           >
-            {loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
+            {loading ? "กำลังโหลด…" : "รีเฟรชสถานะ"}
           </Button>
         </>
       ]}

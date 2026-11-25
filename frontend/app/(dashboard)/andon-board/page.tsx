@@ -151,7 +151,7 @@ export default function AndonBoardPage() {
       setError("");
     } catch (e) {
       console.error("Andon board load failed:", e);
-      setError("โหลดข้อมูลไม่สำเร็จ — กำลังลองใหม่...");
+      setError("โหลดข้อมูลไม่สำเร็จ — กำลังลองใหม่…");
     }
     setLoading(false);
   };
