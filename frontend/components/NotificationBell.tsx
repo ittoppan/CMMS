@@ -106,7 +106,7 @@ export function NotificationBell({
       <PopoverContent align="end" className="w-[360px] p-0">
         {loading ? (
           <div className="py-6 text-center">
-            <Spinner size={16} label="กำลังโหลด..." />
+            <Spinner size={16} label="กำลังโหลด…" />
           </div>
         ) : (
           <NotificationCenter

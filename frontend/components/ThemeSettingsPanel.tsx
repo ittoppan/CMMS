@@ -175,7 +175,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
           <HexStatus value={values.theme_secondary_hex ?? ""} />
         </VStack>
         <Button disabled={saving} onClick={onSave}>
-          {saving ? "กำลังบันทึก..." : "บันทึกธีมลงฐานข้อมูล"}
+          {saving ? "กำลังบันทึก…" : "บันทึกธีมลงฐานข้อมูล"}
         </Button>
       </HStack>
 

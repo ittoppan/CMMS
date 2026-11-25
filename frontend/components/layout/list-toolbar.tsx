@@ -119,7 +119,7 @@ export function ListToolbar({
             type="search"
             value={search.value}
             onChange={(e) => search.onChange(e.target.value)}
-            placeholder={search.placeholder ?? "ค้นหา..."}
+            placeholder={search.placeholder ?? "ค้นหา…"}
             className="h-11 pl-9 pr-9 md:h-10"
           />
           {search.value.length > 0 && (

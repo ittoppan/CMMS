@@ -1197,7 +1197,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
     );
   }
 
-  const displayName = form.reporterName || sessionName || "...";
+  const displayName = form.reporterName || sessionName || "…";
   // ชื่อแผนกที่ใช้แสดงผล: ตัวเลือกในฟอร์ม → แผนกจากโปรไฟล์ที่ผูกไว้
   const deptLabel = depts.find((d) => d.code === form.departmentCode)?.name || reporterDeptName || "";
 
@@ -1294,7 +1294,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
               onClick={() => flushQueue(true)}
               className="shrink-0"
             >
-              {flushingQueue ? "กำลังส่ง..." : "ส่งงานค้างทั้งหมดตอนนี้"}
+              {flushingQueue ? "กำลังส่ง…" : "ส่งงานค้างทั้งหมดตอนนี้"}
             </Button>
           </div>
 
@@ -1487,7 +1487,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
               <Textarea
                 label="รายละเอียดปัญหา"
                 isLabelHidden
-                placeholder="อธิบายปัญหาที่พบให้ละเอียด เช่น อาการที่พบ ข้อความแจ้งเตือน เวลาเกิดปัญหา..."
+                placeholder="อธิบายปัญหาที่พบให้ละเอียด เช่น อาการที่พบ ข้อความแจ้งเตือน เวลาเกิดปัญหา…"
                 value={form.symptoms}
                 onChange={(e) => update("symptoms", e.target.value)}
                 rows={4}
@@ -1540,7 +1540,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
                   onValueChange={(v) => update("departmentCode", v === "__none__" ? "" : v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="เลือกแผนก..." />
+                    <SelectValue placeholder="เลือกแผนก…" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__" disabled>เลือกแผนก...</SelectItem>

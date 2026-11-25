@@ -100,12 +100,12 @@ export default function ImageUploadField({
           disabled={uploading}
           onClick={() => fileInputRef.current?.click()}
         >
-          เลือกไฟล์รูป...
+          เลือกไฟล์รูป…
         </Button>
         {uploading && (
           <HStack gap={2} vAlign="center">
             <Loader2 size={14} strokeWidth={1.75} aria-hidden="true" className="animate-spin text-[var(--cmms-text-secondary)]" />
-            <p className="text-sm text-muted-foreground">กำลังอัปโหลดรูป...</p>
+            <p className="text-sm text-muted-foreground">กำลังอัปโหลดรูป…</p>
           </HStack>
         )}
       </VStack>
@@ -138,7 +138,7 @@ export default function ImageUploadField({
           <Input
             label="URL รูปภาพ"
             isLabelHidden
-            placeholder="หรือวาง URL รูปภาพที่นี่ (เช่น จาก Sage)..."
+            placeholder="หรือวาง URL รูปภาพที่นี่ (เช่น จาก Sage)…"
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             className="w-64"

@@ -155,7 +155,7 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
             placeholder={
               index.length > 0
                 ? `ค้นหาเมนู (${index.length} รายการ) — พิมพ์เช่น PM, อะไหล่, Sage`
-                : "ค้นหาเมนูหรือฟีเจอร์ (พิมพ์เพื่อกรองทันที)..."
+                : "ค้นหาเมนูหรือฟีเจอร์ (พิมพ์เพื่อกรองทันที)…"
             }
             autoComplete="off"
             spellCheck={false}

@@ -510,18 +510,29 @@ function ItemsCard({
               const status = getStockStatus(item);
               const badge = stockBadge[status];
               const thumb = partThumbSrc(item);
+              // แถวทั้งแถวกดได้ (เหมือนตอนที่เป็น role="button") — แต่เป็นการ์ดคลิกที่ซ้อนได้
+              // โดยไม่ผิดกฎ: ปุ่มทับโปร่งใส tabIndex=-1 + aria-hidden, ปุ่มจริงยังเป็นตัวรับ focus
+              const openRow = selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item);
               return (
                 <div
                   key={item.id}
-                  className="flex flex-wrap items-start justify-between gap-3 rounded-[10px] border border-border bg-card p-3 transition-colors duration-300 hover:bg-accent"
+                  className="relative flex flex-wrap items-start justify-between gap-3 rounded-[10px] border border-border bg-card p-3 transition-colors duration-300 hover:bg-accent"
                 >
+                  {/* พื้นที่ว่าง/ตัวเลข/มินิบาร์ กดแล้วเปิดรายการเหมือนเดิม — ปุ่มจริงด้านล่างเป็นตัวรับ focus */}
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    onClick={openRow}
+                    className="absolute inset-0 z-0 cursor-pointer rounded-[10px]"
+                  />
                   {/* checkbox อยู่นอกปุ่ม — ห้ามมี interactive ซ้อนใน interactive */}
                   {selectMode && (
                     <input
                       type="checkbox"
                       checked={selectedIds.has(item.rawId)}
                       onChange={() => toggleSelect(item.rawId)}
-                      className="mt-1 h-[18px] w-[18px] accent-[var(--cmms-primary)]"
+                      className="relative z-10 mt-1 h-[18px] w-[18px] accent-[var(--cmms-primary)]"
                       aria-label={`เลือก ${item.name}`}
                     />
                   )}
@@ -529,8 +540,8 @@ function ItemsCard({
                   {/* เนื้อหาหลักเป็นปุ่มจริง — Enter/Space ใช้ได้ตาม native */}
                   <button
                     type="button"
-                    onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
-                    className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-[8px] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
+                    onClick={openRow}
+                    className="relative z-10 flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-[8px] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
                   >
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -584,7 +595,7 @@ function ItemsCard({
                       </div>
                       <MiniBar value={item.stock} max={item.maxStock} label={`สต็อก ${item.name}`} />
                     </div>
-                    <div className="flex gap-1">
+                    <div className="relative z-10 flex gap-1">
                       <Button
                         variant="ghost"
                         size="icon"

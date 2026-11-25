@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 function Spinner({
   className,
   size = 20,
-  label = "กำลังโหลด...",
+  label = "กำลังโหลด…",
 }: {
   className?: string;
   size?: number;

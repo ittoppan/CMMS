@@ -209,7 +209,7 @@ export default function EmailNotifySettings() {
     return (
       <div className="flex items-center justify-center gap-3 py-14">
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าอีเมล...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าอีเมล…</p>
       </div>
     );
   }
@@ -290,7 +290,7 @@ export default function EmailNotifySettings() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[var(--cmms-text-primary)]">การเข้ารหัส SMTP</label>
                 <Select value={settings.smtp_encryption || "tls"} onValueChange={(v) => setSettingField("smtp_encryption", v)}>
-                  <SelectTrigger aria-label="การเข้ารหัส SMTP"><SelectValue placeholder="เลือกการเข้ารหัส..." /></SelectTrigger>
+                  <SelectTrigger aria-label="การเข้ารหัส SMTP"><SelectValue placeholder="เลือกการเข้ารหัส…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tls">STARTTLS (พอร์ต 587)</SelectItem>
                     <SelectItem value="ssl">SSL (พอร์ต 465)</SelectItem>
@@ -329,7 +329,7 @@ export default function EmailNotifySettings() {
                   value={activeTemplate}
                   onValueChange={(v) => { setActiveTemplate(v); setTestResult(null); }}
                 >
-                  <SelectTrigger aria-label="เหตุการณ์การแจ้งเตือน"><SelectValue placeholder="เลือกเหตุการณ์..." /></SelectTrigger>
+                  <SelectTrigger aria-label="เหตุการณ์การแจ้งเตือน"><SelectValue placeholder="เลือกเหตุการณ์…" /></SelectTrigger>
                   <SelectContent>
                     {TEMPLATE_ORDER.map((k) => (
                       <SelectItem key={k} value={k}>
@@ -431,7 +431,7 @@ export default function EmailNotifySettings() {
               <HStack hAlign="end" gap={2} wrap="wrap">
                 <Button disabled={testing} onClick={handleTestSend}>
                   <Send size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {testing ? "กำลังส่ง..." : "ยิงทดสอบส่งอีเมล"}
+                  {testing ? "กำลังส่ง…" : "ยิงทดสอบส่งอีเมล"}
                 </Button>
                 <Button variant="secondary" disabled={!hasChanges || saving} onClick={handleSave}>
                   {hasChanges ? "บันทึก (มีการแก้ไข)" : "บันทึกการตั้งค่า"}

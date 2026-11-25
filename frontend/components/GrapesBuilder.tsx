@@ -752,7 +752,7 @@ export default function GrapesBuilder() {
           หน้าใหม่
         </button>
         <button type="button" onClick={save} disabled={busy || !ready} style={btnStyle("primary")}>
-          {busy ? "กำลังบันทึก..." : "บันทึกหน้า"}
+          {busy ? "กำลังบันทึก…" : "บันทึกหน้า"}
         </button>
         {slug && (
           <a href={`/pages/${encodeURIComponent(slug)}`} target="_blank" rel="noreferrer" style={btnStyle("link")}>
@@ -908,7 +908,7 @@ export default function GrapesBuilder() {
                     cursor: "pointer",
                   }}
                 >
-                  {busy ? "กำลังสร้าง..." : "สร้างเลย"}
+                  {busy ? "กำลังสร้าง…" : "สร้างเลย"}
                 </button>
               </div>
             ))}
@@ -931,7 +931,7 @@ export default function GrapesBuilder() {
 
       {!ready && (
         <div style={{ fontSize: 14, color: "var(--cmms-text-muted, #9AA4B8)" }}>
-          กำลังโหลดตัวแก้ไข...
+          กำลังโหลดตัวแก้ไข…
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ export default function FileAttachment({
         <FileText strokeWidth={1.75} aria-hidden="true" />
       </AttachmentMedia>
       <AttachmentContent>
-        <AttachmentTitle>{state === "uploading" ? "กำลังอัปโหลด..." : name}</AttachmentTitle>
+        <AttachmentTitle>{state === "uploading" ? "กำลังอัปโหลด…" : name}</AttachmentTitle>
         <AttachmentDescription>{label}</AttachmentDescription>
       </AttachmentContent>
       {onRemove && url && (

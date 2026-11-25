@@ -201,7 +201,7 @@ export function ReportPage({
               variant="outline"
               onClick={() => refetch()}
               loading={isFetching}
-              loadingText="กำลังโหลด..."
+              loadingText="กำลังโหลด…"
             >
               {!isFetching && <RefreshCcw size={15} aria-hidden="true" />}
               รีเฟรช
