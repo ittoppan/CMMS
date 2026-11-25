@@ -127,7 +127,7 @@ export function ListToolbar({
               type="button"
               onClick={() => search.onChange("")}
               aria-label="ล้างคำค้นหา"
-              className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--cmms-text-muted)] transition-colors hover:bg-[var(--cmms-bg-muted)] hover:text-[var(--cmms-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
+              className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--cmms-text-muted)] transition-colors hover:bg-[var(--cmms-bg-muted)] hover:text-[var(--cmms-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
             >
               <X className="h-4 w-4" strokeWidth={1.75} />
             </button>

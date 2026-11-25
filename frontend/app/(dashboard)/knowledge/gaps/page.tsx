@@ -223,7 +223,7 @@ export default function KnowledgeGapsPage() {
               }}
               placeholder="เพิ่มคำค้นที่ยังไม่มีคำตอบ"
               aria-label="เพิ่มช่องว่างความรู้ด้วยคำค้น"
-              className="h-9 w-56 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-primary)]"
+              className="h-9 w-56 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
             />
             <Button variant="secondary" disabled={busy || !newTerm.trim()} onClick={addManual}>
               <Plus size={15} aria-hidden="true" /> เพิ่ม

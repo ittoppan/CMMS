@@ -327,7 +327,7 @@ export default function ScheduledReportsPage() {
                       aria-checked={cfg.enabled}
                       aria-label={`เปิด/ปิด ${cfg.name}`}
                       onClick={() => toggleEnabled(cfg)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${cfg.enabled ? "bg-[var(--cmms-primary)]" : "bg-input"}`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)] ${cfg.enabled ? "bg-[var(--cmms-primary)]" : "bg-input"}`}
                     >
                       <span
                         className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${cfg.enabled ? "translate-x-5" : "translate-x-0"}`}

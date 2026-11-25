@@ -391,7 +391,7 @@ export function DataTable<TData extends RowData>({
                     : undefined
                 }
                 className={cn(
-                  onRowClick && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]",
+                  onRowClick && "cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]",
                   canSelect && selectedIds.has(row.id) && "bg-[var(--cmms-primary-light)]"
                 )}
               >

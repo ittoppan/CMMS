@@ -62,7 +62,7 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close
             aria-label="ปิด"
-            className="absolute right-3 top-3 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="absolute right-3 top-3 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
           >
             <X size={18} strokeWidth={1.75} aria-hidden="true" />
           </SheetPrimitive.Close>

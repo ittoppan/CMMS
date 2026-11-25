@@ -66,7 +66,7 @@ function Dialog({
               {showCloseButton && (
                 <DialogPrimitive.Close
                   aria-label="ปิด"
-                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
                 >
                   <X size={18} strokeWidth={1.75} aria-hidden="true" />
                 </DialogPrimitive.Close>

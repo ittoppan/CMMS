@@ -18,7 +18,7 @@ const HIT_AREA = "relative after:absolute after:content-[''] after:rounded-[inhe
 const HIT_32 = `${HIT_AREA} after:-inset-2`; // 32px visual → hit ≥48px
 const HIT_40 = `${HIT_AREA} after:-inset-1`; // 40px visual → hit 48px
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] font-semibold transition-[background-color,box-shadow,transform] duration-[var(--cmms-transition)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)] disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:shrink-0 [&_svg]:aria-hidden",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] font-semibold transition-[background-color,box-shadow,transform] duration-[var(--cmms-transition)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)] disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:shrink-0 [&_svg]:aria-hidden",
   {
     variants: {
       variant: {

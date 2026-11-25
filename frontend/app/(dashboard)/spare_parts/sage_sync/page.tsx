@@ -432,7 +432,7 @@ export default function SageSyncConfigPage() {
                 aria-checked={syncConfig.overwrite}
                 aria-label="ทับข้อมูลรายการเดิม"
                 onClick={() => canWrite && setSyncConfig(prev => prev ? { ...prev, overwrite: !prev.overwrite } : prev)}
-                className="relative inline-flex h-10 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
+                className="relative inline-flex h-10 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
               >
                 <span
                   className="relative inline-flex h-6 w-11 items-center rounded-full"

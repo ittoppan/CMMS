@@ -104,7 +104,7 @@ export function KpiStrip({ items, ariaLabel, className }: KpiStripProps) {
               type="button"
               onClick={item.onClick}
               aria-pressed={Boolean(item.active)}
-              className={cn(tileClass, "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)]")}
+              className={cn(tileClass, "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]")}
             >
               <KpiBody item={item} />
             </button>
