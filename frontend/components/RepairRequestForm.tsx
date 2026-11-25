@@ -1240,13 +1240,25 @@ const flushQueue = async (notifyOnAuthFail = false) => {
 
       {/* Step Indicator */}
       <div className="cmms-stepper">
-{STEPS.map((s, i) => (
-            <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
-              onClick={() => { if (i < step) setStep(i); }}>
+{STEPS.map((s, i) => {
+            // ขั้นที่ผ่านแล้วคลิกย้อนกลับได้ — ต้องเข้าถึงด้วยคีย์บอร์ดได้ด้วย
+            const canGoBack = i < step;
+            return (
+            <div key={i}
+              className={`cmms-step ${i === step ? "active" : ""} ${canGoBack ? "done" : ""}${canGoBack ? " cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]" : ""}`}
+              role={canGoBack ? "button" : undefined}
+              tabIndex={canGoBack ? 0 : undefined}
+              aria-label={canGoBack ? `ย้อนกลับไปขั้น ${tliff(`liff.step_${s.key}`)}` : undefined}
+              aria-current={i === step ? "step" : undefined}
+              onClick={() => { if (canGoBack) setStep(i); }}
+              onKeyDown={(e) => {
+                if (canGoBack && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setStep(i); }
+              }}>
               <div className="cmms-step-number">{i < step ? <Check size={14} strokeWidth={2} /> : <Icon name={s.iconName} size={14} />}</div>
               <span className="cmms-step-label">{tliff(`liff.step_${s.key}`)}</span>
             </div>
-          ))}
+            );
+          })}
       </div>
 
       {/* Offline status */}
@@ -1330,7 +1342,15 @@ const flushQueue = async (notifyOnAuthFail = false) => {
 
       {/* ผูกบัญชี LINE */}
       {lineBound === false && (
-        <div className="cmms-bind-banner" onClick={() => (window.location.href = "/register")}>
+        <div
+          className="cmms-bind-banner focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
+          role="link"
+          tabIndex={0}
+          onClick={() => (window.location.href = "/register")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); window.location.href = "/register"; }
+          }}
+        >
           <div>
             <b><Link className="w-4 h-4 inline align-middle" /> ผูกบัญชี LINE กับเลขพนักงาน</b>
             <div className="cmms-bind-sub">ครั้งแรก? ลงทะเบียน 1 ครั้ง — ระบบจำชื่อคุณ และแจ้งเตือนช่างได้ตรงคน</div>

@@ -206,6 +206,9 @@ export default function PwaSettingsPage() {
               </HStack>
 
               <div
+                role="button"
+                tabIndex={0}
+                aria-label="เลือกไฟล์ภาพไอคอน (PNG / JPEG / WebP)"
                 onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={(e) => {
@@ -214,6 +217,13 @@ export default function PwaSettingsPage() {
                   handleFile(e.dataTransfer.files?.[0]);
                 }}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
                 style={{
                   border: `2px dashed ${dragging ? "var(--cmms-primary)" : "var(--cmms-border)"}`,
                   borderRadius: "var(--cmms-radius)",

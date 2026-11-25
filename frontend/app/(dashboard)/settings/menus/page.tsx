@@ -459,14 +459,20 @@ export default function MenuPermissionsPage() {
                   >
                     <HStack hAlign="between" vAlign="center">
                       <HStack gap={3} vAlign="center">
-                        <span
+                        {/* ตัวรับ focus จริงสำหรับคีย์บอร์ด (การ์ดทั้งใบคลิกได้เฉพาะเมาส์ เพราะมีปุ่ม chips ซ้อนอยู่) */}
+                        <button
+                          type="button"
+                          aria-pressed={isPreview}
+                          title={isPreview ? "กำลังพรีวิวบทบาทนี้" : `พรีวิวบทบาท ${r.name}`}
+                          onClick={(e) => { e.stopPropagation(); setPreviewRoleId(r.id); }}
+                          className="cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
                           style={{
                             fontSize: "0.75rem", fontWeight: 700, padding: "3px 10px", borderRadius: 999,
-                            background: rc.bg, color: rc.fg,
+                            background: rc.bg, color: rc.fg, border: "none", fontFamily: "inherit",
                           }}
                         >
                           {r.name}
-                        </span>
+                        </button>
                         <span
                           className="cmms-andon-chip"
                           style={list.length > MAX_BN

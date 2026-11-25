@@ -428,7 +428,16 @@ export default function BOMTreePage() {
                                 )}
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-semibold">{p.part_code || `SP-${p.spare_part_id}`}</span>
+                                    {/* บล็อกชื่อชิ้นส่วนเป็นตัวรับ focus จริง (แถวมีปุ่มซ้อนอยู่ จึงใส่ role=button ที่แถวไม่ได้) */}
+                                    <button
+                                      type="button"
+                                      aria-pressed={selectedPart?.id === p.id}
+                                      title={`เลือกชิ้นส่วน ${p.part_code || `SP-${p.spare_part_id}`}`}
+                                      onClick={(e) => { e.stopPropagation(); setSelectedPart(p); }}
+                                      className="rounded-sm text-left font-semibold underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
+                                    >
+                                      {p.part_code || `SP-${p.spare_part_id}`}
+                                    </button>
                                     <Badge variant="neutral">ชิ้นส่วน</Badge>
                                   </div>
                                   <p className="truncate text-sm text-muted-foreground">
