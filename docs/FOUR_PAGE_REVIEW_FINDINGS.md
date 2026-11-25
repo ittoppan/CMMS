@@ -2,7 +2,7 @@
 
 เอกสารนี้รวม finding จากรีวิว 4 หน้าหลัก + sibling ที่เกี่ยวข้อง เพื่อกันสั่งแก้ซ้ำในสิ่งที่แก้ไปแล้ว และชี้ชัดว่าอะไรยังค้างจริง
 
-อัปเดตล่าสุด: 25 พ.ย. 2026 — commit `96ffcc4e` (main) — base สำหรับ review ควรเป็น origin/main (ล่าสุด) ไม่ใช่ commit เก่า
+อัปเดตล่าสุด: 25 พ.ย. 2026 — regenerate ด้วย `python scripts/design-audit.py --diff 4e2102f0` (base = HEAD ปัจจุบัน ไม่ใช่ commit เก่า) — สแกน 58 ไฟล์, FAIL 0 / WARN 0
 
 ## สถานะภาพรวม
 
@@ -55,10 +55,35 @@
 
 > P3 (pm_am/calendar) และ P4 (pm_am/dashboard) ปิดแล้ว — โค้ดถูก normalize เป็น h2/h3 ตั้งแต่ `77c302f0` และตรวจ DOM จริงซ้ำเมื่อ 25 พ.ย. 2026 แล้วไม่พบ skip (รายละเอียดในตาราง Fixed #20–#21)
 
+## รีวิวใหม่ด้วย base `4e2102f0` (25 พ.ย. 2026)
+
+เปลี่ยน base ของการรีวิวจาก commit เก่า (`77c302f0` และก่อนหน้า) มาเป็น HEAD ปัจจุบัน `4e2102f0` เพื่อให้ finding ที่แก้ไปแล้วหลุดออกจาก diff ไม่ถูกรายงานซ้ำ
+
+```bash
+python scripts/design-audit.py --diff 4e2102f0 --strict
+# pages scanned: 58  (diff vs 4e2102f0)
+# FAIL: 0   WARN: 0   [STRICT: WARN=fail]
+# RESULT: PASS
+
+python scripts/design-audit.py --diff 4e2102f0 --json
+# {"status":"PASS","diff":"4e2102f0","pages":58,"fail":0,"warn":0,"files":{}}
+```
+
+ผลลัพธ์ `"files": {}` = ไม่มี finding เหลือใน diff เลย รวม 3 ตัวที่เคยค้าง:
+
+| # | finding เดิม | ทำไมหลุดออกจาก diff | หลักฐาน |
+|---|--------------|----------------------|---------|
+| 1 | Focus ring HubCard (`components/layout/hub-grid.tsx`, แก้ใน `13cadf2e`) | ไฟล์ไม่ถูกแก้ตั้งแต่ base → ไม่อยู่ในขอบเขต diff | `git diff --name-only 4e2102f0..HEAD \| grep -c hub-grid.tsx` = **0** |
+| 2 | pm_am h1→KPI (h3) / heading skip (แก้ใน `40b26fd0`, `77c302f0`) | ไฟล์อยู่ใน diff แต่เนื้อหาปัจจุบันถูกต้องแล้ว → audit ไม่ flag | `pm_am/page.tsx`: `cmms-kpi-value` = 5, `<h3` = **0**; axe `heading-order` = 0 violations; ไม่มีคีย์ไฟล์นี้ใน `files` ของ JSON |
+| 3 | spare_parts `role="button"` ที่แถวตาราง (แก้ใน `22346ba4`) | แถวเปลี่ยนเป็น card overlay แล้ว, ไม่มี `role="button"` จริงในไฟล์ (เหลือแต่คอมเมนต์) | `grep role="button" spare_parts/page.tsx` เจอเฉพาะบรรทัดคอมเมนต์ `:522`; audit ไม่ flag |
+
+สรุป: **finding list ว่างสำหรับทั้ง 3 ตัว** — ไม่มี FAIL/WARN ใน 58 ไฟล์ที่ diff จาก `4e2102f0` และตาราง Pending ยังว่างตามเดิม
+
 ## หมายเหตุสภาพแวดล้อม (ไม่ใช่ finding ของโค้ด)
 
-- บัญชีทดสอบ `CMMSTEST403` เป็น role Viewer (role_id=5) → หน้า repair/spare_parts/pm_am ตอบ 403; ถ้าต้องวัด DOM ให้ย้าย role ชั่วคราวเป็น role 10 แล้วคืนค่า
-- Telegram แจ้งเตือนทำไม่ได้ (ไม่มี `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)
+- บัญชีทดสอบ `CMMSTEST403` = user id 783, **role_id 10 (Officer-Read)** และมี `menu_permissions.repair=1` แล้ว — เข้าหน้า repair/spare_parts/pm_am ได้ (แก้ข้อมูลจากบันทึกเดิมที่ระบุว่าเป็น role 5/Viewer)
+- role 10 ไม่มี `repair:delete` ใน matrix → ปุ่มลบใน `/repair` ซ่อนโดย `useCan("repair")` และ API ตอบ 403; ถ้าต้องทดสอบ flow ลบ ให้ grant `user_permissions` ชั่วคราวเฉพาะบัญชีแล้ว revoke คืน
+- Telegram แจ้งเตือนใช้งานได้แล้ว (token/chat_id อ่านจาก `.env`, ส่งได้ HTTP 200)
 - session ในเบราว์เซอร์พรีวิวหมดอายุบ่อย
 
 ## ไฟล์หลักฐาน (screenshots ใน artifacts/)
