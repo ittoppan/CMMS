@@ -128,6 +128,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // ปุ่มเปิดเมนู — ใช้คืน focus เมื่อลิ้นชักปิด (ไม่ให้ focus ตกไปที่ body)
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // ปุ่ม "ย้อนกลับ" บน app bar มือถือ: แสดงเฉพาะเมื่อผู้ใช้เดินทางภายในแอปมาแล้ว
   // (หน้าแรกที่เปิด = ไม่มีอะไรให้ย้อนกลับ — กดไปจะหลุดออกจากแอป/PWA)
@@ -444,6 +446,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* ═══════════ MOBILE NATIVE APP BAR (<1024px) ═══════════ */}
           <header className="cmms-mobile-app-bar lg:!hidden">
             <button
+              ref={menuButtonRef}
               type="button"
               className="cmms-mobile-app-bar-btn"
               aria-label="เปิดเมนู"
@@ -493,7 +496,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <SheetContent side="left" showCloseButton={false} className="bg-[var(--cmms-bg-sidebar)] p-0">
+            <SheetContent
+              side="left"
+              showCloseButton={false}
+              className="bg-[var(--cmms-bg-sidebar)] p-0"
+              onCloseAutoFocus={(e) => {
+                // Radix คืน focus ให้ element ก่อนเปิด แต่ปุ่มเปิดเมนูอยู่ใน header ที่ re-render
+                // → บังคับกลับไปที่ปุ่มเดิมเสมอ (ปุ่มปิด/Esc/แตะ overlay ใช้ทางเดียวกันหมด)
+                e.preventDefault();
+                menuButtonRef.current?.focus();
+              }}
+            >
               <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
               <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
