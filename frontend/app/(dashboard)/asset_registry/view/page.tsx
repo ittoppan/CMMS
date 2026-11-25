@@ -915,10 +915,7 @@ export default function AssetRegistryViewPage() {
               <CardContent className="flex flex-col items-center gap-3 p-4">
                 {image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={image}
-                    alt={asset.name}
-                    className="h-40 w-40 rounded-xl border border-border object-cover"
+                  <img src={image} alt={asset.name} width={160} height={160} className="h-40 w-40 rounded-xl border border-border object-cover"
                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                   />
                 ) : (
@@ -1449,7 +1446,7 @@ export default function AssetRegistryViewPage() {
         <div className="flex flex-col items-center gap-3">
           {qrUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={qrUrl} alt={`QR Code ของ ${asset.code}`} className="h-56 w-56 rounded-lg" />
+            <img src={qrUrl} alt={`QR Code ของ ${asset.code}`} width={224} height={224} className="h-56 w-56 rounded-lg" />
           )}
           <p className="text-sm text-muted-foreground">{asset.code} — {asset.name}</p>
           <Button className="w-full" onClick={() => router.push(`/scan?asset_code=${encodeURIComponent(asset.code)}`)}>

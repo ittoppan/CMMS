@@ -332,10 +332,7 @@ export default function BOMTreePage() {
                 <div className="flex flex-wrap items-center gap-4">
                   {normalizeImage(machine.image_path) ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={normalizeImage(machine.image_path)!}
-                      alt={machine.name}
-                      className="h-14 w-14 rounded-lg border border-border object-cover"
+                    <img src={normalizeImage(machine.image_path)!} alt={machine.name} width={56} height={56} className="h-14 w-14 rounded-lg border border-border object-cover"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                     />
                   ) : (
@@ -415,10 +412,7 @@ export default function BOMTreePage() {
                               <div className="flex min-w-0 flex-1 items-center gap-3">
                                 {img ? (
                                   // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={img}
-                                    alt={p.part_name || ""}
-                                    className="h-11 w-11 shrink-0 rounded-md border border-border object-cover"
+                                  <img src={img} alt={p.part_name || ""} width={44} height={44} className="h-11 w-11 shrink-0 rounded-md border border-border object-cover"
                                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                                   />
                                 ) : (
@@ -582,10 +576,7 @@ export default function BOMTreePage() {
               <p className="text-sm font-medium">เลือกรายการอะไหล่จากคลัง:</p>
               {selectedSpareObj && normalizeImage(selectedSpareObj.image_url) && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={normalizeImage(selectedSpareObj.image_url)!}
-                  alt={selectedSpareObj.name}
-                  className="h-[72px] w-[72px] rounded-lg border border-border object-cover"
+                <img src={normalizeImage(selectedSpareObj.image_url)!} alt={selectedSpareObj.name} width={72} height={72} className="h-[72px] w-[72px] rounded-lg border border-border object-cover"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                 />
               )}

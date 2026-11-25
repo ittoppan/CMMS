@@ -277,7 +277,7 @@ export default function SageIssueCenterPage() {
           <img loading="lazy" decoding="async"
             src={partImageSrc({ partId: row.original.partId, imageUrl: row.original.imageUrl })}
             alt={row.original.name}
-            className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
+            width={48} height={48} className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
             onError={(e) => {
               const t = e.currentTarget;
               if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${row.original.partId}`;
@@ -489,7 +489,7 @@ export default function SageIssueCenterPage() {
                               <img loading="lazy" decoding="async"
                                 src={partImageSrc(p)}
                                 alt={p.name || p.code}
-                                className="h-14 w-14 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
+                                width={56} height={56} className="h-14 w-14 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
                                 onError={(e) => {
                                   const t = e.currentTarget;
                                   if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${p.id}`;

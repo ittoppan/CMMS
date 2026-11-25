@@ -141,7 +141,7 @@ export default function InstallPage() {
         <VStack gap={5}>
           {/* หัวเรื่อง */}
           <VStack gap={3} style={{ alignItems: "center", textAlign: "center" }}>
-            <img src="/logo.png" alt="TOPPAN" style={{ height: 40, width: "auto" }} />
+            <img src="/logo.png" alt="TOPPAN" width={244} height={40} style={{ height: 40, width: "auto" }} />
             <VStack gap={1} style={{ alignItems: "center" }}>
               <p className="cmms-eyebrow m-0">CMMS-TOPPAN APP</p>
               <h1 className="text-xl font-bold text-[var(--cmms-text-primary)]">

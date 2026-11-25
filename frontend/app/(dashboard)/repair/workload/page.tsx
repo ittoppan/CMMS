@@ -123,6 +123,8 @@ function Avatar({ name, src, size = 56 }: { name?: string | null; src?: string; 
         <img loading="lazy" decoding="async"
           src={src}
           alt={name || "ผู้รับผิดชอบ"}
+          width={size}
+          height={size}
           onError={() => setErr(true)}
           className="h-full w-full object-cover"
         />
@@ -160,8 +162,7 @@ function RepairPhoto({
     <a href={src} target="_blank" rel="noopener noreferrer" className="shrink-0" title={label}>
       <img loading="lazy" decoding="async"
         src={src}
-        alt={alt}
-        className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
+        alt={alt} width={56} height={56} className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
         onError={() => setErr(true)}
       />
     </a>

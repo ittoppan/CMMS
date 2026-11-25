@@ -196,7 +196,7 @@ function LoginContent() {
       <div className="cmms-login-band cmms-login-band--neo">
         <div className="cmms-login-brand">
           <div className="cmms-login-brand-mark cmms-login-brand-mark--neo cmms-login-brand-mark--logo">
-            <img src="/logo.png" alt="TOPPAN" className="cmms-login-logo-img" />
+            <img src="/logo.png" alt="TOPPAN" width={170} height={28} className="cmms-login-logo-img" />
           </div>
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
@@ -217,7 +217,7 @@ function LoginContent() {
         <div className="cmms-login-holo-grid" aria-hidden="true" />
 
         <div className="cmms-login-brand cmms-login-brand--hero">
-          <img src="/logo.png" alt="TOPPAN logo" className="cmms-login-logo-img cmms-login-logo-img--hero" />
+          <img src="/logo.png" alt="TOPPAN logo" width={268} height={44} className="cmms-login-logo-img cmms-login-logo-img--hero" />
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
             <div className="cmms-login-brand-sub">Smart Maintenance Platform</div>
@@ -265,7 +265,7 @@ function LoginContent() {
           <h1 className="sr-only">เข้าสู่ระบบ CMMS-TOPPAN</h1>
           <div className="cmms-login-logo">
             <div className="cmms-login-logo-icon cmms-login-logo-icon--neo cmms-login-brand-mark--logo">
-              <img src="/logo.png" alt="TOPPAN" className="cmms-login-logo-img cmms-login-logo-img--form" />
+              <img src="/logo.png" alt="TOPPAN" width={134} height={22} className="cmms-login-logo-img cmms-login-logo-img--form" />
             </div>
             <div>
               <div className="cmms-login-logo-text">CMMS-TOPPAN</div>

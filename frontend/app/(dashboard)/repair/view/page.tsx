@@ -1194,8 +1194,7 @@ export default function RepairViewDetailsPage() {
                                   const t = e.currentTarget;
                                   if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${r.spare_part_id}`;
                                 }}
-                                alt={r.code}
-                                className="w-8 h-8 rounded-lg object-cover border border-border"
+                                alt={r.code} width={32} height={32} className="w-8 h-8 rounded-lg object-cover border border-border"
                               />
                             ) : (
                               <span className="w-8 h-8 rounded-lg bg-primary-light/50 border border-border flex items-center justify-center text-xs font-bold text-primary uppercase">

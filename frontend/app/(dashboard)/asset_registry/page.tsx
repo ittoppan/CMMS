@@ -179,10 +179,7 @@ export default function AssetRegistryPage() {
         const src = cleaned.startsWith("data:") || cleaned.startsWith("/") || cleaned.startsWith("http") ? cleaned : "/" + cleaned;
         return (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={src}
-            alt={item.name}
-            className="h-10 w-10 rounded-md border border-border object-cover"
+          <img src={src} alt={item.name} width={40} height={40} className="h-10 w-10 rounded-md border border-border object-cover"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         );

@@ -105,7 +105,7 @@ function Avatar({ name, src, size = 44 }: { name?: string | null; src?: string; 
       title={name || "ยังไม่มอบหมาย"}
     >
       {showImg ? (
-        <img src={src} alt={name || "ผู้รับผิดชอบ"} onError={() => setErr(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src={src} alt={name || "ผู้รับผิดชอบ"} width={size} height={size} onError={() => setErr(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
         <span>{initials(name)}</span>
       )}

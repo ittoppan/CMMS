@@ -229,7 +229,7 @@ export default function QrSheetPage() {
           <Card key={m.code} className="qr-sheet-card">
             <CardContent className="flex flex-col items-center gap-2 p-3">
               {qrMap[m.code] ? (
-                <img src={qrMap[m.code]} alt={`QR ${m.code}`} />
+                <img src={qrMap[m.code]} alt={`QR ${m.code}`} width={170} height={170} />
               ) : (
                 <div className="flex flex-col items-center h-[120px] justify-center">
                   {generating ? <Spinner /> : <p className="text-sm text-[var(--cmms-text-secondary)]">ไม่พบ QR</p>}
