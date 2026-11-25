@@ -26,7 +26,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0068B5",
+  // ต้องตรงกับพื้นหลังแถบหัวจริง (.cmms-mobile-app-bar = #FFFFFF) — ไม่งั้น
+  // แถบ URL/status bar ของมือถือเป็นน้ำเงินตัดกับหัวขาวเป็นเส้นชัด
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
   // a11y: เปิด zoom ได้ (WCAG 1.4.4) — ไม่จำกัด maximumScale/userScalable

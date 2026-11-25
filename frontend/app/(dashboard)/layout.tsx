@@ -27,6 +27,7 @@ import {
   CheckSquare,
   Users,
   User,
+  X,
 } from "lucide-react";
 import LiffBridge from "../../components/LiffBridge";
 import { offlineQueueCount } from "../../lib/offline-store";
@@ -39,7 +40,7 @@ import { SidebarNav, NAV_GROUPS, type NavItemDef } from "../../components/dashbo
 import { getMenuHrefs } from "../../lib/quick-links";
 import { routeIsBlocked } from "../../lib/route-perms";
 import { recordMenuUsage, getFrequentMenuItems } from "../../lib/frequent-menus";
-import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "../../components/ui/breadcrumb";
 import { EmployeeAvatar } from "../../components/ui/employee-avatar";
 import { useMenuPermission } from "../../lib/useMenuPermission";
@@ -498,10 +499,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
               <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="TOPPAN" width={554} height={91} className="h-7 w-auto object-contain" />
-                <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">
+                <img src="/logo.png" alt="TOPPAN" width={554} height={91} className="h-7 w-auto max-w-[88px] shrink-0 object-contain" />
+                <span className="min-w-0 truncate text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">
                   CMMS-TOPPAN
                 </span>
+                {/* ปุ่มปิดที่มองเห็นได้ — กดง่าย 44px; SheetClose ของ Radix จัดการ focus return ให้เอง */}
+                <SheetClose
+                  aria-label="ปิดเมนู"
+                  className="ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--cmms-sidebar-text)] transition-colors hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-primary)]"
+                >
+                  <X size={18} strokeWidth={2} aria-hidden="true" />
+                </SheetClose>
               </div>
               <SidebarNav
                 canShow={canShow}
