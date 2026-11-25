@@ -1722,6 +1722,13 @@ html, body {
     -webkit-tap-highlight-color: transparent;
   }
   .cmms-mobile-app-bar-btn:active { background: var(--cmms-bg-sidebar-hover, #F1F5F9); }
+  /* วงโฟกัสดีย์บอร์ดแบบเดียวกับ hub-grid — ประกาศชัดที่ class นี้เพราะปุ่มใน app bar
+     เป็นไอคอนล้วน (a/button ผสมกัน) ถ้าพึ่งกฎ global อย่างเดียวจะโดน border-radius-sm ทับทรงปุ่ม */
+  .cmms-mobile-app-bar-btn:focus-visible {
+    outline: 2px solid var(--cmms-border-focus);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
   .cmms-mobile-app-bar-logo {
     height: 28px;
     max-width: 112px;
