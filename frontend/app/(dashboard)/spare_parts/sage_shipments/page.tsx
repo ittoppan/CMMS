@@ -405,7 +405,7 @@ export default function SageShipmentsPage() {
                         <div className="flex items-center justify-center gap-2">
                           <div className="w-24 h-2 bg-[var(--cmms-border)] rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-[var(--cmms-primary)] transition duration-300"
+                              className="h-full bg-[var(--cmms-primary)] transition-all duration-300"
                               style={{ width: `${req.total_qty > 0 ? Math.min(100, (Number(req.total_sage_qty) / Number(req.total_qty)) * 100) : 0}%` }}
                             />
                           </div>

@@ -162,7 +162,6 @@ function RepairPhoto({
         src={src}
         alt={alt}
         className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
-       
         onError={() => setErr(true)}
       />
     </a>
