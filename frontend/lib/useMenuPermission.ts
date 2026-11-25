@@ -44,8 +44,9 @@ export function useMenuPermission() {
       url = `/api/v1/menu_permissions.php?role_id=${encodeURIComponent(roleId)}`;
       res = await apiFetch(url);
     }
-    // auth guard: session หมดอายุ (401) -> กลับเข้า /login
+    // auth guard: session หมดอายุ (401) -> ล้าง session แล้วกลับเข้า /login
     if (res.status === 401) {
+      try { await fetch("/logout.php", { credentials: "same-origin", cache: "no-store" }); } catch { /* ignore */ }
       router.replace("/login");
       return;
     }

@@ -41,6 +41,8 @@ const PUBLIC_ENDPOINTS = new Set([
   "user_lookup.php",
   "login",
   "login.php",
+  "logout",
+  "logout.php",
   "settings",
   "settings.php",
 ]);
@@ -182,6 +184,8 @@ export default function ApiFetchInterceptor() {
           !window.location.pathname.startsWith("/login")
         ) {
           redirecting = true;
+          // ล้าง PHP session ก่อน (เหมือนปุ่ม logout) — ใช้ originalFetch กัน recursion
+          try { await originalFetch("/logout.php", { credentials: "same-origin", cache: "no-store" }); } catch { /* ignore */ }
           window.location.href = "/login";
         }
       }

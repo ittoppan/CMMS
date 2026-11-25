@@ -100,6 +100,10 @@ export async function apiFetch(
   const res = await fetch(url, { ...restInit, headers, credentials: "include" });
   // 401 → พาไปหน้า login (central handling)
   if (res.status === 401 && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    // ล้าง PHP session ก่อน (เหมือนปุ่ม logout) — ใช้ fetch ดิบกัน recursion
+    if (!url.includes("logout")) {
+      try { await fetch("/logout.php", { credentials: "same-origin", cache: "no-store" }); } catch { /* ignore */ }
+    }
     window.location.href = "/login";
   }
   return res;
