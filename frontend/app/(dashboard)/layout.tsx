@@ -242,6 +242,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Dashboard = Maintenance Control Tower (TV wallboard) — ต้องเต็มจอ ไม่มี scroll บนจอ TV
   const isTower = pathname === "/dashboard";
 
+  // ออกจากระบบ: ต้องล้าง PHP session ก่อน (คุกกี้ session เป็น HttpOnly — ล้างฝั่ง client ไม่ได้)
+  // เรียก endpoint เดิม /logout.php แล้วค่อยพาไปหน้า login แบบ client-side
+  const handleLogout = async () => {
+    setDrawerOpen(false);
+    try {
+      await fetch("/logout.php", { credentials: "same-origin", cache: "no-store" });
+    } catch {
+      // endpoint เรียกไม่ได้ ก็ยังพาไปหน้า login (ไม่ค้างอยู่ในแอป)
+    }
+    router.replace("/login");
+  };
+
   // tab title ต่อหน้า
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -383,14 +395,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {lang === "th" ? "EN" : "TH"}
               </button>
               <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
-              <Link
-                href="/login"
+              <button
+                type="button"
+                onClick={handleLogout}
                 aria-label={t("menu.logout")}
                 title={t("menu.logout")}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground cursor-pointer"
               >
                 {t("menu.logout")}
-              </Link>
+              </button>
             </div>
           </header>
 
@@ -540,15 +553,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* ท้ายลิ้นชัก: ออกจากระบบ — แถบ header เดสก์ท็อป (ที่มีปุ่มนี้) ถูกซ่อนที่ < lg
                   เดิมจอเล็กจึงไม่มีทางออกจากระบบเลย */}
               <div className="mt-auto border-t border-border px-3 py-2">
-                <Link
-                  href="/login"
-                  onClick={() => setDrawerOpen(false)}
+                <button
+                  type="button"
+                  onClick={handleLogout}
                   aria-label={t("menu.logout")}
-                  className="flex min-h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] px-2 text-sm font-semibold text-[var(--cmms-sidebar-text)] transition-colors hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-primary)]"
+                  className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-[var(--cmms-radius)] px-2 text-left text-sm font-semibold text-[var(--cmms-sidebar-text)] transition-colors hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-primary)]"
                 >
                   <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
                   {t("menu.logout")}
-                </Link>
+                </button>
               </div>
             </SheetContent>
           </Sheet>

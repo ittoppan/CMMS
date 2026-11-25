@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../src/auth.php'; // cmms_secure_session() + session hardening อยู่ที่นี่
 require_once __DIR__ . '/../src/helpers/audit.php';
 cmms_secure_session();
 $pdo = getDb();
