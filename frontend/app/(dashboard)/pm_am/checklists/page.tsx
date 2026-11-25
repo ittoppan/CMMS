@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { swalConfirm } from "@/lib/swal";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,10 @@ export default function PMChecklistsPage() {
 
   // form item
   const [itemFormOpen, setItemFormOpen] = useState(false);
+
+  // a11y ของ modal: Escape ปิด, Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const templateDialogRef = useDialogA11y<HTMLDivElement>(formOpen, () => setFormOpen(false));
+  const itemDialogRef = useDialogA11y<HTMLDivElement>(itemFormOpen, () => setItemFormOpen(false));
   const [itemEditId, setItemEditId] = useState(0);
   const [itemForm, setItemForm] = useState<TemplateItem>({
     id: 0, item_order: 0, item_type: "yes_no", description: "",
@@ -309,9 +314,9 @@ export default function PMChecklistsPage() {
 
       {/* ── Modal: สร้าง/แก้ Template ── */}
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setFormOpen(false)}>
-          <div className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">{formEditId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</h3>
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setFormOpen(false)}>
+          <div ref={templateDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-template-dialog-title" tabIndex={-1} className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 id="checklist-template-dialog-title" className="text-lg font-bold">{formEditId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</h3>
             <div className="space-y-3">
               <Input label="รหัส Template *" placeholder="เช่น CHK-PUMP-01" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
               <Input label="ชื่อ Template *" placeholder="เช่น เช็คชีทปั๊มน้ำประจำเดือน" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -346,9 +351,9 @@ export default function PMChecklistsPage() {
 
       {/* ── Modal: เพิ่ม/แก้ รายการตรวจ ── */}
       {itemFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setItemFormOpen(false)}>
-          <div className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">{itemEditId ? "แก้ไขรายการตรวจ" : "เพิ่มรายการตรวจ"}</h3>
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setItemFormOpen(false)}>
+          <div ref={itemDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-item-dialog-title" tabIndex={-1} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 id="checklist-item-dialog-title" className="text-lg font-bold">{itemEditId ? "แก้ไขรายการตรวจ" : "เพิ่มรายการตรวจ"}</h3>
             <div className="space-y-3">
               <Input label="รายการตรวจ *" placeholder="เช่น เช็ครอยรั่วของวาล์ว" value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
               <div className="space-y-1.5">

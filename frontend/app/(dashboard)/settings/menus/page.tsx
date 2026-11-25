@@ -447,7 +447,11 @@ export default function MenuPermissionsPage() {
                 return (
                   <div
                     key={r.id}
-                    onClick={() => setPreviewRoleId(r.id)}
+                    onClick={(e) => {
+                      // ชิป/ปุ่มย่อยที่ทำเครื่องหมาย data-card-ignore จัดการคลิกเอง ไม่เปลี่ยนพรีวิว
+                      if ((e.target as HTMLElement).closest("[data-card-ignore]")) return;
+                      setPreviewRoleId(r.id);
+                    }}
                     style={{
                       border: isPreview ? `2px solid ${rc.fg}` : "1px solid var(--cmms-border)",
                       borderRadius: 12,
@@ -513,7 +517,7 @@ export default function MenuPermissionsPage() {
                               {bnLabelOf(k)}
                             </span>
                             {hidden && <span style={{ fontSize: "0.75rem", color: "var(--cmms-warning-dark)", fontWeight: 700 }}>ปิดสิทธิ์</span>}
-                            <div style={{ display: "flex", gap: 1, marginLeft: 2 }} onClick={(e) => e.stopPropagation()}>
+                            <div data-card-ignore style={{ display: "flex", gap: 1, marginLeft: 2 }}>
                               <button type="button" className="bn-chip-btn" disabled={i === 0} onClick={() => bnMove(r.id, i, -1)} title="เลื่อนซ้าย (ก่อนหน้า)">▲</button>
                               <button type="button" className="bn-chip-btn" disabled={i === list.length - 1} onClick={() => bnMove(r.id, i, 1)} title="เลื่อนขวา (ถัดไป)">▼</button>
                               <button type="button" className="bn-chip-btn danger" onClick={() => bnRemove(r.id, i)} title="ลบปุ่ม">✕</button>
@@ -530,7 +534,7 @@ export default function MenuPermissionsPage() {
 
                     {/* เพิ่มปุ่ม */}
                     {available.length > 0 ? (
-                      <div style={{ marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
+                      <div data-card-ignore style={{ marginTop: 10 }}>
                         <select
                           value=""
                           onChange={(e) => { if (e.target.value) bnAdd(r.id, e.target.value); }}
