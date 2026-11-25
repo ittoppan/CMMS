@@ -172,7 +172,7 @@ export default function CostPage() {
         title={hero.title}
         description={hero.desc}
         status={<Badge variant="primary" dot><CircleDollarSign size={13} aria-hidden="true" /> ค่าแรง + อะไหล่ + จ้างภายนอก</Badge>}
-        actions={[<button key="refresh" type="button" onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"><RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช</button>]}
+        actions={[<button key="refresh" type="button" onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20"><RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช</button>]}
       />
 
 

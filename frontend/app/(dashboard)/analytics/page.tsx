@@ -134,7 +134,7 @@ export default function AnalyticsDashboardPage() {
         description={hero.desc}
         status={<span className="cmms-andon-chip"><CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" /> ข้อมูลจริง</span>}
         actions={[
-          <Link key="advanced" href="/analytics/advanced" className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">วิเคราะห์เจาะลึก 8 มุม</Link>,
+          <Link key="advanced" href="/analytics/advanced" className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20">วิเคราะห์เจาะลึก 8 มุม</Link>,
           <Select key="year" value={String(year)} onValueChange={(v) => setYear(Number(v))}>
             <SelectTrigger aria-label="ปี" className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white">
               <SelectValue />
@@ -147,7 +147,7 @@ export default function AnalyticsDashboardPage() {
               ))}
             </SelectContent>
           </Select>,
-          <button key="refresh" type="button" onClick={fetchAnalytics} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+          <button key="refresh" type="button" onClick={fetchAnalytics} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20">
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
           </button>,
         ]}

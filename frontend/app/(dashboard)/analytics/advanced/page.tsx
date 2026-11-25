@@ -166,7 +166,7 @@ export default function AnalyticsAdvancedPage() {
               {years().map((y) => <SelectItem key={y.value} value={y.value}>{y.label}</SelectItem>)}
             </SelectContent>
           </Select>,
-          <button key="refresh" type="button" onClick={() => fetchData(year)} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+          <button key="refresh" type="button" onClick={() => fetchData(year)} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20">
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
           </button>,
         ]}

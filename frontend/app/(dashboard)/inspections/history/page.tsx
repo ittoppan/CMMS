@@ -97,7 +97,7 @@ export default function InspectionHistoryPage() {
         }
         primaryAction={
           assetId ? (
-            <a href={`/asset_registry/view?id=${assetId}`} className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
+            <a href={`/asset_registry/view?id=${assetId}`} className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-[background-color,border-color,color] duration-300 hover:bg-[var(--cmms-bg-wash)]">
               <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> กลับหน้าบันทึกเครื่องจักร
             </a>
           ) : undefined

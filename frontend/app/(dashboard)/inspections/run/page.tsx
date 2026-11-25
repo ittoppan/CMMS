@@ -597,19 +597,19 @@ export default function InspectionRunPage() {
                         {!numeric && item.type !== "text" && item.type !== "date_time" && (
                           <div className="flex gap-2">
                             <button type="button" onClick={() => setStatus(index, "pass")} aria-pressed={item.status === "pass"}
-                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-[background-color,border-color,color] duration-300"
                               style={{ backgroundColor: item.status === "pass" ? "var(--cmms-success)" : "var(--cmms-bg-card)", color: item.status === "pass" ? "white" : "var(--cmms-text-secondary)", borderColor: item.status === "pass" ? "var(--cmms-success)" : "var(--cmms-border)" }}>
                               <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" /> ผ่าน
                             </button>
                             {item.type === "check" && (
                               <button type="button" onClick={() => setStatus(index, "warn")} aria-pressed={item.status === "warn"}
-                                className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 font-semibold transition-all duration-300"
+                                className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 font-semibold transition-[background-color,border-color,color] duration-300"
                                 style={{ backgroundColor: item.status === "warn" ? "var(--cmms-warning)" : "var(--cmms-bg-card)", color: item.status === "warn" ? "white" : "var(--cmms-text-secondary)", borderColor: item.status === "warn" ? "var(--cmms-warning)" : "var(--cmms-border)" }}>
                                 <Copy size={16} strokeWidth={1.75} aria-hidden="true" /> ข้อสังเกต
                               </button>
                             )}
                             <button type="button" onClick={() => setStatus(index, "fail")} aria-pressed={item.status === "fail"}
-                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-[background-color,border-color,color] duration-300"
                               style={{ backgroundColor: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-bg-card)", color: item.status === "fail" ? "white" : "var(--cmms-text-secondary)", borderColor: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-border)" }}>
                               <XCircle size={16} strokeWidth={1.75} aria-hidden="true" /> ไม่ผ่าน
                             </button>
@@ -620,12 +620,12 @@ export default function InspectionRunPage() {
                         {(numeric || item.type === "text" || item.type === "date_time") && (
                           <div className="flex gap-2">
                             <button type="button" onClick={() => setStatus(index, "pass")} aria-pressed={item.status === "pass" || (numeric && item.value.trim() !== "" && item.status !== "fail")}
-                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-[background-color,border-color,color] duration-300"
                               style={{ backgroundColor: item.status === "fail" ? "var(--cmms-bg-card)" : "var(--cmms-success)", color: item.status === "fail" ? "var(--cmms-text-secondary)" : "white", borderColor: "var(--cmms-success)" }}>
                               <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" /> ผ่าน
                             </button>
                             <button type="button" onClick={() => setStatus(index, "fail")} aria-pressed={item.status === "fail"}
-                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-[background-color,border-color,color] duration-300"
                               style={{ backgroundColor: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-bg-card)", color: item.status === "fail" ? "white" : "var(--cmms-text-secondary)", borderColor: "var(--cmms-danger)" }}>
                               <XCircle size={16} strokeWidth={1.75} aria-hidden="true" /> NG
                             </button>
@@ -656,7 +656,7 @@ export default function InspectionRunPage() {
                       {/* รูปหลักฐาน */}
                       <div className="ml-10 flex flex-wrap items-center gap-2">
                         <button type="button" onClick={() => fileRefs.current[item.id]?.click()}
-                          className="inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all duration-300"
+                          className="inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-[background-color,border-color,color] duration-300"
                           style={{ background: item.photo_required ? "var(--cmms-primary-light)" : "var(--cmms-bg-muted)", color: "var(--cmms-primary-hover)", borderColor: "var(--cmms-border)" }}>
                           <Camera size={14} strokeWidth={1.75} aria-hidden="true" />
                           {item.photo_required ? "ถ่ายรูปหลักฐาน *" : "ถ่ายรูปเพิ่ม"}

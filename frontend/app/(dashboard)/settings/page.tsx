@@ -950,7 +950,7 @@ export default function SettingsPage() {
                 return (
                   <Card
                     key={topicId}
-                    className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 cmms-side-accent"
+                    className="cursor-pointer transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-0.5 cmms-side-accent"
                     style={{ borderLeftColor: topic.color }}
                     onClick={() => {
                       if (topic.link) {

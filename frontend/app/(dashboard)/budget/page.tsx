@@ -131,7 +131,7 @@ export default function BudgetPage() {
         description={hero.desc}
         status={<Badge variant="primary" dot><Wallet size={13} aria-hidden="true" /> ปีงบ {year || "ทั้งหมด"}</Badge>}
         actions={[
-          <button key="refresh" type="button" onClick={load} className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</button>,
+          <button key="refresh" type="button" onClick={load} className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20"><RefreshCw size={15} aria-hidden="true" /> รีเฟรช</button>,
           ...(manage ? [<button key="create" type="button" onClick={() => setModal({ kind: "create" })} className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"><Plus size={15} aria-hidden="true" /> สร้างงบประมาณ</button>] : []),
         ]}
       />

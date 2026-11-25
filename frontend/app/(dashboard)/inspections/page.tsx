@@ -223,10 +223,10 @@ export default function InspectionsPage() {
           </span>
         }
         actions={[
-          <a key="history" href="/inspections/history" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
+          <a key="history" href="/inspections/history" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-[background-color,border-color,color] duration-300 hover:bg-[var(--cmms-bg-wash)]">
             <History size={16} strokeWidth={1.75} aria-hidden="true" /> ประวัติตรวจเช็ค
           </a>,
-          <a key="templates" href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]">
+          <a key="templates" href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-5 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-[background-color,border-color,color] duration-300 hover:bg-[var(--cmms-bg-wash)]">
             <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" /> จัดการ Template
           </a>,
           ...(canManage === false
@@ -413,7 +413,7 @@ export default function InspectionsPage() {
             <div className="flex flex-wrap gap-2">
               {SCOPES.map((s) => (
                 <button key={s.value} type="button" onClick={() => setScope(s.value)}
-                  className="min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+                  className="min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-[background-color,color] duration-300"
                   style={{ background: scope === s.value ? "var(--cmms-primary)" : "var(--cmms-bg-muted)", color: scope === s.value ? "#fff" : "var(--cmms-text-secondary)" }}>
                   {s.label}
                 </button>
@@ -459,12 +459,12 @@ export default function InspectionsPage() {
                         <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> ทำเช็ค
                       </a>
                     )}
-                    <a href={`/inspections/history?asset_id=${s.asset_id}`} className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                    <a href={`/inspections/history?asset_id=${s.asset_id}`} className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-[background-color,color] duration-300" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                       <History size={14} strokeWidth={1.75} aria-hidden="true" /> ประวัติ
                     </a>
                     {canManage !== false && (
                       <button type="button" title="ลบรอบ" aria-label={`ลบรอบ ${s.template_title || s.id}`} onClick={() => deleteSchedule(s)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-[background-color,color,box-shadow] duration-300" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
                         <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                       </button>
                     )}

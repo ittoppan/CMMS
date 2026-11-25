@@ -658,7 +658,7 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 0.78rem;
   background: var(--cmms-bg-card); border: 1.5px solid var(--cmms-border);
-  color: var(--cmms-text-muted); flex-shrink: 0; transition: all var(--cmms-transition);
+  color: var(--cmms-text-muted); flex-shrink: 0; transition: background-color var(--cmms-transition), border-color var(--cmms-transition), color var(--cmms-transition), box-shadow var(--cmms-transition);
 
   width: 28px; height: 28px; font-size: 0.75rem;
 }
@@ -1153,7 +1153,7 @@ html.cmms-no-anim *::after {
   display: flex; align-items: center; gap: 8px;
   padding: 4px 12px 4px 4px; border-radius: 100px;
   background: var(--cmms-bg-muted); border: 1px solid var(--cmms-border);
-  cursor: pointer; transition: all var(--cmms-transition-fast);
+  cursor: pointer; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast);
 }
 .cmms-user-chip:hover { background: var(--cmms-bg-wash); border-color: var(--cmms-border-hover); }
 .cmms-user-avatar {
@@ -1311,7 +1311,7 @@ html.cmms-no-anim *::after {
 .cmms-chip {
   border: 1.5px solid var(--cmms-border); background: var(--cmms-bg-card); color: var(--cmms-text-primary);
   border-radius: 12px; padding: 12px 8px; font-size: 0.82rem; font-weight: 700;
-  cursor: pointer; transition: all var(--cmms-transition-fast); font-family: inherit;
+  cursor: pointer; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), color var(--cmms-transition-fast), box-shadow var(--cmms-transition-fast), transform var(--cmms-transition-fast); font-family: inherit;
   touch-action: manipulation;
 
   border-radius: 14px; padding: 13px 8px;
@@ -1346,7 +1346,7 @@ html.cmms-no-anim *::after {
 .cmms-option-row {
   display: flex; align-items: center; gap: 12px; width: 100%;
   border: 1.5px solid var(--cmms-border); border-radius: 14px; padding: 12px 14px;
-  background: var(--cmms-bg-card); cursor: pointer; transition: all var(--cmms-transition-fast); font-family: inherit;
+  background: var(--cmms-bg-card); cursor: pointer; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), box-shadow var(--cmms-transition-fast), transform var(--cmms-transition-fast); font-family: inherit;
   text-align: left; touch-action: manipulation;
 
   border-radius: 16px; padding: 13px 14px;
@@ -1361,7 +1361,7 @@ html.cmms-no-anim *::after {
 .cmms-option-emoji { font-size: 1.5rem; }
 .cmms-radio-dot {
   width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--cmms-border);
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all var(--cmms-transition-fast);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), box-shadow var(--cmms-transition-fast);
 }
 .cmms-option-row.selected .cmms-radio-dot {
   border-color: var(--opt-color, var(--cmms-primary));
@@ -1374,7 +1374,7 @@ html.cmms-no-anim *::after {
 .cmms-job-card {
   border: 1.5px solid var(--cmms-border); border-radius: 14px; padding: 14px 12px;
   background: var(--cmms-bg-card); cursor: pointer; text-align: center; font-family: inherit;
-  transition: all var(--cmms-transition-fast); touch-action: manipulation;
+  transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), color var(--cmms-transition-fast), box-shadow var(--cmms-transition-fast), transform var(--cmms-transition-fast); touch-action: manipulation;
   display: flex; flex-direction: column; gap: 2px; align-items: center;
 
   border-radius: 16px; padding: 15px 10px;
@@ -1396,7 +1396,7 @@ html.cmms-no-anim *::after {
 /* Contamination box */
 .cmms-contam-box {
   border-radius: 14px; padding: 14px; border: 1.5px solid;
-  transition: all var(--cmms-transition);
+  transition: background-color var(--cmms-transition), border-color var(--cmms-transition);
 }
 .cmms-contam-box.safe { border-color: var(--cmms-success); background: var(--cmms-success-light); }
 .cmms-contam-box.risk { border-color: var(--cmms-danger); background: var(--cmms-danger-light); }
@@ -1406,7 +1406,7 @@ html.cmms-no-anim *::after {
   width: 100%; border: 2px dashed var(--cmms-border); border-radius: 14px;
   background: var(--cmms-bg-muted); color: var(--cmms-text-secondary);
   padding: 24px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;
-  cursor: pointer; font-family: inherit; transition: all var(--cmms-transition-fast); touch-action: manipulation;
+  cursor: pointer; font-family: inherit; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), color var(--cmms-transition-fast); touch-action: manipulation;
 }
 .cmms-photo-empty:active { background: var(--cmms-bg-wash); }
 .cmms-photo-preview {
@@ -1525,7 +1525,7 @@ html.cmms-no-anim *::after {
   aspect-ratio: 1; border: 2px dashed var(--cmms-border); border-radius: 12px;
   background: var(--cmms-bg-muted); color: var(--cmms-text-secondary);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  cursor: pointer; font-family: inherit; touch-action: manipulation; transition: all var(--cmms-transition-fast);
+  cursor: pointer; font-family: inherit; touch-action: manipulation; transition: background-color var(--cmms-transition-fast), border-color var(--cmms-transition-fast), color var(--cmms-transition-fast), transform var(--cmms-transition-fast);
 
   border-radius: 14px;
   background: rgba(0, 104, 181, 0.04);

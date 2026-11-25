@@ -309,7 +309,7 @@ export default function IntelligencePage() {
         description={hero.desc}
         status={<span className="cmms-andon-chip"><AndonLampDefault status="ok" size="sm" /> ข้อมูลจริง ไม่มีการพยากรณ์</span>}
         actions={[
-          <button key="refresh" type="button" onClick={() => fetchAll()} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+          <button key="refresh" type="button" onClick={() => fetchAll()} className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-[background-color,border-color,color] duration-300 hover:bg-white/20">
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
           </button>,
         ]}

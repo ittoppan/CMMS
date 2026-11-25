@@ -222,7 +222,7 @@ export default function SyncCenterPage() {
             <p className="text-xs">{t("sync.saved_offline_note")}</p>
             <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
               <div
-                className="h-full bg-primary transition-all"
+                className="h-full bg-primary transition-[width]"
                 style={{ width: `${Math.min(100, (attBytes / (120 * 1024 * 1024)) * 100)}%` }}
               />
             </div>
