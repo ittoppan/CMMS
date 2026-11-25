@@ -69,7 +69,7 @@ function lampTone(tone: string | undefined): "ok" | "warn" | "down" | "idle" {
   }
 }
 
-function SearchBox({ initial, auto }: { initial: string; auto?: boolean }) {
+function SearchBox({ initial }: { initial: string }) {
   const [q, setQ] = useState(initial);
   const [asset, setAsset] = useState("");
   const router = useRouter();
@@ -97,7 +97,6 @@ function SearchBox({ initial, auto }: { initial: string; auto?: boolean }) {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          autoFocus={auto}
           placeholder="พิมพ์อาการหรือข้อมูลเครื่อง เช่น พื้นเสียงผิดปกติ เช่น M-104"
           className="pl-9"
           aria-label="ค้นหาความรู้"
@@ -370,7 +369,7 @@ function SearchInner() {
         />
       </div>
 
-      <SearchBox initial={q} auto={!q} />
+      <SearchBox initial={q} />
 
       {loading && (
         <div className="space-y-3">

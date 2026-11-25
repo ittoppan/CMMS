@@ -291,7 +291,6 @@ function LoginContent() {
               label="ชื่อผู้ใช้"
               placeholder="เช่น E01117"
               value={username}
-              autoFocus
               autoComplete="username"
               autoCapitalize="none"
               autoCorrect="off"
