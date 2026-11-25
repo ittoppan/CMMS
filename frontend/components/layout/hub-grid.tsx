@@ -59,7 +59,7 @@ export function HubCard({ icon, title, description, href, onClick, badge, classN
     return (
       <Link
         href={href}
-        className="block min-h-11 rounded-[var(--cmms-radius-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)]"
+        className="block min-h-11 rounded-[var(--cmms-radius-lg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
       >
         {body}
       </Link>
@@ -70,7 +70,7 @@ export function HubCard({ icon, title, description, href, onClick, badge, classN
       <button
         type="button"
         onClick={onClick}
-        className="block w-full rounded-[var(--cmms-radius-lg)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)]"
+        className="block w-full rounded-[var(--cmms-radius-lg)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
       >
         {body}
       </button>
