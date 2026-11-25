@@ -319,3 +319,13 @@
 - `frontend/components/ui/`: `EmptyState`, `Skeleton` (ใช้ต่อ ไม่สร้างใหม่)
 - `ChartTip`/`Legend` ยังไม่ได้ดึงเป็น component กลาง — อยู่ใน `dashboard/page.tsx`, ดึงในขั้น dashboard (โมดูล 12)
 - ~~Demo ชั่วคราว~~ **ลบแล้ว 2026-11-23 (Phase 2)**: `/ui-demo`, `/ui-kit` — ตัวอย่างการใช้งานจริงดู `/supervisor`, `/supervisor/queue`, `/repair/view` และ `docs/COMPONENT_LIBRARY.md`
+
+## (ช) Accessibility: จุดที่คลิกได้ต้องเข้าถึงด้วยคีย์บอร์ด (`3ae9b10d`)
+
+กฎ: อะไรที่ `onClick` ได้ ต้อง `Tab` ไปถึง, กด `Enter`/`Space` ได้ และเห็น focus ring (`focus-visible:outline-2 outline-offset-2 outline-[var(--cmms-border-focus)]`) — ถ้าภายในมีการ์ด/แถวที่มีปุ่มซ้อนอยู่ ให้ปุ่มจริงเป็นตัวรับ focus ไม่ใช่ใส่ `role="button"` ที่ตัวห่อ
+
+- `settings/menus`: การ์ดพรีวิวบทบาท → ปุ่มชื่อบทบาท (`aria-pressed`) เป็นตัวรับ focus, การ์ดทั้งใบยังคลิกได้ด้วยเมาส์
+- `settings/pwa`: dropzone เปลี่ยนไอคอน → `role="button"` + `tabIndex` + `aria-label` + Enter/Space เปิด file input
+- `components/RepairRequestForm.tsx`: ขั้น stepper ที่ย้อนกลับได้ → `role="button"` + `tabIndex` + `aria-current="step"` + Enter/Space (ขั้นที่ยังไม่ถึงไม่ใส่ `tabIndex`); แบนเนอร์ผูกบัญชี LINE → `role="link"` + `tabIndex` + Enter/Space
+- `asset_registry/bom_tree`: ชื่อชิ้นส่วนเป็นปุ่มจริงสำหรับเลือก (`aria-pressed`) เพราะแถวมีปุ่มซ้อน
+- ยกเว้นโดยเจตนา: backdrop ของ dialog/modal, wrapper ที่แค่ `stopPropagation`, canvas คลิกวางตำแหน่ง (`facility-layout`), และจุดที่มี `onKeyDown` อยู่แล้ว (`ui/table.tsx` td ของ checkbox, `tv` `role="application"`)
