@@ -940,13 +940,13 @@ export default function PMChecksheetPage() {
                 {inspectorSig && (
                   <div className="space-y-1">
                     <p className="text-sm text-[var(--cmms-text-secondary)]">ผู้ตรวจเช็ค</p>
-                    <img loading="lazy" decoding="async" src={inspectorSig} alt="ลายเซ็นผู้ตรวจเช็ค" style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                    <img loading="lazy" decoding="async" src={inspectorSig} alt="ลายเซ็นผู้ตรวจเช็ค" width={137} height={44} style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
                   </div>
                 )}
                 {operatorSig && (
                   <div className="space-y-1">
                     <p className="text-sm text-[var(--cmms-text-secondary)]">ผู้ควบคุมเครื่อง ({operatorName || "-"})</p>
-                    <img loading="lazy" decoding="async" src={operatorSig} alt="ลายเซ็นผู้ควบคุมเครื่อง" style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                    <img loading="lazy" decoding="async" src={operatorSig} alt="ลายเซ็นผู้ควบคุมเครื่อง" width={137} height={44} style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
                   </div>
                 )}
               </div>

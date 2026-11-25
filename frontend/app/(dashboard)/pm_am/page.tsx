@@ -892,7 +892,7 @@ export default function PMSchedulePage() {
                       <Card key={blk.label} className="min-w-0 flex-1" style={{ minWidth: 220 }}>
                         <CardContent className="flex min-h-[130px] flex-col items-center justify-center gap-2 p-3">
                           {src ? (
-                            <img loading="lazy" decoding="async" src={src} alt={`ลายเซ็น ${blk.label}`} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
+                            <img loading="lazy" decoding="async" src={src} alt={`ลายเซ็น ${blk.label}`} width={249} height={80} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
                           ) : (
                             <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีลายเซ็น</p>
                           )}

@@ -1476,7 +1476,7 @@ export default function RepairViewDetailsPage() {
                 {localAtts.filter((a) => a.status === "pending").map((a) => (
                   <div key={a.id} className="relative rounded-lg border border-dashed border-amber-400/60 bg-amber-400/5 p-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img decoding="async" src={a.data} alt={a.file_name} className="h-20 w-full rounded object-cover" />
+                    <img decoding="async" src={a.data} alt={a.file_name} width={320} height={80} className="h-20 w-full rounded object-cover" />
                     <span className="mt-1 block text-center text-xs font-medium text-amber-600">
                       รอซิงก์
                     </span>
@@ -1486,7 +1486,7 @@ export default function RepairViewDetailsPage() {
                   <div key={a.id} className="rounded-lg border border-border p-1">
                     {(a.file_type || "").startsWith("image") ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img decoding="async" src={assetUrl(a.file_path)} alt={a.file_name} className="h-20 w-full rounded object-cover" />
+                      <img decoding="async" src={assetUrl(a.file_path)} alt={a.file_name} width={320} height={80} className="h-20 w-full rounded object-cover" />
                     ) : (
                       <div className="flex h-20 w-full items-center justify-center rounded bg-secondary/40 text-xs font-medium text-muted-foreground">
                         {a.file_name}

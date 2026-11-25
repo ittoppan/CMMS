@@ -32,7 +32,17 @@ function LineAvatar({
   className?: string;
 }) {
   const initial = (name || "U").charAt(0).toUpperCase();
-  if (src) return <img src={src} alt={name || ""} className={`cmms-reg-avatar ${className}`} />;
+  // ขนาดตาม variant ของ .cmms-reg-avatar (globals.css) — รูปทุก variant เป็นวงกลมจัตุรัส
+  const size = className.includes("cmms-reg-avatar-xl")
+    ? 128
+    : className.includes("cmms-reg-avatar-lg")
+      ? 80
+      : className.includes("cmms-reg-avatar-md")
+        ? 56
+        : className.includes("cmms-reg-avatar-sm")
+          ? 48
+          : 46;
+  if (src) return <img src={src} alt={name || ""} width={size} height={size} className={`cmms-reg-avatar ${className}`} />;
   return <div className={`cmms-reg-avatar ${className}`}>{initial}</div>;
 }
 

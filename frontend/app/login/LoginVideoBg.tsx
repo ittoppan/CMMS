@@ -87,7 +87,7 @@ export default function LoginVideoBg({
   }, [src, mobileSrc]);
 
   if (failed) {
-    return <img className="cmms-login-video" src={poster} alt="" />;
+    return <img className="cmms-login-video" src={poster} alt="" width={1920} height={1080} />;
   }
 
   return (

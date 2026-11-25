@@ -487,10 +487,7 @@ export default function BOMTreePage() {
                       <h4 className="text-base font-semibold">รายละเอียดชิ้นส่วน</h4>
                       {normalizeImage(selectedPart.image_url) && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={normalizeImage(selectedPart.image_url)!}
-                          alt={selectedPart.part_name || ""}
-                          className="max-h-[180px] w-full rounded-lg border border-border object-cover"
+                        <img src={normalizeImage(selectedPart.image_url)!} alt={selectedPart.part_name || ""} width={320} height={240} className="max-h-[180px] w-full rounded-lg border border-border object-cover"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                         />
                       )}
