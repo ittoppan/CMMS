@@ -513,28 +513,25 @@ function ItemsCard({
               return (
                 <div
                   key={item.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && e.target === e.currentTarget) {
-                      selectMode ? toggleSelect(item.rawId) : onEdit(item);
-                    }
-                  }}
-                  className="flex cursor-pointer flex-wrap items-start justify-between gap-3 rounded-[10px] border border-border bg-card p-3 transition-colors duration-300 hover:bg-accent"
+                  className="flex flex-wrap items-start justify-between gap-3 rounded-[10px] border border-border bg-card p-3 transition-colors duration-300 hover:bg-accent"
                 >
-                  {/* start */}
-                  <div className="flex items-center gap-2">
-                    {selectMode && (
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(item.rawId)}
-                        onChange={() => toggleSelect(item.rawId)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-[18px] w-[18px] accent-[var(--cmms-primary)]"
-                        aria-label={`เลือก ${item.name}`}
-                      />
-                    )}
+                  {/* checkbox อยู่นอกปุ่ม — ห้ามมี interactive ซ้อนใน interactive */}
+                  {selectMode && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(item.rawId)}
+                      onChange={() => toggleSelect(item.rawId)}
+                      className="mt-1 h-[18px] w-[18px] accent-[var(--cmms-primary)]"
+                      aria-label={`เลือก ${item.name}`}
+                    />
+                  )}
+
+                  {/* เนื้อหาหลักเป็นปุ่มจริง — Enter/Space ใช้ได้ตาม native */}
+                  <button
+                    type="button"
+                    onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
+                    className="cmms-focus-ring flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-[8px] text-left"
+                  >
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={thumb} alt={item.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
@@ -543,10 +540,9 @@ function ItemsCard({
                         <Box size={16} strokeWidth={1.75} aria-hidden="true" />
                       </div>
                     )}
-                  </div>
 
-                  {/* middle */}
-                  <div className="min-w-[200px] flex-1 space-y-1">
+                    {/* middle */}
+                    <div className="min-w-[200px] flex-1 space-y-1">
                     <p className="text-sm font-semibold text-foreground">{item.name}</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="neutral">{item.code}</Badge>
@@ -564,7 +560,8 @@ function ItemsCard({
                         <> ・ แนะนำเติม: <span className="tabular-nums font-medium text-[var(--cmms-warning-dark)]">{getSuggestedReplenish(item)}</span> {item.unit}</>
                       )}
                     </p>
-                  </div>
+                    </div>
+                  </button>
 
                   {/* end */}
                   <div className="flex flex-col items-end gap-1.5">

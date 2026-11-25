@@ -601,7 +601,7 @@ export default function PMSchedulePage() {
             <div className="cmms-icon-tile"><AlertTriangle size={20} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด (ค้าง)</p>
-              <h2 className="cmms-kpi-value">{stats.overdue} <span className="text-sm font-normal">รายการ</span></h2>
+              <p className="cmms-kpi-value">{stats.overdue} <span className="text-sm font-normal">รายการ</span></p>
             </div>
           </CardContent>
         </Card>
@@ -610,7 +610,7 @@ export default function PMSchedulePage() {
             <div className="cmms-icon-tile h-12 w-12"><Clock3 size={20} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">ครบกำหนดวันนี้ / 7 วัน</p>
-              <h2 className="cmms-kpi-value">{stats.dueToday} / {stats.upcoming7} <span className="text-sm font-normal">รายการ</span></h2>
+              <p className="cmms-kpi-value">{stats.dueToday} / {stats.upcoming7} <span className="text-sm font-normal">รายการ</span></p>
             </div>
           </CardContent>
         </Card>
@@ -619,7 +619,7 @@ export default function PMSchedulePage() {
             <div className="cmms-icon-tile h-12 w-12"><ClipboardCheck size={20} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังดำเนินการ</p>
-              <h2 className="cmms-kpi-value">{stats.inProgress} <span className="text-sm font-normal">รายการ</span></h2>
+              <p className="cmms-kpi-value">{stats.inProgress} <span className="text-sm font-normal">รายการ</span></p>
             </div>
           </CardContent>
         </Card>
@@ -628,10 +628,10 @@ export default function PMSchedulePage() {
             <div className="cmms-icon-tile green h-12 w-12"><FileCheck2 size={20} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">อัตราปฏิบัติตามแผน (ถึงกำหนดแล้ว)</p>
-              <h2 className="cmms-kpi-value">
+              <p className="cmms-kpi-value">
                 {stats.complianceRate === null ? "N/A" : `${stats.complianceRate}%`}
                 <span className="text-sm font-normal"> {stats.complianceDone}/{stats.complianceEligible}</span>
-              </h2>
+              </p>
               <p className="text-xs text-[var(--cmms-text-muted)]">ฐาน: งานที่ถึงกำหนดแล้ว (ไม่รวมข้าม/ยกเลิก)</p>
             </div>
           </CardContent>
@@ -641,7 +641,7 @@ export default function PMSchedulePage() {
             <div className="cmms-icon-tile h-12 w-12"><CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จสิ้น / ทั้งหมด</p>
-              <h2 className="cmms-kpi-value">{stats.completed} / {stats.total} <span className="text-sm font-normal">รายการ</span></h2>
+              <p className="cmms-kpi-value">{stats.completed} / {stats.total} <span className="text-sm font-normal">รายการ</span></p>
               <p className="text-xs text-[var(--cmms-text-muted)]">ไม่มีกำหนด {stats.noDue} รายการ</p>
             </div>
           </CardContent>
