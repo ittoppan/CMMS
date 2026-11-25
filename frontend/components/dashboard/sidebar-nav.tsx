@@ -421,43 +421,43 @@ export function SidebarNav({
       {showSearch && (
         <div className="shrink-0 px-3 pb-3 pt-3">
           <div className="flex items-center gap-1.5">
-          <div className="relative min-w-0 flex-1">
-            <Search
-              size={15}
-              strokeWidth={1.75}
-              aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("sidebar.search")}
-              aria-label="ค้นหาเมนู"
-              autoComplete="off"
-              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
-            />
-            {!query && (
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent("cmms:open-palette"))}
-                aria-label={"⌘\u00A0K — เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"}
-                title={"ค้นหาทั่วทั้งแอป — Ctrl/⌘\u00A0K"}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-border bg-card px-1.5 py-0.5 text-[0.6rem] font-bold text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
-              >
-                {"⌘\u00A0K"}
-              </button>
-            )}
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="ล้างคำค้นหา"
-                className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <X size={14} strokeWidth={2} aria-hidden="true" />
-              </button>
-            )}
-          </div>
+            <div className="relative min-w-0 flex-1">
+              <Search
+                size={15}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("sidebar.search")}
+                aria-label="ค้นหาเมนู"
+                autoComplete="off"
+                className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
+              />
+              {!query && (
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("cmms:open-palette"))}
+                  aria-label={"⌘\u00A0K — เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"}
+                  title={"ค้นหาทั่วทั้งแอป — Ctrl/⌘\u00A0K"}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-border bg-card px-1.5 py-0.5 text-[0.6rem] font-bold text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
+                >
+                  {"⌘\u00A0K"}
+                </button>
+              )}
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="ล้างคำค้นหา"
+                  className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X size={14} strokeWidth={2} aria-hidden="true" />
+                </button>
+              )}
+            </div>
             {/* ตัวนับเมนูที่แสดง — แยกจาก placeholder เพื่อให้ placeholder ลงท้ายด้วย … ตามกฎ */}
             <span
               className="shrink-0 rounded-full border border-border bg-muted/60 px-2 py-1 text-[0.65rem] font-bold tabular-nums text-muted-foreground"
