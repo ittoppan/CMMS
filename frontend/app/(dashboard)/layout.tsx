@@ -514,6 +514,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
             <ConnectivityStatus variant="icon" />
             <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="cmms-mobile-app-bar-btn"
+              aria-label={t("menu.logout")}
+              title={t("menu.logout")}
+            >
+              <LogOut size={20} strokeWidth={1.75} aria-hidden="true" />
+            </button>
           </header>
 
           {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
