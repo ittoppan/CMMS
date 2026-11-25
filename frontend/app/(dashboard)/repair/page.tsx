@@ -114,20 +114,23 @@ const REPAIR_VIEW_VERSION = 1 as const;
 
 type RepairOutsource = "all" | "in" | "out";
 
-// คำค้นหาไม่อยู่ใน URL แล้ว (เก็บเฉพาะ status/priority/outsource)
+// คำค้นหา sync ลง URL เฉพาะตอน blur/กด Enter (ไม่เขียนตอนพิมพ์ทุกตัวอักษร)
 function readRepairFilters(sp: URLSearchParams) {
+  const qParam = sp.get("q");
+  const woParam = sp.get("wo");
+  const search = (qParam ?? woParam ?? "").trim();
   const status = (sp.get("status") || "").trim();
   const priority = (sp.get("priority") || "").trim();
   const outRaw = (sp.get("outsource") || "all").trim();
   const outsource: RepairOutsource = outRaw === "in" || outRaw === "out" ? outRaw : "all";
-  return { statusFilter: status, priorityFilter: priority, outsourceFilter: outsource };
+  return { search, statusFilter: status, priorityFilter: priority, outsourceFilter: outsource };
 }
 
-function buildRepairParams(state: { statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, base?: URLSearchParams) {
+function buildRepairParams(state: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, base?: URLSearchParams) {
   const sp = new URLSearchParams(base ? base.toString() : "");
-  // ล้างค่าเก่าที่ค้างใน URL จากลิงก์เดิม
   sp.delete("wo");
-  sp.delete("q");
+  const q = state.search.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
   if (state.statusFilter) sp.set("status", state.statusFilter); else sp.delete("status");
   if (state.priorityFilter) sp.set("priority", state.priorityFilter); else sp.delete("priority");
   if (state.outsourceFilter && state.outsourceFilter !== "all") sp.set("outsource", state.outsourceFilter); else sp.delete("outsource");
@@ -146,7 +149,7 @@ export default function WorkOrdersPage() {
   // เกณฑ์ "ใกล้ครบกำหนด SLA" (ชม.) — อ่านจาก settings เพื่อให้ตรงกับตัวเลขบนแดชบอร์ด
   const [slaRiskHours, setSlaRiskHours] = useState(24);
   const initialFilters = useMemo(() => readRepairFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialFilters.search);
   const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
   const [priorityFilter, setPriorityFilter] = useState(initialFilters.priorityFilter);
   const [outsourceFilter, setOutsourceFilter] = useState<RepairOutsource>(initialFilters.outsourceFilter);
@@ -176,7 +179,7 @@ export default function WorkOrdersPage() {
 
   // เขียน URL ตรงกับ history (ไม่ผ่าน router) — หน้านี้ใช้ state เป็นหลัก
   // จึงไม่ต้องให้ router re-render ตาม query และไม่ชนกับการ replace ของ router
-  const syncUrl = useCallback((next: { statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, mode: "replace" | "push" = "replace") => {
+  const syncUrl = useCallback((next: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, mode: "replace" | "push" = "replace") => {
     const sp = buildRepairParams(next, new URLSearchParams(window.location.search));
     const qs = sp.toString();
     const url = qs ? `${pathname}?${qs}` : pathname;
@@ -199,19 +202,18 @@ export default function WorkOrdersPage() {
     setSavedViews(listSavedViews(REPAIR_VIEW_ENTITY));
   }, []);
 
+  // ช่องค้นหา: ตารางกรองทันทีที่พิมพ์ แต่เขียน URL เฉพาะตอน blur หรือกด Enter
+  const commitSearch = useCallback(() => {
+    syncUrl({ search, statusFilter, priorityFilter, outsourceFilter }, "replace");
+  }, [outsourceFilter, priorityFilter, search, statusFilter, syncUrl]);
+
   useEffect(() => {
-    // คำค้นหาไม่ผูกกับ URL — sync เฉพาะตัวกรอง เพื่อไม่ให้คำที่พิมพ์อยู่หาย
     const fromUrl = readRepairFilters(new URLSearchParams(searchParams.toString()));
+    setSearch(fromUrl.search);
     setStatusFilter(fromUrl.statusFilter);
     setPriorityFilter(fromUrl.priorityFilter);
     setOutsourceFilter(fromUrl.outsourceFilter);
   }, [searchParams]);
-
-  // ล้าง q/wo ที่ค้างมาจากลิงก์เดิมตั้งแต่เปิดหน้า
-  useEffect(() => {
-    const raw = new URLSearchParams(window.location.search);
-    if (raw.has("q") || raw.has("wo")) syncUrl(readRepairFilters(raw), "replace");
-  }, [syncUrl]);
 
   const dirty = snapshotOf(currentFilterState) !== (appliedSnapshotRef.current || snapshotOf({ search: "", statusFilter: "", priorityFilter: "", outsourceFilter: "all" }));
 
@@ -289,7 +291,7 @@ export default function WorkOrdersPage() {
 
   useEffect(() => {
     // Initialize applied snapshot from URL on first load (preserves shared/bookmarked URLs)
-    appliedSnapshotRef.current = snapshotOf({ ...readRepairFilters(new URLSearchParams(searchParams.toString())), search: "" });
+    appliedSnapshotRef.current = snapshotOf(readRepairFilters(new URLSearchParams(searchParams.toString())));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -846,6 +848,13 @@ export default function WorkOrdersPage() {
             placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onBlur={commitSearch}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitSearch();
+              }
+            }}
             className="w-full sm:w-56"
           />
           <Select
