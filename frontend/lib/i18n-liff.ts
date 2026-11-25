@@ -13,7 +13,7 @@ import { useLang } from "@/lib/i18n";
  */
 const LIFF_DICT: Record<string, { th: string; en: string }> = {
   "liff.lang_label": { th: "ภาษา", en: "Language" },
-  "liff.scan_loading": { th: "กำลังตรวจสอบเครื่องจักร…", en: "Checking machine..." },
+  "liff.scan_loading": { th: "กำลังตรวจสอบเครื่องจักร…", en: "Checking machine…" },
   "liff.scan_ok": { th: "สแกนเครื่องจักรสำเร็จ", en: "Machine found" },
   "liff.scan_no_data": { th: "ไม่มีข้อมูล", en: "No data" },
   "liff.scan_qr_code": { th: "รหัสจาก QR:", en: "Code from QR:" },

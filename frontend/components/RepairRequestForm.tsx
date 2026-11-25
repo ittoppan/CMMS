@@ -1543,7 +1543,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
                     <SelectValue placeholder="เลือกแผนก…" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__" disabled>เลือกแผนก...</SelectItem>
+                    <SelectItem value="__none__" disabled>เลือกแผนก…</SelectItem>
                     {depts.map((d) => (
                       <SelectItem key={d.id} value={d.code}>{d.name}</SelectItem>
                     ))}
