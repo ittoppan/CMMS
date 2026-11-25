@@ -803,13 +803,12 @@ export default function WorkOrdersPage() {
           </div>
         </Card>
         <Card className="p-4">
-          <div
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
+            aria-pressed={outsourceFilter === "out"}
             onClick={() => setFilters({ outsourceFilter: outsourceFilter === "out" ? "all" : "out" })}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOutsourceFilter(prev => prev === "out" ? "all" : "out"); } }}
             title={outsourceFilter === "out" ? "ยกเลิกกรองงานภายนอก" : "กรองเฉพาะงานจ้างภายนอก"}
-            style={{ cursor: "pointer" }}
+            className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
@@ -824,17 +823,16 @@ export default function WorkOrdersPage() {
                 ฿{stats.outsourceCost.toLocaleString("th-TH")}
               </p>
             </div>
-          </div>
+          </button>
         </Card>
         {stats.overdue > 0 && (
           <Card className="p-4">
-            <div
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
+              aria-pressed={statusFilter === "overdue"}
               onClick={() => setFilters({ statusFilter: statusFilter === "overdue" ? "" : "overdue" })}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFilters({ statusFilter: statusFilter === "overdue" ? "" : "overdue" }); } }}
               title={statusFilter === "overdue" ? "ยกเลิกกรองงานเกินกำหนด" : "กรองเฉพาะงานเกินกำหนด"}
-              style={{ cursor: "pointer" }}
+              className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
@@ -846,7 +844,7 @@ export default function WorkOrdersPage() {
                   <span className="cmms-kpi-unit">รายการ</span>
                 </div>
               </div>
-            </div>
+          </button>
           </Card>
         )}
       </Grid>
