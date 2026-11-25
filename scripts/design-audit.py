@@ -323,14 +323,42 @@ def ellipsis_issues_for_file(rel):
     return out
 
 
+def resolve_diff_ref(ref):
+    """Resolve --diff ref to a concrete, up-to-date base.
+
+    - None / "auto" → fetch origin/main แล้วใช้ origin/main (ล่าสุด)
+    - ref ที่ไม่ valid → fallback origin/main แล้ว HEAD~1
+    """
+    if not ref or ref == "auto":
+        try:
+            subprocess.run(["git", "fetch", "--quiet", "origin", "main"], cwd=ROOT, timeout=20)
+        except Exception:
+            pass
+        if subprocess.run(["git", "rev-parse", "--verify", "origin/main"], cwd=ROOT, capture_output=True).returncode == 0:
+            return "origin/main"
+        return "HEAD~1"
+    # validate given ref
+    if subprocess.run(["git", "rev-parse", "--verify", ref], cwd=ROOT, capture_output=True).returncode != 0:
+        try:
+            subprocess.run(["git", "fetch", "--quiet", "origin", "main"], cwd=ROOT, timeout=20)
+        except Exception:
+            pass
+        if subprocess.run(["git", "rev-parse", "--verify", "origin/main"], cwd=ROOT, capture_output=True).returncode == 0:
+            return "origin/main"
+        return "HEAD~1"
+    return ref
+
+
 def main():
     ap = argparse.ArgumentParser(description="CMMS-TPT design-guideline audit")
     ap.add_argument("--strict", action="store_true", help="WARN ทุกตัว = FAIL (ใช้ gate งานใหม่)")
-    ap.add_argument("--diff", metavar="REF", help="ตรวจเฉพาะไฟล์ที่เปลี่ยนเทียบ REF (เช่น origin/main)")
+    ap.add_argument("--diff", nargs="?", const="auto", metavar="REF", help="ตรวจเฉพาะไฟล์ที่เปลี่ยนเทียบ REF (เช่น origin/main); ถ้าไม่ระบุ = origin/main ล่าสุด")
     ap.add_argument("--json", action="store_true", help="output เป็น JSON")
     args = ap.parse_args()
 
-    pages = list_pages(args.diff)
+    diff_ref = resolve_diff_ref(args.diff) if args.diff else None
+    args.diff = diff_ref
+    pages = list_pages(diff_ref)
     all_issues = {}
     summaries = {}
 
@@ -340,7 +368,7 @@ def main():
         summaries[rel] = summary
 
     # Check 8: Thai UI string containing ASCII "..." (regression gate, diff mode only)
-    if args.diff:
+    if diff_ref:
         for rel in list_changed_frontend(args.diff):
             res = ellipsis_issues_for_file(rel)
             if not res:

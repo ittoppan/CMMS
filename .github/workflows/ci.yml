@@ -47,7 +47,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           python -m pip install --quiet --upgrade pip
-          python scripts/design-audit.py --diff ${{ github.event.before }} --strict
+          # ใช้ github.event.before ถ้ามี; ถ้าเป็น 0 (force push / branch ใหม่) ใช้ origin/main (ล่าสุด)
+          BASE="${{ github.event.before }}"
+          if echo "$BASE" | grep -qE '^0+$'; then
+            git fetch --depth=1 origin main 2>/dev/null || true
+            BASE="origin/main"
+          fi
+          python scripts/design-audit.py --diff "$BASE" --strict
 
   phplint:
     name: PHP Syntax Lint

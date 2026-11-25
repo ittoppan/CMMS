@@ -30,13 +30,15 @@ while read -r local_ref local_oid remote_ref remote_oid; do
     continue
   fi
 
-  # push branch ใหม่ (remote oid เป็น 0) → เทียบกับ origin/main (ถ้ามี)
-  if echo "$remote_oid" | grep -qE "^0+$"; then
-    if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
-      base="origin/main"
-    else
-      base="HEAD"
-    fi
+  # อัปเดต tracking ref ก่อนคำนวณ base — กันใช้ remote_oid ที่ stale
+  git fetch --quiet origin main 2>/dev/null || true
+
+  # ใช้ origin/main (ล่าสุด) เป็น base เสมอ เพื่อให้ diff ครอบคลุมเฉพาะไฟล์ที่ยังไม่ merge
+  # (remote_oid เก่ากว่า fix commits ทำให้ finding เดิมถูกฟ้องซ้ำ)
+  if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+    base="origin/main"
+  elif echo "$remote_oid" | grep -qE "^0+$"; then
+    base="HEAD"
   else
     base="$remote_oid"
   fi
