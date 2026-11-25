@@ -27,6 +27,7 @@ import {
   CheckSquare,
   Users,
   User,
+  LogOut,
   X,
 } from "lucide-react";
 import LiffBridge from "../../components/LiffBridge";
@@ -536,6 +537,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 frequentItems={frequentItems}
                 onNavigate={() => setDrawerOpen(false)}
               />
+              {/* ท้ายลิ้นชัก: ออกจากระบบ — แถบ header เดสก์ท็อป (ที่มีปุ่มนี้) ถูกซ่อนที่ < lg
+                  เดิมจอเล็กจึงไม่มีทางออกจากระบบเลย */}
+              <div className="mt-auto border-t border-border px-3 py-2">
+                <Link
+                  href="/login"
+                  onClick={() => setDrawerOpen(false)}
+                  aria-label={t("menu.logout")}
+                  className="flex min-h-11 items-center gap-2.5 rounded-[var(--cmms-radius)] px-2 text-sm font-semibold text-[var(--cmms-sidebar-text)] transition-colors hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-primary)]"
+                >
+                  <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {t("menu.logout")}
+                </Link>
+              </div>
             </SheetContent>
           </Sheet>
 
