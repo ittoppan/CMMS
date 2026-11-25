@@ -2603,8 +2603,9 @@ next-route-announcer {
 /* KPI การ์ดที่ใช้เป็นปุ่มกรอง — ต้องเห็นสถานะ "กดอยู่" (aria-pressed) ไม่ใช่แค่ประกาศให้ screen reader */
 .cmms-kpi-toggle[aria-pressed="true"] {
   outline: 2px solid var(--cmms-border-focus);
-  outline-offset: -2px;
-  border-radius: var(--cmms-radius);
+  /* ปุ่มไม่มี padding ภายใน — เว้นระยะวงแหวนออกไปให้พ้นตัวอักษร */
+  outline-offset: 6px;
+  border-radius: calc(var(--cmms-radius) + 6px);
   background: var(--cmms-bg-muted);
 }
 
