@@ -882,7 +882,7 @@ export default function PageDesignerPage() {
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">
-              กำลังโหลดค่าปัจจุบันจากฐานข้อมูล...
+              กำลังโหลดค่าปัจจุบันจากฐานข้อมูล…
             </p>
           </CardContent>
         </Card>

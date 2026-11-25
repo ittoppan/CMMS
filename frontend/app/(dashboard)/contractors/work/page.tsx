@@ -464,7 +464,7 @@ export default function ContractorWorkPage() {
                                     <div className="flex justify-end gap-2">
                                       <Button variant="ghost" size="sm" onClick={() => setInspectId(0)}><X size={14} aria-hidden="true" /> ปิด</Button>
                                       <Button variant="primary" size="sm" onClick={() => inspect(a)} disabled={busy === `in-${a.id}`}>
-                                        <ClipboardCheck size={14} aria-hidden="true" /> {busy === `in-${a.id}` ? "..." : "บันทึกผลตรวจรับ"}
+                                        <ClipboardCheck size={14} aria-hidden="true" /> {busy === `in-${a.id}` ? "…" : "บันทึกผลตรวจรับ"}
                                       </Button>
                                     </div>
                                   </div>

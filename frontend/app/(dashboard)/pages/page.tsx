@@ -74,7 +74,7 @@ export default function CustomPagesListPage() {
         note="การลบหน้าที่มีลิงก์ภายนอกอ้างอิงอาจทำให้เข้าถึงไม่ได้ — ควรตรวจสอบก่อนลบ"
         related={[{"href":"/editor/builder","label":"ตัวสร้างหน้า/Builder"},{"href":"/documents","label":"เอกสาร (ถ้าเกี่ยวข้อง)"}]}
       />
-        <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
+        <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง…</p>
       </div>
       </>
     );

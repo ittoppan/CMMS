@@ -179,7 +179,7 @@ export default function SystemHealthPage() {
         {loading && !d ? (
           <HStack gap={2}>
             <Spinner size={20} />
-            <span className="text-sm">กำลังตรวจสอบสถานะระบบ...</span>
+            <span className="text-sm">กำลังตรวจสอบสถานะระบบ…</span>
           </HStack>
         ) : !d ? null : (
           <VStack gap={4}>

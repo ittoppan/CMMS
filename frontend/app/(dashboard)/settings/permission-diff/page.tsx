@@ -75,7 +75,7 @@ export default function PermissionDiffPage() {
       {loading ? (
         <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
           <Spinner size={20} />
-          <p className="text-sm text-muted-foreground">กำลังตรวจ...</p>
+          <p className="text-sm text-muted-foreground">กำลังตรวจ…</p>
         </div>
       ) : (
         <div className="space-y-4">

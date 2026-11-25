@@ -237,7 +237,7 @@ export default function EditProductionHoursPage() {
   const hero = usePageHero("mtbf_mttr/production_hours/edit");
 
   return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด...</p>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด…</p>}>
       <EditProductionHoursContent />
     </Suspense>
   );

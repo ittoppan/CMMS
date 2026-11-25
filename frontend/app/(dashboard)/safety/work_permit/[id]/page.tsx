@@ -157,7 +157,7 @@ export default function PermitDetailPage() {
             {p?.risk_level && <Badge variant={RISK_LEVEL_TONE[p.risk_level]} dot>เสี่ยง {RISK_LEVEL_LABELS[p.risk_level]}</Badge>}
           </span>
         }
-        description={p ? `${typeName(p.permit_type_code, opts?.permit_types)} · ${p.work_description || "—"}` : "..."}
+        description={p ? `${typeName(p.permit_type_code, opts?.permit_types)} · ${p.work_description || "—"}` : "…"}
         actions={[
           <Button key="back" variant="secondary" onClick={() => router.push(PATHS.list)}>
             <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" /> รายการ

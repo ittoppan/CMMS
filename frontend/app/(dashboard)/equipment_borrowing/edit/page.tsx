@@ -330,7 +330,7 @@ export default function EditBorrowingPage() {
   const hero = usePageHero("equipment_borrowing/edit");
 
   return (
-    <Suspense fallback={<p className="text-sm">กำลังโหลด...</p>}>
+    <Suspense fallback={<p className="text-sm">กำลังโหลด…</p>}>
       <EditBorrowingContent />
     </Suspense>
   );

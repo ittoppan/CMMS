@@ -721,7 +721,7 @@ export default function FacilityLayoutPage() {
                                 const np=[...roomCfg.ports]; np[idx]={...p,feeds:[...feeds, ref]}; updateRoomPorts(effectiveRoomId,np);
                                 e.target.value = "";
                               }}>
-                                <option value="">+ เพิ่มปลายทาง (พอร์ต/จุด/เครื่อง)...</option>
+                                <option value="">+ เพิ่มปลายทาง (พอร์ต/จุด/เครื่อง)…</option>
                                 {allPortOptions.filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
                                   <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
                                 ))}
@@ -1595,7 +1595,7 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
               }}>
-                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)...</option>
+                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)…</option>
                 {(allPortOptions||[]).filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
                   <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
                 ))}
@@ -1652,7 +1652,7 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
               }}>
-                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)...</option>
+                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)…</option>
                 {(allPortOptions||[]).filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
                   <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
                 ))}

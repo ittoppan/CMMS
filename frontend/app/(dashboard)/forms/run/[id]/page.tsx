@@ -400,7 +400,7 @@ export default function FormRunPage() {
         />
         <div className="flex flex-col items-center gap-3 py-20">
           <Spinner size={28} label="" />
-          <p className="text-sm text-muted-foreground">กำลังโหลดแบบฟอร์ม...</p>
+          <p className="text-sm text-muted-foreground">กำลังโหลดแบบฟอร์ม…</p>
         </div>
       </div>
     );

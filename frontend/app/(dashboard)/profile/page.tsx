@@ -218,7 +218,7 @@ export default function ProfilePage() {
     return (
       <HStack hAlign="center" vAlign="center" className="py-16">
         <Spinner />
-        <span className="text-sm text-muted-foreground">กำลังโหลดโปรไฟล์...</span>
+        <span className="text-sm text-muted-foreground">กำลังโหลดโปรไฟล์…</span>
       </HStack>
     );
   }

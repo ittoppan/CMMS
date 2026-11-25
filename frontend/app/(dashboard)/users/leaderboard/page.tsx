@@ -173,7 +173,7 @@ export default function LeaderboardPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
+            <p className="text-sm text-muted-foreground">กำลังโหลด…</p>
           ) : rest.length > 0 ? (
             <SimpleDataTable columns={columns} data={rest} />
           ) : rows.length === 0 ? (

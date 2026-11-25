@@ -196,7 +196,7 @@ export default function AssetCriticalityPage() {
         <Card>
           <CardContent className="flex items-center justify-center gap-3 py-16">
             <Spinner size={20} label="" />
-            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูลเครื่องจักร...</span>
+            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูลเครื่องจักร…</span>
           </CardContent>
         </Card>
       ) : (

@@ -83,7 +83,7 @@ export default function PlantMapPage() {
       <div className="space-y-6">
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {loading ? (
-        <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลด…</p>
       ) : (
         <div className="space-y-4">
           {groups.map(([zone, items]) => {

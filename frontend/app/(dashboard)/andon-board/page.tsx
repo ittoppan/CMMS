@@ -435,7 +435,7 @@ export default function AndonBoardPage() {
                 <span className="andon-count">{urgentRepairs.length} รายการ</span>
               </div>
               {loading ? (
-                <div className="andon-empty">กำลังโหลดข้อมูล...</div>
+                <div className="andon-empty">กำลังโหลดข้อมูล…</div>
               ) : urgentRepairs.length === 0 ? (
                 <div className="andon-empty">
                   <AndonLamp status="ok" size="lg" />
@@ -473,7 +473,7 @@ export default function AndonBoardPage() {
                 <span className="andon-count">{lowStock.length} รายการ</span>
               </div>
               {loading ? (
-                <div className="andon-empty">กำลังโหลดข้อมูล...</div>
+                <div className="andon-empty">กำลังโหลดข้อมูล…</div>
               ) : lowStock.length === 0 ? (
                 <div className="andon-empty" style={{ color: "#86efac" }}>สต็อกอะไหล่ปกติทั้งหมด</div>
               ) : (
@@ -501,7 +501,7 @@ export default function AndonBoardPage() {
                 <span className="andon-count">{todayPms.length} รายการ</span>
               </div>
               {loading ? (
-                <div className="andon-empty">กำลังโหลดข้อมูล...</div>
+                <div className="andon-empty">กำลังโหลดข้อมูล…</div>
               ) : todayPms.length === 0 ? (
                 <div className="andon-empty" style={{ color: "#86efac" }}>ไม่มีแผน PM ค้างวันนี้</div>
               ) : (
@@ -533,7 +533,7 @@ export default function AndonBoardPage() {
                 <h3><span className="cmms-status-dot ok" style={{ display: "inline-block" }} /> สถานะงานทั้งหมด</h3>
               </div>
               {loading ? (
-                <div className="andon-empty">กำลังโหลดข้อมูล...</div>
+                <div className="andon-empty">กำลังโหลดข้อมูล…</div>
               ) : !kpi?.status_dist?.length ? (
                 <div className="andon-empty">ยังไม่มีข้อมูลงานซ่อม</div>
               ) : (

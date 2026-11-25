@@ -68,7 +68,7 @@ export default function CustomPageView() {
         title="ดูหน้าที่สร้างเอง"
       />
       <div className="space-y-6">
-        <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
+        <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง…</p>
       </div>
     </>
     );
@@ -157,7 +157,7 @@ export default function CustomPageView() {
             <div ref={contentRef} dangerouslySetInnerHTML={{ __html: page.html }} />
           </Card>
         ) : (
-          <p className="text-sm text-muted-foreground">กำลังโหลดหน้า...</p>
+          <p className="text-sm text-muted-foreground">กำลังโหลดหน้า…</p>
         )}
       </div>
       </div>

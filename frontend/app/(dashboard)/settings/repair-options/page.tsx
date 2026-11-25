@@ -280,7 +280,7 @@ function RepairOptionsSection() {
     return (
       <div className="flex items-center justify-center gap-3" style={{ padding: 40 }}>
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูล...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูล…</p>
       </div>
     );
   }
@@ -611,7 +611,7 @@ function MasterEntitySection({ entityKey }: { entityKey: "departments" | "locati
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
+            <p className="text-sm text-muted-foreground">กำลังโหลด…</p>
           ) : rows.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">ยังไม่มีรายการ</p>
           ) : (

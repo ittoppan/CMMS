@@ -126,7 +126,7 @@ export default function NotificationPrefsPage() {
     return (
       <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่า...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่า…</p>
       </div>
     );
   }

@@ -409,7 +409,7 @@ export default function InspectionRunPage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดรอบตรวจ...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดรอบตรวจ…</span>
       </div>
     );
   }
@@ -583,7 +583,7 @@ export default function InspectionRunPage() {
                                 <Select value={item.value || "__none__"} onValueChange={(v) => updateItem(index, { value: v === "__none__" ? "" : v, status: v === "__none__" ? null : item.status ?? "pass" })}>
                                   <SelectTrigger><SelectValue placeholder="เลือกตัวเลือก…" /></SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="__none__" disabled>เลือกตัวเลือก...</SelectItem>
+                                    <SelectItem value="__none__" disabled>เลือกตัวเลือก…</SelectItem>
                                     {item.options.map((op) => <SelectItem key={op} value={op}>{op}</SelectItem>)}
                                     {item.options.length === 0 && <SelectItem value="__none__" disabled>ยังไม่มีตัวเลือก</SelectItem>}
                                   </SelectContent>

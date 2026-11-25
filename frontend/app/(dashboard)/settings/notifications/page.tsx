@@ -381,7 +381,7 @@ export default function NotificationsSettingsPage() {
     return (
       <HStack hAlign="center" vAlign="center" gap={3} className="py-16">
         <Spinner size={20} />
-        <span className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าการแจ้งเตือน...</span>
+        <span className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าการแจ้งเตือน…</span>
       </HStack>
     );
   }

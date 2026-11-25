@@ -16,7 +16,7 @@ export default function DashboardLoading() {
         className="h-40 w-40 sm:h-56 sm:w-56"
         draggable={false}
       />
-      <p className="text-sm font-medium text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>
+      <p className="text-sm font-medium text-[var(--cmms-text-secondary)]">กำลังโหลด…</p>
     </div>
   );
 }

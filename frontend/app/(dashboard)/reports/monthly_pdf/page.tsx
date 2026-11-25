@@ -185,7 +185,7 @@ export default function MonthlyPdfReportPage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูลรายงาน...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูลรายงาน…</span>
       </div>
     );
   }

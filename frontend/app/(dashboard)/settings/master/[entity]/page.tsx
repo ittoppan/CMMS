@@ -367,7 +367,7 @@ export default function MasterDataPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
+            <p className="text-sm text-muted-foreground">กำลังโหลด…</p>
           ) : rows.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">ยังไม่มีรายการ</p>
           ) : (

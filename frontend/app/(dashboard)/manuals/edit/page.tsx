@@ -206,7 +206,7 @@ function EditManualContent() {
                 <Label htmlFor="manual-filepath">ลิงก์ไฟล์เอกสาร</Label>
                 <Input
                   id="manual-filepath"
-                  placeholder="https://..."
+                  placeholder="https://…"
                   value={filePath}
                   onChange={(e) => setFilePath(e.target.value)}
                 />
@@ -234,7 +234,7 @@ export default function EditManualPage() {
   const hero = usePageHero("manuals/edit");
 
   return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด...</p>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด…</p>}>
       <EditManualContent />
     </Suspense>
   );

@@ -372,7 +372,7 @@ export default function NotificationRulesPage() {
         {loading ? (
           <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
             <Spinner size={20} />
-            <p className="text-sm text-muted-foreground">กำลังโหลดกฎ...</p>
+            <p className="text-sm text-muted-foreground">กำลังโหลดกฎ…</p>
           </div>
         ) : (
           <SimpleDataTable
@@ -515,7 +515,7 @@ export default function NotificationRulesPage() {
                     {u.full_name} {u.role_name ? `(${u.role_name})` : ""}
                   </label>
                 ))}
-                {users.length === 0 && <span className="text-xs text-muted-foreground">กำลังโหลดผู้ใช้...</span>}
+                {users.length === 0 && <span className="text-xs text-muted-foreground">กำลังโหลดผู้ใช้…</span>}
               </div>
             </div>
 

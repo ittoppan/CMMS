@@ -292,7 +292,7 @@ export default function BOMTreePage() {
         <Card>
           <CardContent className="flex items-center justify-center gap-3 py-16">
             <Spinner size={20} label="" />
-            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูล...</span>
+            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูล…</span>
           </CardContent>
         </Card>
       ) : machines.length === 0 ? (

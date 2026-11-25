@@ -123,7 +123,7 @@ export default function TcoPage() {
           <CardTitle className="text-base">ตาราง TCO รายเครื่อง</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? <p className="text-sm text-muted-foreground">กำลังคำนวณ...</p>
+          {loading ? <p className="text-sm text-muted-foreground">กำลังคำนวณ…</p>
             : rows.length === 0 ? <p className="text-sm text-muted-foreground text-center py-6">ยังไม่มีข้อมูล</p>
             : <SimpleDataTable columns={columns} data={rows} />}
         </CardContent>

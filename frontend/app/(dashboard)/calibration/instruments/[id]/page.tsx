@@ -205,7 +205,7 @@ export default function InstrumentDetailPage() {
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "การสอบเทียบ", href: "/calibration" },
         { label: "เครื่องมือวัด", href: "/calibration/instruments" },
-        { label: instrument?.display_name || "..." },
+        { label: instrument?.display_name || "…" },
       ]}
       title={instrument?.display_name || "เครื่องมือวัด"}
       description={

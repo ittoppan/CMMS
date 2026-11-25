@@ -367,7 +367,7 @@ function PoRowCard({
         <div className="space-y-1.5">
           <p className="text-xs font-semibold text-muted-foreground">CC อีเมล (คั่น ; )</p>
           <Input
-            placeholder="anggruethai.m@toppan.co.th;..."
+            placeholder="anggruethai.m@toppan.co.th;…"
             value={cc}
             onChange={(e) => setCc(e.target.value)}
           />

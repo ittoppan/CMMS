@@ -157,7 +157,7 @@ function EditAssetContent() {
         </CardHeader>
         <CardContent className="space-y-5">
           {loading ? (
-            <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลเครื่องจักร...</p>
+            <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลเครื่องจักร…</p>
           ) : (
             <>
               {errorMessage && (
@@ -311,7 +311,7 @@ export default function EditAssetPage() {
   const hero = usePageHero("asset_registry/edit");
 
   return (
-    <Suspense fallback={<div className="flex items-center justify-center p-10 text-sm text-muted-foreground">กำลังโหลด...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center p-10 text-sm text-muted-foreground">กำลังโหลด…</div>}>
       <EditAssetContent />
     </Suspense>
   );

@@ -986,7 +986,7 @@ export default function AssetRegistryViewPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {!facilityLayout ? (
-                <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลผัง/พอร์ต...</p>
+                <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลผัง/พอร์ต…</p>
               ) : !layoutInfo?.locId ? (
                 <Alert variant="warning" description="เครื่องนี้ยังไม่ผูกตำแหน่ง (location/ห้อง) — กำหนดตำแหน่งให้เครื่องเพื่อเชื่อมกับผังอาคารและพอร์ตของห้อง" />
               ) : (

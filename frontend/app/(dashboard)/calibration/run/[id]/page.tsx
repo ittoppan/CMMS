@@ -225,7 +225,7 @@ export default function RunDetailPage() {
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "การสอบเทียบ", href: "/calibration" },
         { label: "เครื่องมือวัด", href: "/calibration/instruments" },
-        { label: data?.asset_name || "..." },
+        { label: data?.asset_name || "…" },
         { label: `รอบ #${runId}` },
       ]}
       title={`รอบสอบเทียบ #${runId}`}

@@ -233,7 +233,7 @@ export default function FeedbackPage() {
             </HStack>
 
             {loading && items.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">กำลังโหลด...</p>
+              <p className="mt-3 text-sm text-muted-foreground">กำลังโหลด…</p>
             ) : items.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">ยังไม่มีฟีดแบ็ก</p>
             ) : (

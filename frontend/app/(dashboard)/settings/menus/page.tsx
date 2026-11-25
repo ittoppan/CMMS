@@ -222,7 +222,7 @@ export default function MenuPermissionsPage() {
     return (
       <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดสิทธิ์เมนู...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดสิทธิ์เมนู…</p>
       </div>
     );
   }

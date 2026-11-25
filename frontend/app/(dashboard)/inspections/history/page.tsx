@@ -76,7 +76,7 @@ export default function InspectionHistoryPage() {
     return (
       <div className="flex items-center justify-center gap-3 py-16">
         <Spinner size={28} />
-        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดประวัติตรวจเช็ค...</span>
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดประวัติตรวจเช็ค…</span>
       </div>
     );
   }

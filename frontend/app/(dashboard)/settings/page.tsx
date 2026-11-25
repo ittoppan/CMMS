@@ -778,7 +778,7 @@ export default function SettingsPage() {
     return (
       <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
         <Spinner size={20} />
-        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าระบบ...</p>
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าระบบ…</p>
       </div>
     );
   }
@@ -1018,7 +1018,7 @@ export default function SettingsPage() {
                           })}
                           {topicSettings.length > 3 && (
                             <p className="text-sm text-muted-foreground">
-                              +{topicSettings.length - 3} รายการเพิ่มเติม...
+                              +{topicSettings.length - 3} รายการเพิ่มเติม…
                             </p>
                           )}
                         </VStack>
@@ -1484,7 +1484,7 @@ export default function SettingsPage() {
           {auditLoading ? (
             <HStack hAlign="center" gap={2}>
               <Spinner size={16} />
-              <span className="text-sm text-muted-foreground">กำลังโหลดประวัติ...</span>
+              <span className="text-sm text-muted-foreground">กำลังโหลดประวัติ…</span>
             </HStack>
           ) : auditRows.length === 0 ? (
             <p className="text-sm text-muted-foreground">ยังไม่มีประวัติการแก้ไข — บันทึกการตั้งค่าครั้งถัดไปจะปรากฏที่นี่</p>
