@@ -665,6 +665,7 @@ function SidebarGroup({
                 type="button"
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={expanded}
+                aria-controls={panelId}
                 className="flex w-full items-center gap-2 rounded-[var(--cmms-radius)] py-1.5 pl-3 pr-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/50 hover:text-primary"
               >
                 <ChevronRight
