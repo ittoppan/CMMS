@@ -202,7 +202,7 @@ export default function PMChecklistsPage() {
         {/* ── รายการ Templates ── */}
         <Card>
           <CardContent className="space-y-3 p-4">
-            <h4 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />Template ทั้งหมด ({templates.length})</h4>
+            <h2 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />Template ทั้งหมด ({templates.length})</h2>
             {templates.length === 0 && (
               <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ยังไม่มี Template" description="สร้าง Template เช็คชีทชุดแรก" />
             )}
@@ -248,7 +248,7 @@ export default function PMChecklistsPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
                     <div>
                       <p className="font-mono text-xs font-bold" style={{ color: "var(--cmms-primary-hover)" }}>{activeTpl.code}</p>
-                      <h4 className="font-bold">{activeTpl.name}</h4>
+                      <h3 className="font-bold">{activeTpl.name}</h3>
                       <p className="text-xs" style={{ color: "var(--cmms-text-muted)" }}>{activeTpl.item_count} รายการตรวจ</p>
                     </div>
                     <Button size="sm" onClick={() => { setItemFormOpen(true); setItemEditId(0); resetItemForm(); }}>

@@ -184,7 +184,7 @@ export default function BatchSchedulePage() {
         <div className="space-y-4">
           <Card>
             <CardContent className="space-y-4 p-5">
-              <h4 className="font-bold">1. กำหนดแผน PM</h4>
+              <h2 className="font-bold">1. กำหนดแผน PM</h2>
               <div className="space-y-4">
                 <Input
                   label="ชื่อแผน PM *"
@@ -251,7 +251,7 @@ export default function BatchSchedulePage() {
         <div className="space-y-4">
           <Card className="flex max-h-[560px] flex-col">
             <CardContent className="flex min-h-0 flex-1 flex-col p-5">
-              <h4 className="mb-4 font-bold">2. เลือกเครื่องจักร (Select Assets)</h4>
+              <h2 className="mb-4 font-bold">2. เลือกเครื่องจักร (Select Assets)</h2>
 
               <div className="relative">
                 <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />

@@ -177,7 +177,7 @@ export default function PMDetailPage() {
             <div className="space-y-4">
               <Card>
                 <CardContent className="space-y-3 p-5">
-                  <h4 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ข้อมูลรอบ PM</h4>
+                  <h2 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ข้อมูลรอบ PM</h2>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <span className="flex items-center gap-2 text-[var(--cmms-text-secondary)]">
                       <Wrench size={14} aria-hidden="true" />เครื่องจักร
@@ -230,7 +230,7 @@ export default function PMDetailPage() {
 
               <Card>
                 <CardContent className="space-y-2 p-5">
-                  <h4 className="font-bold">สถานะ</h4>
+                  <h2 className="font-bold">สถานะ</h2>
                   <div className="flex items-center gap-3">
                     <AndonLamp status={pm.status === "completed" ? "ok" : pm.status === "overdue" ? "down" : pm.status === "in_progress" ? "warn" : "idle"} />
                     <span className="font-bold">{statusLabel[pm.status] || pm.status}</span>
@@ -262,7 +262,7 @@ export default function PMDetailPage() {
               <Card>
                 <CardContent className="space-y-3 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
-                    <h4 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ผลการตรวจเช็ค ({checklist.length} รายการ)</h4>
+                    <h2 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ผลการตรวจเช็ค ({checklist.length} รายการ)</h2>
                     <span className="flex items-center gap-4 text-sm">
                       <span className="flex items-center gap-1 font-semibold" style={{ color: "var(--cmms-success)" }}>
                         <CheckCircle2 size={14} aria-hidden="true" />ผ่าน {checklist.filter((i) => i.status === "pass" || i.status === "ok").length}
@@ -301,7 +301,7 @@ export default function PMDetailPage() {
               {pm.notes && (
                 <Card>
                   <CardContent className="p-5">
-                    <h4 className="mb-2 flex items-center gap-2 font-bold"><FileText size={16} strokeWidth={1.75} aria-hidden="true" />หมายเหตุ</h4>
+                    <h2 className="mb-2 flex items-center gap-2 font-bold"><FileText size={16} strokeWidth={1.75} aria-hidden="true" />หมายเหตุ</h2>
                     <p className="whitespace-pre-line text-sm" style={{ color: "var(--cmms-text-secondary)" }}>{pm.notes}</p>
                   </CardContent>
                 </Card>
