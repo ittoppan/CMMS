@@ -164,7 +164,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ fontSize: 12, fontWeight: 700, color: "#B91C1C" }}>🔴 รูปถ่ายก่อนซ่อม / จุดชำรุด</div>
           <div style={{ width: "100%", height: 200, borderRadius: 8, overflow: "hidden", background: "#CBD5E1", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {wo.beforeImg ? (
-              <img src={wo.beforeImg} alt="รูปถ่ายก่อนซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img loading="eager" decoding="async" src={wo.beforeImg} alt="รูปถ่ายก่อนซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
               <span style={{ fontSize: 12, color: "#475569" }}>ไม่มีรูปถ่ายก่อนซ่อม</span>
             )}
@@ -174,7 +174,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ fontSize: 12, fontWeight: 700, color: "#15803D" }}>🟢 รูปถ่ายหลังซ่อมเสร็จ</div>
           <div style={{ width: "100%", height: 200, borderRadius: 8, overflow: "hidden", background: "#CBD5E1", marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {wo.afterImg ? (
-              <img src={wo.afterImg} alt="รูปถ่ายหลังซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img loading="eager" decoding="async" src={wo.afterImg} alt="รูปถ่ายหลังซ่อม" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
               <span style={{ fontSize: 12, color: "#475569" }}>ไม่มีรูปถ่ายหลังซ่อม</span>
             )}
@@ -291,7 +291,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 4 }}>ลายเซ็นผู้รับมอบงาน</div>
           <div style={{ width: "80%", height: 80, border: "1px dashed #10B981", borderRadius: 8, margin: "8px auto", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFFFFF" }}>
             {wo.receiverSignature ? (
-              <img src={wo.receiverSignature} alt="ลายเซ็นผู้รับมอบงาน" style={{ maxHeight: 70, maxWidth: "90%" }} />
+              <img loading="eager" decoding="async" src={wo.receiverSignature} alt="ลายเซ็นผู้รับมอบงาน" style={{ maxHeight: 70, maxWidth: "90%" }} />
             ) : (
               <span style={{ fontSize: 12, color: "#64748B" }}>ยังไม่มีลายเซ็น</span>
             )}
