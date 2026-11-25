@@ -169,7 +169,7 @@ export default function ScanLandingPage() {
                       value={manual}
                       onChange={(e) => setManual(e.target.value)}
                       placeholder="เช่น MCH-001"
-                      className="h-12 flex-1 min-w-0 rounded-lg border px-4 text-base outline-none"
+                      className="h-12 flex-1 min-w-0 rounded-lg border px-4 text-base outline-none focus:border-[var(--cmms-border-focus)] focus:shadow-[var(--cmms-shadow-focus)]"
                       style={{ borderColor: "var(--cmms-border)", color: "var(--cmms-text-primary)", background: "var(--cmms-bg)" }}
                     />
                     <Button type="submit" className="h-12">ดูข้อมูล</Button>
