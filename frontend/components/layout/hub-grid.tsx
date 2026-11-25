@@ -59,6 +59,7 @@ export function HubCard({ icon, title, description, href, onClick, badge, classN
     return (
       <Link
         href={href}
+        onClick={onClick}
         className="block min-h-11 rounded-[var(--cmms-radius-lg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
       >
         {body}

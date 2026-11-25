@@ -126,6 +126,7 @@ export default function DashboardPortalPage() {
                   title={item.titleTh}
                   description={item.descriptionTh}
                   href={item.href}
+                  onClick={() => handleOpen(item)}
                   badge={item.status === "partial" ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">บางส่วน</span> : null}
                 />
               ))}
@@ -162,19 +163,19 @@ export default function DashboardPortalPage() {
                     );
                   }
                   return (
-                    <div key={item.id} onClick={() => handleOpen(item)}>
-                      <HubCard
-                        icon={<item.icon size={20} aria-hidden="true" />}
-                        title={item.titleTh}
-                        description={item.descriptionTh}
-                        href={item.href}
-                        badge={
-                          item.status === "partial" ? (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">บางส่วน</span>
-                          ) : null
-                        }
-                      />
-                    </div>
+                    <HubCard
+                      key={item.id}
+                      icon={<item.icon size={20} aria-hidden="true" />}
+                      title={item.titleTh}
+                      description={item.descriptionTh}
+                      href={item.href}
+                      onClick={() => handleOpen(item)}
+                      badge={
+                        item.status === "partial" ? (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">บางส่วน</span>
+                        ) : null
+                      }
+                    />
                   );
                 })}
               </HubGrid>
