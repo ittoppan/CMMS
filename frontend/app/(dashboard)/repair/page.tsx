@@ -9,6 +9,8 @@ import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { swalConfirm } from "@/lib/swal";
+import { useCan } from "@/lib/useCan";
+import { apiFetch } from "@/lib/api";
 import {
   ArrowPathIcon,
   BookmarkIcon,
@@ -143,6 +145,8 @@ export default function WorkOrdersPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
+  // API บังคับ requirePerm('repair','delete') แล้ว — ซ่อนปุ่มถ้า role ไม่มีสิทธิ์ (fail-closed)
+  const canRepair = useCan("repair");
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -639,6 +643,7 @@ export default function WorkOrdersPage() {
           >
             แก้ไข
           </Button>
+          {canRepair("delete") && (
           <Button
             size="sm"
             variant="ghost"
@@ -654,7 +659,8 @@ export default function WorkOrdersPage() {
               });
               if (!confirmed) return;
               try {
-                const res = await fetch(`/api/v1/repair.php?id=${delId}`, { method: "DELETE" });
+                // apiFetch แนบ X-CSRF-Token ให้อัตโนมัติ (endpoint ใช้ enforceCsrf แล้ว)
+                const res = await apiFetch(`/api/v1/repair.php?id=${delId}`, { method: "DELETE" });
                 if (!res.ok && res.status !== 204) throw new Error(await res.text());
                 await fetchWO();
                 showToast("success", `ลบงานซ่อม #${delId} แล้ว`);
@@ -666,6 +672,7 @@ export default function WorkOrdersPage() {
           >
             <TrashIcon className="w-4 h-4" aria-hidden="true" />
           </Button>
+          )}
         </div>
       ),
     },
@@ -997,7 +1004,7 @@ export default function WorkOrdersPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
                 <ClipboardDocumentListIcon className="h-4 w-4" />
               </div>
-              <h3 className="text-base font-semibold">รายการงานซ่อม</h3>
+              <h2 className="text-base font-semibold">รายการงานซ่อม</h2>
               <span className="cmms-count-pill">{totalItems} รายการ</span>
             </div>
             {statusFilter && (

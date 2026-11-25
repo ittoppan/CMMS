@@ -1035,6 +1035,11 @@ try {
                 error_log("[repair.php] completed notify failed: " . $e->getMessage());
             }
         case 'DELETE':
+            // mutation ต้องผ่าน CSRF + สิทธิ์ลบ (เดิมเปิดให้ผู้ใช้ที่ล็อกอินคนใดก็ลบได้)
+            enforceCsrf();
+            require_once __DIR__ . '/../../../src/helpers/permissions.php';
+            requirePerm($pdo, 'repair', 'delete', 'คุณไม่มีสิทธิ์ลบงานซ่อม');
+
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
 
