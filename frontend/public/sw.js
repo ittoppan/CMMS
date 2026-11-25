@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v208-20261125-1642";
+const SW_VERSION = "v209-20261125-1652";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
