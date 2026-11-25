@@ -2600,6 +2600,14 @@ next-route-announcer {
   color: var(--color-text-secondary);
 }
 
+/* KPI การ์ดที่ใช้เป็นปุ่มกรอง — ต้องเห็นสถานะ "กดอยู่" (aria-pressed) ไม่ใช่แค่ประกาศให้ screen reader */
+.cmms-kpi-toggle[aria-pressed="true"] {
+  outline: 2px solid var(--cmms-border-focus);
+  outline-offset: -2px;
+  border-radius: var(--cmms-radius);
+  background: var(--cmms-bg-muted);
+}
+
 /* ── ปุ่มหลักแบบ flat (แทน gradient — ตาม guideline §6.3) ── */
 .cmms-btn-primary {
   display: inline-flex;

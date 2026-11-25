@@ -808,7 +808,7 @@ export default function WorkOrdersPage() {
             aria-pressed={outsourceFilter === "out"}
             onClick={() => setFilters({ outsourceFilter: outsourceFilter === "out" ? "all" : "out" })}
             title={outsourceFilter === "out" ? "ยกเลิกกรองงานภายนอก" : "กรองเฉพาะงานจ้างภายนอก"}
-            className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
+            className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)] cmms-kpi-toggle"
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
@@ -832,7 +832,7 @@ export default function WorkOrdersPage() {
               aria-pressed={statusFilter === "overdue"}
               onClick={() => setFilters({ statusFilter: statusFilter === "overdue" ? "" : "overdue" })}
               title={statusFilter === "overdue" ? "ยกเลิกกรองงานเกินกำหนด" : "กรองเฉพาะงานเกินกำหนด"}
-              className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
+              className="block w-full rounded-[var(--cmms-radius)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)] cmms-kpi-toggle"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
