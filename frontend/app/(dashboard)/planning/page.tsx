@@ -1,7 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import {
   getCenter,
@@ -167,6 +167,19 @@ export default function PlanningCenterPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // เก็บค่าล่าสุดของช่องค้นหาไว้ใน ref เพื่อ flush ตอน blur (closure ใน effect อาจ stale)
+  const searchRef = useRef(search);
+  searchRef.current = search;
+  const searchDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flushDebouncedSearch = useCallback(() => {
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
+      searchDebounceTimerRef.current = null;
+    }
+    setDebouncedSearch(searchRef.current.trim());
+  }, []);
+
   // row selection (bulk)
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkOp, setBulkOp] = useState<"schedule" | "assign">("schedule");
@@ -254,8 +267,17 @@ export default function PlanningCenterPage() {
   }, [reloadQueue]);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
-    return () => clearTimeout(t);
+    if (searchDebounceTimerRef.current) clearTimeout(searchDebounceTimerRef.current);
+    searchDebounceTimerRef.current = setTimeout(() => {
+      searchDebounceTimerRef.current = null;
+      setDebouncedSearch(search.trim());
+    }, 350);
+    return () => {
+      if (searchDebounceTimerRef.current) {
+        clearTimeout(searchDebounceTimerRef.current);
+        searchDebounceTimerRef.current = null;
+      }
+    };
   }, [search]);
 
   const loadTechs = useCallback(async () => {
@@ -719,7 +741,12 @@ export default function PlanningCenterPage() {
               );
             })}
             <div className="ml-auto w-56">
-              <Input placeholder="ค้นหางาน / หมายเลข / เครื่องจักร…" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input
+                placeholder="ค้นหางาน / หมายเลข / เครื่องจักร…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onBlur={flushDebouncedSearch}
+              />
             </div>
           </div>
         </CardHeader>

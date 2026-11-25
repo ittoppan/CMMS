@@ -1,7 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
@@ -82,6 +82,19 @@ export default function SupervisorQueuePage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [technicians, setTechnicians] = useState<TechnicianRow[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // เก็บค่าล่าสุดของช่องค้นหาไว้ใน ref เพื่อ flush ตอน blur (closure ใน effect อาจ stale)
+  const searchInputRef = useRef(searchInput);
+  searchInputRef.current = searchInput;
+  const searchDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flushSearch = useCallback(() => {
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
+      searchDebounceTimerRef.current = null;
+    }
+    setSearch(searchInputRef.current.trim());
+  }, []);
   const [assignOpen, setAssignOpen] = useState(false);
   const [activeDialogs, setActiveDialogs] = useState<Record<string, string>>({});
 
@@ -119,8 +132,17 @@ export default function SupervisorQueuePage() {
 
   // debounce คำค้นหา — ลด request ที่ยิงทุกคีย์
   useEffect(() => {
-    const t = setTimeout(() => setSearch(searchInput.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(t);
+    if (searchDebounceTimerRef.current) clearTimeout(searchDebounceTimerRef.current);
+    searchDebounceTimerRef.current = setTimeout(() => {
+      searchDebounceTimerRef.current = null;
+      setSearch(searchInput.trim());
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceTimerRef.current) {
+        clearTimeout(searchDebounceTimerRef.current);
+        searchDebounceTimerRef.current = null;
+      }
+    };
   }, [searchInput]);
 
   // เปลี่ยนตัวกรอง → กลับหน้าแรก
@@ -320,6 +342,7 @@ export default function SupervisorQueuePage() {
           placeholder="ค้นหา เลขที่งาน / ชื่อ / เครื่องจักร / ช่าง"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
+          onBlur={flushSearch}
           aria-label="ค้นหางานในคิว"
         />
         <Select value={priority} onValueChange={setPriority}>
