@@ -207,7 +207,7 @@ export default function PMChecklistsPage() {
               <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ยังไม่มี Template" description="สร้าง Template เช็คชีทชุดแรก" />
             )}
             {templates.map((tpl) => (
-              <div key={tpl.id} className={`rounded-lg border p-3 transition-all ${activeTpl?.id === tpl.id ? "" : ""}`}
+              <div key={tpl.id} className={`rounded-lg border p-3 transition ${activeTpl?.id === tpl.id ? "" : ""}`}
                 style={{ borderColor: activeTpl?.id === tpl.id ? "var(--cmms-primary)" : "var(--cmms-border)", background: activeTpl?.id === tpl.id ? "var(--cmms-primary-wash)" : "var(--cmms-bg-card)" }}>
                 <button className="flex w-full items-start justify-between gap-2 text-left" onClick={() => loadItems(tpl.id)}>
                   <div className="min-w-0">

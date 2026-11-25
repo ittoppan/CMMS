@@ -120,7 +120,7 @@ function Avatar({ name, src, size = 56 }: { name?: string | null; src?: string; 
       title={name || "ยังไม่มอบหมาย"}
     >
       {showImg ? (
-        <img
+        <img loading="lazy" decoding="async"
           src={src}
           alt={name || "ผู้รับผิดชอบ"}
           onError={() => setErr(true)}
@@ -158,11 +158,11 @@ function RepairPhoto({
   if (!src || err) return placeholder;
   return (
     <a href={src} target="_blank" rel="noopener noreferrer" className="shrink-0" title={label}>
-      <img
+      <img loading="lazy" decoding="async"
         src={src}
         alt={alt}
         className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
-        loading="lazy"
+       
         onError={() => setErr(true)}
       />
     </a>

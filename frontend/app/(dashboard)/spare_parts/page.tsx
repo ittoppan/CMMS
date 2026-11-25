@@ -534,7 +534,7 @@ function ItemsCard({
                   >
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={thumb} alt={item.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                      <img loading="lazy" decoding="async" src={thumb} alt={item.name} width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                     ) : (
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                         <Box size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -658,7 +658,7 @@ function ItemsCard({
                 <div key={p.rawId} className="flex flex-wrap items-center gap-3 rounded-[10px] border border-border p-2.5">
                   {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={thumb} alt={p.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                    <img loading="lazy" decoding="async" src={thumb} alt={p.name} width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                       <Box size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -675,14 +675,14 @@ function ItemsCard({
                       className="hidden"
                       onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
                     />
-                    <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white transition-all duration-300 hover:opacity-90">
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white transition duration-300 hover:opacity-90">
                       {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
                     </span>
                   </label>
                   {chosen && (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={chosen.preview} alt="preview" className="h-10 w-10 rounded-md object-cover" />
+                      <img loading="lazy" decoding="async" src={chosen.preview} alt="preview" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
                       <span className="max-w-[160px] truncate text-sm text-muted-foreground">
                         {chosen.file.name}
                       </span>

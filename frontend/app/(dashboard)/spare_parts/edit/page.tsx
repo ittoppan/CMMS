@@ -157,7 +157,7 @@ function EditSparePartContent() {
           <button
             type="button"
             onClick={() => router.push("/spare_parts")}
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
           >
             <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
             {t("action.back")}

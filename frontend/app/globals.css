@@ -568,7 +568,7 @@ html, body {
 .cmms-kpi-icon.red { background: var(--cmms-danger-light); color: var(--cmms-danger); }
 .cmms-kpi-icon.cyan { background: var(--cmms-info-light); color: var(--cmms-info); }
 
-.cmms-kpi-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--cmms-text-primary); }
+.cmms-kpi-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--cmms-text-primary); font-variant-numeric: tabular-nums; }
 .cmms-kpi-label { font-size: 0.8rem; font-weight: 500; color: var(--cmms-text-secondary); }
 .cmms-kpi-change {
   display: inline-flex; align-items: center; gap: 4px;

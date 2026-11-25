@@ -472,7 +472,7 @@ export default function PMSchedulePage() {
               <button
                 type="button"
                 onClick={() => openDetail(item)}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
                 style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}
               >
                 <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -488,7 +488,7 @@ export default function PMSchedulePage() {
                   setDeferReason("");
                   setDeferDate("");
                 }}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
                 style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
               >
                 <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -499,7 +499,7 @@ export default function PMSchedulePage() {
               <button
                 type="button"
                 onClick={() => router.push(`/pm_am/checksheet?plan_id=${item.rawId}`)}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
                 style={{ background: "var(--cmms-primary)", color: "#fff" }}
                 title="ทำเช็คชีท (เปิดได้ตั้งแต่วันครบกำหนดเป็นต้นไป)"
               >
@@ -510,7 +510,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => router.push(`/pm_am/view?id=${item.rawId}`)}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
               style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}
             >
               <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -520,7 +520,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
               style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
             >
               <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.update")}
@@ -530,7 +530,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => handleDelete(item)}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300"
               style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
             >
               <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.delete")}
@@ -892,7 +892,7 @@ export default function PMSchedulePage() {
                       <Card key={blk.label} className="min-w-0 flex-1" style={{ minWidth: 220 }}>
                         <CardContent className="flex min-h-[130px] flex-col items-center justify-center gap-2 p-3">
                           {src ? (
-                            <img src={src} alt={`ลายเซ็น ${blk.label}`} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
+                            <img loading="lazy" decoding="async" src={src} alt={`ลายเซ็น ${blk.label}`} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
                           ) : (
                             <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีลายเซ็น</p>
                           )}

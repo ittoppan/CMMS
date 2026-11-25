@@ -289,7 +289,7 @@ export default function SageSyncConfigPage() {
           <button
             type="button"
             onClick={() => (window.location.href = "/spare_parts")}
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
           >
             กลับไปยังคลังอะไหล่
           </button>
@@ -521,7 +521,7 @@ export default function SageSyncConfigPage() {
                         <button
                           type="button"
                           onClick={() => canWrite && toggleCategory(cat.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
                         >
                           {cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
                         </button>
@@ -552,7 +552,7 @@ export default function SageSyncConfigPage() {
             <button
               type="button"
               onClick={fetchData}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
             >
               <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
               รีเฟรช

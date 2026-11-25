@@ -95,7 +95,7 @@ function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | nul
   if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <img loading="lazy" decoding="async"
         src={src}
         alt={name}
         width={size}

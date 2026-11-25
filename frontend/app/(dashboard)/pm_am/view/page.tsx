@@ -313,13 +313,13 @@ export default function PMDetailPage() {
                     {pm.operator_signature && (
                       <div>
                         <p className="mb-1 text-sm font-semibold">ลายเซ็นผู้ปฏิบัติงาน</p>
-                        <img src={pm.operator_signature} alt="ลายเซ็นผู้ปฏิบัติงาน" className="max-h-24 w-full rounded border object-contain bg-white" style={{ borderColor: "var(--cmms-border)" }} />
+                        <img loading="lazy" decoding="async" src={pm.operator_signature} alt="ลายเซ็นผู้ปฏิบัติงาน" className="max-h-24 w-full rounded border object-contain bg-white" style={{ borderColor: "var(--cmms-border)" }} />
                       </div>
                     )}
                     {pm.reviewer_signature && (
                       <div>
                         <p className="mb-1 text-sm font-semibold">ลายเซ็นผู้ตรวจทาน</p>
-                        <img src={pm.reviewer_signature} alt="ลายเซ็นผู้ตรวจทาน" className="max-h-24 w-full rounded border object-contain bg-white" style={{ borderColor: "var(--cmms-border)" }} />
+                        <img loading="lazy" decoding="async" src={pm.reviewer_signature} alt="ลายเซ็นผู้ตรวจทาน" className="max-h-24 w-full rounded border object-contain bg-white" style={{ borderColor: "var(--cmms-border)" }} />
                       </div>
                     )}
                   </CardContent>

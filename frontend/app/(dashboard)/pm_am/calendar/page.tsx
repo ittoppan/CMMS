@@ -622,7 +622,7 @@ export default function PMCalendarPage() {
                     const canDo = t.displayStatus === "pending" || t.displayStatus === "due" || t.displayStatus === "in_progress" || t.displayStatus === "overdue";
                     const dueReached = t.date && t.date <= todayStr;
                     return (
-                      <div key={t.id} className="rounded-lg border p-4 transition-all" style={{ borderColor: "var(--cmms-border)", backgroundColor: "var(--cmms-bg-card)" }}>
+                      <div key={t.id} className="rounded-lg border p-4 transition" style={{ borderColor: "var(--cmms-border)", backgroundColor: "var(--cmms-bg-card)" }}>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-3">
@@ -648,7 +648,7 @@ export default function PMCalendarPage() {
                             <button
                               type="button"
                               onClick={() => router.push(`/pm_am/view?id=${t.rawId}`)}
-                              className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300 sm:w-auto"
+                              className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300 sm:w-auto"
                               style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}
                             >
                               <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" />ดูรายละเอียด
@@ -657,7 +657,7 @@ export default function PMCalendarPage() {
                               <button
                                 type="button"
                                 onClick={() => router.push(`/pm_am/checksheet?plan_id=${t.rawId}`)}
-                                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300 sm:w-auto"
+                                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300 sm:w-auto"
                                 style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                               >
                                 <FileCheck2 size={14} strokeWidth={1.75} aria-hidden="true" />ทำเช็คชีท
@@ -667,7 +667,7 @@ export default function PMCalendarPage() {
                               <button
                                 type="button"
                                 onClick={() => router.push(`/pm_am/view?id=${t.rawId}`)}
-                                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300 sm:w-auto"
+                                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition duration-300 sm:w-auto"
                                 style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}
                               >
                                 <Eye size={14} strokeWidth={1.75} aria-hidden="true" />ดูผลตรวจ

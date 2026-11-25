@@ -383,7 +383,7 @@ export default function PMPlansPage() {
                 const isOverdueNext = !!(nextDue && nextDue < today && p.status === "active" && p.is_active === 1);
                 const isDueSoon = !!(nextDue && nextDue >= today && nextDue <= weekOut && p.status === "active" && p.is_active === 1);
                 return (
-                  <div key={p.id} className="rounded-lg border p-4 transition-all hover:shadow-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}>
+                  <div key={p.id} className="rounded-lg border p-4 transition hover:shadow-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
                         <div className="flex flex-wrap items-center gap-2">

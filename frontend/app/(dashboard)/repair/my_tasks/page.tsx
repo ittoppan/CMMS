@@ -984,7 +984,7 @@ export default function MyTasksPage() {
             />
             {afterImg && (
               <div className="flex items-center gap-3 p-3 rounded-xl border border-[var(--cmms-success)]/30 bg-[var(--cmms-success-light)]">
-                <img src={afterImg} alt="รูปตัวอย่างหลังซ่อม" className="w-14 h-14 rounded-lg object-cover" />
+                <img loading="lazy" decoding="async" src={afterImg} alt="รูปตัวอย่างหลังซ่อม" width={56} height={56} className="w-14 h-14 rounded-lg object-cover" />
                 <span className="text-xs font-semibold text-[var(--cmms-success-dark)]">
                   พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ
                 </span>

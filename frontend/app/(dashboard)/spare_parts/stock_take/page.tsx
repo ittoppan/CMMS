@@ -270,14 +270,14 @@ export default function StockTakePage() {
                 <button
                   type="button"
                   onClick={() => { setActiveId(null); setRound(null); }}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
                 >← กลับรายการ</button>
                 {round.status === "draft" && canPlan && (
                   <>
                     <button
                       type="button"
                       onClick={cancelRound}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition duration-300"
                       style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
                     >ยกเลิกรอบ</button>
                     <button
@@ -368,7 +368,7 @@ export default function StockTakePage() {
                           type="button"
                           disabled={busy || !canPlan}
                           onClick={() => saveItem(it)}
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
                             counted
                               ? "border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-secondary)] hover:bg-[var(--cmms-bg-wash)]"
                               : "text-white cmms-btn-primary"
@@ -420,7 +420,7 @@ export default function StockTakePage() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); deleteRound(r.id); }}
-                        className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all"
+                        className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition"
                         style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
                       >
                         <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />

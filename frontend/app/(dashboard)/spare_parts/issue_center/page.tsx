@@ -274,11 +274,11 @@ export default function SageIssueCenterPage() {
       header: t("tbl.spare_item"),
       cell: ({ row }: { row: { original: CartItem } }) => (
         <div className="flex items-center gap-3">
-          <img
+          <img loading="lazy" decoding="async"
             src={partImageSrc({ partId: row.original.partId, imageUrl: row.original.imageUrl })}
             alt={row.original.name}
             className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
-            loading="lazy"
+           
             onError={(e) => {
               const t = e.currentTarget;
               if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${row.original.partId}`;
@@ -301,7 +301,7 @@ export default function SageIssueCenterPage() {
             disabled={row.original.qty <= 1}
             onClick={() => handleQtyChange(row.original.id, row.original.qty - 1)}
             aria-label="ลดจำนวน"
-            className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-base font-bold text-[var(--cmms-text-secondary)] transition-all hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40 active:scale-[0.98]"
+            className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-base font-bold text-[var(--cmms-text-secondary)] transition hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40 active:scale-[0.98]"
           >−</button>
           <input
             type="number"
@@ -315,7 +315,7 @@ export default function SageIssueCenterPage() {
             type="button"
             onClick={() => handleQtyChange(row.original.id, row.original.qty + 1)}
             aria-label="เพิ่มจำนวน"
-            className="h-12 w-12 rounded-lg bg-[var(--cmms-primary)] text-white text-base font-bold transition-all hover:bg-[var(--cmms-primary-hover)] active:scale-[0.98]"
+            className="h-12 w-12 rounded-lg bg-[var(--cmms-primary)] text-white text-base font-bold transition hover:bg-[var(--cmms-primary-hover)] active:scale-[0.98]"
           >+</button>
         </div>
       ),
@@ -341,7 +341,7 @@ export default function SageIssueCenterPage() {
         <button
           type="button"
           onClick={() => handleRemove(row.original.id)}
-          className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all"
+          className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border px-3 py-1.5 text-sm font-semibold transition"
           style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
         >
           <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -376,7 +376,7 @@ export default function SageIssueCenterPage() {
           <button
             type="button"
             onClick={fetchData}
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
           >
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.refresh")}
           </button>
@@ -487,11 +487,11 @@ export default function SageIssueCenterPage() {
                               onClick={() => handleAddPart(o.value)}
                               className={`flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-[var(--cmms-bg-muted)] ${selected ? "bg-[var(--cmms-primary-light)]" : ""}`}
                             >
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={partImageSrc(p)}
                                 alt={p.name || p.code}
                                 className="h-14 w-14 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
-                                loading="lazy"
+                               
                                 onError={(e) => {
                                   const t = e.currentTarget;
                                   if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${p.id}`;

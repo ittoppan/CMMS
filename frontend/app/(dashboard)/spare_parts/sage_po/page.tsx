@@ -174,14 +174,14 @@ export default function SagePOReceiptPage() {
             disabled={row.original.receivedQty <= 1}
             onClick={() => handleQtyChange(row.original.id, row.original.receivedQty - 1)}
             aria-label="ลดจำนวน"
-            className="h-7 w-7 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-sm font-bold text-[var(--cmms-text-secondary)] transition-all hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40"
+            className="h-7 w-7 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-sm font-bold text-[var(--cmms-text-secondary)] transition hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40"
           >−</button>
           <span className="text-sm font-bold">{row.original.receivedQty}</span>
           <button
             type="button"
             onClick={() => handleQtyChange(row.original.id, row.original.receivedQty + 1)}
             aria-label="เพิ่มจำนวน"
-            className="cmms-btn-primary h-7 w-7 rounded-lg text-sm font-bold text-white transition-all"
+            className="cmms-btn-primary h-7 w-7 rounded-lg text-sm font-bold text-white transition"
           >+</button>
         </div>
       ),
@@ -200,7 +200,7 @@ export default function SagePOReceiptPage() {
         <button
           type="button"
           onClick={() => handleRemove(row.original.id)}
-          className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all"
+          className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition"
           style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
         >
           <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -236,7 +236,7 @@ export default function SagePOReceiptPage() {
           <button
             type="button"
             onClick={fetchParts}
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 py-2.5 text-sm font-semibold text-[var(--cmms-text-secondary)] transition duration-300 hover:bg-[var(--cmms-bg-wash)]"
           >
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
