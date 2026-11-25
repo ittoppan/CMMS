@@ -318,7 +318,7 @@ export default function PMChecklistsPage() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">หมวดหมู่</label>
                 <select
-                  className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus:ring-2"
+                  className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
                   style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -354,7 +354,7 @@ export default function PMChecklistsPage() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">ประเภทรายการ</label>
                 <select
-                  className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus:ring-2"
+                  className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
                   style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
                   value={itemForm.item_type}
                   onChange={(e) => setItemForm({ ...itemForm, item_type: e.target.value })}

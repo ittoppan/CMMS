@@ -121,7 +121,7 @@ export default function CalibrationMobilePage() {
                 value={manual}
                 onChange={(e) => setManual(e.target.value)}
                 placeholder="กรอกรหัสเครื่องมือ เช่น MASS-001"
-                className="h-12 flex-1 min-w-0 rounded-lg border px-4 text-base outline-none"
+                className="h-12 flex-1 min-w-0 rounded-lg border px-4 text-base outline-none focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
               />
               <Button type="submit" className="h-12">ดูข้อมูล</Button>
             </form>

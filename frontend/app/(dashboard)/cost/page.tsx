@@ -591,7 +591,7 @@ export default function CostPage() {
                       <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ID ใบสั่งซ่อม</label>
                       <input value={woQuery} onChange={(e) => setWoQuery(e.target.value.replace(/\D/g, ""))} onKeyDown={(e) => e.key === "Enter" && openWo()}
                         placeholder="เช่น 5"
-                        className="h-9 w-full rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none focus:border-[var(--cmms-primary)]" />
+                        className="h-9 w-full rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]" />
                     </div>
                     <button type="button" onClick={openWo} disabled={woBusy} className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white disabled:opacity-60">
                       <FileSearch size={15} aria-hidden="true" /> {woBusy ? "กำลังค้นหา…" : "ค้นหา"}

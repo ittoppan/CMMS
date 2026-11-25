@@ -119,6 +119,8 @@
   cursor: pointer;
 }
 .tower-select:hover { border-color: var(--tower-border-strong); }
+/* outline:none ข้างบน — ต้องมี focus indicator ที่มองเห็นได้จริง (จอ TV/คีย์บอร์ด) */
+.tower-select:focus-visible { outline: 2px solid var(--tower-accent, #38bdf8); outline-offset: 2px; }
 .tower-btn {
   display: inline-flex;
   height: 2.15em;

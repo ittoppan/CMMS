@@ -308,7 +308,7 @@ export default function SageIssueCenterPage() {
             max={row.original.stockQty}
             value={row.original.qty}
             onChange={(e) => handleQtyChange(row.original.id, parseInt(e.target.value) || 1)}
-            className="w-16 h-12 text-center text-base font-bold text-[var(--cmms-text-primary)] border border-[var(--cmms-border)] rounded-[var(--cmms-radius)] focus:outline-none focus:border-[var(--cmms-border-focus)]"
+            className="w-16 h-12 text-center text-base font-bold text-[var(--cmms-text-primary)] border border-[var(--cmms-border)] rounded-[var(--cmms-radius)] focus:outline-none focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
           />
           <button
             type="button"
