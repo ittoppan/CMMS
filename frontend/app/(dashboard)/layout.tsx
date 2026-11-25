@@ -230,10 +230,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   // bottom nav: "หน้าแรก" ผูกกับ /home แต่หน้าที่ผู้ใช้เปิดจริงคือ /dashboard
-  // (รวมหน้าศูนย์รวมย่อยใต้ /dashboard/* ซึ่ง sidebar จัดอยู่ในหมวดเดียวกัน)
-  // — ไฮไลต์เฉพาะรายการนี้ ไม่กระทบการเลือกของเมนูอื่น
+  // — ไฮไลต์เฉพาะ /dashboard เป๊ะ ๆ เพื่อให้ aria-current ตรงกับหน้าจริง
+  //   (หน้าศูนย์รวมย่อยใต้ /dashboard/* ไม่ถือว่าเป็น "หน้าแรก")
   const isBottomNavSelected = (href: string) => {
-    if (href === "/home" && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) return true;
+    if (href === "/home" && pathname === "/dashboard") return true;
     return isSelected(href);
   };
 
