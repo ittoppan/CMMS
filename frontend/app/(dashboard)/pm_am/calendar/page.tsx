@@ -503,7 +503,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="down" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">งานเลยกำหนด (ค้าง)</p>
-              <h3 className="cmms-kpi-value">{overdueCount} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{overdueCount} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -512,7 +512,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="warn" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">งานที่ต้องทำวันนี้</p>
-              <h3 className="cmms-kpi-value">{todayCount} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{todayCount} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -521,7 +521,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="ok" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จแล้ว (กำหนดวันนี้)</p>
-              <h3 className="cmms-kpi-value">{completedTodayCount} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{completedTodayCount} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -530,7 +530,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="idle" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังดำเนินการโดยช่าง</p>
-              <h3 className="cmms-kpi-value">{activeTechCount} <span className="cmms-kpi-unit">คน</span></h3>
+              <p className="cmms-kpi-value">{activeTechCount} <span className="cmms-kpi-unit">คน</span></p>
             </div>
           </CardContent>
         </Card>

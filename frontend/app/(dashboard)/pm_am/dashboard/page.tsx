@@ -128,7 +128,7 @@ export default function PMDashboardPage() {
             <AndonLamp status="down" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">งานเลยกำหนด</p>
-              <h3 className="cmms-kpi-value">{stats.overdue} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{stats.overdue} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -138,7 +138,7 @@ export default function PMDashboardPage() {
             <AndonLamp status="warn" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">กำหนดวันนี้</p>
-              <h3 className="cmms-kpi-value">{stats.dueToday} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{stats.dueToday} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -148,7 +148,7 @@ export default function PMDashboardPage() {
             <AndonLamp status="ok" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จสิ้นแล้ว</p>
-              <h3 className="cmms-kpi-value">{stats.completed} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{stats.completed} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
@@ -158,7 +158,7 @@ export default function PMDashboardPage() {
             <AndonLamp status="idle" size="sm" />
             <div>
               <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังจะครบกำหนด (7 วัน)</p>
-              <h3 className="cmms-kpi-value">{stats.upcoming} <span className="cmms-kpi-unit">งาน</span></h3>
+              <p className="cmms-kpi-value">{stats.upcoming} <span className="cmms-kpi-unit">งาน</span></p>
             </div>
           </CardContent>
         </Card>
