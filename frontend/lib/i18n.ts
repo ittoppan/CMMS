@@ -1861,9 +1861,22 @@ export function getUserLang(): Lang | null {
   return v === "en" || v === "th" ? v : null;
 }
 
+/**
+ * <html lang> ต้องตรงกับภาษาที่กำลังแสดงจริง — ไม่งั้น screen reader
+ * อ่าน UI ภาษาอังกฤษด้วยเสียงไทย (และ auto-translate เข้าใจผิด)
+ * จำ lang ที่ sync แล้วไว้ กันเขียน attribute ซ้ำจาก useLang() ทุกอินสแตนซ์
+ */
+let htmlLangSynced: Lang | null = null;
+function syncHtmlLang(lang: Lang) {
+  if (typeof document === "undefined" || htmlLangSynced === lang) return;
+  htmlLangSynced = lang;
+  document.documentElement.lang = lang;
+}
+
 export function setUserLang(lang: Lang) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, lang);
+  syncHtmlLang(lang);
   listeners.forEach((fn) => fn());
 }
 
@@ -1902,6 +1915,8 @@ export function useLang(): Lang {
   useEffect(() => {
     const fn = () => setLang(currentLang());
     listeners.add(fn);
+    // ค่าเริ่มต้น (localStorage/บัญชี) ต้อง sync <html lang> ด้วย ไม่ใช่แค่ตอนกดสลับ
+    syncHtmlLang(currentLang());
     return () => { listeners.delete(fn); };
   }, []);
   return lang;

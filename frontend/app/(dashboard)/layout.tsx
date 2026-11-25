@@ -295,7 +295,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
-            <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
+            <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">CMMS-TOPPAN</span>
             {/* จุดสถานะเป็นเพียงลวดลาย (decoration) — ไม่ผูกกับสถานะจริง จึงไม่ประกาศให้ screen reader
                 (ใช้ ConnectivityStatus ใน topbar สำหรับสถานะเชื่อมต่อจริง) */}
             <span className="ml-auto inline-flex items-center gap-1.5 shrink-0" aria-hidden="true">
@@ -407,7 +407,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                   <h1 className="text-xl font-bold text-foreground">403 — ไม่มีสิทธิ์เข้าใช้หน้านี้</h1>
                   <p className="text-sm text-muted-foreground">
-                    หน้า <span className="font-mono text-xs">{pathname}</span> ยังไม่เปิดสิทธิ์สำหรับบทบาท
+                    หน้า <span className="font-mono text-xs" translate="no">{pathname}</span> ยังไม่เปิดสิทธิ์สำหรับบทบาท
                     {roleName ? <span className="font-semibold text-foreground">“{roleName}”</span> : "ของคุณ"}
                     {simulated ? " (โหมดจำลอง)" : ""}
                     หากคิดว่าควรได้ใช้ กรุณาติดต่อผู้ดูแลระบบเพื่อขอเปิดสิทธิ์เมนูนี้
@@ -499,7 +499,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto object-contain" />
-                <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]">
+                <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]" translate="no">
                   CMMS-TOPPAN
                 </span>
               </div>
@@ -526,7 +526,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
-          <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูหลัก">
+          {/* label ต่างจาก sidebar ("เมนูหลัก") — ไม่งั้นมี landmark ชื่อซ้ำกันสองอันให้ screen reader เลือก */}
+          <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูล่าง">
             {(() => {
               const items = bottomNav.slice();
               const scanIndex = items.findIndex((item) => item.key === "scan" || item.href === "/scan");
@@ -549,6 +550,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     key={`${item.key}-${item.href}`}
                     href={item.href}
                     className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
+                    aria-current={isSelected(item.href) ? "page" : undefined}
                     aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
                     title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
                   >
