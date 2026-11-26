@@ -286,6 +286,9 @@ export default function AndonBoardPage() {
             radial-gradient(700px 400px at 50% 120%, rgba(34,211,238,0.12), transparent 60%),
             linear-gradient(180deg,#020617 0%,#030712 50%,#020617 100%);
           font-family: 'Sarabun', ui-sans-serif, system-ui, sans-serif;
+  --cmms-andon-green: #10b981;
+  --cmms-andon-amber: #f59e0b;
+  --cmms-andon-red: #ef4444;
         }
         .andon-grid{
           position:absolute; inset:-20% -10% -30% -10%; pointer-events:none; opacity:.35;
@@ -354,6 +357,9 @@ export default function AndonBoardPage() {
         .andon-progress > i{ display:block; height:100%; background:linear-gradient(90deg,var(--a-cyan),var(--a-violet)); box-shadow:0 0 12px rgba(34,211,238,.6); }
         @media (max-width: 1200px){ .andon-main{ grid-template-columns: 1fr; } .andon-kpis{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
         @media (max-width: 700px){ .andon-kpis{ grid-template-columns: 1fr; } .andon-stock-grid{ grid-template-columns: 1fr; } .andon-owner{ display:none; } }
+@media (prefers-reduced-motion: reduce) {
+  .andongrid, .andonorb, .andonkpi* { animation: none !important; transition: none !important; }
+}
       `}</style>
       <div style={{ padding: "8px 16px" }}>
         <ModuleGuide
