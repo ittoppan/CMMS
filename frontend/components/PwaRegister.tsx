@@ -79,6 +79,12 @@ export default function PwaRegister() {
         l.href = "/manifest.webmanifest";
         document.head.appendChild(l);
       }
+      if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+        const a = document.createElement("link");
+        a.rel = "apple-touch-icon";
+        a.href = "/icons/icon-192.png";
+        document.head.appendChild(a);
+      }
     } catch { /* ignore */ }
 
     // ติดตาม activity ของผู้ใช้ เพื่อใช้ตัดสินใจ auto-reload เมื่อ idle
