@@ -368,3 +368,10 @@
 
 - โลโก้ที่ CSS บีบด้วย `max-width` (`(dashboard)/layout` 104/112/88px, `.cmms-login-logo-img--hero` 260px, `--form` 120px): attribute ใช้ **ขนาดกล่องที่ render จริง** ไม่ใช่สัดส่วนของ `logo.png` (554×91) — เพราะสัดส่วนจริงทำให้กล่องก่อนโหลดกว้าง 170–268px แล้วถูกบีบลงทีหลัง (เกิด shift แนวนอนในแถวเดียวกับชื่อระบบ); ค่า 104×28 / 112×28 / 88×28 / 260×44 / 120×22 มาจาก `height`+`max-width` ใน CSS ไม่ใช่การเดา
 - กล่องรูปแปลน (fluid width) ล็อกสัดส่วนด้วย `aspect-ratio` (ประกาศใน `.cmms-plan-box`) จาก `image_width`/`image_height` จริง ซึ่ง `planBoxStyle()` ส่งมาเป็น CSS var `--cmms-plan-ratio` — กล่องจึงเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุด `%` ตรงทั้งก่อนและหลังรูปโหลด และไม่มีแถบว่างเมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (`0`) จะถอยไปใช้ `minHeight: 320` แบบเดิม **ไม่มีการเดาสัดส่วน**
+
+## (ด) ปรับปรุง UI หน้าศูนย์รวม Dashboard (2026-11-26)
+
+- แก้ `frontend/components/layout/hub-grid.tsx` (additive): `HubCard` เพิ่ม prop `accent` (ค่าเริ่มต้นคงเดิม), icon chip ใช้ `color-mix` กับ accent, hover lift/shadow/border accent, ChevronRight ตอน hover, description `line-clamp-2`
+- แก้ `frontend/app/(dashboard)/dashboard/page.tsx`: hero toolbar (flat wash + จำนวน Dashboard/กลุ่ม + วงเบลอ accent), หัวข้อกลุ่มมีแถบสี accent + count pill, ส่ง `accent` ตาม `g.key` (A–F) ให้ `HubCard` และการ์ด "ใช้บ่อย"; planned card คง opacity เดิม
+- ห้าม gradient (audit) → ใช้ flat surface + วงเบลอ accent แทน linear-gradient
+- ไม่เปลี่ยน logic/API/state/permission/navigation/route

@@ -15,6 +15,16 @@ import {
 
 const FREQ_KEY = "cmms_dashboard_frequent";
 
+/** สีเน้นต่อกลุ่ม (ใช้ token ของระบบทั้งหมด — ไม่มี hex) */
+const GROUP_ACCENT: Record<string, string> = {
+  A: "var(--cmms-primary)",
+  B: "var(--cmms-info)",
+  C: "var(--cmms-success)",
+  D: "var(--cmms-warning)",
+  E: "var(--cmms-primary-hover)",
+  F: "var(--cmms-text-muted)",
+};
+
 function readFrequent(): string[] {
   try {
     const raw = localStorage.getItem(FREQ_KEY);
@@ -95,27 +105,44 @@ export default function DashboardPortalPage() {
       }
     >
       <div className="space-y-6">
-        {/* ช่องค้นหา */}
-        <div className="relative">
-          <Search
-            size={16}
+        {/* ช่องค้นหา + สรุปจำนวน */}
+        <div className="relative overflow-hidden rounded-[var(--cmms-radius-xl)] border border-[var(--cmms-border)] bg-[var(--cmms-surface)] p-3.5 sm:p-4">
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-[var(--cmms-primary)]/10 blur-2xl"
           />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ค้นหา Dashboard (ไทย/อังกฤษ/คำอธิบาย)"
-            aria-label="ค้นหา Dashboard"
-            className="h-11 w-full rounded-[var(--cmms-radius)] border border-border bg-card pl-10 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
-          />
+          <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search
+                size={16}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--cmms-text-secondary)]"
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="ค้นหา Dashboard (ไทย/อังกฤษ/คำอธิบาย)"
+                aria-label="ค้นหา Dashboard"
+                className="h-11 w-full rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-surface)] pl-10 pr-4 text-sm shadow-[var(--cmms-shadow-sm)] outline-none transition-[border-color,box-shadow] focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-primary)]/20"
+              />
+            </div>
+            <div className="flex shrink-0 items-center gap-2 text-xs text-[var(--cmms-text-secondary)]">
+              <span className="rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-surface)]/80 px-2.5 py-1 font-medium tabular-nums">
+                <strong className="text-[var(--cmms-text-primary)]">{visibleItems.length}</strong> Dashboard
+              </span>
+              <span className="rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-surface)]/80 px-2.5 py-1 font-medium tabular-nums">
+                <strong className="text-[var(--cmms-text-primary)]">{DASHBOARD_GROUPS.filter((g) => dashboardsByGroup(g.key).some((d) => visibleItems.includes(d))).length}</strong> กลุ่ม
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* ใช้บ่อย */}
         {frequentItems.length > 0 && !q && (
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <Star size={16} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
+              <span aria-hidden="true" className="h-4 w-1 rounded-full bg-[var(--cmms-primary)]" />
+              <Star size={15} aria-hidden="true" className="text-[var(--cmms-primary)]" />
               ใช้บ่อย
             </h2>
             <HubGrid>
@@ -127,7 +154,8 @@ export default function DashboardPortalPage() {
                   description={item.descriptionTh}
                   href={item.href}
                   onClick={() => handleOpen(item)}
-                  badge={item.status === "partial" ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">บางส่วน</span> : null}
+                  accent="var(--cmms-primary)"
+                  badge={item.status === "partial" ? <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span> : null}
                 />
               ))}
             </HubGrid>
@@ -138,11 +166,19 @@ export default function DashboardPortalPage() {
         {DASHBOARD_GROUPS.map((g) => {
           const items = dashboardsByGroup(g.key).filter((d) => visibleItems.includes(d));
           if (items.length === 0) return null;
+          const accent = GROUP_ACCENT[g.key] ?? "var(--cmms-primary)";
           return (
             <section key={g.key} className="space-y-3">
-              <h2 className="text-base font-semibold text-foreground">
-                {g.titleTh} <span className="text-sm font-normal text-muted-foreground">({g.titleEn})</span>
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <span aria-hidden="true" className="h-4 w-1 rounded-full" style={{ backgroundColor: accent }} />
+                <h2 className="text-[15px] font-semibold text-foreground">
+                  {g.titleTh}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">{g.titleEn}</span>
+                </h2>
+                <span className="ml-auto rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-2 py-0.5 text-[11px] font-medium tabular-nums text-[var(--cmms-text-secondary)]">
+                  {items.length}
+                </span>
+              </div>
               <HubGrid>
                 {items.map((item) => {
                   const isPlanned = item.status === "planned";
@@ -157,7 +193,8 @@ export default function DashboardPortalPage() {
                           icon={<item.icon size={20} aria-hidden="true" />}
                           title={item.titleTh}
                           description={item.descriptionTh}
-                          badge={<span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">เร็วๆ นี้</span>}
+                          accent={accent}
+                          badge={<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">เร็วๆ นี้</span>}
                         />
                       </div>
                     );
@@ -170,9 +207,10 @@ export default function DashboardPortalPage() {
                       description={item.descriptionTh}
                       href={item.href}
                       onClick={() => handleOpen(item)}
+                      accent={accent}
                       badge={
                         item.status === "partial" ? (
-                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">บางส่วน</span>
+                          <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span>
                         ) : null
                       }
                     />
