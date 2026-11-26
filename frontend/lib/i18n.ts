@@ -24,15 +24,15 @@ export type Lang = "th" | "en";
 const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
   "nav.overview": { th: "ภาพรวม", en: "Overview" },
-  "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
-  "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
+  "nav.work_orders": { th: "งานซ่อม (ใบงาน)", en: "Work Orders" },
+  "nav.planning": { th: "แผนงาน & ตาราง PM", en: "PM Plans & Schedule" },
   "nav.shutdown": { th: "หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
   "nav.supervisor": { th: "หัวหน้างาน (Supervisor)", en: "Supervisor Desk" },
   "nav.workforce": { th: "กำลังคนและคุณสมบัติ", en: "Workforce & Competency" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "nav.phase32_docs": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
   "nav.knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
-  "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
+  "nav.pm_machines": { th: "เครื่องจักร & สินทรัพย์", en: "Machines & Assets" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "nav.cost_budget": { th: "ค่าใช้จ่าย & งบประมาณ", en: "Cost & Budget" },
