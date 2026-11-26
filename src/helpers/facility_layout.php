@@ -183,9 +183,10 @@ function facility_layout_sanitize(array $input): array {
                 'grid_w' => max(1, min(50, (int)($fp['grid_w'] ?? 8))),
                 'grid_h' => max(1, min(50, (int)($fp['grid_h'] ?? 6))),
                 'image_url' => mb_substr(trim((string)($fp['image_url'] ?? '')), 0, 500),
-                // ขนาดจริงของไฟล์รูป (px) — 0 = ยังไม่รู้; ใช้ทำ width/height กัน layout shift
-                'image_width' => max(0, min(20000, (int)($fp['image_width'] ?? 0))),
-                'image_height' => max(0, min(20000, (int)($fp['image_height'] ?? 0))),
+                // ขนาดจริงของไฟล์รูป (px) — 0 = ยังไม่รู้; ใช้ทำ width/height/aspect-ratio กัน layout shift
+                // ล้างเป็น 0 เสมอเมื่อไม่มี URL (รูปถูกเอาออก/เปลี่ยน แล้วค่ายังค้าง)
+                'image_width' => trim((string)($fp['image_url'] ?? '')) !== '' ? max(0, min(20000, (int)($fp['image_width'] ?? 0))) : 0,
+                'image_height' => trim((string)($fp['image_url'] ?? '')) !== '' ? max(0, min(20000, (int)($fp['image_height'] ?? 0))) : 0,
                 'items' => array_values($fpItems),
             ],
         ];
@@ -226,9 +227,10 @@ function facility_layout_sanitize(array $input): array {
                 'grid_w' => max(1, min(50, (int)($fp['grid_w'] ?? 8))),
                 'grid_h' => max(1, min(50, (int)($fp['grid_h'] ?? 6))),
                 'image_url' => mb_substr(trim((string)($fp['image_url'] ?? '')), 0, 500),
-                // ขนาดจริงของไฟล์รูป (px) — 0 = ยังไม่รู้; ใช้ทำ width/height กัน layout shift
-                'image_width' => max(0, min(20000, (int)($fp['image_width'] ?? 0))),
-                'image_height' => max(0, min(20000, (int)($fp['image_height'] ?? 0))),
+                // ขนาดจริงของไฟล์รูป (px) — 0 = ยังไม่รู้; ใช้ทำ width/height/aspect-ratio กัน layout shift
+                // ล้างเป็น 0 เสมอเมื่อไม่มี URL (รูปถูกเอาออก/เปลี่ยน แล้วค่ายังค้าง)
+                'image_width' => trim((string)($fp['image_url'] ?? '')) !== '' ? max(0, min(20000, (int)($fp['image_width'] ?? 0))) : 0,
+                'image_height' => trim((string)($fp['image_url'] ?? '')) !== '' ? max(0, min(20000, (int)($fp['image_height'] ?? 0))) : 0,
                 'items' => array_values($fpItems),
             ],
         ];

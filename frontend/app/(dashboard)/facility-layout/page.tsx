@@ -70,10 +70,9 @@ function defaultFloorPlan(): FloorPlanData { return { grid_w: 8, grid_h: 6, imag
 function planBoxStyle(fp?: FloorPlanData, measured?: ImageSize | null): CSSProperties {
   const w = fp?.image_width || measured?.w || 0;
   const h = fp?.image_height || measured?.h || 0;
-  // ส่งสัดส่วนให้คลาส .cmms-plan-box (aspect-ratio อยู่ใน CSS) — ไม่รู้ขนาดถอยไปใช้ minHeight เดิม
-  return w > 0 && h > 0
-    ? ({ "--cmms-plan-ratio": `${w} / ${h}` } as CSSProperties)
-    : { minHeight: 320 };
+  // รู้ขนาดจริง → ล็อกสัดส่วนด้วย aspect-ratio (ความสูงกล่อง = สูงรูปจริง หมุด % จึงตรงกับรูป)
+  // ไม่รู้ขนาด → ใช้ minHeight เดิมเป็นที่กันที่ว่างระหว่างรอรูป
+  return w > 0 && h > 0 ? { aspectRatio: `${w} / ${h}` } : { minHeight: 320 };
 }
 function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: defaultFloorPlan() }; }
 function defaultFloor(): FloorCfg { return { floor_plan: defaultFloorPlan() }; }
