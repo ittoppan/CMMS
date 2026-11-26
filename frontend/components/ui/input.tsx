@@ -49,6 +49,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           aria-invalid={!!error || undefined}
           aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
+          autoComplete={props.autoComplete ?? (props.type === "email" ? "email" : props.type === "tel" ? "tel" : props.type === "url" ? "url" : props.type === "password" ? "current-password" : "off")}
           className={cn(
             "w-full rounded-[var(--cmms-radius-sm)] border bg-[var(--cmms-bg-card)] text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)] transition-[border-color,box-shadow] duration-[var(--cmms-transition)] focus-visible:outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:shadow-[var(--cmms-shadow-focus)] disabled:cursor-not-allowed disabled:opacity-50",
             sizeClasses[inputSize],
