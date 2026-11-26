@@ -5,6 +5,7 @@ import { PackagePlus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sendOrEnqueue } from "@/lib/offlineQueue";
 import { makeId } from "@/lib/offline/engine";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 
 interface SageItem {
   item_no: string;
@@ -38,6 +39,8 @@ export default function SagePartAddModal({ open, onClose, workOrderId, woNumber,
   const [savingItem, setSavingItem] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  // a11y: Escape ปิด, Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const dialogRef = useDialogA11y<HTMLDivElement>(open, onClose);
 
   // โฟกัสช่องค้นหาเมื่อผู้ใช้เปิด modal นี้เท่านั้น (ไม่ใช้ autoFocus)
   useEffect(() => {
@@ -128,12 +131,12 @@ export default function SagePartAddModal({ open, onClose, workOrderId, woNumber,
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="เบิกอะไหล่ในใบงานซ่อม">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className="relative z-10 max-h-[90dvh] w-full max-w-[min(640px,94vw)] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation" tabIndex={-1}>
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} role="presentation" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="sage-part-add-title" tabIndex={-1} className="relative z-10 max-h-[90dvh] w-full max-w-[min(640px,94vw)] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl">
         <div className="flex items-start justify-between gap-3 border-b border-border px-6 pb-4 pt-5">
           <div>
-            <h2 className="text-base font-semibold">เบิกอะไหล่{woNumber ? `: ${woNumber}` : ""}</h2>
+            <h2 id="sage-part-add-title" className="text-base font-semibold">เบิกอะไหล่{woNumber ? `: ${woNumber}` : ""}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">ค้นหาจาก Sage 300 — บันทึกเป็นรายการ Pending Issue รออนุมัติจ่ายของ</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="ปิดหน้าต่าง">

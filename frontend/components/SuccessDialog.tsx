@@ -2,7 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 
 /**
  * SuccessDialog — หน้าจอ "สำเร็จ" แบบเต็มจอ (Modern Design)
@@ -34,26 +34,22 @@ export default function SuccessDialog({
   onBackdrop,
   stackButtons = false,
 }: SuccessDialogProps) {
-  // Handle ESC key to close/trigger backdrop action
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && onBackdrop) {
-        onBackdrop();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onBackdrop]);
+  // a11y: Escape = onBackdrop (เดิม), Tab วนในกล่อง, โฟกัสเข้าและคืนให้ตัวที่เปิด
+  const dialogRef = useDialogA11y<HTMLDivElement>(true, () => onBackdrop?.());
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="success-dialog-title"
+      role="presentation"
+      tabIndex={-1}
       className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in"
       onClick={onBackdrop}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="success-dialog-title"
+        tabIndex={-1}
         className="flex flex-col items-center gap-6 bg-white rounded-2xl p-8 md:p-12 text-center max-w-[420px] w-full shadow-2xl border border-slate-100 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >{/* impeccable-disable-next-line bounce-easing: success checkmark flourish */}

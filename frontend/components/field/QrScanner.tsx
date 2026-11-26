@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X, CameraOff, Zap, Keyboard, RefreshCw } from "lucide-react";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 
 interface ScannerControls {
   stop: () => void;
@@ -35,6 +36,8 @@ export function QrScanner({ onResult, onClose, title = "สแกน QR / บา
   const [manualOpen, setManualOpen] = useState(false);
   const [manual, setManual] = useState("");
   const manualInputRef = useRef<HTMLInputElement | null>(null);
+  // a11y: Escape ปิดกล้อง, Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const panelRef = useDialogA11y<HTMLDivElement>(true, onClose);
 
   // โฟกัสช่องกรอกรหัสเมื่อผู้ใช้กดเปิดช่องนี้ (หรือกล้องใช้ไม่ได้) — ไม่ใช้ autoFocus
   useEffect(() => {
@@ -142,7 +145,7 @@ export function QrScanner({ onResult, onClose, title = "สแกน QR / บา
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black text-white">
+    <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} className="fixed inset-0 z-[100] flex flex-col bg-black text-white">
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <p className="text-base font-semibold">{title}</p>
         <button
