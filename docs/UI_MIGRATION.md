@@ -327,6 +327,9 @@
 - `settings/menus`: การ์ดพรีวิวบทบาท → ปุ่มชื่อบทบาท (`aria-pressed`) เป็นตัวรับ focus, การ์ดทั้งใบยังคลิกได้ด้วยเมาส์
 - `settings/pwa`: dropzone เปลี่ยนไอคอน → `role="button"` + `tabIndex` + `aria-label` + Enter/Space เปิด file input
 - `components/RepairRequestForm.tsx`: ขั้น stepper ที่ย้อนกลับได้ → `role="button"` + `tabIndex` + `aria-current="step"` + Enter/Space (ขั้นที่ยังไม่ถึงไม่ใส่ `tabIndex`); แบนเนอร์ผูกบัญชี LINE → `role="link"` + `tabIndex` + Enter/Space
+- `audit-log` (ตาราง log) และ `spare_parts/balances` (ตารางยอดคงเหลือ) — แถวคลิกเปิดรายละเอียด/ประวัติ: เพิ่ม `role="button"` + `tabIndex={0}` + `aria-label` + Enter/Space + focus ring (ตารางทั้งสองไม่มีปุ่มซ้อนในแถว)
+- `settings` (หน้าแรก): การ์ดหน้าย่อย (`SUB_PAGES`) และการ์ดกลุ่มการตั้งค่า (`TOPICS`) คลิกทั้งใบ → เพิ่ม `role="button"` + `tabIndex={0}` + `aria-label` + Enter/Space (เนื้อในการ์ดไม่มีปุ่มซ้อน)
+- `pm_am/checklists`: panel ของ dialog ไม่ใช่ div ที่คลิกได้อีก — ย้ายไปใช้ `e.target === e.currentTarget` ที่ backdrop แทน `stopPropagation`; backdrop ยังเป็น `role="presentation"` คลิกปิดได้สำหรับเมาส์ และมี Escape สำหรับคีย์บอร์ดอยู่แล้ว
 - `asset_registry/bom_tree`: ชื่อชิ้นส่วนเป็นปุ่มจริงสำหรับเลือก (`aria-pressed`) เพราะแถวมีปุ่มซ้อน
 - ยกเว้นโดยเจตนา: canvas คลิกวางตำแหน่ง (`facility-layout`) และจุดที่มี `onKeyDown` อยู่แล้ว (`ui/table.tsx` td ของ checkbox, `tv` `role="application"`)
 - modal แบบ inline (`pm_am/checklists`, `field/work/[id]` pause+complete, `knowledge/articles/[id]` Modal, `knowledge/reviews`, `dashboard/wallboard` งานค้าง) ใช้ `useDialogA11y` (`frontend/lib/use-dialog-a11y.ts`): Escape ปิด, `Tab`/`Shift+Tab` วนในกล่อง, โฟกัสเข้าเมื่อเปิดและคืนให้ปุ่มที่เปิดเมื่อปิด; ตัวกล่องเป็น `role="dialog" aria-modal="true" aria-labelledby="…" tabIndex={-1}` และ backdrop เป็น `role="presentation"` (คลิกนอกกล่องยังปิดได้ แต่ไม่ใช่ทางเดียว)

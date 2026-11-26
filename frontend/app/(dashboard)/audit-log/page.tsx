@@ -364,8 +364,16 @@ export default function AuditLogPage() {
                     {items.map((row) => (
                       <tr
                         key={row.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`เปิดรายละเอียด ${row.action}`}
                         onClick={() => openDetail(row.id)}
-                        className="cursor-pointer border-b last:border-0 hover:bg-[var(--cmms-bg-muted)]"
+                        onKeyDown={(e) => {
+                          if (e.key !== "Enter" && e.key !== " ") return;
+                          e.preventDefault();
+                          openDetail(row.id);
+                        }}
+                        className="cursor-pointer border-b last:border-0 hover:bg-[var(--cmms-bg-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--cmms-border-focus)]"
                       >
                         <td className="px-3 py-2 tabular-nums whitespace-nowrap">{fmtDateTime(row.created_at)}</td>
                         <td className="px-3 py-2">{row.user_name || "system"}</td>

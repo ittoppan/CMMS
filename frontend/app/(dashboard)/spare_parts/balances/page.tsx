@@ -272,8 +272,16 @@ export default function SpareBalancesPage() {
                   return (
                     <tr
                       key={p.id}
-                      className="cursor-pointer border-b border-border transition-colors hover:bg-accent/40"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`ดูประวัติการเคลื่อนไหว ${p.code}`}
+                      className="cursor-pointer border-b border-border transition-colors hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--cmms-border-focus)]"
                       onClick={() => openHistory(p)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        e.preventDefault();
+                        openHistory(p);
+                      }}
                     >
                       <td className="py-2.5 pr-2">
                         <HoverCard openDelay={120}>

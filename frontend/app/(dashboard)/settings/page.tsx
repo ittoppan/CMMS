@@ -856,8 +856,16 @@ export default function SettingsPage() {
         {SUB_PAGES.map((p) => (
           <Card
             key={p.href}
-            className="cursor-pointer transition-shadow hover:shadow-md"
+            role="button"
+            tabIndex={0}
+            aria-label={`เปิดหน้าย่อย ${p.label}`}
+            className="cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
             onClick={() => router.push(p.href)}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              e.preventDefault();
+              router.push(p.href);
+            }}
           >
             <CardContent className="flex items-center gap-3 p-4">
               <div className="rounded-lg p-2.5" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)" }}>
@@ -950,9 +958,21 @@ export default function SettingsPage() {
                 return (
                   <Card
                     key={topicId}
-                    className="cursor-pointer transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-0.5 cmms-side-accent"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`เปิดกลุ่มตั้งค่า ${topic.label}`}
+                    className="cursor-pointer transition-[box-shadow,transform] hover:shadow-lg hover:-translate-y-0.5 cmms-side-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-border-focus)]"
                     style={{ borderLeftColor: topic.color }}
                     onClick={() => {
+                      if (topic.link) {
+                        router.push(topic.link);
+                      } else {
+                        setActiveTopic(topicId);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter" && e.key !== " ") return;
+                      e.preventDefault();
                       if (topic.link) {
                         router.push(topic.link);
                       } else {

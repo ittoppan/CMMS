@@ -314,8 +314,8 @@ export default function PMChecklistsPage() {
 
       {/* ── Modal: สร้าง/แก้ Template ── */}
       {formOpen && (
-        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setFormOpen(false)}>
-          <div ref={templateDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-template-dialog-title" tabIndex={-1} className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setFormOpen(false); }}>
+          <div ref={templateDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-template-dialog-title" tabIndex={-1} className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl">
             <h3 id="checklist-template-dialog-title" className="text-lg font-bold">{formEditId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</h3>
             <div className="space-y-3">
               <Input label="รหัส Template *" placeholder="เช่น CHK-PUMP-01" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
@@ -351,8 +351,8 @@ export default function PMChecklistsPage() {
 
       {/* ── Modal: เพิ่ม/แก้ รายการตรวจ ── */}
       {itemFormOpen && (
-        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setItemFormOpen(false)}>
-          <div ref={itemDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-item-dialog-title" tabIndex={-1} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setItemFormOpen(false); }}>
+          <div ref={itemDialogRef} role="dialog" aria-modal="true" aria-labelledby="checklist-item-dialog-title" tabIndex={-1} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl">
             <h3 id="checklist-item-dialog-title" className="text-lg font-bold">{itemEditId ? "แก้ไขรายการตรวจ" : "เพิ่มรายการตรวจ"}</h3>
             <div className="space-y-3">
               <Input label="รายการตรวจ *" placeholder="เช่น เช็ครอยรั่วของวาล์ว" value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
