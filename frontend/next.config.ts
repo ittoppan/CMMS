@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     optimizePackageImports: ["recharts", "lucide-react"],
+    // อัปโหลดรูป (เช่น แปลนผังอาคาร) ผ่าน rewrite /api/* → PHP: ค่าเริ่มต้นของ proxy อยู่ที่ 10 MB
+    // ทำให้ไฟล์ขนาด 10 MB พอดีถูกตัดก่อนถึง PHP (ได้ 500) — เผื่อ margin ให้ limit 10 MB ใช้งานได้จริง
+    proxyClientMaxBodySize: "12mb",
   },
   // Allow building to an alternate dir while the standalone prod server
   // (node server.js, port 3001) holds a lock on .next/standalone:

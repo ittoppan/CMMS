@@ -14,6 +14,7 @@ import { Alert } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCan } from "@/lib/useCan";
 import { useImageSize, type ImageSize } from "@/lib/use-image-size";
+import { apiJson } from "@/lib/api";
 import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network, Search, AlertTriangle, CircleCheck, CircleDashed, Wrench } from "lucide-react";
 import AndonBadge from "@/components/AndonBadge";
 
@@ -114,6 +115,10 @@ export default function FacilityLayoutPage() {
   const [floorPlanPlaceTarget, setFloorPlanPlaceTarget] = useState<{ type: "cabinet"|"asset"; ref_id: string; room_id: number } | null>(null);
   const [selectedFloorPlanItemId, setSelectedFloorPlanItemId] = useState<string | null>(null);
   const floorPlanContainerRef = useRef<HTMLDivElement>(null);
+  // อัปโหลดรูปแปลน (JPEG/PNG/WebP ≤ 10 MB) — ช่อง URL เดิมยังใช้เป็น fallback
+  const roomPlanFileRef = useRef<HTMLInputElement | null>(null);
+  const floorPlanFileRef = useRef<HTMLInputElement | null>(null);
+  const [planUpload, setPlanUpload] = useState<{ target: "room" | "floor" | null; busy: boolean; error: string; ok: string }>({ target: null, busy: false, error: "", ok: "" });
   const suppressFloorPlanClickRef = useRef(false);
   const floorDragStateRef = useRef<{ id: string; pointerId: number; startClientX: number; startClientY: number; origX: number; origY: number; moved: boolean } | null>(null);
   const [floorDragOverride, setFloorDragOverride] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -297,6 +302,37 @@ export default function FacilityLayoutPage() {
     const items = (floorCfg.floor_plan?.items || []).filter(i => i.id !== itemId);
     updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items } });
     setSelectedFloorPlanItemId(prev => (prev === itemId ? null : prev));
+  };
+
+  /** อัปโหลดรูปแปลนขึ้นเซิร์ฟเวอร์ แล้วเติม URL + ขนาดจริงที่ได้จาก getimagesize */
+  const uploadPlanImage = async (target: "room" | "floor", file: File) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setPlanUpload({ target, busy: false, error: "รองรับเฉพาะไฟล์ JPEG/PNG/WebP", ok: "" });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setPlanUpload({ target, busy: false, error: "ไฟล์ใหญ่เกิน 10 MB", ok: "" });
+      return;
+    }
+    setPlanUpload({ target, busy: true, error: "", ok: "" });
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiJson<{ path: string; width: number; height: number }>("/api/v1/facility_plan_upload.php", {
+        method: "POST",
+        body: fd,
+      });
+      const next = { image_url: res.path, image_width: res.width, image_height: res.height };
+      if (target === "room" && effectiveRoomId) {
+        updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, ...next } as any });
+      } else if (target === "floor" && selectedFloor) {
+        updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, ...next } });
+      }
+      setPlanUpload({ target, busy: false, error: "", ok: `อัปโหลดแล้ว ${res.width}×${res.height}px — กดบันทึกเพื่อเก็บค่าลงผัง` });
+    } catch (e) {
+      setPlanUpload({ target, busy: false, error: e instanceof Error ? e.message : "อัปโหลดไม่สำเร็จ", ok: "" });
+    }
   };
 
   const selectRoomById = (rid: number | null) => {
@@ -818,14 +854,28 @@ export default function FacilityLayoutPage() {
               <p className="text-xs text-muted-foreground">แนบ URL รูปแปลนจริงของห้อง แล้ววางหมุดตู้ไฟ/ตู้ควบคุมหรือเครื่องจักรบนรูป (เก็บพิกัดใน <code>facility_layout_config</code>) — คลิกหมุดเพื่อดูรายละเอียด พอร์ต/สถานะ/งานซ่อม จากตำแหน่งบนแปลน</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                 <div className="md:col-span-2">
-                  <Label className="text-xs">URL รูปแปลนจริง (ห้อง/ชั้น)</Label>
+                  <Label className="text-xs">URL รูปแปลนจริง (ห้อง/ชั้น) — หรืออัปโหลดไฟล์ด้านขวา</Label>
                   <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value, image_width: 0, image_height: 0 } as any })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    ref={roomPlanFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPlanImage("room", f); e.target.value = ""; }}
+                  />
+                  <Button size="sm" variant="secondary" disabled={planUpload.busy && planUpload.target === "room"} onClick={() => roomPlanFileRef.current?.click()}>
+                    {planUpload.busy && planUpload.target === "room" ? "กำลังอัปโหลด…" : "อัปโหลดรูป"}
+                  </Button>
                   {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any }); setSelectedPlanItemId(null); }}>ลบรูป</Button> : null}
                   {(roomCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items: [] } as any }); setSelectedPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
                 </div>
               </div>
+              <p className="text-[11px] text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
+              {planUpload.target === "room" && (planUpload.error || planUpload.ok) ? (
+                <p className={`text-xs ${planUpload.error ? "text-destructive" : "text-muted-foreground"}`}>{planUpload.error || planUpload.ok}</p>
+              ) : null}
               {canManage && (
                 <div className="flex flex-wrap gap-2 items-center">
                   <Label className="text-xs">วางหมุด:</Label>
@@ -1332,14 +1382,28 @@ export default function FacilityLayoutPage() {
           <p className="text-xs text-muted-foreground">แนบ URL รูปแปลนจริงของชั้น/โซนนี้ แล้ววางหมุดตู้/แผงหรือเครื่องจักร (ที่อยู่ในห้องภายใต้ชั้นนี้) บนรูป — เก็บพิกัดใน <code>facility_layout_config.floors</code> คลิกหมุดเพื่อดูรายละเอียดและไปยังห้อง/รายการที่เกี่ยวข้อง</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
             <div className="md:col-span-2">
-              <Label className="text-xs">URL รูปแปลนจริง (ชั้น/โซน)</Label>
+              <Label className="text-xs">URL รูปแปลนจริง (ชั้น/โซน) — หรืออัปโหลดไฟล์ด้านขวา</Label>
               <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value, image_width: 0, image_height: 0 } })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={floorPlanFileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPlanImage("floor", f); e.target.value = ""; }}
+              />
+              <Button size="sm" variant="secondary" disabled={planUpload.busy && planUpload.target === "floor"} onClick={() => floorPlanFileRef.current?.click()}>
+                {planUpload.busy && planUpload.target === "floor" ? "กำลังอัปโหลด…" : "อัปโหลดรูป"}
+              </Button>
               {floorCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: "" } }); setSelectedFloorPlanItemId(null); }}>ลบรูป</Button> : null}
               {(floorCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items: [] } }); setSelectedFloorPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
+          {planUpload.target === "floor" && (planUpload.error || planUpload.ok) ? (
+            <p className={`text-xs ${planUpload.error ? "text-destructive" : "text-muted-foreground"}`}>{planUpload.error || planUpload.ok}</p>
+          ) : null}
           {canManage && (
             <div className="flex flex-wrap gap-2 items-center">
               <Label className="text-xs">วางหมุด:</Label>
