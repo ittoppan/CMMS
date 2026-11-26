@@ -59,6 +59,17 @@ const CABINET_TYPES = [
 ];
 
 function defaultFloorPlan(): FloorPlanData { return { grid_w: 8, grid_h: 6, image_url: "", items: [] }; }
+
+/**
+ * กล่องรูปแปลน (fluid width) — ล็อกสัดส่วนด้วย aspect-ratio จากขนาดจริงของไฟล์:
+ * กล่องจะเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุดที่คิดเป็น % ของกล่องตรงกับตัวรูป และไม่เกิดแถบว่าง
+ * เมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (0) ถอยไปใช้ minHeight เดิม — ไม่เดาสัดส่วน
+ */
+function planBoxStyle(fp?: FloorPlanData): { aspectRatio?: string; minHeight?: number } {
+  const w = fp?.image_width ?? 0;
+  const h = fp?.image_height ?? 0;
+  return w > 0 && h > 0 ? { aspectRatio: `${w} / ${h}` } : { minHeight: 320 };
+}
 function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: defaultFloorPlan() }; }
 function defaultFloor(): FloorCfg { return { floor_plan: defaultFloorPlan() }; }
 function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "", feeds: [] }; }
@@ -833,7 +844,7 @@ export default function FacilityLayoutPage() {
                   <div
                     ref={planContainerRef}
                     className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
-                    style={{ minHeight: 320 }}
+                    style={planBoxStyle(roomCfg.floor_plan)}
                     onClick={(e)=>{
                       if (suppressPlanClickRef.current) { suppressPlanClickRef.current = false; return; }
                       if (!canManage || !planPlaceTarget || !effectiveRoomId) return;
@@ -1358,7 +1369,7 @@ export default function FacilityLayoutPage() {
               <div
                 ref={floorPlanContainerRef}
                 className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${floorPlanPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
-                style={{ minHeight: 320 }}
+                style={planBoxStyle(floorCfg.floor_plan)}
                 onClick={(e)=>{
                   if (suppressFloorPlanClickRef.current) { suppressFloorPlanClickRef.current = false; return; }
                   if (!canManage || !floorPlanPlaceTarget || !selectedFloor) return;
