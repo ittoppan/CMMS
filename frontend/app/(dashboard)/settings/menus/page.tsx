@@ -458,7 +458,7 @@ export default function MenuPermissionsPage() {
                       padding: "12px 14px",
                       cursor: "pointer",
                       background: isPreview ? rc.bg : "var(--cmms-bg-wash, #f8fafc)",
-                      transition: "all .15s ease",
+                      transition: "border-color .15s ease, background-color .15s ease",
                     }}
                   >
                     <HStack hAlign="between" vAlign="center">

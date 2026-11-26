@@ -490,7 +490,8 @@ export default function InteractiveStylePageEditor() {
               boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
               overflow: "hidden",
               border: `3px solid ${primaryColor}`,
-              transition: "all 0.3s ease-in-out"
+              // ระบุ property ที่เปลี่ยนจริง (viewport width / สี / ขอบ) — ไม่ใช้ all
+              transition: "width .3s ease-in-out, background-color .3s ease-in-out, border-radius .3s ease-in-out, border-color .3s ease-in-out, box-shadow .3s ease-in-out"
             }}>
               <iframe
                 ref={iframeRef}

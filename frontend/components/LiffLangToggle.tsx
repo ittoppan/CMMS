@@ -56,7 +56,7 @@ export default function LiffLangToggle({
               cursor: "pointer",
               background: active ? "var(--cmms-primary, #0057A8)" : "transparent",
               color: active ? "#fff" : "var(--cmms-text-secondary, #475569)",
-              transition: "all 150ms ease",
+              transition: "background-color 150ms ease, color 150ms ease",
             }}
           >
             {opt.label}

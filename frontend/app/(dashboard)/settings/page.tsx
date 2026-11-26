@@ -1291,7 +1291,7 @@ export default function SettingsPage() {
                                     background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
                                     color: active ? "#fff" : "var(--cmms-text-secondary)",
                                     fontSize: 13, fontWeight: 700, cursor: "pointer",
-                                    transition: "all 150ms ease",
+                                    transition: "border-color 150ms ease, background-color 150ms ease, color 150ms ease",
                                   }}
                                 >
                                   {opt.short}
