@@ -274,8 +274,8 @@ export default function PwaRegister() {
           right: 12,
           bottom: 12,
           zIndex: 9999,
-          background: "#0f172a",
-          color: "#fff",
+          background: "var(--tp-navy-dark)",
+          color: "var(--tp-text-on-brand)",
           border: "1px solid rgba(255,255,255,0.12)",
           borderRadius: 14,
           boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
@@ -298,8 +298,8 @@ export default function PwaRegister() {
           type="button"
           onClick={handleUpdateNow}
           style={{
-            background: "#22c55e",
-            color: "#0f172a",
+            background: "var(--tp-success)",
+            color: "var(--tp-navy-dark)",
             padding: "8px 12px",
             borderRadius: 10,
             fontSize: 13,
@@ -344,8 +344,8 @@ export default function PwaRegister() {
         right: 12,
         bottom: 12,
         zIndex: 9998,
-        background: "#ffffff",
-        color: "#0f172a",
+        background: "var(--tp-surface-white)",
+        color: "var(--tp-navy-dark)",
         border: "1px solid rgba(0,104,181,0.18)",
         borderRadius: 14,
         boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
@@ -369,8 +369,8 @@ export default function PwaRegister() {
         onClick={handleInstallClick}
         disabled={installing}
         style={{
-          background: "#0068B5",
-          color: "#fff",
+          background: "var(--tp-toppan-blue)",
+          color: "var(--tp-text-on-brand)",
           padding: "8px 12px",
           borderRadius: 10,
           fontSize: 13,
