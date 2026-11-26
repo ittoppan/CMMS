@@ -3415,6 +3415,11 @@ html.cmms-no-anim *::after {
   border: 1px solid rgba(255, 120, 140, 0.35);
   color: #ffdce2;
 }
+/* ไอคอนในกล่อง error บนพื้น glass: --cmms-danger (#DC2626) จมกับพื้นแดงเข้ม
+   (contrast ≈1.9:1) จึงใช้แดงอ่อนเฉพาะในธีม login นี้ (≈7.7:1) */
+.cmms-login-container--neo .cmms-login-error svg {
+  color: #ff8a9b;
+}
 @media (max-width: 1023.98px) {
   .cmms-login-3d-canvas { opacity: 0.55; }
   .cmms-login-panel--neo { background: transparent; }

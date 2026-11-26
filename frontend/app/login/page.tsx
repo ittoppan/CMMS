@@ -8,8 +8,10 @@ import LoginVideoBg from './LoginVideoBg';
 // three.js โหลดเฉพาะเมื่อวิดีโอพื้นหลังเล่นไม่ได้ (fallback ชั้นที่ 2)
 // ถ้า WebGL ใช้ไม่ได้อีก ตัว component จะแสดง gradient/glow จาก CSS ให้เอง
 const CmmsScene3D = dynamic(() => import('./CmmsScene3D'), { ssr: false });
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/cn';
 import { Wrench, ChartBar, Clock, Box, Eye, EyeOff, AlertCircle, ShieldCheck, Cpu, Activity, Cog } from 'lucide-react';
 
@@ -288,10 +290,9 @@ function LoginContent() {
           </header>
 
           {loginFailed && errorMessage && (
-            <div className="cmms-login-error" role="alert" aria-live="assertive">
-              <AlertCircle size={16} strokeWidth={1.75} className="mt-0.5 shrink-0" />
+            <Alert variant="danger" className="cmms-login-error" aria-live="assertive">
               <span>{errorMessage}</span>
-            </div>
+            </Alert>
           )}
 
           <div className="flex flex-col gap-4">
@@ -320,15 +321,17 @@ function LoginContent() {
                 onBlur={() => setCapsOn(false)}
                 className={cn('h-11 pr-11', loginFailed && '!border-[var(--cmms-danger)]')}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 className="cmms-login-peek"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
                 aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
-              </button>
+              </Button>
             </div>
 
             {capsOn && !showPassword && (
@@ -341,9 +344,9 @@ function LoginContent() {
           </Button>
 
           <div className="flex items-center gap-3">
-            <span className="cmms-login-rule" />
+            <Separator className="cmms-login-rule" />
             <span className="text-xs text-[var(--cmms-text-muted)]">หรือ</span>
-            <span className="cmms-login-rule" />
+            <Separator className="cmms-login-rule" />
           </div>
 
           <div className="flex flex-col gap-3">
