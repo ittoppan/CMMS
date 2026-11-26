@@ -10,6 +10,7 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/services/WebPushService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
@@ -20,6 +21,10 @@ try {
 requireLogin($pdo);
     $userId = (int)$_SESSION['user_id'];
     $method = $_SERVER['REQUEST_METHOD'];
+
+    if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
+        enforceCsrf();
+    }
 
     if ($method === 'GET') {
         $keys = WebPushService::loadKeys($pdo);
