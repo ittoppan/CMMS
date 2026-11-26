@@ -331,3 +331,14 @@
 - ยกเว้นโดยเจตนา: canvas คลิกวางตำแหน่ง (`facility-layout`) และจุดที่มี `onKeyDown` อยู่แล้ว (`ui/table.tsx` td ของ checkbox, `tv` `role="application"`)
 - modal แบบ inline (`pm_am/checklists`, `field/work/[id]` pause+complete, `knowledge/articles/[id]` Modal, `knowledge/reviews`) ใช้ `useDialogA11y` (`frontend/lib/use-dialog-a11y.ts`): Escape ปิด, `Tab`/`Shift+Tab` วนในกล่อง, โฟกัสเข้าเมื่อเปิดและคืนให้ปุ่มที่เปิดเมื่อปิด; ตัวกล่องเป็น `role="dialog" aria-modal="true" aria-labelledby="…" tabIndex={-1}` และ backdrop เป็น `role="presentation"` (คลิกนอกกล่องยังปิดได้ แต่ไม่ใช่ทางเดียว)
 - wrapper ที่เดิมแค่ `stopPropagation` (`settings/menus`) ไม่เป็น div ที่คลิกได้อีก ใช้ `data-card-ignore` แล้วให้การ์ดตรวจ `closest()` แทน — คีย์บอร์ดจึงไม่ต้อง Tab ไปที่ wrapper
+
+## (ซ) `<img>` ต้องมี `width`/`height` กัน layout shift
+
+กฎ: ทุก `<img>` ใส่ `width`/`height` เป็นตัวเลขจริงของกล่องที่ render — รูปที่ CSS บังคับขนาดไว้แล้วก็ยังต้องมี เพื่อไม่ให้เกิด shift ก่อน CSS โหลด; รูปที่ไหลตามความกว้าง (fluid) ให้ใส่สัดส่วนจริงของภาพ ไม่ใช่ขนาดที่เดา
+
+- `frontend/components/ImageUploadField.tsx`: พรีวิว 96×72 (ตรงกับ `style`)
+- `frontend/components/PMChecksheetDocument.tsx`: ลายเซ็น 2 ใบ 280×90 (ขนาด canvas ลายเซ็น)
+- `frontend/components/RepairRequestForm.tsx`: รูปโปรไฟล์ LINE 44×44 (`.cmms-avatar`), รูปใน `.cmms-photo-thumb` 96×96 (ช่องเป็น `aspect-ratio: 1`)
+- `frontend/components/WorkOrderClosureDocument.tsx`: รูปก่อน/หลังซ่อม 400×200 (กล่องสูง 200 คงที่ กว้าง fluid), ลายเซ็นผู้รับมอบงาน 280×90
+- `frontend/components/ui/employee-avatar.tsx`: `width`/`height` = `size` prop (24/32/40/56/80)
+- ยังขาด: floor plan 2 จุด (`facility-layout`) ต้องเก็บ `image_width`/`image_height` ตอนอัปโหลดก่อน จึงจะใส่ค่าจริงได้ (แตะ API/DB)

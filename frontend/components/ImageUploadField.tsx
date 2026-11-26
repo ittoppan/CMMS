@@ -116,6 +116,8 @@ export default function ImageUploadField({
           <img
             src={value}
             alt={label}
+            width={96}
+            height={72}
             style={{ width: 96, height: 72, borderRadius: 8, objectFit: "cover", border: "1px solid var(--cmms-border)" }}
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.4"; }}
           />

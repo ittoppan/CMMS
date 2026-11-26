@@ -1214,7 +1214,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
           </div>
           <LiffLangToggle />
           {lineProfile?.pic ? (
-            <img src={lineProfile.pic} alt="LINE profile" className="cmms-avatar" />
+            <img src={lineProfile.pic} alt="LINE profile" width={44} height={44} className="cmms-avatar" />
           ) : (
             <div className="cmms-avatar cmms-avatar-fallback"><User size={18} strokeWidth={1.75} /></div>
           )}
@@ -1700,7 +1700,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
               <div className="cmms-photo-grid">
                 {form.photos.map((p, i) => (
                   <div key={i} className="cmms-photo-thumb">
-                    <img src={p} alt={`รูป ${i + 1}`} />
+                    <img src={p} alt={`รูป ${i + 1}`} width={96} height={96} />
                     <button type="button" className="cmms-photo-remove"
                       onClick={() => update("photos", form.photos.filter((_, x) => x !== i))}>
                       <X size={14} strokeWidth={1.75} />

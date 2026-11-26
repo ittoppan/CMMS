@@ -60,6 +60,8 @@ export function EmployeeAvatar({
           <img
             src={photoUrl as string}
             alt={name}
+            width={size}
+            height={size}
             loading="lazy"
             onError={() => setErrored(true)}
             className="h-full w-full object-cover"
