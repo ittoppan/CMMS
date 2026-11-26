@@ -20,7 +20,20 @@ Scope: Design/UI skills audit/fix/verify → QA final sweep → backend CSRF aud
 - ~120 API endpoints in `public/api/v1/`.
 - Files calling `enforceCsrf`: **73** — coverage complete, no gaps found.
 
-## 4. Phase Status
+## 4. Backend Permission Coverage Audit — PASS
+
+- Permission helpers: `requireLogin` (auth.php), `requirePerm` (permissions.php), `requireRole` (roles.php).
+- 70/114 API files use a permission helper.
+- 6 mutating files without session-permission — all verified intentional with compensating controls:
+  - `iot_ingest.php` — source token auth (X-IOT-TOKEN / Bearer)
+  - `line_register.php` — LINE LIFF ID token verification
+  - `line_webhook.php` — LINE signature (channel secret)
+  - `repair_form_attachment.php` — anonymous LIFF staging + CSRF + MIME whitelist + 10MB cap
+  - `repair_video.php` — anonymous LIFF staging + CSRF + MIME whitelist + 25MB cap
+  - `user_lookup.php` — public minimal lookup + rate limit (30/IP, 10/code)
+- **No permission gaps found.**
+
+## 5. Phase Status
 
 | Phase | Status |
 |---|---|
