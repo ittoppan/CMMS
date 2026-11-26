@@ -466,7 +466,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {!kioskMode && (
         <>
           {/* ═══════════ MOBILE NATIVE APP BAR (<1024px) ═══════════ */}
-          <header className="cmms-mobile-app-bar lg:!hidden">
+          <div className="cmms-mobile-app-bar lg:!hidden">
             <button
               ref={menuButtonRef}
               type="button"
@@ -523,7 +523,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <LogOut size={20} strokeWidth={1.75} aria-hidden="true" />
             </button>
-          </header>
+          </div>
 
           {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
