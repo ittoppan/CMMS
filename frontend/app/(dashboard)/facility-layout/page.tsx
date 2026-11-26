@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout";
@@ -65,10 +66,13 @@ function defaultFloorPlan(): FloorPlanData { return { grid_w: 8, grid_h: 6, imag
  * กล่องจะเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุดที่คิดเป็น % ของกล่องตรงกับตัวรูป และไม่เกิดแถบว่าง
  * เมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (0) ถอยไปใช้ minHeight เดิม — ไม่เดาสัดส่วน
  */
-function planBoxStyle(fp?: FloorPlanData): { aspectRatio?: string; minHeight?: number } {
+function planBoxStyle(fp?: FloorPlanData): CSSProperties {
   const w = fp?.image_width ?? 0;
   const h = fp?.image_height ?? 0;
-  return w > 0 && h > 0 ? { aspectRatio: `${w} / ${h}` } : { minHeight: 320 };
+  // ส่งสัดส่วนให้คลาส .cmms-plan-box (aspect-ratio อยู่ใน CSS) — ไม่รู้ขนาดถอยไปใช้ minHeight เดิม
+  return w > 0 && h > 0
+    ? ({ "--cmms-plan-ratio": `${w} / ${h}` } as CSSProperties)
+    : { minHeight: 320 };
 }
 function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: defaultFloorPlan() }; }
 function defaultFloor(): FloorCfg { return { floor_plan: defaultFloorPlan() }; }
@@ -843,7 +847,7 @@ export default function FacilityLayoutPage() {
                 <div className="space-y-2">
                   <div
                     ref={planContainerRef}
-                    className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
+                    className={`cmms-plan-box relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
                     style={planBoxStyle(roomCfg.floor_plan)}
                     onClick={(e)=>{
                       if (suppressPlanClickRef.current) { suppressPlanClickRef.current = false; return; }
@@ -1368,7 +1372,7 @@ export default function FacilityLayoutPage() {
             <div className="space-y-2">
               <div
                 ref={floorPlanContainerRef}
-                className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${floorPlanPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
+                className={`cmms-plan-box relative w-full overflow-hidden rounded-lg border bg-slate-100 ${floorPlanPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
                 style={planBoxStyle(floorCfg.floor_plan)}
                 onClick={(e)=>{
                   if (suppressFloorPlanClickRef.current) { suppressFloorPlanClickRef.current = false; return; }

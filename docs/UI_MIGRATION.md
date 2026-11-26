@@ -344,4 +344,18 @@
 - `frontend/components/WorkOrderClosureDocument.tsx`: รูปก่อน/หลังซ่อม 400×200 (กล่องสูง 200 คงที่ กว้าง fluid), ลายเซ็นผู้รับมอบงาน 280×90
 - `frontend/components/ui/employee-avatar.tsx`: `width`/`height` = `size` prop (24/32/40/56/80)
 - `facility-layout` (รูปแปลนห้อง + ชั้น): เก็บ `image_width`/`image_height` ของ **ไฟล์จริง** ไว้ใน JSON เดียวกับ `image_url` (ใน `settings.facility_layout_config`) — ไม่มีตาราง/คอลัมน์/migration ใหม่; `0` = ยังไม่รู้ขนาด; ค่าเติมอัตโนมัติจาก `naturalWidth`/`naturalHeight` ตอน `onLoad` แล้วผู้ใช้กดบันทึกเอง (ไม่ auto-save); แก้ URL → ล้างค่าเป็น 0 เพื่อไม่ใช้สัดส่วนเก่ากับรูปใหม่; helper `facility_layout_sanitize()` ต้อง whitelist 2 key นี้ **ทั้งบล็อกห้องและบล็อกชั้น** ไม่งั้นค่าถูกทิ้งตอน POST
-- กล่องรูปแปลน (fluid width) ล็อกสัดส่วนด้วย `aspect-ratio` จาก `image_width`/`image_height` จริงผ่าน `planBoxStyle()` — กล่องจึงเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุด `%` ตรงทั้งก่อนและหลังรูปโหลด และไม่มีแถบว่างเมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (`0`) จะถอยไปใช้ `minHeight: 320` แบบเดิม **ไม่มีการเดาสัดส่วน**
+### กลุ่มภาพ fluid — ล็อกขนาดด้วยคลาส CSS (ไม่เดาตัวเลขบน attribute)
+
+รูปที่ความกว้าง/สูงมาจาก layout (fluid) ไม่มีตัวเลขจริงให้ใส่ ใช้คลาสใน `app/globals.css` เป็นตัวกัน CLS แทน:
+
+| คลาส | นิยาม | ที่ใช้ |
+|---|---|---|
+| `.cmms-img-signature` | `aspect-ratio: 280 / 90` (canvas ลายเซ็นที่ระบบสร้างเอง), `width:100%`, `height:auto`, `max-height:96px`, `object-fit:contain` | `pm_am/view` 2 ใบ, `PMChecksheetDocument` 2 ใบ, `WorkOrderClosureDocument` 1 ใบ |
+| `.cmms-img-fill` | `width/height:100%` + `object-fit:cover` — กล่องแม่ตรึงสัดส่วนไว้แล้ว | `repair/edit` (`aspect-square`), `WorkOrderClosureDocument` before/after (กล่องสูง 200) |
+| `.cmms-img-thumb` | `width:100%`, `height:80px`, `object-fit:cover` | `repair/view` ภาพแนบ 2 ใบ (การ์ดสูงเท่ากันทุกใบ) |
+| `.cmms-img-part` | `aspect-ratio: 4 / 3`, `max-height:180px`, `object-fit:cover` | `asset_registry/bom_tree` รูปชิ้นส่วน |
+| `.cmms-plan-box` | `aspect-ratio: var(--cmms-plan-ratio, auto)` | กล่องรูปแปลน 2 จุด (ค่าจริงส่งผ่าน CSS var) |
+
+ผลคือ `width`/`height` attribute เหลือเฉพาะรูปที่รู้ขนาดจริง (canvas ลายเซ็น 280×90, กล่องที่กำหนดขนาดตายตัว) — รูป fluid ไม่มี attribute ที่เป็นตัวเลขเดาอีกแล้ว; ที่ถอดออก: `400×200` (before/after), `400×400` (aspect-square), `320×240` (bom_tree), `320×80` (ภาพแนบ repair/view)
+
+- กล่องรูปแปลน (fluid width) ล็อกสัดส่วนด้วย `aspect-ratio` (ประกาศใน `.cmms-plan-box`) จาก `image_width`/`image_height` จริง ซึ่ง `planBoxStyle()` ส่งมาเป็น CSS var `--cmms-plan-ratio` — กล่องจึงเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุด `%` ตรงทั้งก่อนและหลังรูปโหลด และไม่มีแถบว่างเมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (`0`) จะถอยไปใช้ `minHeight: 320` แบบเดิม **ไม่มีการเดาสัดส่วน**

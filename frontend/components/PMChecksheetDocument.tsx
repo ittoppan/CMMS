@@ -157,14 +157,14 @@ export default function PMChecksheetDocument({ data }: { data: PMChecksheetData 
           <tr>
             <td style={{ ...tdStyle, textAlign: "center", height: 110, width: "50%" }}>
               {sigSrc(data.inspectorSignature) ? (
-                <img src={sigSrc(data.inspectorSignature)} alt="ลายเซ็นผู้ตรวจเช็ค" width={280} height={90} style={{ maxHeight: 64, maxWidth: "90%", objectFit: "contain" }} />
+                <img src={sigSrc(data.inspectorSignature)} alt="ลายเซ็นผู้ตรวจเช็ค" width={280} height={90} className="cmms-img-signature" style={{ maxHeight: 64, maxWidth: "90%", objectFit: "contain" }} />
               ) : (
                 <div style={{ color: "#94A3B8", fontSize: 12 }}>ยังไม่ลงนาม</div>
               )}
             </td>
             <td style={{ ...tdStyle, textAlign: "center", height: 110, width: "50%" }}>
               {sigSrc(data.operatorSignature) ? (
-                <img src={sigSrc(data.operatorSignature)} alt="ลายเซ็นผู้ควบคุมเครื่อง" width={280} height={90} style={{ maxHeight: 64, maxWidth: "90%", objectFit: "contain" }} />
+                <img src={sigSrc(data.operatorSignature)} alt="ลายเซ็นผู้ควบคุมเครื่อง" width={280} height={90} className="cmms-img-signature" style={{ maxHeight: 64, maxWidth: "90%", objectFit: "contain" }} />
               ) : (
                 <div style={{ color: "#94A3B8", fontSize: 12 }}>ยังไม่ลงนาม</div>
               )}

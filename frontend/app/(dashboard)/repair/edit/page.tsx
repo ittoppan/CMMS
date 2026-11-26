@@ -569,7 +569,7 @@ function EditWorkOrderContent() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
                 {afterImages.map((p, i) => (
                   <div key={i} className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
-                    <img loading="lazy" decoding="async" src={p} alt={`รูปหลังซ่อม ${i + 1}`} width={400} height={400} className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={p} alt={`รูปหลังซ่อม ${i + 1}`} className="cmms-img-fill" />
                     <button
                       type="button"
                       aria-label={`ลบรูปหลังซ่อม ${i + 1}`}
