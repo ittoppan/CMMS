@@ -60,11 +60,11 @@ CMMS already has a full PWA implementation (SW v255, manifest, PwaRegister, offl
 - [ ] ConnectivityStatus uses Tailwind semantic classes (border-destructive etc.) — consistent with shadcn theme
 
 ## Known Gaps / Recommendations
-1. Maskable icon reuses icon-512.png (acceptable; dedicated maskable icon recommended for better adaptive icons)
-2. No periodic background sync (not needed for current use case)
-3. Push notification VAPID key flow depends on /api/v1/push_subscribe.php (server-side) — ensure CSRF check
-4. Consider adding `content-visibility: auto` for long lists (react-best-practices) — separate concern
-5. Lighthouse PWA audit should be run before production deploy
+1. ~~Maskable icon reuses icon-512.png~~ → **RESOLVED** — dedicated maskable icon generated at `frontend/public/icons/icon-maskable-512.png` (`scripts/gen_maskable.py`), manifest updated ✅
+2. ~~No periodic background sync~~ → **RESOLVED** — periodic sync added to `frontend/public/sw.js` ✅
+3. Push notification VAPID key flow depends on /api/v1/push_subscribe.php (server-side) → **CSRF enforced** in `public/api/v1/push_subscribe.php` ✅
+4. ~~Consider adding `content-visibility: auto` for long lists~~ → **RESOLVED** — present in `frontend/app/globals.css` (line 110) ✅
+5. Lighthouse PWA audit should be run before production deploy — Lighthouse PWA category unavailable in current Chrome; DevTools installability checks used instead (see PWA_AUDIT.md) — pending final production deploy check
 
 ## Files Changed in This Branch
 - frontend/components/PwaRegister.tsx (token alignment + apple-touch-icon injection)
