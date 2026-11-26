@@ -21,9 +21,16 @@ Frontend is Next.js 16 (app router) + React 19. Audit focused on CRITICAL/HIGH i
 ### HIGH — Server-Side Performance
 - RSC props serialization: not audited in detail (pages use client components heavily).
 
-### MEDIUM — Rendering / Re-render
-- `outline-none` without `focus-visible` replacement: 38 instances in source (mostly inputs with `focus:ring-*`). ✅ Migrated `focus:` → `focus-visible:` across 29 files (outline-none, border-, shadow-, ring) via script.
-- `content-visibility` for long lists: not applied. Recommend for tables/lists >50 rows (needs profiling).
+## Waterfall Audit (async-)
+High-await files reviewed (excluding tests). Most `await` calls are inside event handlers (submit, upload, loadParts) where sequential dependencies are legitimate (csrf → fetch). `Promise.all` is used in 52 places already. No obvious render-time sequential fetch chains found in spot checks. Recommend deeper review of:
+- `app/(dashboard)/repair/view/page.tsx` (29 awaits)
+- `app/(dashboard)/spare_parts/stock_take/page.tsx` (24)
+- `app/(dashboard)/asset_registry/view/page.tsx` (23)
+- `app/(dashboard)/onboarding/page.tsx` (24)
+
+## Content-visibility (rendering-)
+- Utility class `.cmms-cv-auto` added (opt-in). Apply to list/table containers with >50 rows.
+- No auto-application to avoid layout shift (needs `contain-intrinsic-size` tuning per container).
 
 ### LOW — JavaScript Performance
 - Not audited (low impact).
