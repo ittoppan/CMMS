@@ -44,7 +44,7 @@ try {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
             // ทุก SELECT แนบแผนกมาด้วย (department_id + ชื่อ/รหัส) — หน้าจัดการผู้ใช้และโปรไฟล์ใช้แสดง/แก้ไข
-            $userCols = 'u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.department_id, d.code AS dept_code, d.name AS dept_name, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at';
+            $userCols = 'u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.department_id, d.code AS dept_code, d.name AS dept_name, u.avatar, u.avatar_path, u.line_user_id, u.microsoft_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at';
             $userFrom = 'FROM users u LEFT JOIN roles r ON r.id = u.role_id LEFT JOIN departments d ON d.id = u.department_id';
             if ($id) {
                 $stmt = $pdo->prepare("SELECT {$userCols} {$userFrom} WHERE u.id = ?");
@@ -67,7 +67,7 @@ try {
             requirePerm($pdo, 'users', 'manage');
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             users_normalize_role($pdo, $data);
-            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
+            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'microsoft_user_id', 'lang', 'must_change_password'];
             $cols = [];
             $vals = [];
             foreach ($allowed as $col) {
@@ -104,7 +104,7 @@ try {
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
             users_normalize_role($pdo, $data);
-            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
+            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'microsoft_user_id', 'lang', 'must_change_password'];
             $fields = [];
             $values = [];
             foreach ($allowed as $col) {
