@@ -1,0 +1,50 @@
+# AI code review gate — Open Code Review
+# https://github.com/marketplace/actions/open-code-review
+#
+# หมายเหตุการตั้งค่า:
+#  - รันเฉพาะ pull_request + สั่งมือ (workflow_dispatch) — repo นี้ push ตรงเข้า main เป็นหลัก
+#    ถ้าต้องการกั้นทุก push ให้เพิ่ม `push: branches: [main]` ใน on: (ยังไม่เปิด เพราะยังไม่รู้ว่า
+#    action คำนวณ base diff ของ push event ได้ถูกต้องหรือไม่)
+#  - sla: L1 = ตรวจเชิงโครงสร้าง ไม่ต้องใช้ LLM (เหมาะกับ CI ที่ไม่มี Ollama)
+#    L2/L3 ต้องมี Ollama หรือ OpenAI-compatible endpoint — ยังไม่ตั้งใน workflow นี้
+#  - fail-on-low-score: false = คอมเมนต์รายงานก่อน ยังไม่บล็อก merge
+#    เปิดเป็น "true" ได้เมื่อดูผลรอบแรกแล้วว่าคะแนนไม่ต่ำเกินไป
+#  - ตัวสแกนรองรับ TS/JS, Python, Java, Go, Kotlin — ไฟล์ PHP ของโปรเจกต์นี้จะถูกข้าม
+#  - LICENSE ของ action = BUSL-1.1: ฟรีสำหรับ personal/non-commercial,
+#    การใช้เชิงพาณิชย์ต้องมี Team/Enterprise license (ตรวจก่อนใช้ในงานบริษัท)
+name: Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: code-review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: AI Code Review (Open Code Review)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # ต้องมี history เพื่อให้ scan-mode: diff เทียบ base branch ได้
+          fetch-depth: 0
+
+      - name: Open Code Review
+        uses: raye-deng/open-code-review@v2.1.5
+        with:
+          sla: L1
+          threshold: '60'
+          scan-mode: diff
+          fail-on-low-score: 'false'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
