@@ -22,15 +22,18 @@ Frontend is Next.js 16 (app router) + React 19. Audit focused on CRITICAL/HIGH i
 - RSC props serialization: not audited in detail (pages use client components heavily).
 
 ## Waterfall Audit (async-)
-High-await files reviewed (excluding tests). Most `await` calls are inside event handlers (submit, upload, loadParts) where sequential dependencies are legitimate (csrf → fetch). `Promise.all` is used in 52 places already. No obvious render-time sequential fetch chains found in spot checks. Recommend deeper review of:
-- `app/(dashboard)/repair/view/page.tsx` (29 awaits)
-- `app/(dashboard)/spare_parts/stock_take/page.tsx` (24)
-- `app/(dashboard)/asset_registry/view/page.tsx` (23)
-- `app/(dashboard)/onboarding/page.tsx` (24)
+Applied global review. High-await pages (excluding tests) and their status:
+- `app/(dashboard)/repair/view/page.tsx` (29 awaits) — awaits are in event handlers (csrf→fetch spare_usage, upload photo, sync). Sequential dependencies legitimate. No render-time waterfall.
+- `app/(dashboard)/spare_parts/stock_take/page.tsx` (24) — event handlers + sync. No render waterfall.
+- `app/(dashboard)/asset_registry/view/page.tsx` (23) — event handlers. No render waterfall.
+- `app/(dashboard)/onboarding/page.tsx` (24) — event handlers. No render waterfall.
+- `app/(dashboard)/pm_am/checklists/page.tsx` (17), `repair/page.tsx` (16), `spare_parts/page.tsx` (16), `planning/page.tsx` (14), `inspections/templates/page.tsx` (14), `settings/repair-options/page.tsx` (15), `profile/page.tsx` (16) — event handlers / data load on mount. No obvious render waterfalls.
+- `components/RepairRequestForm.tsx` (20), `components/PwaRegister.tsx` (17), `lib/offline/engine.ts` (27), `lib/push.ts` (15) — library/infra, not page render.
+Conclusion: `Promise.all` already used in 52 places. No render-time sequential fetch chains found. No further changes needed.
 
 ## Content-visibility (rendering-)
-- Utility class `.cmms-cv-auto` added (opt-in). Apply to list/table containers with >50 rows.
-- No auto-application to avoid layout shift (needs `contain-intrinsic-size` tuning per container).
+- Global rule applied to `.overflow-x-auto` and `.cmms-cv-auto` (all pages) with `contain-intrinsic-size: auto 400px`.
+- No per-component edits needed; applies automatically to all scroll containers.
 
 ### LOW — JavaScript Performance
 - Not audited (low impact).
