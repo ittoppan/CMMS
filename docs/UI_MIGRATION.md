@@ -330,6 +330,7 @@
 - `asset_registry/bom_tree`: ชื่อชิ้นส่วนเป็นปุ่มจริงสำหรับเลือก (`aria-pressed`) เพราะแถวมีปุ่มซ้อน
 - ยกเว้นโดยเจตนา: canvas คลิกวางตำแหน่ง (`facility-layout`) และจุดที่มี `onKeyDown` อยู่แล้ว (`ui/table.tsx` td ของ checkbox, `tv` `role="application"`)
 - modal แบบ inline (`pm_am/checklists`, `field/work/[id]` pause+complete, `knowledge/articles/[id]` Modal, `knowledge/reviews`, `dashboard/wallboard` งานค้าง) ใช้ `useDialogA11y` (`frontend/lib/use-dialog-a11y.ts`): Escape ปิด, `Tab`/`Shift+Tab` วนในกล่อง, โฟกัสเข้าเมื่อเปิดและคืนให้ปุ่มที่เปิดเมื่อปิด; ตัวกล่องเป็น `role="dialog" aria-modal="true" aria-labelledby="…" tabIndex={-1}` และ backdrop เป็น `role="presentation"` (คลิกนอกกล่องยังปิดได้ แต่ไม่ใช่ทางเดียว)
+- `autoFocus`: ไม่ใช้เลยใน `frontend/` — จุดที่ต้องโฟกัสช่องกรอกเมื่อ “ผู้ใช้เปิด” กล่อง (sage_shipments 3 dialog, `SagePartAddModal`, `QrScanner` ช่องกรอกรหัส) ใช้ `ref` + `useEffect` ที่ผูกกับ state เปิด/ปิดแทน จึงไม่แย่งโฟกัสตอนหน้าโหลด
 - `dashboard/wallboard` (modal งานค้าง): เดิมมี `role="dialog"`/`aria-modal`/Escape เองแล้ว แต่ไม่มี focus trap — ย้าย `role`/`aria-modal`/`aria-label`/`tabIndex` ไปที่ `.tower-modal-card` ใส่ `ref` ของ hook, ตัว `.tower-modal` ชั้นนอกเป็น `role="presentation"` และ backdrop button ตั้ง `tabIndex={-1}` ไม่ให้เป็นจุดรับ focus
 - wrapper ที่เดิมแค่ `stopPropagation` (`settings/menus`) ไม่เป็น div ที่คลิกได้อีก ใช้ `data-card-ignore` แล้วให้การ์ดตรวจ `closest()` แทน — คีย์บอร์ดจึงไม่ต้อง Tab ไปที่ wrapper
 

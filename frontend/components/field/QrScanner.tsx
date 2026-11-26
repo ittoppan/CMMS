@@ -34,6 +34,14 @@ export function QrScanner({ onResult, onClose, title = "สแกน QR / บา
   const [torch, setTorch] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [manual, setManual] = useState("");
+  const manualInputRef = useRef<HTMLInputElement | null>(null);
+
+  // โฟกัสช่องกรอกรหัสเมื่อผู้ใช้กดเปิดช่องนี้ (หรือกล้องใช้ไม่ได้) — ไม่ใช้ autoFocus
+  useEffect(() => {
+    if (!manualOpen) return;
+    const t = setTimeout(() => manualInputRef.current?.focus(), 0);
+    return () => clearTimeout(t);
+  }, [manualOpen]);
 
   const stop = useCallback(() => {
     try {
@@ -221,7 +229,7 @@ export function QrScanner({ onResult, onClose, title = "สแกน QR / บา
               value={manual}
               onChange={(e) => setManual(e.target.value)}
               placeholder="เช่น MCH-001 หรือ CMMS-A-XXXX"
-              autoFocus
+              ref={manualInputRef}
               className="h-12 flex-1 min-w-0 rounded-lg border border-white/20 bg-white/10 px-3 text-base text-white outline-none placeholder:text-white/40 focus:border-white/70 focus:ring-2 focus:ring-white/50"
               aria-label="กรอกรหัสด้วยตนเอง"
             />

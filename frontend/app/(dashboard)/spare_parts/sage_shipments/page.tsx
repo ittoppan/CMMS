@@ -2,7 +2,7 @@
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { PageHeader } from "@/components/layout";
@@ -589,8 +589,16 @@ function RequestShipmentModal({
   onSubmit: (data: { shipmentNo: string }) => void;
   onCancel: () => void;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [shipmentNo, setShipmentNo] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // โฟกัสเมื่อผู้ใช้เปิด dialog นี้เท่านั้น (ไม่ใช้ autoFocus ที่ผูกกับการ mount)
+  // หน่วงเป็น macrotask เพื่อให้ Radix Dialog จัดการ initial focus ของตัวเองเสร็จก่อน
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -605,7 +613,7 @@ function RequestShipmentModal({
           value={shipmentNo}
           onChange={(e) => setShipmentNo(e.target.value)}
           placeholder="เช่น SHP-2024-00123"
-          autoFocus
+          ref={inputRef}
           disabled={submitting}
         />
         <p className="text-xs text-muted-foreground">เว้นว่างได้ หากยังไม่มีเลขที่ Shipment</p>
@@ -631,8 +639,16 @@ function ItemQtyModal({
   onSubmit: (data: { qty: number }) => void;
   onCancel: () => void;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [qty, setQty] = useState(String(item.sage_qty ?? 0));
   const [submitting, setSubmitting] = useState(false);
+
+  // โฟกัสเมื่อผู้ใช้เปิด dialog นี้เท่านั้น (ไม่ใช้ autoFocus ที่ผูกกับการ mount)
+  // หน่วงเป็น macrotask เพื่อให้ Radix Dialog จัดการ initial focus ของตัวเองเสร็จก่อน
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 0);
+    return () => clearTimeout(t);
+  }, []);
   const maxRemaining = Math.max(0, Number(item.qty) - Number(item.sage_qty ?? 0));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -654,7 +670,7 @@ function ItemQtyModal({
           value={qty}
           onChange={(e) => setQty(e.target.value)}
           placeholder={`สูงสุด ${fmt(item.qty)} ${item.unit}`}
-          autoFocus
+          ref={inputRef}
           disabled={submitting}
         />
         <p className="text-xs text-muted-foreground">คงเหลือ: {fmt(maxRemaining)} {item.unit} / ทั้งหมด: {fmt(item.qty)} {item.unit}</p>
@@ -680,8 +696,16 @@ function ItemShipmentModal({
   onSubmit: (data: { shipmentNo: string }) => void;
   onCancel: () => void;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [shipmentNo, setShipmentNo] = useState(item.sage_shipment_no ?? "");
   const [submitting, setSubmitting] = useState(false);
+
+  // โฟกัสเมื่อผู้ใช้เปิด dialog นี้เท่านั้น (ไม่ใช้ autoFocus ที่ผูกกับการ mount)
+  // หน่วงเป็น macrotask เพื่อให้ Radix Dialog จัดการ initial focus ของตัวเองเสร็จก่อน
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -696,7 +720,7 @@ function ItemShipmentModal({
           value={shipmentNo}
           onChange={(e) => setShipmentNo(e.target.value)}
           placeholder="เช่น SHP-2024-00123"
-          autoFocus
+          ref={inputRef}
           disabled={submitting}
         />
         <p className="text-xs text-muted-foreground">เว้นว่างได้</p>

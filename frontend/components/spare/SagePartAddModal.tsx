@@ -37,6 +37,14 @@ export default function SagePartAddModal({ open, onClose, workOrderId, woNumber,
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [savingItem, setSavingItem] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+
+  // โฟกัสช่องค้นหาเมื่อผู้ใช้เปิด modal นี้เท่านั้น (ไม่ใช้ autoFocus)
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => searchRef.current?.focus(), 0);
+    return () => clearTimeout(t);
+  }, [open]);
 
   // รีเซ็ตทุกครั้งที่เปิด
   useEffect(() => {
@@ -142,7 +150,7 @@ export default function SagePartAddModal({ open, onClose, workOrderId, woNumber,
               placeholder="ระบุรหัสหรือชื่ออะไหล่ (Item No. / Description)"
               aria-label="ค้นหาอะไหล่จาก Sage 300"
               className="h-10 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              autoFocus
+              ref={searchRef}
             />
           </div>
 
