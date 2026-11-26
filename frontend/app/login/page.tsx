@@ -30,6 +30,18 @@ function LineLoginIcon() {
   );
 }
 
+// Microsoft Login button icon — โลโก้ Microsoft ทางการ (4 สี่เหลี่ยมสี)
+function MicrosoftLoginIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 21 21" aria-hidden="true" focusable="false" style={{ flexShrink: 0 }}>
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  );
+}
+
 const FEATURES = [
   { icon: Clock, text: 'ติดตามงานซ่อมแบบ Real-time' },
   { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF / MTTR / OEE' },
@@ -46,7 +58,8 @@ function friendlyAuthError(raw: string): string {
   const lower = s.toLowerCase();
   if (lower.includes('invalid_credentials')) return 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
   if (lower.includes('validation_error')) return 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-  if (lower.includes('cancelled')) return 'คุณยกเลิกการเข้าสู่ระบบด้วย LINE';
+  if (lower.includes('cancelled')) return 'คุณยกเลิกการเข้าสู่ระบบ';
+  if (lower.includes('microsoft')) return 'เข้าสู่ระบบด้วย Microsoft ไม่สำเร็จ — กรุณาลองอีกครั้งหรือล็อกอินด้วยชื่อผู้ใช้';
   if (lower.includes('profile') || lower.includes('line login')) {
     return 'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — กรุณาลองอีกครั้งหรือล็อกอินด้วยชื่อผู้ใช้';
   }
@@ -344,6 +357,17 @@ function LoginContent() {
               <LineLoginIcon />
               <span className="cmms-login-line-divider" aria-hidden="true" />
               <span>ล็อกอินด้วย LINE</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full h-11 cmms-login-ms"
+              style={{ paddingLeft: 22, paddingRight: 22 }}
+              onClick={() => { window.location.href = '/microsoft_login.php'; }}
+            >
+              <MicrosoftLoginIcon />
+              <span className="cmms-login-line-divider" aria-hidden="true" />
+              <span>ล็อกอินด้วย Microsoft</span>
             </Button>
             {bindLine && (
               <p className="cmms-login-note">ล็อกอินสำเร็จแล้วระบบจะพาไปผูกบัญชี LINE เพื่อรับการแจ้งเตือนงาน</p>
