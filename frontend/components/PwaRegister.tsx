@@ -125,7 +125,19 @@ export default function PwaRegister() {
     // Web Push: ถ้า SW แจ้งว่า subscription rotate แล้ว sync ไม่สำเร็จ → re-subscribe ใหม่
     navigator.serviceWorker.addEventListener("message", (event) => {
       const data = event.data as { type?: string } | null;
-      if (!data || data.type !== "PUSH_SUBSCRIPTION_CHANGED") return;
+      if (!data || data.type !== "PUSH_SUBSCRIPTION_CHANGED") {
+        if (data?.type === "PERIODIC_SYNC") {
+          (async () => {
+            try {
+              const { flushAllNow } = await import("@/lib/offline/engine");
+              await flushAllNow();
+            } catch (err) {
+              console.warn("[PWA] periodic sync flush failed:", err);
+            }
+          })();
+        }
+        return;
+      }
       (async () => {
         try {
           const reg = await navigator.serviceWorker.getRegistration();
@@ -176,6 +188,20 @@ export default function PwaRegister() {
             if (!newWorker) return;
             handleWaiting(newWorker);
           });
+
+          // Periodic Background Sync (Chrome/Edge) - guarded by feature detection
+          if ("periodicSync" in reg) {
+            (async () => {
+              try {
+                const status = await navigator.permissions.query({ name: "periodic-background-sync" as PermissionName });
+                if (status.state === "granted") {
+                  await (reg as ServiceWorkerRegistration & { periodicSync?: { register: (tag: string, opts: { minInterval: number }) => Promise<void> } }).periodicSync?.register("cmms-periodic-sync", { minInterval: 24 * 60 * 60 * 1000 });
+                }
+              } catch (err) {
+                console.warn("[PWA] periodic sync registration failed:", err);
+              }
+            })();
+          }
         })
         .catch((err) => {
           console.warn("[PWA] Service worker registration failed:", err);

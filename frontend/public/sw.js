@@ -205,7 +205,19 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-/* ---------- Web Push (PWA push notifications) ---------- */
+/* ---------- Periodic Background Sync ---------- */
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'cmms-periodic-sync') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: 'PERIODIC_SYNC' });
+        }
+        return Promise.resolve();
+      })
+    );
+  }
+});
 self.addEventListener("push", (event) => {
   console.log("[SW] push event received", event);
   let data = {};
