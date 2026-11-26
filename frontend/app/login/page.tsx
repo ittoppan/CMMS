@@ -34,10 +34,10 @@ function LineLoginIcon() {
 function MicrosoftLoginIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 21 21" aria-hidden="true" focusable="false" style={{ flexShrink: 0 }}>
-      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
-      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
-      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
-      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+      <rect x="1" y="1" width="9" height="9" fill="var(--cmms-ms-red, #F25022)" />
+      <rect x="11" y="1" width="9" height="9" fill="var(--cmms-ms-green, #7FBA00)" />
+      <rect x="1" y="11" width="9" height="9" fill="var(--cmms-ms-blue, #00A4EF)" />
+      <rect x="11" y="11" width="9" height="9" fill="var(--cmms-ms-yellow, #FFB900)" />
     </svg>
   );
 }
