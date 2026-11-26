@@ -3,10 +3,10 @@
  *
  * derive จาก NAV_GROUPS (sidebar) จุดเดียว — ไม่ซ่อมแซมด้วยมือ:
  *  1) exact map:   href ของทุกเมนู → รายการ perm ของ href นั้น
- *  2) prefix map:  pathPrefixes ของกลุ่ม → รวม perm ทั้งกลุ่ม (ใช้กับหน้าลึก เช่น /repair/view?id=1)
+ *  2) prefix map:  prefix จาก ROUTE_PERM_MAP → รวม perm ของ prefix นั้น (ใช้กับหน้าลึก เช่น /repair/view?id=1)
  *
  * นโยบาย "กันด้วยความระมัดระวัง" (fail-open):
- *  - path ที่ไม่รู้จัก (ไม่ตรง exact และไม่อยู่ใต้ pathPrefixes ใด) → null = ไม่กั้น
+ *  - path ที่ไม่รู้จัก (ไม่ตรง exact และไม่อยู่ใต้ prefix ใดใน ROUTE_PERM_MAP) → null = ไม่กั้น
  *  - กั้นเมื่อ permission โหลดแล้วและ perm ที่ต้องใช้ "ทุกตัว" ถูกปิดชัดเจน (=== 0)
  *    (key ที่ไม่มีใน map = ไม่ระบุ = อนุญาต ตามพฤติกรรม canShow เดิม)
  */
@@ -16,7 +16,7 @@ import { ROUTE_PERM_MAP } from "./route-perm-map";
 export interface RequiredPerms {
   /** perm keys ที่ต้องมี "ตัวใดตัวหนึ่ง" จึงผ่าน */
   perms: string[];
-  /** true = แมปตรงกับ href เมนูพอดี / false = จาก pathPrefixes ของกลุ่ม */
+  /** true = แมปตรงกับ href เมนูพอดี / false = จาก prefix ของ ROUTE_PERM_MAP */
   exact: boolean;
 }
 

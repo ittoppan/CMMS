@@ -150,23 +150,21 @@ export function sectionIcon(titleKey: string): LucideIcon {
 
 export interface NavGroupDef {
   titleKey: string;
-  pathPrefixes: string[];
   items: NavItemDef[];
 }
 
 export const NAV_GROUPS: NavGroupDef[] = [
   {
     titleKey: "nav.overview",
-    pathPrefixes: ["/dashboard", "/repair/my_tasks", "/notifications", "/home", "/my-repairs", "/alert-center"],
     items: [
       { perm: "dashboard", labelKey: "menu.dashboard", href: "/dashboard", icon: Home },
       { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
       { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
+      { perm: "notifications", labelKey: "menu.alert_center", href: "/alert-center", icon: ShieldAlert },
     ],
   },
   {
     titleKey: "nav.work_orders",
-    pathPrefixes: ["/repair", "/approval", "/forms", "/field"],
     items: [
       { perm: "repair", labelKey: "menu.repairs", href: "/repair", icon: Wrench },
       { perm: "repair/request", labelKey: "menu.repair_request", href: "/repair/request", icon: FilePlus2 },
@@ -183,7 +181,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.planning",
-    pathPrefixes: ["/pm_am", "/inspections", "/planning", "/field/plan", "/shutdown", "/process-flows", "/predictive-maintenance"],
     items: [
       { perm: "pm_am", labelKey: "menu.pm_am", href: "/pm_am", icon: CalendarDays },
       { perm: "pm_am/calendar", labelKey: "menu.pm_calendar", href: "/pm_am/calendar", icon: CalendarDays },
@@ -194,6 +191,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
       { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
       { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
+      { perm: "pm_am", labelKey: "menu.predictive_maintenance", href: "/predictive-maintenance", icon: Hourglass },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },
       { perm: "inspections/templates", labelKey: "menu.inspections_templates", href: "/inspections/templates", icon: ListChecks, secondary: true },
@@ -202,7 +200,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.pm_machines",
-    pathPrefixes: ["/asset_registry", "/assets", "/qr-sheet", "/equipment_borrowing", "/facility-layout"],
     items: [
       { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
       { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
@@ -214,7 +211,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.calibration",
-    pathPrefixes: ["/calibration"],
     items: [
       { perm: "calibration", labelKey: "menu.calibration", href: "/calibration", icon: Scale },
       { perm: "calibration/instruments", labelKey: "menu.calibration_instruments", href: "/calibration/instruments", icon: Ruler },
@@ -235,11 +231,11 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.parts_external",
-    pathPrefixes: ["/spare_parts", "/suppliers", "/contractors"],
     items: [
       { perm: "spare_parts", labelKey: "menu.spare_parts", href: "/spare_parts", icon: Box },
       { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
       { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },
+      { perm: "spare_parts", labelKey: "menu.spare_reorder", href: "/spare-reorder", icon: ShoppingCart },
       { perm: "suppliers", labelKey: "menu.suppliers", href: "/suppliers", icon: Truck },
       { perm: "spare_parts/overview", labelKey: "menu.spare_overview", href: "/spare_parts/overview", icon: ChartPie, secondary: true },
       { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History, secondary: true },
@@ -254,7 +250,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.supervisor",
-    pathPrefixes: ["/supervisor"],
     items: [
       { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck },
       { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks },
@@ -265,7 +260,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.workforce",
-    pathPrefixes: ["/workforce"],
     items: [
       { perm: "workforce", labelKey: "menu.workforce", href: "/workforce", icon: Users },
       { perm: "workforce/technicians", labelKey: "menu.workforce_people", href: "/workforce/technicians", icon: UserCog },
@@ -281,7 +275,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.analytics_reports",
-    pathPrefixes: ["/analytics", "/reports", "/andon-board", "/cost", "/budget"],
     items: [
       { perm: "analytics", labelKey: "menu.analytics_bi", href: "/analytics", icon: BarChart3 },
       { perm: "analytics", labelKey: "menu.analytics_kpi", href: "/analytics/kpi", icon: ChartPie },
@@ -298,7 +291,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.reliability",
-    pathPrefixes: ["/reliability", "/asset-reliability", "/mtbf_mttr", "/rca"],
     items: [
       { perm: "reliability", labelKey: "menu.reliability", href: "/reliability", icon: Gauge },
       { perm: "reliability/assets", labelKey: "menu.reliability_assets", href: "/reliability/assets", icon: Boxes },
@@ -329,7 +321,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.knowledge_ops",
-    pathPrefixes: ["/knowledge", "/documents", "/engineering-changes", "/safety", "/iot", "/manuals"],
     items: [
       { perm: "knowledge", labelKey: "menu.knowledge", href: "/knowledge", icon: GraduationCap },
       { perm: "knowledge/search", labelKey: "menu.knowledge_search", href: "/knowledge/search", icon: Search },
@@ -348,7 +339,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.system",
-    pathPrefixes: ["/notifications/history", "/settings", "/pages", "/editor", "/audit-log", "/feedback", "/users", "/roles", "/register"],
     items: [
       { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
       { perm: "users", labelKey: "menu.users", href: "/users", icon: Users },
