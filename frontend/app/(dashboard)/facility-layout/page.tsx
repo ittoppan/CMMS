@@ -21,7 +21,7 @@ type PortRef = { scope: "room"|"cabinet"|"asset"; room_id: number; cabinet_id?: 
 type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string; feeds?: PortRef[] };
 type Cabinet = { id: string; name: string; code: string; cabinet_type: string; location_note: string; status: string; notes: string; ports: Port[] };
 type FloorPlanItem = { id: string; type: "cabinet"|"asset"; ref_id: string; room_id?: number; x: number; y: number; label?: string };
-type FloorPlanData = { grid_w: number; grid_h: number; image_url: string; items: FloorPlanItem[] };
+type FloorPlanData = { grid_w: number; grid_h: number; image_url: string; image_width?: number; image_height?: number; items: FloorPlanItem[] };
 type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: FloorPlanData };
 type FloorCfg = { floor_plan: FloorPlanData };
 type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; floors?: Record<string, FloorCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
@@ -800,7 +800,7 @@ export default function FacilityLayoutPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                 <div className="md:col-span-2">
                   <Label className="text-xs">URL รูปแปลนจริง (ห้อง/ชั้น)</Label>
-                  <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value } as any })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+                  <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value, image_width: 0, image_height: 0 } as any })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
                 </div>
                 <div className="flex gap-2">
                   {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any }); setSelectedPlanItemId(null); }}>ลบรูป</Button> : null}
@@ -860,7 +860,21 @@ export default function FacilityLayoutPage() {
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={roomCfg.floor_plan.image_url} alt="Floor plan" className="w-full h-auto block select-none pointer-events-none" />
+                    <img
+                      src={roomCfg.floor_plan.image_url}
+                      alt="Floor plan"
+                      width={roomCfg.floor_plan.image_width || undefined}
+                      height={roomCfg.floor_plan.image_height || undefined}
+                      className="w-full h-auto block select-none pointer-events-none"
+                      onLoad={(e) => {
+                        const el = e.currentTarget;
+                        const w = el.naturalWidth, h = el.naturalHeight;
+                        if (!effectiveRoomId || !w || !h) return;
+                        if (roomCfg.floor_plan.image_width === w && roomCfg.floor_plan.image_height === h) return;
+                        // เก็บขนาดจริงของไฟล์ที่โหลดได้ (ไม่เดา aspect) แล้วรอผู้ใช้กดบันทึก
+                        updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_width: w, image_height: h } as any });
+                      }}
+                    />
                     {(roomCfg.floor_plan?.items || []).map((it) => {
                       const isCab = it.type === "cabinet";
                       const cab = isCab ? (roomCfg.cabinets||[]).find(c => String(c.id) === String(it.ref_id)) : null;
@@ -1300,7 +1314,7 @@ export default function FacilityLayoutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
             <div className="md:col-span-2">
               <Label className="text-xs">URL รูปแปลนจริง (ชั้น/โซน)</Label>
-              <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value } })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+              <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value, image_width: 0, image_height: 0 } })} placeholder="https://…/floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
             </div>
             <div className="flex gap-2">
               {floorCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: "" } }); setSelectedFloorPlanItemId(null); }}>ลบรูป</Button> : null}
@@ -1372,7 +1386,21 @@ export default function FacilityLayoutPage() {
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={floorCfg.floor_plan.image_url} alt="Floor plan" className="w-full h-auto block select-none pointer-events-none" />
+                <img
+                  src={floorCfg.floor_plan.image_url}
+                  alt="Floor plan"
+                  width={floorCfg.floor_plan.image_width || undefined}
+                  height={floorCfg.floor_plan.image_height || undefined}
+                  className="w-full h-auto block select-none pointer-events-none"
+                  onLoad={(e) => {
+                    const el = e.currentTarget;
+                    const w = el.naturalWidth, h = el.naturalHeight;
+                    if (!selectedFloor || !w || !h) return;
+                    if (floorCfg.floor_plan.image_width === w && floorCfg.floor_plan.image_height === h) return;
+                    // เก็บขนาดจริงของไฟล์ที่โหลดได้ (ไม่เดา aspect) แล้วรอผู้ใช้กดบันทึก
+                    updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_width: w, image_height: h } });
+                  }}
+                />
                 {(floorCfg.floor_plan?.items || []).map((it) => {
                   const isCab = it.type === "cabinet";
                   const itemRoomId = it.room_id != null ? Number(it.room_id) : (isCab ? undefined : (assets.find(a => String(a.id) === String(it.ref_id))?.location_id ?? undefined));

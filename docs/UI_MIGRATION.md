@@ -341,4 +341,5 @@
 - `frontend/components/RepairRequestForm.tsx`: รูปโปรไฟล์ LINE 44×44 (`.cmms-avatar`), รูปใน `.cmms-photo-thumb` 96×96 (ช่องเป็น `aspect-ratio: 1`)
 - `frontend/components/WorkOrderClosureDocument.tsx`: รูปก่อน/หลังซ่อม 400×200 (กล่องสูง 200 คงที่ กว้าง fluid), ลายเซ็นผู้รับมอบงาน 280×90
 - `frontend/components/ui/employee-avatar.tsx`: `width`/`height` = `size` prop (24/32/40/56/80)
-- ยังขาด: floor plan 2 จุด (`facility-layout`) ต้องเก็บ `image_width`/`image_height` ตอนอัปโหลดก่อน จึงจะใส่ค่าจริงได้ (แตะ API/DB)
+- `facility-layout` (รูปแปลนห้อง + ชั้น): เก็บ `image_width`/`image_height` ของ **ไฟล์จริง** ไว้ใน JSON เดียวกับ `image_url` (ใน `settings.facility_layout_config`) — ไม่มีตาราง/คอลัมน์/migration ใหม่; `0` = ยังไม่รู้ขนาด; ค่าเติมอัตโนมัติจาก `naturalWidth`/`naturalHeight` ตอน `onLoad` แล้วผู้ใช้กดบันทึกเอง (ไม่ auto-save); แก้ URL → ล้างค่าเป็น 0 เพื่อไม่ใช้สัดส่วนเก่ากับรูปใหม่; helper `facility_layout_sanitize()` ต้อง whitelist 2 key นี้ **ทั้งบล็อกห้องและบล็อกชั้น** ไม่งั้นค่าถูกทิ้งตอน POST
+- ไม่ใส่ `aspect-ratio` ที่กล่องรอบรูปแปลนโดยเจตนา: กล่องมี `minHeight: 320` และหมุดอ้างพิกัด `%` ของกล่อง — `width`/`height` บน `<img>` ไม่เปลี่ยนขนาดที่ render (CSS `w-full h-auto` คุมอยู่) จึงจองที่ก่อนรูปโหลดได้โดยหมุดไม่ขยับ; รูปที่สูงจริงต่ำกว่า 320px ยังเป็นอาการเดิม (กล่องสูงตาม `minHeight`) ซึ่งอยู่นอกขอบเขตงานนี้
