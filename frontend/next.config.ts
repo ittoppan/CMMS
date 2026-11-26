@@ -115,6 +115,14 @@ const nextConfig: NextConfig = {
         destination: `${apiUrl}/line_login.php`,
       },
       {
+        source: "/microsoft_login.php",
+        destination: `${apiUrl}/microsoft_login.php`,
+      },
+      {
+        source: "/microsoft_callback.php",
+        destination: `${apiUrl}/microsoft_callback.php`,
+      },
+      {
         source: "/bind_line.php",
         destination: `${apiUrl}/bind_line.php`,
       },
