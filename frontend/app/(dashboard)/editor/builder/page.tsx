@@ -8,7 +8,8 @@ import { usePageHero } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { LayoutGrid } from "lucide-react";
-import GrapesBuilder from "@/components/GrapesBuilder";
+import dynamic from "next/dynamic";
+const GrapesBuilder = dynamic(() => import("@/components/GrapesBuilder"), { ssr: false, loading: () => <div className="p-8 text-center text-muted-foreground">Loading builder…</div> });
 
 export default function VisualBuilderPage() {
   const hero = usePageHero("editor/builder");
