@@ -40,6 +40,7 @@ import {
 import dynamic from "next/dynamic";
 import * as D from "@/lib/dashboard";
 import { useTvRotate } from "@/lib/use-tv-rotate";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import {
   TOWER_PALETTE as C,
   fetchMonthlyTrend,
@@ -586,14 +587,8 @@ export default function DashboardPage() {
   const slaBreak = ov?.alerts?.sla_by_priority ?? [];
   const slaRiskHours = ov?.alerts?.sla_risk_hours ?? 24;
 
-  useEffect(() => {
-    if (!pendingOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPendingOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [pendingOpen]);
+  // a11y ของ modal งานค้าง: Escape ปิด, Tab/Shift+Tab วนในกล่อง, คืนโฟกัสให้ปุ่มที่เปิด
+  const pendingDialogRef = useDialogA11y<HTMLDivElement>(pendingOpen, () => setPendingOpen(false));
 
   if (firstLoad) {
     if (error) {
@@ -1239,14 +1234,22 @@ export default function DashboardPage() {
 
       {/* ── DRILL-DOWN: รายละเอียดงานค้าง + ผู้รับผิดชอบ ─────────────── */}
       {pendingOpen ? (
-        <div className="tower-modal" role="dialog" aria-modal="true" aria-label="รายละเอียดงานค้างและผู้รับผิดชอบ">
+        <div className="tower-modal" role="presentation">
           <button
             type="button"
             className="tower-modal-backdrop"
             aria-label="ปิดรายละเอียด"
+            tabIndex={-1}
             onClick={() => setPendingOpen(false)}
           />
-          <div className="tower-modal-card">
+          <div
+            ref={pendingDialogRef}
+            className="tower-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="รายละเอียดงานค้างและผู้รับผิดชอบ"
+            tabIndex={-1}
+          >
             <header className="tower-modal-head">
               <div className="min-w-0">
                 <div className="tower-modal-title">งานค้าง · ผู้รับผิดชอบ</div>
