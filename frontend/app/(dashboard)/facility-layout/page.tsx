@@ -708,7 +708,7 @@ export default function FacilityLayoutPage() {
                               {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
                             </select>
                           </div>
-                          <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" onClick={()=> updateRoomPorts(effectiveRoomId, roomCfg.ports.filter((_,i)=>i!==idx))}><Trash2 className="w-4 h-4 text-red-500"/></Button>}</div>
+                          <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" aria-label="ลบพอร์ต/วงจรนี้" onClick={()=> updateRoomPorts(effectiveRoomId, roomCfg.ports.filter((_,i)=>i!==idx))}><Trash2 className="w-4 h-4 text-red-500" aria-hidden="true"/></Button>}</div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           {impactInfo.badSources.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
@@ -789,7 +789,7 @@ export default function FacilityLayoutPage() {
                             {PORT_STATUS.filter(s=>s.value!=="spare"&&s.value!=="reserved").map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
                           </select>
                         </div>
-                        <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" onClick={()=> updateRoomCabinets(effectiveRoomId, roomCfg.cabinets.filter((_,i)=>i!==cidx))}><Trash2 className="w-4 h-4 text-red-500"/></Button>}</div>
+                        <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" aria-label="ลบตู้นี้" onClick={()=> updateRoomCabinets(effectiveRoomId, roomCfg.cabinets.filter((_,i)=>i!==cidx))}><Trash2 className="w-4 h-4 text-red-500" aria-hidden="true"/></Button>}</div>
                       </div>
                       <div><Label className="text-xs">หมายเหตุ/รายละเอียดตู้</Label><Input value={cab.notes||""} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,notes:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="โหลดรวม, ระบบจ่ายไฟ, ผู้รับผิดชอบ" /></div>
                       <details className="text-xs rounded border bg-muted/20 p-2">
@@ -1619,7 +1619,7 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
                 {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
-            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button>}</div>
+            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" aria-label="ลบพอร์ต/วงจรนี้" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3" aria-hidden="true"/></Button>}</div>
           </div>
           <div className="flex flex-wrap items-center gap-1 text-[11px]">
             {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
@@ -1676,7 +1676,7 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
                 {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
-            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button>}</div>
+            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" aria-label="ลบพอร์ต/วงจรนี้" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3" aria-hidden="true"/></Button>}</div>
           </div>
           <div className="flex flex-wrap items-center gap-1 text-[11px]">
             {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}

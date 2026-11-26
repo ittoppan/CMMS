@@ -325,6 +325,7 @@
 กฎ: อะไรที่ `onClick` ได้ ต้อง `Tab` ไปถึง, กด `Enter`/`Space` ได้ และเห็น focus ring (`focus-visible:outline-2 outline-offset-2 outline-[var(--cmms-border-focus)]`) — ถ้าภายในมีการ์ด/แถวที่มีปุ่มซ้อนอยู่ ให้ปุ่มจริงเป็นตัวรับ focus ไม่ใช่ใส่ `role="button"` ที่ตัวห่อ
 
 - `settings/menus`: การ์ดพรีวิวบทบาท → ปุ่มชื่อบทบาท (`aria-pressed`) เป็นตัวรับ focus, การ์ดทั้งใบยังคลิกได้ด้วยเมาส์
+- ปุ่มไอคอนล้วน (ไม่มีข้อความ) ต้องมี `aria-label` เสมอ และไอคอนข้างในใส่ `aria-hidden="true"` — ตรวจทั้ง `frontend/app` (2026-11-26): 23 ปุ่มไอคอนล้วนมีชื่อครบ 0 จุดขาด; จุดที่เพิ่ม: `calibration/calendar` (เดือนก่อนหน้า/ถัดไป), `facility-layout` 4 ปุ่มลบ (พอร์ต ×3, ตู้ ×1), `supervisor/review` ปุ่มไม่อนุมัติ
 - `settings/pwa`: dropzone เปลี่ยนไอคอน → `role="button"` + `tabIndex` + `aria-label` + Enter/Space เปิด file input
 - `components/RepairRequestForm.tsx`: ขั้น stepper ที่ย้อนกลับได้ → `role="button"` + `tabIndex` + `aria-current="step"` + Enter/Space (ขั้นที่ยังไม่ถึงไม่ใส่ `tabIndex`); แบนเนอร์ผูกบัญชี LINE → `role="link"` + `tabIndex` + Enter/Space
 - `audit-log` (ตาราง log) และ `spare_parts/balances` (ตารางยอดคงเหลือ) — แถวคลิกเปิดรายละเอียด/ประวัติ: เพิ่ม `role="button"` + `tabIndex={0}` + `aria-label` + Enter/Space + focus ring (ตารางทั้งสองไม่มีปุ่มซ้อนในแถว)

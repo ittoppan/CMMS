@@ -167,11 +167,11 @@ export default function CalibrationCalendar() {
       <Card className="p-4">
         <div className="mb-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
-            <Button variant="secondary" size="sm" onClick={() => move(-1)}>
-              <ChevronLeft className="h-4 w-4" />
+            <Button variant="secondary" size="sm" aria-label="เดือนก่อนหน้า" onClick={() => move(-1)}>
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => move(1)}>
-              <ChevronRight className="h-4 w-4" />
+            <Button variant="secondary" size="sm" aria-label="เดือนถัดไป" onClick={() => move(1)}>
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
           <h2 className="text-lg font-semibold">

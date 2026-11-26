@@ -236,8 +236,8 @@ export default function SupervisorReviewPage() {
                         {canReview && m.status === "open" && (
                           <>
                             <Button size="sm" onClick={() => (setDetailId(m.id), openApprove(m))}>อนุมัติ</Button>
-                            <Button size="sm" variant="danger" onClick={() => { setDetailId(m.id); setRejectReason(""); setRejectErr(null); setRejectOpen(true); }}>
-                              <XCircle className="h-3.5 w-3.5" />
+                            <Button size="sm" variant="danger" aria-label="ไม่อนุมัติคำขอนี้" title="ไม่อนุมัติ" onClick={() => { setDetailId(m.id); setRejectReason(""); setRejectErr(null); setRejectOpen(true); }}>
+                              <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
                             </Button>
                           </>
                         )}
