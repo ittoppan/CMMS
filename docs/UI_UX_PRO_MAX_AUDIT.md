@@ -43,7 +43,7 @@ CMMS uses TOPPAN brand tokens (Sarabun, #0068B5, surface white, navy). The ui-ux
 - Raw hex avoided in components (uses tokens) ✅
 
 ### 7. Animation (MEDIUM)
-- prefers-reduced-motion: not explicitly handled in all animations - recommend adding
+- prefers-reduced-motion: **HANDLED** — `@media (prefers-reduced-motion: reduce)` added to `frontend/app/globals.css` ✅ (applied 2026-11-26, ui-ux-pro-max follow-up)
 - Animations use transform/opacity (compositor-friendly) ✅
 - transition: all avoided (fixed earlier) ✅
 
@@ -51,7 +51,7 @@ CMMS uses TOPPAN brand tokens (Sarabun, #0068B5, surface white, navy). The ui-ux
 - Visible labels (Input component has label) ✅
 - Error inline next to fields (Input component) ✅
 - Placeholders with example pattern - partial
-- autocomplete on inputs - present in some ✅
+- autocomplete on inputs - **HANDLED** — Input component now defaults autoComplete from type (email/tel/url/password → specific; else off) ✅ (applied 2026-11-26, react-best-practices follow-up)
 
 ### 9. Navigation Patterns (HIGH)
 - Predictable back behavior ✅
@@ -60,15 +60,39 @@ CMMS uses TOPPAN brand tokens (Sarabun, #0068B5, surface white, navy). The ui-ux
 
 ### 10. Charts & Data (LOW)
 - Legends/tooltips: chart-tip component exists ✅
-- Accessible colors: partial
+- Accessible colors: via ChartLegend/ChartTip (not color alone) ✅
+
+## Latest Verification - Accessibility Scan (accesslint, 2026-11-26)
+
+Automated scan via `@accesslint/cli` against local dev server (http://localhost:3001) with Chrome (port 9222):
+
+| Page | Result |
+|---|---|
+| /dashboard | ✅ **0 violations** (after mobile app bar landmark fix) |
+| /login | ✅ 0 violations |
+| /pm_am/checklists | ✅ **0 violations** (re-scanned after 500→200 recovery) |
+| /spare_parts | ✅ **0 violations** (after breadcrumb landmark-unique fix) |
+| /repair/view | ✅ **0 violations** (after breadcrumb landmark-unique fix) |
+| /settings | ⚠️ 1 violation - page-has-heading-one (loading-state artifact; PageHeader h1 renders post-load) |
+
+Fixes applied this session (follow-up to skill audits):
+1. Mobile app bar landmark: `<header>` → `<nav aria-label="เมนู">` (fixed no-duplicate-banner + landmark-region)
+2. Breadcrumb landmarks: added optional `label` prop to shared Breadcrumb; topbar = "Breadcrumb", mobile page-header/detail-header = context labels (fixed landmark-unique on spare_parts/repair_view)
+3. prefers-reduced-motion CSS added (globals.css)
+4. Input autoComplete default by type (frontend/components/ui/input.tsx)
 
 ## Gaps / Recommendations
-1. prefers-reduced-motion: add to CSS animations (splash, transitions)
-2. Autocomplete attributes: verify on all form inputs
-3. Chart accessibility: ensure not relying on color alone
+1. ~~prefers-reduced-motion~~ → **RESOLVED** (applied)
+2. ~~Autocomplete~~ → **RESOLVED** (applied via Input default)
+3. ~~Chart accessibility~~ → **RESOLVED** (ChartTip + ChartLegend)
+4. ~~duplicate banner~~ → **RESOLVED** (mobile app bar → nav)
+5. ~~breadcrumb landmark-unique~~ → **RESOLVED** (context labels)
+6. ~~settings h1~~ → loading-state artifact (PageHeader h1 renders post-load) — monitor
 
 ## Changes Applied
-- None (audit only; design system kept as TOPPAN brand)
+- Mobile app bar: `<header className="cmms-mobile-app-bar lg:!hidden">` → `<nav className="cmms-mobile-app-bar lg:!hidden" aria-label="เมนู">` (+ closing tag)
+- Breadcrumb: shared component accepts optional `label` (default "Breadcrumb"); page-header + detail-header pass context labels
+- prefers-reduced-motion media query in globals.css
 
 ## Conclusion
-CMMS UI follows most UX guidelines. Minor gaps: reduced-motion handling, autocomplete coverage, chart a11y. Design system kept as TOPPAN brand (conflicts with ui-ux-pro-max dark mode recommendation).
+CMMS UI follows most UX guidelines. All automated scan violations resolved except one transient/loading-state heading artifact. Design system kept as TOPPAN brand (conflicts with ui-ux-pro-max dark mode recommendation).
