@@ -382,17 +382,16 @@ export function SidebarNav({
   const searching = q.length > 0;
 
   // จำกัดบล็อก "ใช้บ่อย" ไม่เกิน 5 รายการ
+  // ไม่ตัดเมนูที่อยู่ใน "ใช้บ่อย" ออกจากหมวดเดิม — หมวดต้องครบเสมอ
+  // (เดิมตัดออกทำให้ "ระบบ & ตั้งค่า" ไม่มี "ตั้งค่าระบบทั้งหมด" แล้วดูเหมือนจัดกลุ่มผิด)
   const freq = frequentItems.slice(0, 5);
-  const freqHrefSet = new Set(freq.map((i) => i.href));
 
   const groups = NAV_GROUPS.map((group) => ({
     ...group,
     visibleItems: group.items.filter(
       (item) =>
         canShow(item.perm) &&
-        (!q || (item.label ?? (item.labelKey ? t(item.labelKey) : "")).toLowerCase().includes(q)) &&
-        // เมื่อไม่ได้ค้นหา ตัด item ที่ href ตรงกับ frequentItems ออก
-        (searching || !freqHrefSet.has(item.href))
+        (!q || (item.label ?? (item.labelKey ? t(item.labelKey) : "")).toLowerCase().includes(q))
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
