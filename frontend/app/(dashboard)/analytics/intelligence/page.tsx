@@ -563,7 +563,7 @@ export default function IntelligencePage() {
                   onChange={(e) => setF("search", e.target.value)}
                   placeholder="ค้นหาโค้ด/ชื่อเครื่อง…"
                   aria-label="ค้นหาเครื่อง"
-                  className="h-9 w-full max-w-xs rounded-lg border border-border bg-card px-3 text-sm outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+                  className="h-9 w-full max-w-xs rounded-lg border border-border bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
                 />
                 <button type="button" onClick={() => fetchAll()} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold" style={{ background: "var(--cmms-primary)", color: "#fff" }}>
                   <SearchIcon size={14} aria-hidden="true" /> ค้นหา

@@ -40,7 +40,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-invalid={!!error || undefined}
           aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
           className={cn(
-            "w-full rounded-[var(--cmms-radius-sm)] border bg-[var(--cmms-bg-card)] px-3 py-2 text-base text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)] transition-[border-color,box-shadow] duration-[var(--cmms-transition)] focus:outline-none focus:border-[var(--cmms-border-focus)] focus:shadow-[var(--cmms-shadow-focus)] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
+            "w-full rounded-[var(--cmms-radius-sm)] border bg-[var(--cmms-bg-card)] px-3 py-2 text-base text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)] transition-[border-color,box-shadow] duration-[var(--cmms-transition)] focus-visible:outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:shadow-[var(--cmms-shadow-focus)] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
             error ? "border-[var(--cmms-danger)]" : "border-[var(--cmms-border)]",
             className
           )}

@@ -434,7 +434,7 @@ export function SidebarNav({
                 placeholder={t("sidebar.search")}
                 aria-label="ค้นหาเมนู"
                 autoComplete="off"
-                className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
+                className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus:bg-card focus-visible:ring-2 focus-visible:ring-ring/20"
               />
               {!query && (
                 <button

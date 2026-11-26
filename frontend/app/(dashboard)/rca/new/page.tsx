@@ -18,7 +18,7 @@ import {
   FAILURE_SEVERITIES, RCA_PRODUCTION_IMPACT, fmtDuration,
 } from "@/lib/rca";
 
-const inputCls = "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
+const inputCls = "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]";
 
 export default function RcaNewPage() {
   const hero = usePageHero("rca");
@@ -263,12 +263,12 @@ export default function RcaNewPage() {
 
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">อาการ (Symptom) <span className="text-[var(--cmms-text-muted)]">— ระบุเฉพาะสิ่งที่เห็นจริง</span></span>
-            <textarea value={symptom} onChange={(e) => setSymptom(e.target.value)} rows={2} placeholder="เช่น มีเสียงดังผิดปกติที่หัวปั๊ม ก่อนเครื่องตัดใน 5 นาที" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]" />
+            <textarea value={symptom} onChange={(e) => setSymptom(e.target.value)} rows={2} placeholder="เช่น มีเสียงดังผิดปกติที่หัวปั๊ม ก่อนเครื่องตัดใน 5 นาที" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]" />
           </label>
 
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียดเหตุการณ์ *</span>
-            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} placeholder="เล่าตามลำดับเหตุจริง: เกิดอะไรขึ้น ก่อน/ระหว่าง/หลัง ใครพบเห็น" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]" />
+            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} placeholder="เล่าตามลำดับเหตุจริง: เกิดอะไรขึ้น ก่อน/ระหว่าง/หลัง ใครพบเห็น" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]" />
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -315,7 +315,7 @@ export default function RcaNewPage() {
             </div>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">คำอธิบายปัญหา (Problem Statement)</span>
-              <textarea value={problemStatement} onChange={(e) => setProblemStatement(e.target.value)} rows={3} placeholder="ระบุปัญหาที่ชัดเจนที่ต้องสืบหา เช่น เครื่อง X หยุดเพราะมอเตอร์ม้วนไหม้ โดยก่อนหน้าซ่อมมาแล้ว 2 ครั้งใน 3 เดือน" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]" />
+              <textarea value={problemStatement} onChange={(e) => setProblemStatement(e.target.value)} rows={3} placeholder="ระบุปัญหาที่ชัดเจนที่ต้องสืบหา เช่น เครื่อง X หยุดเพราะมอเตอร์ม้วนไหม้ โดยก่อนหน้าซ่อมมาแล้ว 2 ครั้งใน 3 เดือน" className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]" />
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">

@@ -152,7 +152,7 @@ export default function SagePartAddModal({ open, onClose, workOrderId, woNumber,
               onChange={(e) => setQuery(e.target.value)}
               placeholder="ระบุรหัสหรือชื่ออะไหล่ (Item No. / Description)"
               aria-label="ค้นหาอะไหล่จาก Sage 300"
-              className="h-10 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+              className="h-10 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
               ref={searchRef}
             />
           </div>

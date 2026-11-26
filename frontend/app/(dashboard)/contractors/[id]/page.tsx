@@ -41,7 +41,7 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
   { key: "activity", label: "กิจกรรม", icon: Clock },
 ];
 
-const inputCls = "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
+const inputCls = "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]";
 
 export default function ContractorDetailPage() {
   const params = useParams<{ id: string }>();

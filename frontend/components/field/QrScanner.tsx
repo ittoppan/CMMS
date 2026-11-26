@@ -233,7 +233,7 @@ export function QrScanner({ onResult, onClose, title = "สแกน QR / บา
               onChange={(e) => setManual(e.target.value)}
               placeholder="เช่น MCH-001 หรือ CMMS-A-XXXX"
               ref={manualInputRef}
-              className="h-12 flex-1 min-w-0 rounded-lg border border-white/20 bg-white/10 px-3 text-base text-white outline-none placeholder:text-white/40 focus:border-white/70 focus:ring-2 focus:ring-white/50"
+              className="h-12 flex-1 min-w-0 rounded-lg border border-white/20 bg-white/10 px-3 text-base text-white outline-none placeholder:text-white/40 focus-visible:border-white/70 focus-visible:ring-2 focus-visible:ring-white/50"
               aria-label="กรอกรหัสด้วยตนเอง"
             />
             <Button type="submit" className="h-12">

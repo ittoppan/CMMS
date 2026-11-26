@@ -71,7 +71,7 @@ export default function UtilityEnergyPage() {
     }
   };
 
-  const inputClass = "w-full rounded-[var(--cmms-radius)] border border-border bg-card px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20";
+  const inputClass = "w-full rounded-[var(--cmms-radius)] border border-border bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20";
 
   return (
     <PageShell

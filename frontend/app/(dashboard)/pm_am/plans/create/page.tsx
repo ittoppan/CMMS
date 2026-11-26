@@ -566,7 +566,7 @@ export default function PMPlanFormPage() {
               <Search size={16} strokeWidth={1.75} aria-hidden="true"
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
-                className="w-full rounded-lg border border-input bg-card py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+                className="w-full rounded-lg border border-input bg-card py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
                 placeholder="ค้นหา Item Code / ชื่ออะไหล่ใน Sage 300 (เช่น SUP001 · O-RING) และกด + เพื่อเพิ่ม…"
                 value={ppSearch}
                 onChange={(e) => setPpSearch(e.target.value)}

@@ -47,7 +47,7 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
 ];
 
 const inputCls =
-  "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
+  "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]";
 
 /** tone จาก Phase 32 (neutral/success/warning/danger/info) → .cmms-status */
 function lampOf(tone: Tone | "ok" | "warn" | "down" | "idle" | undefined): "ok" | "warn" | "down" | "idle" {

@@ -159,7 +159,7 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
             }
             autoComplete="off"
             spellCheck={false}
-            className="w-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--cmms-border-focus)] bg-transparent text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)]"
+            className="w-full text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] bg-transparent text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)]"
           />
           <span className="cmms-palette-kbd">ESC</span>
         </div>

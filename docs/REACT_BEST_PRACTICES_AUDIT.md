@@ -22,8 +22,8 @@ Frontend is Next.js 16 (app router) + React 19. Audit focused on CRITICAL/HIGH i
 - RSC props serialization: not audited in detail (pages use client components heavily).
 
 ### MEDIUM — Rendering / Re-render
-- `outline-none` without `focus-visible` replacement: 38 instances in source (mostly inputs with `focus:ring-*`). Recommend migrating to `focus-visible:ring-*`. Bulk change, deferred.
-- `content-visibility` for long lists: not applied. Recommend for tables/lists >50 rows.
+- `outline-none` without `focus-visible` replacement: 38 instances in source (mostly inputs with `focus:ring-*`). ✅ Migrated `focus:` → `focus-visible:` across 29 files (outline-none, border-, shadow-, ring) via script.
+- `content-visibility` for long lists: not applied. Recommend for tables/lists >50 rows (needs profiling).
 
 ### LOW — JavaScript Performance
 - Not audited (low impact).

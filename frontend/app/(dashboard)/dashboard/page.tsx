@@ -123,7 +123,7 @@ export default function DashboardPortalPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="ค้นหา Dashboard (ไทย/อังกฤษ/คำอธิบาย)"
                 aria-label="ค้นหา Dashboard"
-                className="h-11 w-full rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-surface)] pl-10 pr-4 text-sm shadow-[var(--cmms-shadow-sm)] outline-none transition-[border-color,box-shadow] focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-primary)]/20"
+                className="h-11 w-full rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-surface)] pl-10 pr-4 text-sm shadow-[var(--cmms-shadow-sm)] outline-none transition-[border-color,box-shadow] focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-primary)]/20"
               />
             </div>
             <div className="flex shrink-0 items-center gap-2 text-xs text-[var(--cmms-text-secondary)]">

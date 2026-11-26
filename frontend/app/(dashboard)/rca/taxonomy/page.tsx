@@ -216,7 +216,7 @@ export default function RcaTaxonomyPage() {
               value={fCode}
               onChange={(e) => setFCode(e.target.value)}
               placeholder={`เช่น ${KIND_META[kind].codePrefix}-001`}
-              className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
+              className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
             />
           </label>
           <label className="block">
@@ -225,7 +225,7 @@ export default function RcaTaxonomyPage() {
               value={fName}
               onChange={(e) => setFName(e.target.value)}
               placeholder="ชื่อรายการ"
-              className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
+              className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
             />
           </label>
           <label className="block">
@@ -234,7 +234,7 @@ export default function RcaTaxonomyPage() {
               value={fDesc}
               onChange={(e) => setFDesc(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
+              className="w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
             />
           </label>
           {kind === "failure_modes" && (
@@ -258,7 +258,7 @@ export default function RcaTaxonomyPage() {
                 value={fComp}
                 onChange={(e) => setFComp(e.target.value)}
                 placeholder="เช่น bearing, motor"
-                className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]"
+                className="h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
               />
             </label>
           )}

@@ -50,7 +50,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={!!error || undefined}
           aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
           className={cn(
-            "w-full rounded-[var(--cmms-radius-sm)] border bg-[var(--cmms-bg-card)] text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)] transition-[border-color,box-shadow] duration-[var(--cmms-transition)] focus:outline-none focus:border-[var(--cmms-border-focus)] focus:shadow-[var(--cmms-shadow-focus)] disabled:cursor-not-allowed disabled:opacity-50",
+            "w-full rounded-[var(--cmms-radius-sm)] border bg-[var(--cmms-bg-card)] text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)] transition-[border-color,box-shadow] duration-[var(--cmms-transition)] focus-visible:outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:shadow-[var(--cmms-shadow-focus)] disabled:cursor-not-allowed disabled:opacity-50",
             sizeClasses[inputSize],
             error ? "border-[var(--cmms-danger)]" : "border-[var(--cmms-border)]",
             className
