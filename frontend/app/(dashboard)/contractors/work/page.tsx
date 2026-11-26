@@ -459,8 +459,8 @@ export default function ContractorWorkPage() {
                                         {Object.entries(ACCEPTANCE_RESULT_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                                       </SelectContent>
                                     </Select>
-                                    <input className={inputCls} value={iDefect} onChange={(e) => setIDefect(e.target.value)} placeholder={iResult === "pass" ? "บันทึกผลการตรวจ (พบนิดหน่อย)" : "จุดบกพร่อง / ข้อกำหนดแก้ไข"} />
-                                    {iResult === "reject" && <input className={inputCls} type="date" value={iReworkDue} onChange={(e) => setIReworkDue(e.target.value)} placeholder="กำหนดส่งงานใหม่" />}
+                                    <input aria-label="รายละเอียดข้อบกพร่อง" className={inputCls} value={iDefect} onChange={(e) => setIDefect(e.target.value)} placeholder={iResult === "pass" ? "บันทึกผลการตรวจ (พบนิดหน่อย)" : "จุดบกพร่อง / ข้อกำหนดแก้ไข"} />
+                                    {iResult === "reject" && <input aria-label="กำหนดแก้ไข" className={inputCls} type="date" value={iReworkDue} onChange={(e) => setIReworkDue(e.target.value)} placeholder="กำหนดส่งงานใหม่" />}
                                     <div className="flex justify-end gap-2">
                                       <Button variant="ghost" size="sm" onClick={() => setInspectId(0)}><X size={14} aria-hidden="true" /> ปิด</Button>
                                       <Button variant="primary" size="sm" onClick={() => inspect(a)} disabled={busy === `in-${a.id}`}>
@@ -483,7 +483,7 @@ export default function ContractorWorkPage() {
                                     </SelectContent>
                                   </Select>
                                   {a.status === "rework" || a.status === "cancelled" ? (
-                                    <input className={inputCls + " h-9 text-xs"} value={transNote[a.id] || ""} onChange={(e) => setTransNote((p) => ({ ...p, [a.id]: e.target.value }))} placeholder="เหตุผลบังคับ" />
+                                    <input aria-label="หมายเหตุการเปลี่ยนสถานะ" className={inputCls + " h-9 text-xs"} value={transNote[a.id] || ""} onChange={(e) => setTransNote((p) => ({ ...p, [a.id]: e.target.value }))} placeholder="เหตุผลบังคับ" />
                                   ) : null}
                                   <Button variant="secondary" size="sm" onClick={() => transTo[a.id] && transition(a, transTo[a.id])} disabled={!transTo[a.id] || busy === `tr-${a.id}`}>
                                     <ArrowRight size={14} aria-hidden="true" /> {busy === `tr-${a.id}` ? "เปลี่ยนสถานะ…" : "เปลี่ยนสถานะ"}

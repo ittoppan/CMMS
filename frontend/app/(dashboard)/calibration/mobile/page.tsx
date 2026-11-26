@@ -118,6 +118,7 @@ export default function CalibrationMobilePage() {
             </Button>
             <form className="flex w-full gap-2" onSubmit={(e) => { e.preventDefault(); handleManual(); }}>
               <input
+                aria-label="รหัสสินทรัพย์/อุปกรณ์"
                 value={manual}
                 onChange={(e) => setManual(e.target.value)}
                 placeholder="กรอกรหัสเครื่องมือ เช่น MASS-001"

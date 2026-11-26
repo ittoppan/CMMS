@@ -117,6 +117,7 @@ export default function RcaEventsPage() {
           <div className="relative min-w-[220px] flex-1">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" aria-hidden="true" />
             <input
+              aria-label="ค้นหาเหตุการณ์ RCA"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitSearch()}

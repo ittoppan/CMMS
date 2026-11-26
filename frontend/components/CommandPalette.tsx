@@ -146,6 +146,7 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
           <MagnifyingGlassIcon className="w-4.5 h-4.5 shrink-0 text-[var(--cmms-text-muted)]" />
           <input
             ref={inputRef}
+            aria-label="ค้นหาเมนูและคำสั่ง"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);

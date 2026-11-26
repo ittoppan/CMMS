@@ -139,7 +139,7 @@ export default function CalibrationStandardsPage() {
           <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-4">
             <Input label="รหัสมาตรฐาน *" value={form.standard_code || ""} onChange={(e) => set("standard_code", e.target.value)} placeholder="e.g. STD-THERM-001" />
             <Input label="ชื่อมาตรฐาน *" value={form.standard_name || ""} onChange={(e) => set("standard_name", e.target.value)} placeholder="Thermometer master" />
-            <select className="rounded-md border border-input bg-background px-3 py-2 text-sm" value={form.standard_type || "reference_instrument"} onChange={(e) => set("standard_type", e.target.value)}>
+            <select aria-label="ประเภทมาตรฐาน" className="rounded-md border border-input bg-background px-3 py-2 text-sm" value={form.standard_type || "reference_instrument"} onChange={(e) => set("standard_type", e.target.value)}>
               {Object.entries(typeLabel).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <Input label="หมายเลขเครื่อง" value={form.serial_number || ""} onChange={(e) => set("serial_number", e.target.value)} />

@@ -170,6 +170,7 @@ function ColorField({
         />
         <input
           type="text"
+          aria-label={`${label} (HEX)`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="#RRGGBB"

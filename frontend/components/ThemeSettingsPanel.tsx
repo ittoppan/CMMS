@@ -142,6 +142,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
             />
             <input
               type="text"
+              aria-label="รหัสสีหลัก (HEX)"
               value={values.theme_primary_hex ?? ""}
               onChange={(e) => onChange("theme_primary_hex", e.target.value)}
               onBlur={() => preview(preset, primary)}
@@ -165,6 +166,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
             />
             <input
               type="text"
+              aria-label="รหัสสีรอง (HEX)"
               value={values.theme_secondary_hex ?? ""}
               onChange={(e) => onChange("theme_secondary_hex", e.target.value)}
               onBlur={() => preview(preset, primary, secondary)}

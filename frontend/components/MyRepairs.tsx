@@ -231,6 +231,7 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
       {open && (
         <div className="mt-2 flex flex-col gap-2">
           <textarea
+            aria-label="ความคิดเห็นการให้คะแนน"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             maxLength={RATING_COMMENT_MAX}

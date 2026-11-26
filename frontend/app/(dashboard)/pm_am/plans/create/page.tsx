@@ -629,6 +629,7 @@ export default function PMPlanFormPage() {
                         <td className="py-2 pr-2">{p.item_description || "-"}</td>
                         <td className="py-2 pr-2 text-right">
                           <input
+                            aria-label="จำนวนอะไหล่"
                             type="number" min={1}
                             className="w-20 rounded-lg border px-2 py-1 text-right text-sm"
                             style={{ borderColor: "var(--cmms-border)" }}

@@ -60,7 +60,7 @@ export default function PredictiveMaintenancePage() {
       <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
         <label className="text-sm">Horizon (days)</label>
-        <input type="number" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))} className="border rounded px-2 py-1 w-20" />
+        <input aria-label="Horizon (days)" type="number" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))} className="border rounded px-2 py-1 w-20" />
         <button onClick={exportCsv} className="border rounded px-3 py-1 text-sm">Export CSV</button>
       </div>
       {loading ? (

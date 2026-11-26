@@ -1022,7 +1022,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
   /* ---------- หน้า Success ---------- */
   if (submitted) {
     return (
-      <div className="cmms-success-overlay" onClick={() => (window.location.href = "/repair")}>
+      <div className="cmms-success-overlay">
         <div className="cmms-success-card" onClick={(e) => e.stopPropagation()}>
           <div className="cmms-success-icon">
             <CheckCircle size={36} strokeWidth={1.75} />

@@ -358,9 +358,9 @@ export default function ContractorDetailPage() {
                 </SelectContent>
               </Select>
               {(decision === "approved" || decision === "conditional") && (
-                <input className={inputCls} type="date" value={qualUntil} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setQualUntil(e.target.value)} placeholder="วันหมดอายุ" />
+                <input aria-label="คุณสมบัติใช้ได้ถึง" className={inputCls} type="date" value={qualUntil} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setQualUntil(e.target.value)} placeholder="วันหมดอายุ" />
               )}
-              <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="หมายเหตุการประเมิน" />
+              <input aria-label="เหตุผล" className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="หมายเหตุการประเมิน" />
               <Button variant="primary" className="w-full" onClick={reviewQual} disabled={busyQual || !decision}>
                 <ShieldCheck size={15} aria-hidden="true" /> {busyQual ? "กำลังบันทึก…" : "บันทึกผลประเมิน"}
               </Button>

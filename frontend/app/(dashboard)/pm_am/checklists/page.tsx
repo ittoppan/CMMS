@@ -323,6 +323,7 @@ export default function PMChecklistsPage() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">หมวดหมู่</label>
                 <select
+                  aria-label="หมวดหมู่"
                   className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
                   style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
                   value={form.category}
@@ -359,6 +360,7 @@ export default function PMChecklistsPage() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">ประเภทรายการ</label>
                 <select
+                  aria-label="ประเภทรายการ"
                   className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
                   style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
                   value={itemForm.item_type}

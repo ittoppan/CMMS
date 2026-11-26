@@ -294,7 +294,7 @@ export default function RcaDetailPage() {
                 <div key={i} className="flex items-start gap-3">
                   <span className="mt-2.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{i + 1}</span>
                   <div className="flex-1 space-y-2">
-                    <input value={row.statement || ""} onChange={(e) => setWhyRows((prev) => prev.map((r, j) => j === i ? { ...r, statement: e.target.value } : r))} placeholder={`ทำไม (Why) #${i + 1}?`} className={inputCls} />
+                    <input aria-label={`สาเหตุ (Why) #${i + 1}`} value={row.statement || ""} onChange={(e) => setWhyRows((prev) => prev.map((r, j) => j === i ? { ...r, statement: e.target.value } : r))} placeholder={`ทำไม (Why) #${i + 1}?`} className={inputCls} />
                     <div className="flex items-center gap-3">
                       <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[var(--cmms-text-secondary)]">
                         <input type="radio" name="why-root" checked={whyRootIndex === i} onChange={() => setWhyRootIndex(i)} className="h-3.5 w-3.5 accent-[var(--cmms-primary)]" />

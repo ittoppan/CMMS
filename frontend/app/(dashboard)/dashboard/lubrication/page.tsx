@@ -104,15 +104,15 @@ export default function LubricationPage() {
           <FormSection title="เพิ่มจุดหล่อลื่น" columns={2}>
             <div className="space-y-1 md:col-span-2">
               <label className="text-sm font-medium text-foreground">ชื่อจุดหล่อลื่น</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} required />
+              <input aria-label="ชื่อจุดหล่อลื่น" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">รอบเวลา (วัน)</label>
-              <input type="number" min={1} value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} className={inputClass} />
+              <input aria-label="รอบ (วัน)" type="number" min={1} value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} className={inputClass} />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">โน้ต</label>
-              <input value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
+              <input aria-label="หมายเหตุ" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
             </div>
           </FormSection>
           <FormActions
@@ -154,7 +154,7 @@ export default function LubricationPage() {
                   <td className="px-3 py-2">
                     {canWrite && markPointId === it.id ? (
                       <span className="flex items-center gap-2">
-                        <input type="date" value={markDate} onChange={(e) => setMarkDate(e.target.value)} className="rounded border border-border bg-card px-2 py-1 text-xs" />
+                        <input aria-label="วันที่บำรุง" type="date" value={markDate} onChange={(e) => setMarkDate(e.target.value)} className="rounded border border-border bg-card px-2 py-1 text-xs" />
                         <button onClick={() => markDone(it.id)} className="rounded bg-[var(--cmms-primary)] px-2 py-1 text-xs text-white">บันทึก</button>
                         <button onClick={() => setMarkPointId(null)} className="text-xs text-muted-foreground">ยกเลิก</button>
                       </span>

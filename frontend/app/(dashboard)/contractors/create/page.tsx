@@ -231,12 +231,12 @@ export default function ContractorCreatePage() {
         <CardContent className="space-y-3">
           {contacts.map((c, i) => (
             <div key={i} className="grid gap-3 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/40 p-3 sm:grid-cols-2 lg:grid-cols-5">
-              <input className={inputCls} value={c.full_name} onChange={(e) => setContact(i, "full_name", e.target.value)} placeholder="ชื่อ-นามสกุล" />
-              <input className={inputCls} value={c.role} onChange={(e) => setContact(i, "role", e.target.value)} placeholder="ตำแหน่ง" />
-              <input className={inputCls} value={c.phone} onChange={(e) => setContact(i, "phone", e.target.value)} placeholder="โทรศัพท์" />
-              <input className={inputCls} value={c.email} onChange={(e) => setContact(i, "email", e.target.value)} placeholder="อีเมล" />
+              <input aria-label="ชื่อ-นามสกุลผู้ติดต่อ" className={inputCls} value={c.full_name} onChange={(e) => setContact(i, "full_name", e.target.value)} placeholder="ชื่อ-นามสกุล" />
+              <input aria-label="ตำแหน่ง" className={inputCls} value={c.role} onChange={(e) => setContact(i, "role", e.target.value)} placeholder="ตำแหน่ง" />
+              <input aria-label="เบอร์โทร" className={inputCls} value={c.phone} onChange={(e) => setContact(i, "phone", e.target.value)} placeholder="โทรศัพท์" />
+              <input aria-label="อีเมล" className={inputCls} value={c.email} onChange={(e) => setContact(i, "email", e.target.value)} placeholder="อีเมล" />
               <div className="flex items-center gap-2">
-                <input className={inputCls} value={c.line_id} onChange={(e) => setContact(i, "line_id", e.target.value)} placeholder="LINE ID" />
+                <input aria-label="LINE ID" className={inputCls} value={c.line_id} onChange={(e) => setContact(i, "line_id", e.target.value)} placeholder="LINE ID" />
                 {contacts.length > 1 && (
                   <Button variant="ghost" size="icon" aria-label="ลบผู้ติดต่อ" onClick={() => setContacts((p) => p.filter((_, idx) => idx !== i))} title="ลบผู้ติดต่อ">
                     <Trash2 size={15} aria-hidden="true" />

@@ -736,7 +736,7 @@ export default function FacilityLayoutPage() {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                           <div className="md:col-span-2"><Label className="text-xs">ชื่อ/Label</Label><Input value={p.label} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,label:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="LAN-01, CB-01" /></div>
                           <div className="md:col-span-2"><Label className="text-xs">ประเภท</Label>
-                            <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.port_type} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_type:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
+                            <select aria-label="ประเภทพอร์ต" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.port_type} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_type:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
                               {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
                             </select>
                           </div>
@@ -744,7 +744,7 @@ export default function FacilityLayoutPage() {
                           <div className="md:col-span-2"><Label className="text-xs">สเปก (V/A/ชนิด)</Label><Input value={p.spec || ""} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,spec:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="220V 16A, Cat6" /></div>
                           <div className="md:col-span-2"><Label className="text-xs">ปลายทาง (ข้อความ)</Label><Input value={p.endpoint} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,endpoint:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เครื่อง/ตู้ไฟ/อุปกรณ์" /></div>
                           <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
-                            <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.status} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,status:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
+                            <select aria-label="สถานะพอร์ต" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.status} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,status:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
                               {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
                             </select>
                           </div>
@@ -767,7 +767,7 @@ export default function FacilityLayoutPage() {
                           </div>
                           {canManage && (
                             <div className="flex items-center gap-2">
-                              <select className="flex-1 h-9 rounded-md border bg-background px-2 text-xs" defaultValue="" onChange={e=>{
+                              <select aria-label="เลือกแหล่งจ่ายไฟ" className="flex-1 h-9 rounded-md border bg-background px-2 text-xs" defaultValue="" onChange={e=>{
                                 const key = e.target.value; if (!key) return;
                                 const target = portIndex[key]; if (!target) return;
                                 const ref = target.ref;
@@ -819,13 +819,13 @@ export default function FacilityLayoutPage() {
                         <div className="md:col-span-3"><Label className="text-xs">ชื่อตู้/แผง</Label><Input value={cab.name} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,name:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="เช่น MDB-1, DB-F1, PLC Panel" /></div>
                         <div className="md:col-span-2"><Label className="text-xs">รหัส/Code</Label><Input value={cab.code} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,code:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="รหัสตู้" /></div>
                         <div className="md:col-span-2"><Label className="text-xs">ประเภทตู้</Label>
-                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.cabinet_type} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,cabinet_type:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
+                          <select aria-label="ประเภทตู้/แผง" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.cabinet_type} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,cabinet_type:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
                             {CABINET_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </div>
                         <div className="md:col-span-3"><Label className="text-xs">ตำแหน่ง/จุดติดตั้ง</Label><Input value={cab.location_note} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,location_note:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="ผนังด้านเหนือ, ใต้บันได" /></div>
                         <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
-                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.status} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,status:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
+                          <select aria-label="สถานะตู้/แผง" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.status} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,status:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
                             {PORT_STATUS.filter(s=>s.value!=="spare"&&s.value!=="reserved").map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
                           </select>
                         </div>
@@ -879,7 +879,7 @@ export default function FacilityLayoutPage() {
               {canManage && (
                 <div className="flex flex-wrap gap-2 items-center">
                   <Label className="text-xs">วางหมุด:</Label>
-                  <select className="h-9 rounded-md border bg-background px-2 text-xs min-w-[220px]" value={planPlaceTarget ? `${planPlaceTarget.type}:${planPlaceTarget.ref_id}` : ""} onChange={e=>{
+                  <select aria-label="ตำแหน่งติดตั้งในแผนผัง" className="h-9 rounded-md border bg-background px-2 text-xs min-w-[220px]" value={planPlaceTarget ? `${planPlaceTarget.type}:${planPlaceTarget.ref_id}` : ""} onChange={e=>{
                     const v = e.target.value;
                     if (!v) { setPlanPlaceTarget(null); return; }
                     const [type, ref_id] = v.split(":");
@@ -1129,14 +1129,14 @@ export default function FacilityLayoutPage() {
             </div>
             <div>
               <Label className="text-xs">ประเภทพอร์ต</Label>
-              <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portTypeFilter} onChange={e=>setPortTypeFilter(e.target.value)}>
+              <select aria-label="กรองประเภทพอร์ต" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portTypeFilter} onChange={e=>setPortTypeFilter(e.target.value)}>
                 <option value="all">ทุกประเภท</option>
                 {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
               <Label className="text-xs">สถานะ</Label>
-              <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portStatusFilter} onChange={e=>setPortStatusFilter(e.target.value)}>
+              <select aria-label="กรองสถานะพอร์ต" className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portStatusFilter} onChange={e=>setPortStatusFilter(e.target.value)}>
                 <option value="all">ทุกสถานะ</option>
                 {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
@@ -1408,6 +1408,7 @@ export default function FacilityLayoutPage() {
             <div className="flex flex-wrap gap-2 items-center">
               <Label className="text-xs">วางหมุด:</Label>
               <select
+                aria-label="ตำแหน่งติดตั้งในแผนผัง"
                 className="h-9 rounded-md border bg-background px-2 text-xs min-w-[260px]"
                 value={floorPlanPlaceTarget ? `${floorPlanPlaceTarget.type}:${floorPlanPlaceTarget.room_id}:${floorPlanPlaceTarget.ref_id}` : ""}
                 onChange={e=>{
@@ -1675,7 +1676,7 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
           <div className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end">
             <div className="md:col-span-2"><Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/เบรกเกอร์/เทอร์มินัล" className="h-8 text-xs" /></div>
             <div className="md:col-span-2">
-              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.port_type} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_type:e.target.value}; update(n); }}>
+              <select aria-label="ประเภทพอร์ต" className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.port_type} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_type:e.target.value}; update(n); }}>
                 {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
@@ -1683,7 +1684,7 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
             <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก (V/A)" className="h-8 text-xs" /></div>
             <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง (ข้อความ)" className="h-8 text-xs" /></div>
             <div className="md:col-span-2">
-              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
+              <select aria-label="สถานะพอร์ต" className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
                 {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
@@ -1701,7 +1702,7 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
               ))}
             </div>
             {canManage && (
-              <select className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
                 const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
@@ -1740,7 +1741,7 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
             <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก" className="h-8 text-xs" /></div>
             <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง (ข้อความ)" className="h-8 text-xs" /></div>
             <div className="md:col-span-2">
-              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
+              <select aria-label="สถานะพอร์ต" className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
                 {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
@@ -1758,7 +1759,7 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
               ))}
             </div>
             {canManage && (
-              <select className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
                 const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";

@@ -1207,6 +1207,7 @@ export default function RepairViewDetailsPage() {
                         <td className="p-3">{r.name}</td>
                         <td className="p-3">
                           <input
+                            aria-label="จำนวนที่ใช้"
                             type="number"
                             min={1}
                             value={r.quantity_used}

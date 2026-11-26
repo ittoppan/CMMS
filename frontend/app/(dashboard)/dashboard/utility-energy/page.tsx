@@ -88,25 +88,25 @@ export default function UtilityEnergyPage() {
           <FormSection title="บันทึกค่ามิเตอร์" columns={2}>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">ประเภท</label>
-              <select value={utilityType} onChange={(e) => setUtilityType(e.target.value)} className={inputClass}>
+              <select aria-label="ประเภทสาธารณูปโภค" value={utilityType} onChange={(e) => setUtilityType(e.target.value)} className={inputClass}>
                 {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">วันที่</label>
-              <input type="date" value={readingDate} onChange={(e) => setReadingDate(e.target.value)} className={inputClass} required />
+              <input aria-label="วันที่อ่านค่า" type="date" value={readingDate} onChange={(e) => setReadingDate(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">ค่าที่อ่านได้</label>
-              <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={inputClass} required />
+              <input aria-label="ค่าที่อ่านได้" type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-foreground">หน่วย</label>
-              <input value={unit} onChange={(e) => setUnit(e.target.value)} className={inputClass} placeholder="kWh, m³" />
+              <input aria-label="หน่วย" value={unit} onChange={(e) => setUnit(e.target.value)} className={inputClass} placeholder="kWh, m³" />
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-sm font-medium text-foreground">โน้ต</label>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
+              <textarea aria-label="หมายเหตุ" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
             </div>
           </FormSection>
           <FormActions

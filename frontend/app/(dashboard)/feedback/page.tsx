@@ -262,6 +262,7 @@ export default function FeedbackPage() {
                       </VStack>
                       {scope === "all" && (
                         <select
+                          aria-label="สถานะข้อเสนอแนะ"
                           className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
                           value={f.status}
                           onChange={(e) => updateStatus(f.id, e.target.value)}

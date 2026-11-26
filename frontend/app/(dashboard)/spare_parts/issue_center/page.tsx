@@ -303,6 +303,7 @@ export default function SageIssueCenterPage() {
             className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-base font-bold text-[var(--cmms-text-secondary)] transition hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40 active:scale-[0.98]"
           >−</button>
           <input
+            aria-label="จำนวนเบิก"
             type="number"
             min="1"
             max={row.original.stockQty}

@@ -589,7 +589,7 @@ export default function CostPage() {
                   <div className="flex flex-wrap items-end gap-2">
                     <div className="min-w-[200px]">
                       <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ID ใบสั่งซ่อม</label>
-                      <input value={woQuery} onChange={(e) => setWoQuery(e.target.value.replace(/\D/g, ""))} onKeyDown={(e) => e.key === "Enter" && openWo()}
+                      <input aria-label="เลขที่ใบงาน" value={woQuery} onChange={(e) => setWoQuery(e.target.value.replace(/\D/g, ""))} onKeyDown={(e) => e.key === "Enter" && openWo()}
                         placeholder="เช่น 5"
                         className="h-9 w-full rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]" />
                     </div>
