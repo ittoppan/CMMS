@@ -11,5 +11,5 @@ $host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost') ?: 'lo
 $port = getenv('NEXTJS_PORT') ?: '3001';
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 
-header('Location: ' . $scheme . '://' . $host . ':' . $port . '/dashboard', true, 302);
+header('Location: ' . $scheme . '://' . $host . ':' . $port . '/home', true, 302);
 exit;

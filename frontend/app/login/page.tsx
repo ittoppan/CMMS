@@ -150,13 +150,8 @@ function LoginContent() {
           if (data?.user?.role_id != null) localStorage.setItem('cmms_line_role_id', String(data.user.role_id));
           if (data?.user?.role_name) localStorage.setItem('cmms_line_role_name', data.user.role_name);
         } catch { /* ignore */ }
-        // หน้าแรกต่อ role
-        let landing = '/';
-        const rid = Number(data?.user?.role_id);
-        if (rid === 9) landing = '/repair/request';
-        else if (rid === 3) landing = '/repair/my_tasks';
-        else if (rid === 7) landing = '/supervisor';
-        else if (rid === 2 || rid === 6 || rid === 5) landing = '/dashboard';
+        // หน้าหลักของทุกคนเป็นหน้า HOME (/home) — ไม่แยกตาม role
+        const landing = '/home';
         window.location.href = bindLine ? '/line_login.php' : nextPath ? nextPath : landing;
       } else {
         setLoginFailed(true);
