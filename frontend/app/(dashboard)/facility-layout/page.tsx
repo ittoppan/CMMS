@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCan } from "@/lib/useCan";
+import { useImageSize, type ImageSize } from "@/lib/use-image-size";
 import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network, Search, AlertTriangle, CircleCheck, CircleDashed, Wrench } from "lucide-react";
 import AndonBadge from "@/components/AndonBadge";
 
@@ -66,9 +67,9 @@ function defaultFloorPlan(): FloorPlanData { return { grid_w: 8, grid_h: 6, imag
  * กล่องจะเท่ากล่องรูปเป๊ะ ⇒ พิกัดหมุดที่คิดเป็น % ของกล่องตรงกับตัวรูป และไม่เกิดแถบว่าง
  * เมื่อรูปสูงจริงต่ำกว่า 320px; ถ้ายังไม่รู้ขนาด (0) ถอยไปใช้ minHeight เดิม — ไม่เดาสัดส่วน
  */
-function planBoxStyle(fp?: FloorPlanData): CSSProperties {
-  const w = fp?.image_width ?? 0;
-  const h = fp?.image_height ?? 0;
+function planBoxStyle(fp?: FloorPlanData, measured?: ImageSize | null): CSSProperties {
+  const w = fp?.image_width || measured?.w || 0;
+  const h = fp?.image_height || measured?.h || 0;
   // ส่งสัดส่วนให้คลาส .cmms-plan-box (aspect-ratio อยู่ใน CSS) — ไม่รู้ขนาดถอยไปใช้ minHeight เดิม
   return w > 0 && h > 0
     ? ({ "--cmms-plan-ratio": `${w} / ${h}` } as CSSProperties)
@@ -221,6 +222,10 @@ export default function FacilityLayoutPage() {
     fp.items = Array.isArray(fp.items) ? fp.items : [];
     return { floor_plan: fp };
   }, [config, selectedFloor]);
+
+  // ขนาดรูป floor plan: ใช้ค่าที่บันทึกไว้ก่อน ถ้ายังไม่มีก็วัดฝั่ง client (ไม่แตะ API/DB)
+  const roomPlanSize = useImageSize(roomCfg.floor_plan?.image_url, roomCfg.floor_plan?.image_width, roomCfg.floor_plan?.image_height);
+  const floorPlanSize = useImageSize(floorCfg.floor_plan?.image_url, floorCfg.floor_plan?.image_width, floorCfg.floor_plan?.image_height);
 
   const floorRooms = useMemo(() => selectedFloor ? (byParent[selectedFloor] || []) : [], [byParent, selectedFloor]);
   const floorRoomIds = useMemo(() => new Set(floorRooms.map(r => r.id)), [floorRooms]);
@@ -848,7 +853,7 @@ export default function FacilityLayoutPage() {
                   <div
                     ref={planContainerRef}
                     className={`cmms-plan-box relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
-                    style={planBoxStyle(roomCfg.floor_plan)}
+                    style={planBoxStyle(roomCfg.floor_plan, roomPlanSize)}
                     onClick={(e)=>{
                       if (suppressPlanClickRef.current) { suppressPlanClickRef.current = false; return; }
                       if (!canManage || !planPlaceTarget || !effectiveRoomId) return;
@@ -878,8 +883,8 @@ export default function FacilityLayoutPage() {
                     <img
                       src={roomCfg.floor_plan.image_url}
                       alt="Floor plan"
-                      width={roomCfg.floor_plan.image_width || undefined}
-                      height={roomCfg.floor_plan.image_height || undefined}
+                      width={roomCfg.floor_plan.image_width || roomPlanSize?.w || undefined}
+                      height={roomCfg.floor_plan.image_height || roomPlanSize?.h || undefined}
                       className="w-full h-auto block select-none pointer-events-none"
                       onLoad={(e) => {
                         const el = e.currentTarget;
@@ -1373,7 +1378,7 @@ export default function FacilityLayoutPage() {
               <div
                 ref={floorPlanContainerRef}
                 className={`cmms-plan-box relative w-full overflow-hidden rounded-lg border bg-slate-100 ${floorPlanPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
-                style={planBoxStyle(floorCfg.floor_plan)}
+                style={planBoxStyle(floorCfg.floor_plan, floorPlanSize)}
                 onClick={(e)=>{
                   if (suppressFloorPlanClickRef.current) { suppressFloorPlanClickRef.current = false; return; }
                   if (!canManage || !floorPlanPlaceTarget || !selectedFloor) return;
@@ -1404,8 +1409,8 @@ export default function FacilityLayoutPage() {
                 <img
                   src={floorCfg.floor_plan.image_url}
                   alt="Floor plan"
-                  width={floorCfg.floor_plan.image_width || undefined}
-                  height={floorCfg.floor_plan.image_height || undefined}
+                  width={floorCfg.floor_plan.image_width || floorPlanSize?.w || undefined}
+                  height={floorCfg.floor_plan.image_height || floorPlanSize?.h || undefined}
                   className="w-full h-auto block select-none pointer-events-none"
                   onLoad={(e) => {
                     const el = e.currentTarget;

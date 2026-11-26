@@ -326,6 +326,7 @@
 
 - `settings/menus`: การ์ดพรีวิวบทบาท → ปุ่มชื่อบทบาท (`aria-pressed`) เป็นตัวรับ focus, การ์ดทั้งใบยังคลิกได้ด้วยเมาส์
 - ปุ่มไอคอนล้วน (ไม่มีข้อความ) ต้องมี `aria-label` เสมอ และไอคอนข้างในใส่ `aria-hidden="true"` — ตรวจทั้ง `frontend/app` (2026-11-26): 23 ปุ่มไอคอนล้วนมีชื่อครบ 0 จุดขาด; จุดที่เพิ่ม: `calibration/calendar` (เดือนก่อนหน้า/ถัดไป), `facility-layout` 4 ปุ่มลบ (พอร์ต ×3, ตู้ ×1), `supervisor/review` ปุ่มไม่อนุมัติ
+- รูป floor plan (`facility-layout` 2 จุด — ห้อง/ชั้น): ใส่ `width`/`height` จาก `image_width`/`image_height` ที่บันทึกไว้ใน config ถ้ายังไม่มีใช้ `useImageSize` (`frontend/lib/use-image-size.ts`) preload วัด `naturalWidth/Height` ฝั่ง client + cache ต่อ URL → ไม่เพิ่ม field/endpoint ใหม่; `onLoad` เขียนค่าจริงกลับเข้า config ตามเดิม (บันทึกเมื่อกดบันทึกผ่าน `POST /api/v1/facility_layout.php` ที่ whitelist ขนาดอยู่แล้ว) · marker ใช้พิกัด % ของ `.cmms-plan-box` จึงไม่เปลี่ยนตำแหน่งเมื่อทราบขนาดรูป
 - `settings/pwa`: dropzone เปลี่ยนไอคอน → `role="button"` + `tabIndex` + `aria-label` + Enter/Space เปิด file input
 - `components/RepairRequestForm.tsx`: ขั้น stepper ที่ย้อนกลับได้ → `role="button"` + `tabIndex` + `aria-current="step"` + Enter/Space (ขั้นที่ยังไม่ถึงไม่ใส่ `tabIndex`); แบนเนอร์ผูกบัญชี LINE → `role="link"` + `tabIndex` + Enter/Space
 - `audit-log` (ตาราง log) และ `spare_parts/balances` (ตารางยอดคงเหลือ) — แถวคลิกเปิดรายละเอียด/ประวัติ: เพิ่ม `role="button"` + `tabIndex={0}` + `aria-label` + Enter/Space + focus ring (ตารางทั้งสองไม่มีปุ่มซ้อนในแถว)
