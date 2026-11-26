@@ -59,7 +59,7 @@ export function DetailHeader({
   return (
     <div className={cn("w-full", className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumb className="mb-3 lg:hidden">
+        <Breadcrumb className="mb-3 lg:hidden" label="Breadcrumb trail">
           <BreadcrumbList className="flex flex-wrap items-center gap-1 text-xs">
             {breadcrumbs.map((crumb, i) => {
               const last = i === breadcrumbs.length - 1;
