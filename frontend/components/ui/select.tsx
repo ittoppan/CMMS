@@ -123,7 +123,7 @@ function SelectLabel({
 }: React.ComponentProps<typeof SelectPrimitive.Label>) {
   return (
     <SelectPrimitive.Label
-      className={cn("px-2 py-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground", className)}
+      className={cn("px-2 py-1.5 text-xs font-semibold text-muted-foreground", className)}
       {...props}
     />
   );
@@ -137,7 +137,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "relative flex w-full cursor-default select-none items-center gap-2 rounded-lg py-2 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[state=checked]:font-medium",
+        "relative flex w-full cursor-default select-none items-center gap-2 rounded-lg py-2 pl-2 pr-8 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[state=checked]:font-medium",
         className
       )}
       {...props}

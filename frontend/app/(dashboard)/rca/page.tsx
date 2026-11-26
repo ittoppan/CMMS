@@ -40,7 +40,7 @@ function StatCard({ icon: Icon, label, value, sub, tone }: {
     <Card>
       <CardContent className="flex items-start justify-between gap-3 p-5">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">{label}</p>
+          <p className="text-xs font-semibold text-[var(--cmms-text-secondary)]">{label}</p>
           <p className="mt-1.5 text-2xl font-bold tracking-tight text-[var(--cmms-text-primary)]">{value}</p>
           {sub && <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">{sub}</p>}
         </div>
@@ -281,7 +281,7 @@ export default function RcaDashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                      <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
                         <th className="px-3 py-2">เหตุการณ์</th>
                         <th className="px-3 py-2">เครื่องจักร</th>
                         <th className="px-3 py-2">โหมด</th>
@@ -325,7 +325,7 @@ export default function RcaDashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                      <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
                         <th className="px-3 py-2">RCA</th>
                         <th className="px-3 py-2">หัวข้อ/เครื่องจักร</th>
                         <th className="px-3 py-2">สถานะ</th>

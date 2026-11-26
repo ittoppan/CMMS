@@ -206,12 +206,12 @@ export default function PushDevicePage() {
         <CardContent className="space-y-4 p-5">
           <StatusHeader icon={BellRing} tone="success" title="เปิดรับการแจ้งเตือนอยู่ — อุปกรณ์นี้พร้อมใช้งาน" />
           <div className="flex items-start gap-3 rounded-xl border bg-muted/40 p-3" aria-hidden="true">
-            <div className="mt-1 rounded-lg bg-[var(--cmms-primary)] px-2 py-1 text-[10px] font-bold text-white">CMMS</div>
+            <div className="mt-1 rounded-lg bg-[var(--cmms-primary)] px-2 py-1 text-xs font-bold text-white">CMMS</div>
             <VStack gap={0.5}>
               <span className="text-sm font-semibold">ตัวอย่าง: แจ้งซ่อมด่วน WO-2026-0142</span>
               <span className="text-xs text-muted-foreground">Press Machine 01 เสียงดังผิดปกติ — ความสำคัญ: สูง</span>
             </VStack>
-            <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">เมื่อกี้</span>
+            <span className="ml-auto shrink-0 text-xs text-muted-foreground">เมื่อกี้</span>
           </div>
           <HStack gap={3} wrap="wrap">
             <Button onClick={test} disabled={testing}>

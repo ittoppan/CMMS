@@ -129,7 +129,7 @@ function CommandItem({ className, ...props }: React.ComponentProps<typeof CmdIte
     <CmdItem
       data-slot="command-item"
       className={cn(
-        "data-[selected=true]:bg-accent/50 data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+        "data-[selected=true]:bg-accent/50 data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
         className
       )}
       {...props}

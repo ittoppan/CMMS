@@ -360,7 +360,7 @@ function FlowCard({ flow }: { flow: PfFlow }) {
 
         {flow.branches.length > 0 && (
           <div className="border-t border-border pt-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="mb-2 text-xs font-semibold r text-muted-foreground">
               {flow.branchTitle}
             </p>
             <div className="flex flex-wrap gap-2">

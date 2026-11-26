@@ -351,7 +351,7 @@ export default function AuditLogPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                       <th className="px-3 py-2 font-semibold">เวลา (GMT+7)</th>
                       <th className="px-3 py-2 font-semibold">ผู้ใช้</th>
                       <th className="px-3 py-2 font-semibold">Action</th>
@@ -450,21 +450,21 @@ export default function AuditLogPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Time (GMT+7)</p>
+                <p className="text-xs font-semibold text-muted-foreground">Time (GMT+7)</p>
                 <p className="mt-0.5 text-sm tabular-nums">{fmtDateTime(String(detail.created_at ?? ""))}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Severity</p>
+                <p className="text-xs font-semibold text-muted-foreground">Severity</p>
                 <div className="mt-1">
                   <Badge variant={severityVariant[String(detail.severity)] ?? "neutral"}>{String(detail.severity ?? "-")}</Badge>
                 </div>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Action</p>
+                <p className="text-xs font-semibold text-muted-foreground">Action</p>
                 <p className="mt-0.5 text-sm font-medium">{String(detail.action ?? "-")}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Resource</p>
+                <p className="text-xs font-semibold text-muted-foreground">Resource</p>
                 <p className="mt-0.5 text-sm">
                   {String(detail.resource_type ?? "-")}
                   {detail.resource_id ? ` #${String(detail.resource_id)}` : ""}
@@ -476,28 +476,28 @@ export default function AuditLogPage() {
               <div className="flex items-start gap-2">
                 <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">ผู้ใช้</p>
+                  <p className="text-xs font-semibold text-muted-foreground">ผู้ใช้</p>
                   <p className="mt-0.5 text-sm">{String(detail.user_name ?? "-")}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Fingerprint className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">IP Address</p>
+                  <p className="text-xs font-semibold text-muted-foreground">IP Address</p>
                   <p className="mt-0.5 text-sm tabular-nums">{String(detail.ip_address ?? "-")}</p>
                 </div>
               </div>
               <div className="sm:col-span-2 flex items-start gap-2">
                 <MonitorSmartphone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">User Agent</p>
+                  <p className="text-xs font-semibold text-muted-foreground">User Agent</p>
                   <p className="mt-0.5 truncate text-sm">{String(detail.user_agent ?? "-")}</p>
                 </div>
               </div>
               <div className="sm:col-span-2 flex items-start gap-2">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Request ID</p>
+                  <p className="text-xs font-semibold text-muted-foreground">Request ID</p>
                   <p className="mt-0.5 text-sm tabular-nums">{String(detail.request_id ?? "-")}</p>
                 </div>
               </div>
@@ -505,20 +505,20 @@ export default function AuditLogPage() {
 
             {detail.description ? (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">คำอธิบาย</p>
+                <p className="text-xs font-semibold text-muted-foreground">คำอธิบาย</p>
                 <p className="mt-0.5 text-sm">{String(detail.description)}</p>
               </div>
             ) : null}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                   <FileJson2 className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" /> ค่าก่อนแก้ไข (old)
                 </p>
                 <pre className="mt-1 max-h-48 overflow-auto rounded-md bg-[var(--cmms-bg-muted)] p-3 text-xs">{fmtValue(detail.old_value)}</pre>
               </div>
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                   <FileJson2 className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" /> ค่าหลังแก้ไข (new)
                 </p>
                 <pre className="mt-1 max-h-48 overflow-auto rounded-md bg-[var(--cmms-bg-muted)] p-3 text-xs">{fmtValue(detail.new_value)}</pre>

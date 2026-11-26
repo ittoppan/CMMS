@@ -112,7 +112,7 @@ function Section({
   if (!children) return null;
   return (
     <section className="space-y-2">
-      <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+      <h2 className="flex items-center gap-2 text-sm font-bold  text-muted-foreground">
         {icon}
         {title}
       </h2>
@@ -524,7 +524,7 @@ export default function KnowledgeArticleDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold  text-muted-foreground">
                   <Link2 size={13} aria-hidden="true" /> เครื่อง / อะไหล่ / งาน ({(article.relations ?? []).length})
                 </h3>
                 {(article.relations ?? []).length === 0 ? (
@@ -575,7 +575,7 @@ export default function KnowledgeArticleDetailPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold  text-muted-foreground">
                   <FileText size={13} aria-hidden="true" /> เอกสารควบคุม ({(article.documents ?? []).length})
                 </h3>
                 {(article.documents ?? []).length === 0 ? (

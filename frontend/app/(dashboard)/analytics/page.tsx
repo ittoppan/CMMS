@@ -337,7 +337,7 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${val} ใบงาน`}
                     />
-                    <span className="w-full truncate text-center text-[10px] text-[var(--cmms-text-secondary)] sm:text-xs">{m.month}</span>
+                    <span className="w-full truncate text-center text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
                   </div>
                 );
               })
@@ -402,7 +402,7 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${m.cost} หมื่นบาท`}
                     />
-                    <span className="w-full truncate text-center text-[10px] text-[var(--cmms-text-secondary)] sm:text-xs">{m.month}</span>
+                    <span className="w-full truncate text-center text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
                   </div>
                 );
               })

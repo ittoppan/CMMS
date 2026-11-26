@@ -304,7 +304,7 @@ export default function KnowledgeReviewsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                       <th className="px-4 py-2.5">บทความ</th>
                       <th className="px-4 py-2.5">สถานะ</th>
                       <th className="px-4 py-2.5">ครบกำหนด</th>

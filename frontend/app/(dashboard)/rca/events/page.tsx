@@ -176,7 +176,7 @@ export default function RcaEventsPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                  <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
                     <th className="px-4 py-3">เหตุการณ์</th>
                     <th className="px-4 py-3">เครื่องจักร</th>
                     <th className="px-4 py-3">อาการ / โหมด</th>

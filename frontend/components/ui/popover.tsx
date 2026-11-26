@@ -20,7 +20,7 @@ function PopoverContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "cmms-pop-content z-[60] w-72 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none",
+          "cmms-pop-content z-[60] w-72 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]",
           className
         )}
         {...props}

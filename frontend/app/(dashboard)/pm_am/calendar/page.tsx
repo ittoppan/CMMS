@@ -592,7 +592,7 @@ export default function PMCalendarPage() {
                   </div>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground">“ชน/ซ้อน” = คนเดียวกันมี &gt;1 งานในวันเดียวกัน (ควรตรวจสอบการจัดสรร)</p>
+              <p className="text-xs text-muted-foreground">“ชน/ซ้อน” = คนเดียวกันมี &gt;1 งานในวันเดียวกัน (ควรตรวจสอบการจัดสรร)</p>
             </CardContent>
           </Card>
         </div>

@@ -14,7 +14,7 @@ export interface EmployeeAvatarProps {
 }
 
 const SIZE_CLASS: Record<number, string> = {
-  24: "h-6 w-6 text-[10px]",
+  24: "h-6 w-6 text-xs",
   32: "h-8 w-8 text-xs",
   40: "h-10 w-10 text-sm",
   56: "h-14 w-14 text-base",

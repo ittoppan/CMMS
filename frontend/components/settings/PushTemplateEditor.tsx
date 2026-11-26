@@ -256,7 +256,7 @@ function TemplateRow({
   return (
     <div className="space-y-3 px-5 pb-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{MODULE_LABELS[d.module] ?? d.module} · {d.event}</span>
+        <span className="text-xs font-semibold text-muted-foreground">{MODULE_LABELS[d.module] ?? d.module} · {d.event}</span>
         <Badge variant={String(d.enabled) === "1" ? "success" : "neutral"}>
           {String(d.enabled) === "1" ? "ใช้อยู่" : "ปิด"}
         </Badge>
@@ -293,7 +293,7 @@ function TemplateRow({
               key={v}
               type="button"
               onClick={() => onSet(t, "message_template", `${d.message_template} {${v}}`)}
-              className="rounded-full border bg-muted px-2 py-0.5 text-[11px] font-mono"
+              className="rounded-full border bg-muted px-2 py-0.5 text-xs font-mono"
               title="กดเพื่อแทรกตัวแปร"
             >
               {`{${v}}`}
@@ -309,12 +309,12 @@ function TemplateRow({
       )}
       {/* พรีวิวสไตล์ notification push */}
       <div className="flex items-start gap-3 rounded-xl border bg-muted/40 p-3" aria-hidden="true">
-        <div className="mt-1 rounded-lg bg-[var(--cmms-primary)] px-2 py-1 text-[10px] font-bold text-white">CMMS</div>
+        <div className="mt-1 rounded-lg bg-[var(--cmms-primary)] px-2 py-1 text-xs font-bold text-white">CMMS</div>
         <VStack gap={0.5}>
           <span className="truncate text-sm font-semibold">{fill(d.title_template, sample) || "(ไม่มีหัวข้อ)"}</span>
           <span className="line-clamp-2 whitespace-pre-wrap text-xs text-muted-foreground">{fill(d.message_template, sample) || "(ไม่มีข้อความ)"}</span>
         </VStack>
-        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">ตอนนี้</span>
+        <span className="ml-auto shrink-0 text-xs text-muted-foreground">ตอนนี้</span>
       </div>
       <HStack gap={2}>
         <Button size="sm" onClick={() => onSave(t)} disabled={saving}>

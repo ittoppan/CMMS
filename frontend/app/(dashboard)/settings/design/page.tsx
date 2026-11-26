@@ -458,7 +458,7 @@ export default function PageDesignerPage() {
                   />
                   <VStack gap={0} hAlign="start">
                     <span className="text-[13px] font-bold">{t.label}</span>
-                    <span className="text-[11px] text-muted-foreground">{t.primary}</span>
+                    <span className="text-xs text-muted-foreground">{t.primary}</span>
                   </VStack>
                 </button>
               );

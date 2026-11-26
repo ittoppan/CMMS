@@ -64,7 +64,7 @@ export function ModuleGuide({
             <span className="text-sm font-bold text-[var(--cmms-text-primary)]">
               แนะนำโมดูล: {name}
             </span>
-            <span className="rounded-full border border-[var(--cmms-border)] px-2 py-0.5 text-[11px] font-medium text-[var(--cmms-text-muted)]">
+            <span className="rounded-full border border-[var(--cmms-border)] px-2 py-0.5 text-xs font-medium text-[var(--cmms-text-muted)]">
               {open ? "ซ่อนวิธีใช้" : "ดูวิธีใช้"}
             </span>
           </span>

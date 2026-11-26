@@ -477,7 +477,7 @@ export default function FormRunPage() {
               <div ref={printRef} className="cmms-print-area rounded-xl bg-white p-6">
                 <div className="space-y-4">
                   <div className="space-y-1 border-b-2 border-border pb-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs  text-muted-foreground">
                       CMMS-TOPPAN · {tpl.code} {tpl.rev}
                     </p>
                     <h2 className="text-base font-semibold text-foreground">{tpl.title}</h2>

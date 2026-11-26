@@ -1129,7 +1129,7 @@ export default function AssetRegistryViewPage() {
                               <td className="px-3 py-2">{r.parameter || "-"}</td>
                               <td className="px-3 py-2 font-semibold tabular-nums">{r.value_numeric != null ? Number(r.value_numeric).toLocaleString("th-TH") : "ยังไม่ได้กรอก"}</td>
                               <td className="px-3 py-2">
-                                <span className="inline-flex items-center gap-1">{r.unit || "-"}{matched && <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--cmms-success-dark)]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--cmms-success-dark)]" aria-hidden="true" />ตรงแผน</span>}</span>
+                                <span className="inline-flex items-center gap-1">{r.unit || "-"}{matched && <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--cmms-success-dark)]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--cmms-success-dark)]" aria-hidden="true" />ตรงแผน</span>}</span>
                               </td>
                               <td className="px-3 py-2 text-muted-foreground">{r.notes || "-"}</td>
                             </tr>

@@ -872,7 +872,7 @@ export default function FacilityLayoutPage() {
                   {(roomCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items: [] } as any }); setSelectedPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
+              <p className="text-xs text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
               {planUpload.target === "room" && (planUpload.error || planUpload.ok) ? (
                 <p className={`text-xs ${planUpload.error ? "text-destructive" : "text-muted-foreground"}`}>{planUpload.error || planUpload.ok}</p>
               ) : null}
@@ -1015,7 +1015,7 @@ export default function FacilityLayoutPage() {
                           }}
                           onClick={(ev) => { ev.stopPropagation(); }}
                         >
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-xs text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
                           <span className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${bad?"border-t-red-700":planned?"border-t-amber-700":isCab?"border-t-indigo-800":"border-t-emerald-800"}`}></span>
                         </button>
                       );
@@ -1233,7 +1233,7 @@ export default function FacilityLayoutPage() {
             <div className={`rounded border p-2 ${healthSummary.faultyPorts>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดชำรุด</div><div className="text-xl font-semibold text-red-700">{healthSummary.faultyPorts}</div></div>
             <div className={`rounded border p-2 ${healthSummary.plannedPorts>0?"border-sky-300 bg-sky-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดวางแผน</div><div className="text-xl font-semibold">{healthSummary.plannedPorts}</div></div>
             <div className={`rounded border p-2 ${healthSummary.issueCabinets>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">ตู้/แผงมีปัญหา</div><div className="text-xl font-semibold">{healthSummary.issueCabinets}</div></div>
-            <div className={`rounded border p-2 ${healthSummary.assetsWithActiveRepairs>0?"border-amber-300 bg-amber-50":""}`}><div className="text-xs text-muted-foreground">เครื่องมีใบแจ้งซ่อมเปิด/กำลังดำเนินการ</div><div className="text-xl font-semibold">{healthSummary.assetsWithActiveRepairs}</div><div className="text-[11px] text-muted-foreground">{healthSummary.activeRepairs} ใบงาน</div></div>
+            <div className={`rounded border p-2 ${healthSummary.assetsWithActiveRepairs>0?"border-amber-300 bg-amber-50":""}`}><div className="text-xs text-muted-foreground">เครื่องมีใบแจ้งซ่อมเปิด/กำลังดำเนินการ</div><div className="text-xl font-semibold">{healthSummary.assetsWithActiveRepairs}</div><div className="text-xs text-muted-foreground">{healthSummary.activeRepairs} ใบงาน</div></div>
           </div>
           {(() => {
             const byId: Record<number, Location> = {}; locations.forEach(l => { byId[l.id] = l; });
@@ -1256,7 +1256,7 @@ export default function FacilityLayoutPage() {
                         <div key={r.rid} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
                           <div className="min-w-0">
                             <div className="font-medium truncate">{r.name}</div>
-                            <div className="text-[11px] text-muted-foreground flex flex-wrap gap-1 mt-0.5">
+                            <div className="text-xs text-muted-foreground flex flex-wrap gap-1 mt-0.5">
                               {r.faultyPorts>0 && <span className="text-red-700">พอร์ตชำรุด {r.faultyPorts}</span>}
                               {r.plannedPorts>0 && <span className="text-sky-700">วางแผน {r.plannedPorts}</span>}
                               {r.issueCabinets>0 && <span className="text-red-700">ตู้มีปัญหา {r.issueCabinets}</span>}
@@ -1281,7 +1281,7 @@ export default function FacilityLayoutPage() {
                           <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
                             <div className="min-w-0">
                               <div className="font-medium truncate"><span className="font-mono text-xs mr-1">{a.code}</span>{a.name}</div>
-                              <div className="text-[11px] text-muted-foreground flex flex-wrap gap-1 mt-0.5">
+                              <div className="text-xs text-muted-foreground flex flex-wrap gap-1 mt-0.5">
                                 <AndonBadge tone={mp.toLowerCase()==='critical'||mp.toLowerCase()==='high' ? 'down' : 'warn'}>เปิด/กำลังดำเนินการ {ar}</AndonBadge>
                                 {mp && <span>Priority: {mp}</span>}
                                 {loc ? <span>· {loc.name}</span> : <span>· ไม่ระบุตำแหน่ง</span>}
@@ -1342,9 +1342,9 @@ export default function FacilityLayoutPage() {
                         <div className="mt-1 flex flex-wrap gap-1">
                           {downKeys.slice(0, 12).map(dk => {
                             const d = portIndex[dk]; if (!d) return null;
-                            return <span key={dk} className="inline-flex items-center rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[11px]">→ {d.label} ({d.sourceName}{d.assetId ? " · เครื่อง" : ""})</span>;
+                            return <span key={dk} className="inline-flex items-center rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-xs">→ {d.label} ({d.sourceName}{d.assetId ? " · เครื่อง" : ""})</span>;
                           })}
-                          {downKeys.length > 12 && <span className="text-[11px] text-muted-foreground">+{downKeys.length - 12} จุด</span>}
+                          {downKeys.length > 12 && <span className="text-xs text-muted-foreground">+{downKeys.length - 12} จุด</span>}
                         </div>
                       )}
                     </div>
@@ -1400,7 +1400,7 @@ export default function FacilityLayoutPage() {
               {(floorCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items: [] } }); setSelectedFloorPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
+          <p className="text-xs text-muted-foreground">อัปโหลด: JPEG/PNG/WebP ≤ 10 MB (เก็บที่ /uploads/facility/) — หรือวาง URL เองก็ได้</p>
           {planUpload.target === "floor" && (planUpload.error || planUpload.ok) ? (
             <p className={`text-xs ${planUpload.error ? "text-destructive" : "text-muted-foreground"}`}>{planUpload.error || planUpload.ok}</p>
           ) : null}
@@ -1559,7 +1559,7 @@ export default function FacilityLayoutPage() {
                       }}
                       onClick={(ev) => { ev.stopPropagation(); }}
                     >
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-xs text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
                       <span className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${bad?"border-t-red-700":planned?"border-t-amber-700":isCab?"border-t-indigo-800":"border-t-emerald-800"}`}></span>
                     </button>
                   );
@@ -1690,19 +1690,19 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex,
             </div>
             <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" aria-label="ลบพอร์ต/วงจรนี้" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3" aria-hidden="true"/></Button>}</div>
           </div>
-          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1 text-xs">
             {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
             {isAffected && <AndonBadge tone="warn">ได้รับผลกระทบ</AndonBadge>}
             {(impactInfo?.upstreamOf?.[selfKey]||[]).length > 0 && <span className="text-muted-foreground">รับจาก: {(impactInfo.upstreamOf[selfKey]||[]).map((k:string)=>portIndex[k]?.label||k).join(", ")}</span>}
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap gap-1">
-              {feeds.length === 0 ? <span className="text-[11px] text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
-                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
+              {feeds.length === 0 ? <span className="text-xs text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
+                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
               ))}
             </div>
             {canManage && (
-              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-xs" defaultValue="" onChange={e=>{
                 const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
@@ -1747,19 +1747,19 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
             </div>
             <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" aria-label="ลบพอร์ต/วงจรนี้" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3" aria-hidden="true"/></Button>}</div>
           </div>
-          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1 text-xs">
             {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
             {isAffected && <AndonBadge tone="warn">ได้รับผลกระทบ</AndonBadge>}
             {(impactInfo?.upstreamOf?.[selfKey]||[]).length > 0 && <span className="text-muted-foreground">รับจาก: {(impactInfo.upstreamOf[selfKey]||[]).map((k:string)=>portIndex[k]?.label||k).join(", ")}</span>}
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap gap-1">
-              {feeds.length === 0 ? <span className="text-[11px] text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
-                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
+              {feeds.length === 0 ? <span className="text-xs text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
+                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
               ))}
             </div>
             {canManage && (
-              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+              <select aria-label="เลือกแหล่งจ่ายไฟ" className="w-full h-8 rounded-md border bg-background px-2 text-xs" defaultValue="" onChange={e=>{
                 const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
                 if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
                 const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
@@ -1882,12 +1882,12 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
                   </div>
                   {(assetsRepair>0 || planned>0) && (
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {assetsRepair>0 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-900">ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {rh.activeRepairs || assetsRepair}</span>}
-                      {planned>0 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800">พอร์ตวางแผน {planned}</span>}
+                      {assetsRepair>0 && <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-900">ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {rh.activeRepairs || assetsRepair}</span>}
+                      {planned>0 && <span className="text-xs px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800">พอร์ตวางแผน {planned}</span>}
                     </div>
                   )}
-                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=>{ const ar = assetHealth?.[a.id]?.active_repairs || 0; const chip = <span className={`text-[10px] px-1.5 py-0.5 rounded border ${ar>0?"bg-red-50 border-red-300 text-red-800 hover:bg-red-100":"bg-slate-100"}`} title={ar>0?`มีใบแจ้งซ่อมเปิด ${ar} — คลิกเพื่อดูรายการซ่อม`:undefined}>{a.code}{ar>0?" !":""}</span>; return ar>0 ? <Link key={a.id} href={`/repair?q=${encodeURIComponent(a.code || a.name || String(a.id))}`}>{chip}</Link> : <span key={a.id}>{chip}</span>; })}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
-                  {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=>{ const bad=["faulty","inactive","maintenance"].includes(c.status); return <span key={c.id} className={`text-[10px] px-1.5 py-0.5 rounded border ${bad?"bg-red-50 border-red-300 text-red-800":"bg-amber-50 border-amber-200"}`}>{c.name||c.code||"ตู้"}{bad?" !":""}</span>; })}{cabs.length>3 && <span className="text-[10px] text-muted-foreground">+{cabs.length-3}</span>}</div>}
+                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=>{ const ar = assetHealth?.[a.id]?.active_repairs || 0; const chip = <span className={`text-xs px-1.5 py-0.5 rounded border ${ar>0?"bg-red-50 border-red-300 text-red-800 hover:bg-red-100":"bg-slate-100"}`} title={ar>0?`มีใบแจ้งซ่อมเปิด ${ar} — คลิกเพื่อดูรายการซ่อม`:undefined}>{a.code}{ar>0?" !":""}</span>; return ar>0 ? <Link key={a.id} href={`/repair?q=${encodeURIComponent(a.code || a.name || String(a.id))}`}>{chip}</Link> : <span key={a.id}>{chip}</span>; })}{ra.length>4 && <span className="text-xs text-muted-foreground">+{ra.length-4}</span>}</div>}
+                  {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=>{ const bad=["faulty","inactive","maintenance"].includes(c.status); return <span key={c.id} className={`text-xs px-1.5 py-0.5 rounded border ${bad?"bg-red-50 border-red-300 text-red-800":"bg-amber-50 border-amber-200"}`}>{c.name||c.code||"ตู้"}{bad?" !":""}</span>; })}{cabs.length>3 && <span className="text-xs text-muted-foreground">+{cabs.length-3}</span>}</div>}
                 </div>
               );
             })}

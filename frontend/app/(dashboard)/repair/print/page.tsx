@@ -20,7 +20,7 @@ const or = (v: any, dash = "-") => (v === null || v === undefined || String(v).t
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="text-xs font-semibold text-slate-500">{label}</div>
       <div className="text-sm font-semibold text-slate-900 break-words">{value}</div>
     </div>
   );

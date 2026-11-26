@@ -280,7 +280,7 @@ export default function AssetCriticalityPage() {
                   }}
                 />
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">คะแนนประเมินรวม</p>
+                  <p className="text-xs font-bold  text-muted-foreground">คะแนนประเมินรวม</p>
                   <p className="text-[42px] font-semibold leading-tight tabular-nums">
                     {totalScore} <span className="text-lg font-normal text-muted-foreground">/ 30</span>
                   </p>

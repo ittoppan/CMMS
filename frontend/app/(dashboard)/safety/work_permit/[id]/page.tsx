@@ -306,7 +306,7 @@ export default function PermitDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                      <tr className="border-b border-[var(--cmms-border)] text-xs font-semibold text-[var(--cmms-text-secondary)]">
                         <th className="px-3 py-2">#</th><th className="px-3 py-2">อันตราย</th><th className="px-3 py-2">สาเหตุ/ผลกระทบ</th>
                         <th className="px-3 py-2">L</th><th className="px-3 py-2">S</th><th className="px-3 py-2">Score</th><th className="px-3 py-2">ระดับ</th>
                       </tr>
@@ -335,7 +335,7 @@ export default function PermitDetailPage() {
               )}
               {!!p.requirements.length && (
                 <div className="mt-4 border-t border-border pt-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--cmms-text-secondary)]">ข้อกำหนดที่ต้องปฏิบัติ</p>
+                  <p className="mb-2 text-xs font-semibold text-[var(--cmms-text-secondary)]">ข้อกำหนดที่ต้องปฏิบัติ</p>
                   <div className="flex flex-wrap gap-1.5">
                     {p.requirements.map((r) => (
                       <Badge key={r.id} variant="neutral">{r.label_th}</Badge>
@@ -384,7 +384,7 @@ export default function PermitDetailPage() {
                 ))}
                 {p.zero_energy.length > 0 && (
                   <div className="rounded-xl bg-[var(--cmms-bg-muted)] p-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--cmms-text-secondary)]">การตรวจ Zero Energy</p>
+                    <p className="mb-2 text-xs font-semibold text-[var(--cmms-text-secondary)]">การตรวจ Zero Energy</p>
                     <ul className="space-y-1.5">
                       {p.zero_energy.map((z) => (
                         <li key={z.id} className="flex items-center justify-between gap-2 text-sm">
@@ -658,7 +658,7 @@ export default function PermitDetailPage() {
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="shrink-0 text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">{label}</span>
+      <span className="shrink-0 text-xs font-semibold text-[var(--cmms-text-secondary)]">{label}</span>
       <span className="text-right font-medium text-[var(--cmms-text-primary)]">{value}</span>
     </div>
   );

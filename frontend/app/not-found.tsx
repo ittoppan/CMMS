@@ -13,7 +13,7 @@ export default function NotFound() {
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--cmms-bg-muted,#f1f5f9)] text-[var(--cmms-text-muted,#64748b)]">
         <span className="text-2xl font-semibold" aria-hidden="true">?</span>
       </div>
-      <p className="text-sm font-medium uppercase tracking-wide text-[var(--cmms-text-muted,#64748b)]">404</p>
+      <p className="text-sm font-semibold text-[var(--cmms-text-muted,#64748b)]">404</p>
       <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--cmms-text-primary,#0f172a)]">
         ไม่พบหน้านี้
       </h1>

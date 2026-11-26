@@ -298,7 +298,7 @@ export default function WorkPermitCreatePage() {
                 if (!rows.length) return null;
                 return (
                   <div key={cat}>
-                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                    <p className="mb-1.5 text-xs font-semibold text-[var(--cmms-text-secondary)]">
                       {CATEGORY_LABELS[cat] || cat}
                     </p>
                     <ul className="space-y-1">

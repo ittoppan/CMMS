@@ -155,7 +155,7 @@ export default function DashboardPortalPage() {
                   href={item.href}
                   onClick={() => handleOpen(item)}
                   accent="var(--cmms-primary)"
-                  badge={item.status === "partial" ? <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span> : null}
+                  badge={item.status === "partial" ? <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-xs font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span> : null}
                 />
               ))}
             </HubGrid>
@@ -175,7 +175,7 @@ export default function DashboardPortalPage() {
                   {g.titleTh}
                   <span className="ml-1.5 text-xs font-normal text-muted-foreground">{g.titleEn}</span>
                 </h2>
-                <span className="ml-auto rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-2 py-0.5 text-[11px] font-medium tabular-nums text-[var(--cmms-text-secondary)]">
+                <span className="ml-auto rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-2 py-0.5 text-xs font-medium tabular-nums text-[var(--cmms-text-secondary)]">
                   {items.length}
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function DashboardPortalPage() {
                           title={item.titleTh}
                           description={item.descriptionTh}
                           accent={accent}
-                          badge={<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">เร็วๆ นี้</span>}
+                          badge={<span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">เร็วๆ นี้</span>}
                         />
                       </div>
                     );
@@ -210,7 +210,7 @@ export default function DashboardPortalPage() {
                       accent={accent}
                       badge={
                         item.status === "partial" ? (
-                          <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span>
+                          <span className="rounded-full bg-[var(--cmms-warning-light)] px-2 py-0.5 text-xs font-medium text-[var(--cmms-warning-dark)]">บางส่วน</span>
                         ) : null
                       }
                     />

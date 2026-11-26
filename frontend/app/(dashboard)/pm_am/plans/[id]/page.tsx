@@ -308,8 +308,8 @@ export default function PMPlanViewPage() {
                             <div><p style={{ color: "var(--cmms-text-secondary)" }}>เป้าหมาย</p><p className="font-semibold">{target != null ? `${target.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A"}</p></div>
                             <div><p style={{ color: "var(--cmms-text-secondary)" }}>คงเหลือ</p><p className="font-semibold" style={{ color: remaining != null && remaining <= 0 ? "var(--cmms-danger)" : undefined }}>{remaining != null ? `${remaining.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A"}</p></div>
                           </div>
-                          {curEntry?.measuredAt && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>อ่านค่าล่าสุด: {String(curEntry.measuredAt).replace("T", " ").slice(0, 16)}</p>}
-                          {!hasReading && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>บันทึกค่ามิเตอร์ของเครื่องจักร (หน่วย/พารามิเตอร์ให้ตรงกับแผน) เพื่อให้ระบบประเมินรอบตามมิเตอร์ได้</p>}
+                          {curEntry?.measuredAt && <p className="mt-1 text-xs" style={{ color: "var(--cmms-text-muted)" }}>อ่านค่าล่าสุด: {String(curEntry.measuredAt).replace("T", " ").slice(0, 16)}</p>}
+                          {!hasReading && <p className="mt-1 text-xs" style={{ color: "var(--cmms-text-muted)" }}>บันทึกค่ามิเตอร์ของเครื่องจักร (หน่วย/พารามิเตอร์ให้ตรงกับแผน) เพื่อให้ระบบประเมินรอบตามมิเตอร์ได้</p>}
                         </div>
                       );
                     })}
@@ -363,7 +363,7 @@ export default function PMPlanViewPage() {
                 <p className="text-sm text-[var(--cmms-text-secondary)]">รอบทั้งหมด</p>
                 <p className="cmms-kpi-value">{cycleStats.total}</p>
                 {(cycleStats.skipped > 0 || cycleStats.cancelled > 0) && (
-                  <p className="text-[11px] text-[var(--cmms-text-muted)]">ข้าม {cycleStats.skipped} · ยกเลิก {cycleStats.cancelled}</p>
+                  <p className="text-xs text-[var(--cmms-text-muted)]">ข้าม {cycleStats.skipped} · ยกเลิก {cycleStats.cancelled}</p>
                 )}
               </CardContent>
             </Card>

@@ -132,7 +132,7 @@ export default function PlantMapPage() {
                                 <Network className="w-3 h-3" aria-hidden="true" />ผัง/พอร์ตห้อง
                               </Button>
                             ) : (
-                              <span className="text-[11px] opacity-60">ยังไม่ผูกตำแหน่ง (location)</span>
+                              <span className="text-xs opacity-60">ยังไม่ผูกตำแหน่ง (location)</span>
                             )}
                           </div>
                         </div>

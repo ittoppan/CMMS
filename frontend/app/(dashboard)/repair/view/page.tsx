@@ -914,7 +914,7 @@ export default function RepairViewDetailsPage() {
                 { label: "ผู้รับเหมาภายนอก", value: wo.outsourceBy || "—", tone: wo.outsourceBy ? "warn" : "idle" },
               ] as { label: string; value: string; tone?: "ok" | "warn" | "down" | "idle" }[]).map((f) => (
                 <div key={f.label} className="min-w-0 rounded-[var(--cmms-radius-sm)] border border-border px-2.5 py-2">
-                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <dt className="text-xs font-semibold text-muted-foreground">
                     {f.label}
                   </dt>
                   <dd className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -1053,7 +1053,7 @@ export default function RepairViewDetailsPage() {
           <Card className="mb-6">
             <CardHeader>
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   REQUESTED BY REPORTER · F-EN-03
                 </span>
                 <CardTitle className="text-base">อะไหล่ที่ผู้แจ้งร้องขอตอนแจ้งซ่อม</CardTitle>
@@ -1064,10 +1064,10 @@ export default function RepairViewDetailsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-left border-b border-border">
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวนที่ขอ</th>
-                      <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">รหัส</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">ชื่ออะไหล่</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">จำนวนที่ขอ</th>
+                      <th className="p-3 text-right text-xs font-semibold text-muted-foreground">จัดการ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -1134,7 +1134,7 @@ export default function RepairViewDetailsPage() {
         <Card className="mb-6">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-semibold text-muted-foreground">
                 SPARE PARTS USED · F-EN-03 · PENDING ISSUE
               </span>
               <CardTitle className="text-base">อะไหล่ที่ใช้ซ่อม (ใบเบิก)</CardTitle>
@@ -1173,13 +1173,13 @@ export default function RepairViewDetailsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-left border-b border-border">
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวน</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ราคา/หน่วย</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รวม</th>
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">สถานะเบิก</th>
-                      <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">รหัส</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">ชื่ออะไหล่</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">จำนวน</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">ราคา/หน่วย</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">รวม</th>
+                      <th className="p-3 text-xs font-semibold text-muted-foreground">สถานะเบิก</th>
+                      <th className="p-3 text-right text-xs font-semibold text-muted-foreground">จัดการ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -1265,7 +1265,7 @@ export default function RepairViewDetailsPage() {
                   </div>
                   <div className="flex items-end justify-between gap-2">
                     <div className="space-y-1">
-                      <Label htmlFor={`m-qty-${r.id}`} className="text-[11px] text-muted-foreground">
+                      <Label htmlFor={`m-qty-${r.id}`} className="text-xs text-muted-foreground">
                         จำนวน
                       </Label>
                       <div className="flex items-center gap-2">
@@ -1347,11 +1347,11 @@ export default function RepairViewDetailsPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-muted/60 text-left border-b border-border">
-                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Item Code</th>
-                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่อรายการ</th>
-                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">คงเหลือ (Sage 300)</th>
-                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">ราคา/หน่วย</th>
-                        <th className="p-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">เพิ่ม</th>
+                        <th className="p-2.5 text-xs font-semibold text-muted-foreground">Item Code</th>
+                        <th className="p-2.5 text-xs font-semibold text-muted-foreground">ชื่อรายการ</th>
+                        <th className="p-2.5 text-xs font-semibold text-muted-foreground">คงเหลือ (Sage 300)</th>
+                        <th className="p-2.5 text-xs font-semibold text-muted-foreground">ราคา/หน่วย</th>
+                        <th className="p-2.5 text-right text-xs font-semibold text-muted-foreground">เพิ่ม</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -1400,7 +1400,7 @@ export default function RepairViewDetailsPage() {
         <Card>
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-semibold text-muted-foreground">
                 PHOTO EVIDENCE · OFFLINE READY
               </span>
               <CardTitle className="text-base">หลักฐานภาพถ่าย</CardTitle>
@@ -1511,7 +1511,7 @@ export default function RepairViewDetailsPage() {
                 <ShieldAlert className="h-5 w-5" />
               </div>
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   FAILURE ANALYSIS & RCA
                 </span>
                 <CardTitle className="text-base">ความเสียหายและการวิเคราะห์สาเหตุ (RCA/CAPA)</CardTitle>

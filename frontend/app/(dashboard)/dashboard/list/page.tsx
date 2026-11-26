@@ -254,7 +254,7 @@ export default function DashboardListPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-[var(--cmms-border)] text-left text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">
+                    <tr className="border-b border-[var(--cmms-border)] text-left text-xs  text-[var(--cmms-text-muted)]">
                       <th className="px-4 py-3">รายการ PM</th>
                       <th className="px-4 py-3">เครื่องจักร</th>
                       <th className="px-4 py-3">กำหนด</th>
@@ -491,7 +491,7 @@ function WoListTable({
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[820px]">
                 <thead>
-                  <tr className="border-b border-[var(--cmms-border)] text-left text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">
+                  <tr className="border-b border-[var(--cmms-border)] text-left text-xs  text-[var(--cmms-text-muted)]">
                     <th className="px-4 py-3">ใบสั่งงาน</th>
                     <th className="px-4 py-3">เครื่องจักร</th>
                     <th className="px-4 py-3">ผู้รับงาน</th>

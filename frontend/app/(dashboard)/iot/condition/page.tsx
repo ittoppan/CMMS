@@ -296,7 +296,7 @@ export default function IotConditionPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs  text-muted-foreground">
                         <th className="px-3 py-2 font-semibold">จุดวัด</th>
                         <th className="px-3 py-2 font-semibold">ประเภท</th>
                         <th className="px-3 py-2 font-semibold">ค่าล่าสุด</th>
@@ -366,7 +366,7 @@ export default function IotConditionPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs uppercase tracking-wide text-muted-foreground">
+                        <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs  text-muted-foreground">
                           <th className="px-3 py-2 font-semibold">พารามิเตอร์</th>
                           <th className="px-3 py-2 font-semibold">ค่า</th>
                           <th className="px-3 py-2 font-semibold">หน่วย</th>

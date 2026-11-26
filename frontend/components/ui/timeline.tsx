@@ -58,11 +58,11 @@ export function Timeline({ items, compact = false, className }: TimelineProps) {
             />
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <time className="text-[11px] font-semibold tabular-nums text-[var(--cmms-text-muted)]">
+                <time className="text-xs font-semibold tabular-nums text-[var(--cmms-text-muted)]">
                   {formatTime(item.time)}
                 </time>
                 {item.actor && (
-                  <span className="text-[11px] font-medium text-[var(--cmms-text-secondary)]">
+                  <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">
                     {item.actor}
                   </span>
                 )}

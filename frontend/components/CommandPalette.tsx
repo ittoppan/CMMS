@@ -182,12 +182,12 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
                 <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
                   {it.label}
                   {it.frequent && (
-                    <span className="ml-2 rounded-full bg-[var(--cmms-primary-light)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--cmms-primary-dark)]">
+                    <span className="ml-2 rounded-full bg-[var(--cmms-primary-light)] px-1.5 py-0.5 text-xs font-bold text-[var(--cmms-primary-dark)]">
                       ใช้บ่อย
                     </span>
                   )}
                 </span>
-                <span className="shrink-0 text-[10px] font-medium text-[var(--cmms-text-muted)]">
+                <span className="shrink-0 text-xs font-medium text-[var(--cmms-text-muted)]">
                   {it.section && it.section !== it.label ? it.section : ""}
                 </span>
               </button>
@@ -195,7 +195,7 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
           )}
         </div>
 
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--cmms-border)] text-[10px] font-medium text-[var(--cmms-text-muted)]">
+        <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--cmms-border)] text-xs font-medium text-[var(--cmms-text-muted)]">
           <span>
             <kbd className="cmms-palette-kbd">↑↓</kbd> เลือก
           </span>

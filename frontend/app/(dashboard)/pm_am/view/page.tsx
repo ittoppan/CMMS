@@ -209,7 +209,7 @@ export default function PMDetailPage() {
                       <span className="text-[var(--cmms-text-secondary)]">ค่ามิเตอร์ปัจจุบัน</span>
                       <span className="font-semibold">
                         {meterCurrent.value != null ? `${Number(meterCurrent.value).toLocaleString("th-TH")} ${pm.meter_unit || ""}` : "ไม่มีข้อมูล"}
-                        {meterCurrent.measuredAt ? <span className="block text-[11px] font-normal" style={{ color: "var(--cmms-text-muted)" }}>วัดล่าสุด {String(meterCurrent.measuredAt).replace("T", " ").slice(0, 16)}</span> : null}
+                        {meterCurrent.measuredAt ? <span className="block text-xs font-normal" style={{ color: "var(--cmms-text-muted)" }}>วัดล่าสุด {String(meterCurrent.measuredAt).replace("T", " ").slice(0, 16)}</span> : null}
                       </span>
                     </>)}
                     {(pm.frequency_type === "meter_based" || pm.meter_unit) && meterCurrent.value != null && pm.meter_reading !== null && pm.meter_reading !== undefined && pm.meter_reading !== "" && meterInterval != null && meterInterval > 0 && (() => {

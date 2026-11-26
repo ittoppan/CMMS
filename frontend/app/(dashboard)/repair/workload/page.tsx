@@ -151,7 +151,7 @@ function RepairPhoto({
   const [err, setErr] = useState(false);
   const placeholder = (
     <div
-      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5"
+      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-xs text-[var(--cmms-text-muted)] text-center leading-tight px-0.5"
       title={emptyTitle}
     >
       {emptyLabel}
@@ -509,7 +509,7 @@ export default function WorkloadPage() {
                 </div>
               </CardHeader>
               <CardContent className="pt-3">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--cmms-text-muted)]">
+                <div className="mb-2 text-xs font-semibold text-[var(--cmms-text-muted)]">
                   งานที่กำลังรับผิดชอบ ({tech.jobs.length})
                 </div>
                 {tech.jobs.length === 0 ? (
@@ -566,7 +566,7 @@ export default function WorkloadPage() {
                               </div>
                             </div>
                           </div>
-                          <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+                          <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
                             <span className="rounded bg-[var(--cmms-bg-muted)] px-1.5 py-0.5 text-[var(--cmms-text-secondary)]">
                               {statusLabel(job.status)}
                             </span>

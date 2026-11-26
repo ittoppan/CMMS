@@ -173,7 +173,7 @@ export default function LineDeliveryHistoryPage() {
               {log.recipient_name || (isGroup ? "กลุ่ม LINE ช่าง" : log.recipient || "-")}
             </p>
             {log.recipient && (
-              <p className="font-mono text-[11px] text-muted-foreground">{log.recipient}</p>
+              <p className="font-mono text-xs text-muted-foreground">{log.recipient}</p>
             )}
           </div>
         );

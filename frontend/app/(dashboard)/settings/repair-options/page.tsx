@@ -354,13 +354,13 @@ function RepairOptionsSection() {
                 <table style={{ width: "100%", borderCollapse: "collapse" }} className="text-sm">
                   <thead>
                     <tr style={{ borderBottom: "2px solid var(--cmms-border)" }}>
-                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">ไอคอน</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">ค่า (Value)</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">ชื่อ (Label)</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">ชื่ออังกฤษ</th>
-                      <th className="px-2 py-3 text-center text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">ลำดับ</th>
-                      <th className="px-2 py-3 text-center text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">สถานะ</th>
-                      <th className="px-2 py-3 text-right text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">จัดการ</th>
+                      <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--cmms-text-secondary)]">ไอคอน</th>
+                      <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--cmms-text-secondary)]">ค่า (Value)</th>
+                      <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--cmms-text-secondary)]">ชื่อ (Label)</th>
+                      <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--cmms-text-secondary)]">ชื่ออังกฤษ</th>
+                      <th className="px-2 py-3 text-center text-xs font-semibold text-[var(--cmms-text-secondary)]">ลำดับ</th>
+                      <th className="px-2 py-3 text-center text-xs font-semibold text-[var(--cmms-text-secondary)]">สถานะ</th>
+                      <th className="px-2 py-3 text-right text-xs font-semibold text-[var(--cmms-text-secondary)]">จัดการ</th>
                     </tr>
                   </thead>
                   <tbody>

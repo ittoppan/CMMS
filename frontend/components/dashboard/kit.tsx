@@ -94,7 +94,7 @@ export function KpiCard({
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cmms-text-muted)]">{label}</p>
+        <p className="text-xs font-semibold text-[var(--cmms-text-muted)]">{label}</p>
         {icon && (
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cmms-radius)] bg-[var(--cmms-primary-light)] text-[var(--cmms-primary)]">
             {icon}

@@ -335,10 +335,10 @@ export default function MyDashboardPage() {
                           {tr("mydash.due")}: {fmtDate(it.due_at)}
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${PRIORITY_COLOR[prio] || "bg-slate-100 text-slate-700"}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${PRIORITY_COLOR[prio] || "bg-slate-100 text-slate-700"}`}>
                             {PRIORITY_LABEL[prio] || prio || "N/A"}
                           </span>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
                             {STATUS_LABEL[st] || st || "N/A"}
                           </span>
                         </div>
@@ -420,11 +420,11 @@ export default function MyDashboardPage() {
                       <span className="text-xs">{m.label}</span>
                     </div>
                     <div className="mt-1 text-xl font-bold tabular-nums">{loading ? "…" : m.value}</div>
-                    <div className="text-[10px] text-[var(--cmms-text-muted)]">{m.note}</div>
+                    <div className="text-xs text-[var(--cmms-text-muted)]">{m.note}</div>
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-[var(--cmms-text-muted)]">N/A — ข้อมูลย้อนหลังรายเดือนไม่มีแหล่งข้อมูลจริง</p>
+              <p className="text-xs text-[var(--cmms-text-muted)]">N/A — ข้อมูลย้อนหลังรายเดือนไม่มีแหล่งข้อมูลจริง</p>
             </CardContent>
           </Card>
         </div>
@@ -466,7 +466,7 @@ export default function MyDashboardPage() {
                             {tr("mydash.due")}: {fmtDate(it.due_at)}
                           </p>
                         </div>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[st] || "bg-slate-100 text-slate-700"}`}>
                           {STATUS_LABEL[st] || st || "N/A"}
                         </span>
                         <Link href={`/repair/view?id=${it.id}`} className="flex shrink-0 items-center text-[var(--cmms-primary)]" aria-label={tr("mydash.view_all")}>

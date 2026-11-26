@@ -232,7 +232,7 @@ export default function CalibrationCalendar() {
                   {items.slice(0, 3).map((it) => (
                     <span
                       key={it.id}
-                      className={`block truncate rounded px-1 text-[10px] font-medium leading-4 ${
+                      className={`block truncate rounded px-1 text-xs font-medium leading-4 ${
                         it.stage === "overdue"
                           ? "bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]"
                           : it.stage === "done"
@@ -245,7 +245,7 @@ export default function CalibrationCalendar() {
                     </span>
                   ))}
                   {items.length > 3 && (
-                    <span className="block pl-1 text-[10px] text-muted-foreground">
+                    <span className="block pl-1 text-xs text-muted-foreground">
                       + {items.length - 3} รายการ
                     </span>
                   )}

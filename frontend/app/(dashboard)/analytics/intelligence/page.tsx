@@ -149,7 +149,7 @@ function Tbl({ headers, children }: { headers: string[]; children: React.ReactNo
         <thead>
           <tr style={{ background: "var(--cmms-bg-muted)" }}>
             {headers.map((h) => (
-              <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide"
+              <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-xs font-semibold "
                 style={{ color: "var(--cmms-text-secondary)" }}>{h}</th>
             ))}
           </tr>
@@ -430,7 +430,7 @@ export default function IntelligencePage() {
           {tab === "overview" && overview && (
             <div className="space-y-6 pt-4">
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--cmms-text-secondary)" }}>
+                <p className="mb-2 text-xs font-semibold " style={{ color: "var(--cmms-text-secondary)" }}>
                   ความน่าเชื่อถือ (Reliability) — จาก operating hours จริง <span style={{ color: HEALTH_TONE.WATCH }}>· {reliability?.coverage_label}</span>
                 </p>
                 <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -442,7 +442,7 @@ export default function IntelligencePage() {
               </div>
 
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--cmms-text-secondary)" }}>สมรรถนะฝ่ายซ่อมบำรุง</p>
+                <p className="mb-2 text-xs font-semibold " style={{ color: "var(--cmms-text-secondary)" }}>สมรรถนะฝ่ายซ่อมบำรุง</p>
                 <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                   <StatCard label="ใบงานเสร็จ (ช่วงที่เลือก)" value={fmtNum(overview.core.wo_completed_in_range, 0)} sub={`ทั้งหมด ${fmtNum(overview.core.total_wo_created, 0)} ใบ`} />
                   <StatCard label="อัตราเสร็จทันเวลา (SLA)" value={overview.core.sla_compliance_pct == null ? "—" : `${fmtNum(overview.core.sla_compliance_pct)}%`} tone={overview.core.sla_compliance_pct != null && overview.core.sla_compliance_pct >= 80 ? "var(--cmms-success)" : "var(--cmms-warning)"} />

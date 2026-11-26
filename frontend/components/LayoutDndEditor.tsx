@@ -53,7 +53,7 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
   return (
     <VStack gap={2}>
       <HStack hAlign="between" vAlign="center">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold text-muted-foreground">
           DRAG &amp; DROP · เรียงลำดับ section ของหน้า
         </p>
         <Badge variant="info">{`${full.filter((v) => v.enabled).length}/${full.length} แสดง`}</Badge>
@@ -124,7 +124,7 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
                   {meta?.label ?? item.id}
                 </p>
                 {meta?.desc && (
-                  <p className="block truncate text-[11px] leading-snug text-muted-foreground">
+                  <p className="block truncate text-xs leading-snug text-muted-foreground">
                     {meta.desc}
                   </p>
                 )}

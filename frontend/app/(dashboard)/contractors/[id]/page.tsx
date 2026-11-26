@@ -244,19 +244,19 @@ export default function ContractorDetailPage() {
                 ["สร้างเมื่อ", fmtDate(c.created_at)],
               ].map(([k, v]) => (
                 <div key={k as string} className="rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{k}</p>
+                  <p className="text-xs font-semibold text-muted-foreground">{k}</p>
                   <p className="mt-0.5 text-sm font-medium break-words">{v}</p>
                 </div>
               ))}
               {c.notes && (
                 <div className="sm:col-span-2 rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">หมายเหตุ</p>
+                  <p className="text-xs font-semibold text-muted-foreground">หมายเหตุ</p>
                   <p className="mt-0.5 whitespace-pre-wrap text-sm">{c.notes}</p>
                 </div>
               )}
               {c.status_reason && (
                 <div className="sm:col-span-2 rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">เหตุผลสถานะล่าสุด</p>
+                  <p className="text-xs font-semibold text-muted-foreground">เหตุผลสถานะล่าสุด</p>
                   <p className="mt-0.5 text-sm">{c.status_reason}</p>
                 </div>
               )}
@@ -395,7 +395,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                       <th className="px-4 py-2.5">ประเภท</th>
                       <th className="px-4 py-2.5">เลขที่เอกสาร</th>
                       <th className="px-4 py-2.5">ออกเมื่อ</th>
@@ -484,7 +484,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                       <th className="px-4 py-2.5">สัญญา</th>
                       <th className="px-4 py-2.5">ประเภท</th>
                       <th className="px-4 py-2.5">วงเงิน</th>
@@ -535,7 +535,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                       <th className="px-4 py-2.5">เลขที่งาน</th>
                       <th className="px-4 py-2.5">หัวข้อ</th>
                       <th className="px-4 py-2.5">หมวด</th>
@@ -582,7 +582,7 @@ export default function ContractorDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                         <th className="px-4 py-2.5">เลขที่</th>
                         <th className="px-4 py-2.5">ประเภท</th>
                         <th className="px-4 py-2.5">ระดับเสี่ยง</th>

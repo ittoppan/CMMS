@@ -447,7 +447,7 @@ export default function ContractorWorkPage() {
                               {a.permit_required === 1 && (
                                 <p className="flex items-center gap-1"><ShieldAlert size={12} aria-hidden="true" /> {a.permit_id ? "มีใบอนุญาตผูกแล้ว" : "รอใบอนุญาต (PTW)"}</p>
                               )}
-                              <p className="text-[11px]">เจ้าของงาน: {owner(a.internal_owner_id)} · สร้าง {fmtDateTime(a.created_at)}</p>
+                              <p className="text-xs">เจ้าของงาน: {owner(a.internal_owner_id)} · สร้าง {fmtDateTime(a.created_at)}</p>
                             </div>
                             <div className="mt-auto space-y-2 border-t border-[var(--cmms-border)] pt-3">
                               {a.status === "inspection" || a.status === "work_completed" || a.status === "rework" ? (

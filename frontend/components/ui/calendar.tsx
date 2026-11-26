@@ -29,7 +29,7 @@ function Calendar({
         button_next:
           "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-transparent text-foreground transition-colors hover:bg-secondary absolute right-1 top-0",
         weekdays: "flex flex-col",
-        weekday: "w-9 rounded-md text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground py-1",
+        weekday: "w-9 rounded-md text-xs font-semibold text-muted-foreground py-1",
         week: "flex mt-0.5",
         day: "relative w-9 h-9 flex items-center justify-center text-sm",
         day_button:

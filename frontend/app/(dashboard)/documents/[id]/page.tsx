@@ -68,7 +68,7 @@ function lampOf(tone: Tone | "ok" | "warn" | "down" | "idle" | undefined): "ok" 
 function InfoCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
       <div className="text-sm">{children}</div>
     </div>
   );
@@ -637,7 +637,7 @@ export default function DocumentDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                         <th className="px-4 py-2.5">ผู้รับทราบ</th>
                         <th className="px-4 py-2.5">สถานะ</th>
                         <th className="px-4 py-2.5">วิธีรับทราบ</th>
@@ -687,7 +687,7 @@ export default function DocumentDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                         <th className="px-4 py-2.5">ประเภท</th>
                         <th className="px-4 py-2.5">ระบบ/เอนทิตี</th>
                         <th className="px-4 py-2.5">รายละเอียด</th>
@@ -727,7 +727,7 @@ export default function DocumentDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold text-muted-foreground">
                         <th className="px-4 py-2.5">หลักสูตร</th>
                         <th className="px-4 py-2.5">เกณฑ์ผ่าน</th>
                         <th className="px-4 py-2.5">ผล</th>
