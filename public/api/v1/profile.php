@@ -32,7 +32,7 @@ try {
         // แนบชื่อ/รหัสแผนกมาด้วย — หน้าโปรไฟล์และฟอร์มแจ้งซ่อมใช้เติมแผนกอัตโนมัติ
         $stmt = $pdo->prepare('SELECT u.id, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code,
                                       u.department_id, d.code AS department_code, d.name AS department_name,
-                                      u.avatar, u.avatar_path, u.line_user_id, u.lang, u.created_at
+                                      u.avatar, u.avatar_path, u.line_user_id, u.microsoft_user_id, u.lang, u.created_at
                                FROM users u
                                LEFT JOIN departments d ON d.id = u.department_id
                                WHERE u.id = ?');
