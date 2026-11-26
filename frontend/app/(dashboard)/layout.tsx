@@ -352,7 +352,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
           <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card/90 px-6 backdrop-blur lg:flex shadow-[0_1px_3px_rgba(15,35,75,0.04)]">
-            <Breadcrumb className="min-w-0">
+            <Breadcrumb className="min-w-0" label="Breadcrumb">
               <BreadcrumbList className="text-xs text-muted-foreground">
                 <BreadcrumbItem>
                   <BreadcrumbLink href="/dashboard" className="transition-colors hover:text-foreground">CMMS</BreadcrumbLink>

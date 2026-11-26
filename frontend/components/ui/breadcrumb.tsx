@@ -8,8 +8,12 @@ import { cn } from "@/lib/cn";
 /**
  * Breadcrumb — docs/DESIGN_SYSTEM.md §5 step 1 (small, muted).
  */
-function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="Breadcrumb" className={cn("text-xs", className)} {...props} />;
+function Breadcrumb({
+  className,
+  label,
+  ...props
+}: React.ComponentProps<"nav"> & { label?: string }) {
+  return <nav aria-label={label ?? "Breadcrumb"} className={cn("text-xs", className)} {...props} />;
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
