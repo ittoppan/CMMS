@@ -32,6 +32,7 @@ Scope: Design/UI skills audit/fix/verify → QA final sweep → backend CSRF aud
   - `repair_video.php` — anonymous LIFF staging + CSRF + MIME whitelist + 25MB cap
   - `user_lookup.php` — public minimal lookup + rate limit (30/IP, 10/code)
 - **No permission gaps found.**
+- High-risk endpoints verified: `users.php` (requirePerm users:manage), `roles.php` (requirePerm roles:manage + admin), `settings.php` / `master_data.php` (requirePerm settings:manage), `profile.php` (requireLogin self-service), `permission_diff.php` / `menu_permissions.php` (admin-only). ✅
 
 ## 5. Phase Status
 
