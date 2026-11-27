@@ -541,11 +541,16 @@ function lineTemplateDefaults() {
  * ตรวจ+แปลง Raw Flex JSON (โหมด JSON ขั้นสูงของเทมเพลตแจ้งเตือน)
  * คืน array contents ("bubble" หรือ "carousel") หรือ [] ถ้าไม่ใช้/ไม่ผ่าน
  */
-function lineFlexJsonValidate(string $raw): array {
-    $raw = trim($raw);
-    if ($raw === '') return [];
-    $decoded = json_decode($raw, true);
-    if (!is_array($decoded)) return [];
+function lineFlexJsonValidate($raw): array {
+    // รับได้ทั้ง raw JSON string และโครงสร้างที่ decode แล้ว (getLineTemplate คืน flex_json เป็น array)
+    if (is_array($raw)) {
+        $decoded = $raw;
+    } else {
+        $raw = trim((string)$raw);
+        if ($raw === '') return [];
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) return [];
+    }
     // รับได้ทั้ง {type:bubble}, {type:carousel}, หรือ payload เต็ม {type:flex, contents:{...}}
     $contents = null;
     $top = strtolower((string)($decoded['type'] ?? ''));
@@ -649,12 +654,9 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
     $btnLabel = substituteVars($tpl['btn_label'], $norm);
 
     // โหมด JSON ขั้นสูง: flex_json มีค่า → ใช้เขียนทับ bubble ที่สร้างจากฟอร์มเสมอ
-    $flexContents = [];
-    if ($tpl['flex_json'] !== '') {
-        $flexContents = lineFlexJsonValidate($tpl['flex_json']);
-        if ($flexContents !== []) {
-            lineFlexVarsApply($flexContents, $norm);
-        }
+    $flexContents = lineFlexJsonValidate($tpl['flex_json']);
+    if ($flexContents !== []) {
+        lineFlexVarsApply($flexContents, $norm);
     }
 
     if (empty($photos)) {
