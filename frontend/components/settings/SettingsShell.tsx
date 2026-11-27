@@ -63,8 +63,8 @@ const SECTIONS: SectionDef[] = [
   {
     title: "ส่วนตัว",
     links: [
-      { href: "/settings/notification-prefs", label: "การแจ้งเตือนของฉัน", key: "settings", always: false },
-      { href: "/settings/push", label: "Web Push", key: "settings", always: false },
+      { href: "/settings/notification-prefs", label: "การแจ้งเตือนของฉัน", key: "notifications" },
+      { href: "/settings/push", label: "Web Push", key: null, always: true },
       { href: "/profile", label: "โปรไฟล์", key: null, always: true },
       { href: "/change-password", label: "เปลี่ยนรหัสผ่าน", key: null, always: true },
     ],
