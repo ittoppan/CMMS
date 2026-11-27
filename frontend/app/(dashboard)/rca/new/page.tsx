@@ -176,21 +176,21 @@ export default function RcaNewPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="block">
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักร *</span>
               <Select value={assetId} onValueChange={setAssetId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="เลือกเครื่องจักร" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="เครื่องจักร"><SelectValue placeholder="เลือกเครื่องจักร" /></SelectTrigger>
                 <SelectContent>
                   {assets.map((a) => (
                     <SelectItem key={a.id} value={String(a.id)}>{a.code} — {a.name}{a.criticality ? ` (${a.criticality})` : ""}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ใบสั่งงาน (ถ้ามี)</span>
               <Select value={repairId} onValueChange={setRepairId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ใบสั่งงาน"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ระบุ</SelectItem>
                   {(wos || []).map((w) => (
@@ -198,30 +198,30 @@ export default function RcaNewPage() {
                   ))}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">วันที่เกิดเหตุ</span>
               <input type="datetime-local" value={failureDate} onChange={(e) => setFailureDate(e.target.value)} className={inputCls} />
             </label>
-            <label className="block">
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ความรุนแรง *</span>
               <Select value={sev} onValueChange={setSev}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ระดับ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ความรุนแรง"><SelectValue placeholder="ระดับ" /></SelectTrigger>
                 <SelectContent>
                   {FAILURE_SEVERITIES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ผลกระทบการผลิต</span>
               <Select value={prodImpact} onValueChange={setProdImpact}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ผลกระทบการผลิต"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">ไม่ระบุ</SelectItem>
                   {RCA_PRODUCTION_IMPACT.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">Downtime (นาที)</span>
               <input type="number" min={0} value={downtimeMin} onChange={(e) => setDowntimeMin(e.target.value)} placeholder="0" className={inputCls} />
@@ -229,36 +229,36 @@ export default function RcaNewPage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="block">
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">Failure Type</span>
               <Select value={typeId} onValueChange={setTypeId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="Failure Type"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ระบุ</SelectItem>
                   {(tax?.failure_types ?? []).filter((t) => t.is_active).map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.code} — {t.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">Failure Mode</span>
               <Select value={modeId} onValueChange={setModeId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="Failure Mode"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ระบุ</SelectItem>
                   {(tax?.failure_modes ?? []).filter((t) => t.is_active).map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.code} — {t.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">Failure Cause (สาเหตุเบื้องต้น)</span>
               <Select value={causeId} onValueChange={setCauseId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="Failure Cause (สาเหตุเบื้องต้น)"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ระบุ</SelectItem>
                   {(tax?.failure_causes ?? []).filter((t) => t.is_active).map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.code} — {t.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
           </div>
 
           <label className="block">
@@ -302,16 +302,16 @@ export default function RcaNewPage() {
                 <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">หัวข้อ RCA *</span>
                 <input value={rcaTitle} onChange={(e) => setRcaTitle(e.target.value)} placeholder="เช่น วิเคราะห์ปั๊ม PE-04 พังซ้ำ" className={inputCls} />
               </label>
-              <label className="block">
+              <span className="block">
                 <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (Investigator)</span>
                 <Select value={assigneeId} onValueChange={setAssigneeId}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
+                  <SelectTrigger className="w-full" aria-label="ผู้รับผิดชอบ (Investigator)"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">ไม่ระบุ</SelectItem>
                     {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}{u.role_id === 1 ? " (Admin)" : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
-              </label>
+              </span>
             </div>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">คำอธิบายปัญหา (Problem Statement)</span>

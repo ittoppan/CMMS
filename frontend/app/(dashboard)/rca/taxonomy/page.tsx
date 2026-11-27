@@ -150,7 +150,7 @@ export default function RcaTaxonomyPage() {
                   <CardDescription>{meta.desc}</CardDescription>
                 </div>
                 {canTax && (
-                  <Button variant="secondary" size="sm" onClick={() => openCreate(k)} disabled={busy}>
+                  <Button variant="secondary" size="sm" onClick={() => openCreate(k)} disabled={busy} aria-label={`เพิ่ม ${meta.label}`}>
                     <Plus size={14} aria-hidden="true" /> เพิ่ม
                   </Button>
                 )}
@@ -178,10 +178,10 @@ export default function RcaTaxonomyPage() {
                         <div className="flex shrink-0 items-center gap-1">
                           {canTax && it.is_active && (
                             <>
-                              <Button variant="ghost" size="icon-xs" onClick={() => openEdit(k, it)} disabled={busy} aria-label="แก้ไข">
+                              <Button variant="ghost" size="icon-xs" onClick={() => openEdit(k, it)} disabled={busy} aria-label={`แก้ไข ${it.name}`}>
                                 <Pencil size={14} aria-hidden="true" />
                               </Button>
-                              <Button variant="ghost" size="icon-xs" onClick={() => deactivate(k, it)} disabled={busy} aria-label="ปิดใช้งาน">
+                              <Button variant="ghost" size="icon-xs" onClick={() => deactivate(k, it)} disabled={busy} aria-label={`ปิดใช้งาน ${it.name}`}>
                                 <Trash2 size={14} aria-hidden="true" />
                               </Button>
                             </>
@@ -238,10 +238,10 @@ export default function RcaTaxonomyPage() {
             />
           </label>
           {kind === "failure_modes" && (
-            <label className="block">
+            <span className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">Failure Type ต้นสังกัด</span>
               <Select value={fTypeId} onValueChange={setFTypeId}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="เลือก Failure Type" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="Failure Type ต้นสังกัด"><SelectValue placeholder="เลือก Failure Type" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ระบุ</SelectItem>
                   {(tax?.failure_types ?? [])
@@ -249,7 +249,7 @@ export default function RcaTaxonomyPage() {
                     .map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.code} — {t.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
           )}
           {kind !== "root_cause_categories" && (
             <label className="block">

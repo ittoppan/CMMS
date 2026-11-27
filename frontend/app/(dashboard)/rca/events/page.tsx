@@ -126,21 +126,21 @@ export default function RcaEventsPage() {
             />
           </div>
           <Select value={assetId} onValueChange={(v) => { setPage(1); setAssetId(v); }}>
-            <SelectTrigger className="w-[230px]"><SelectValue placeholder="เครื่องจักรทั้งหมด" /></SelectTrigger>
+            <SelectTrigger className="w-[230px]" aria-label="กรองตามเครื่องจักร"><SelectValue placeholder="เครื่องจักรทั้งหมด" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">เครื่องจักรทั้งหมด</SelectItem>
               {assets.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.code} — {a.name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={severity} onValueChange={(v) => { setPage(1); setSeverity(v); }}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="ความรุนแรง" /></SelectTrigger>
+            <SelectTrigger className="w-44" aria-label="กรองตามความรุนแรง"><SelectValue placeholder="ความรุนแรง" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
               {FAILURE_SEVERITIES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={repeatOnly} onValueChange={(v) => { setPage(1); setRepeatOnly(v); }}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="สถานะเสียซ้ำ" /></SelectTrigger>
+            <SelectTrigger className="w-44" aria-label="กรองตามสถานะเสียซ้ำ"><SelectValue placeholder="สถานะเสียซ้ำ" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
               <SelectItem value="1">สงสัยเสียซ้ำ</SelectItem>
@@ -148,7 +148,7 @@ export default function RcaEventsPage() {
             </SelectContent>
           </Select>
           <Select value={rcaState} onValueChange={(v) => { setPage(1); setRcaState(v); }}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="สถานะ RCA" /></SelectTrigger>
+            <SelectTrigger className="w-40" aria-label="กรองตามสถานะ RCA"><SelectValue placeholder="สถานะ RCA" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">ทั้งหมด</SelectItem>
               <SelectItem value="yes">ต้องทำแล้วเปิดแล้ว</SelectItem>
@@ -221,7 +221,7 @@ export default function RcaEventsPage() {
                         <span className="inline-flex items-center gap-1"><CalendarDays size={12} aria-hidden="true" />{fmtDate(ev.failure_date)}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <a href={ev.rca_id ? `/rca/${ev.rca_id}` : `/rca/new?event_id=${ev.id}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label="ดูรายละเอียด">
+                        <a href={ev.rca_id ? `/rca/${ev.rca_id}` : `/rca/new?event_id=${ev.id}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label={`ดูรายละเอียด ${ev.event_code}`}>
                           <PlusCircle size={15} aria-hidden="true" />
                         </a>
                       </td>

@@ -132,7 +132,7 @@ export default function RcaDashboardPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <Select value={assetId} onValueChange={setAssetId}>
-          <SelectTrigger className="w-[260px]"><SelectValue placeholder="เครื่องจักรทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-[260px]" aria-label="กรองตามเครื่องจักร"><SelectValue placeholder="เครื่องจักรทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">เครื่องจักรทั้งหมด</SelectItem>
             {assets.map((a) => (
@@ -141,7 +141,7 @@ export default function RcaDashboardPage() {
           </SelectContent>
         </Select>
         <Select value={severity} onValueChange={setSeverity}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="ความรุนแรงทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-44" aria-label="กรองตามความรุนแรง"><SelectValue placeholder="ความรุนแรงทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">ความรุนแรงทั้งหมด</SelectItem>
             {FAILURE_SEVERITIES.map((sev) => (
@@ -299,7 +299,7 @@ export default function RcaDashboardPage() {
                           <td className="px-3 py-2"><Badge variant="danger" dot>{r.occurrences} ครั้ง</Badge></td>
                           <td className="px-3 py-2">{fmtDuration(r.downtime_minutes)}</td>
                           <td className="px-3 py-2">
-                            <a href={`/rca/events?q=${r.event_code}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })}><ArrowRight size={14} aria-hidden="true" /></a>
+                            <a href={`/rca/events?q=${r.event_code}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label={`เปิดเหตุการณ์ ${r.event_code}`}><ArrowRight size={14} aria-hidden="true" /></a>
                           </td>
                         </tr>
                       ))}

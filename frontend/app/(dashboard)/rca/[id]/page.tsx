@@ -252,7 +252,7 @@ export default function RcaDetailPage() {
           ...(canEdit && allowed.length > 0
             ? [
                 <Select key="status" value="" onValueChange={(v) => v && transition(v)}>
-                  <SelectTrigger className="w-44 h-10"><SelectValue placeholder="เปลี่ยนสถานะ…" /></SelectTrigger>
+                  <SelectTrigger className="w-44 h-10" aria-label="เปลี่ยนสถานะ RCA"><SelectValue placeholder="เปลี่ยนสถานะ…" /></SelectTrigger>
                   <SelectContent>
                     {allowed.map((to) => (
                       <SelectItem key={to} value={to}>{RCA_STATUS_LABELS[to]?.th || to}</SelectItem>
@@ -301,7 +301,7 @@ export default function RcaDetailPage() {
                         กำหนดเป็น Root Cause
                       </label>
                       {whyRows.length > 1 && (
-                        <button type="button" onClick={() => { setWhyRows((prev) => prev.filter((_, j) => j !== i)); if (whyRootIndex === i) setWhyRootIndex(-1); if (whyRootIndex > i) setWhyRootIndex(whyRootIndex - 1); }} className="text-xs text-[var(--cmms-danger)] hover:underline">ลบ</button>
+                        <button type="button" onClick={() => { setWhyRows((prev) => prev.filter((_, j) => j !== i)); if (whyRootIndex === i) setWhyRootIndex(-1); if (whyRootIndex > i) setWhyRootIndex(whyRootIndex - 1); }} className="text-xs text-[var(--cmms-danger)] hover:underline" aria-label={`ลบสาเหตุชั้น ${i + 1}`}>ลบ</button>
                       )}
                     </div>
                   </div>
@@ -436,22 +436,22 @@ export default function RcaDetailPage() {
                             <Button variant="secondary" size="sm" onClick={() => {
                               const ev = prompt("กรอกหลักฐาน/สรุปผลการทำ:");
                               if (ev !== null) actionTransition(a.id, "action_complete", { evidence: ev }, "บันทึกผลทำสำเร็จ");
-                            }} disabled={busy}>ทำเสร็จ</Button>
+                            }} disabled={busy} aria-label={`ทำเสร็จ ${a.title}`}>ทำเสร็จ</Button>
                           )}
                           {a.status === "completed" && canApprove && (
                             <>
-                              <Button variant="primary" size="sm" onClick={() => actionTransition(a.id, "action_verify", { pass: true }, "Verify ผ่าน")} disabled={busy}><Check size={14} aria-hidden="true" /> Verify</Button>
+                              <Button variant="primary" size="sm" onClick={() => actionTransition(a.id, "action_verify", { pass: true }, "Verify ผ่าน")} disabled={busy} aria-label={`Verify ${a.title}`}><Check size={14} aria-hidden="true" /> Verify</Button>
                               <Button variant="ghost" size="sm" onClick={() => {
                                 const note = prompt("เหตุผลไม่ผ่าน:");
                                 if (note !== null) actionTransition(a.id, "action_verify", { pass: false, note }, "ส่งกลับให้แก้อีกครั้ง");
-                              }} disabled={busy}><X size={14} aria-hidden="true" /></Button>
+                              }} disabled={busy} aria-label={`ไม่ผ่านการ verify ${a.title}`}><X size={14} aria-hidden="true" /></Button>
                             </>
                           )}
                           {(a.status === "open" || a.status === "in_progress") && canEdit && (
                             <Button variant="ghost" size="sm" onClick={() => {
                               const note = prompt("เหตุผลการยกเลิก:");
                               if (note !== null && note.trim()) actionTransition(a.id, "action_cancel", { note }, "ยกเลิก action แล้ว");
-                            }} disabled={busy}>ยกเลิก</Button>
+                            }} disabled={busy} aria-label={`ยกเลิก action ${a.title}`}>ยกเลิก</Button>
                           )}
                         </div>
                       </div>
@@ -496,15 +496,15 @@ export default function RcaDetailPage() {
                         <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                           {l.status === "proposed" && canApprove && (
                             <>
-                              <Button variant="primary" size="sm" onClick={() => linkTransition(l.id, "approved")} disabled={busy}><Check size={14} aria-hidden="true" /> อนุมัติ</Button>
+                              <Button variant="primary" size="sm" onClick={() => linkTransition(l.id, "approved")} disabled={busy} aria-label={`อนุมัติ ${l.title}`}><Check size={14} aria-hidden="true" /> อนุมัติ</Button>
                               <Button variant="ghost" size="sm" onClick={() => {
                                 const note = prompt("เหตุผลไม่อนุมัติ:");
                                 if (note !== null && note.trim()) { actionTransition(l.id, "link_transition", { to: "rejected", note }, "ไม่อนุมัติ"); }
-                              }} disabled={busy}><X size={14} aria-hidden="true" /></Button>
+                              }} disabled={busy} aria-label={`ไม่อนุมัติ ${l.title}`}><X size={14} aria-hidden="true" /></Button>
                             </>
                           )}
                           {l.status === "approved" && canApprove && (
-                            <Button variant="secondary" size="sm" onClick={() => linkTransition(l.id, "applied")} disabled={busy}>แจ้งนำไปใช้แล้ว</Button>
+                            <Button variant="secondary" size="sm" onClick={() => linkTransition(l.id, "applied")} disabled={busy} aria-label={`แจ้งนำไปใช้แล้ว ${l.title}`}>แจ้งนำไปใช้แล้ว</Button>
                           )}
                         </div>
                       </div>
@@ -555,9 +555,9 @@ export default function RcaDetailPage() {
 
       <Dialog open={evidenceOpen} onClose={() => setEvidenceOpen(false)} title="เพิ่มหลักฐาน" description="บันทึกแล้วลบ/แก้ไม่ได้ (append-only)" footer={<><Button variant="ghost" onClick={() => setEvidenceOpen(false)} disabled={busy}>ยกเลิก</Button><Button onClick={saveEvidence} loading={busy}>เพิ่มหลักฐาน</Button></>}>
         <div className="space-y-4">
-          <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
-            <Select value={evType} onValueChange={setEvType}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{RCA_EVIDENCE_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
-          </label>
+          <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
+            <Select value={evType} onValueChange={setEvType}><SelectTrigger className="w-full" aria-label="ประเภทหลักฐาน"><SelectValue /></SelectTrigger><SelectContent>{RCA_EVIDENCE_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
+          </span>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ชื่อหลักฐาน *</span><input value={evTitle} onChange={(e) => setEvTitle(e.target.value)} placeholder="เช่น ภาพถ่ายแบริ่งที่ไหม้" className={inputCls} /></label>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">คำอธิบาย</span><textarea value={evDesc} onChange={(e) => setEvDesc(e.target.value)} rows={3} className={textareaCls} /></label>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">แหล่งที่มา</span><input value={evSource} onChange={(e) => setEvSource(e.target.value)} placeholder="เช่น แผนกซ่อมบำรุง, วิศวกรช่วงกลางวัน" className={inputCls} /></label>
@@ -566,9 +566,9 @@ export default function RcaDetailPage() {
 
       <Dialog open={measOpen} onClose={() => setMeasOpen(false)} title="บันทึกการวัด" description="ต้องระบุเครื่องมือ — ข้อมูลต้องมาจากการวัดจริง" footer={<><Button variant="ghost" onClick={() => setMeasOpen(false)} disabled={busy}>ยกเลิก</Button><Button onClick={saveMeasurement} loading={busy}>บันทึก</Button></>}>
         <div className="space-y-4">
-          <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทการวัด</span>
-            <Select value={mType} onValueChange={setMType}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{RCA_MEASUREMENT_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
-          </label>
+          <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทการวัด</span>
+            <Select value={mType} onValueChange={setMType}><SelectTrigger className="w-full" aria-label="ประเภทการวัด"><SelectValue /></SelectTrigger><SelectContent>{RCA_MEASUREMENT_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
+          </span>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ค่า *</span><input type="number" step="any" value={mValue} onChange={(e) => setMValue(e.target.value)} className={inputCls} /></label>
             <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">หน่วย</span><input value={mUnit} onChange={(e) => setMUnit(e.target.value)} placeholder="mm/s, °C, bar…" className={inputCls} /></label>
@@ -581,20 +581,20 @@ export default function RcaDetailPage() {
       <Dialog open={actionOpen} onClose={() => setActionOpen(false)} title="สร้าง Action" description="Corrective = แก้ที่ต้นเหตุ · Preventive = ป้องกันไม่ให้เกิดซ้ำ" footer={<><Button variant="ghost" onClick={() => setActionOpen(false)} disabled={busy}>ยกเลิก</Button><Button onClick={saveAction} loading={busy}>สร้าง action</Button></>}>
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
-              <Select value={aType} onValueChange={setAType}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{RCA_ACTION_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
-            </label>
-            <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ลำดับความสำคัญ</span>
-              <Select value={aPriority} onValueChange={setAPriority}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{RCA_PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent></Select>
-            </label>
+            <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
+              <Select value={aType} onValueChange={setAType}><SelectTrigger className="w-full" aria-label="ประเภท action"><SelectValue /></SelectTrigger><SelectContent>{RCA_ACTION_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
+            </span>
+            <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ลำดับความสำคัญ</span>
+              <Select value={aPriority} onValueChange={setAPriority}><SelectTrigger className="w-full" aria-label="ลำดับความสำคัญ"><SelectValue /></SelectTrigger><SelectContent>{RCA_PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent></Select>
+            </span>
           </div>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ชื่อ action *</span><input value={aTitle} onChange={(e) => setATitle(e.target.value)} placeholder="เช่น เปลี่ยนมาตรฐานการหล่อลื่นแบริ่งทุก 500 ชม." className={inputCls} /></label>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียด</span><textarea value={aDesc} onChange={(e) => setADesc(e.target.value)} rows={3} className={textareaCls} /></label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">กำหนดเสร็จ</span><input type="date" value={aDue} onChange={(e) => setADue(e.target.value)} className={inputCls} /></label>
-            <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">เจ้าของ</span>
-              <Select value={aOwner} onValueChange={setAOwner}><SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger><SelectContent><SelectItem value="0">ไม่ระบุ</SelectItem>{users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}</SelectContent></Select>
-            </label>
+            <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">เจ้าของ</span>
+              <Select value={aOwner} onValueChange={setAOwner}><SelectTrigger className="w-full" aria-label="เจ้าของ action"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger><SelectContent><SelectItem value="0">ไม่ระบุ</SelectItem>{users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}</SelectContent></Select>
+            </span>
           </div>
           <label className="flex cursor-pointer items-center gap-2">
             <input type="checkbox" checked={aMandatory} onChange={(e) => setAMandatory(e.target.checked)} className="h-4 w-4 accent-[var(--cmms-primary)]" />
@@ -605,23 +605,23 @@ export default function RcaDetailPage() {
 
       <Dialog open={linkOpen} onClose={() => setLinkOpen(false)} title="เสนอการเปลี่ยนแปลง" description="Proposal ปรับ PM/Checklist/อุปกรณ์ จากบทสรุปของ RCA" footer={<><Button variant="ghost" onClick={() => setLinkOpen(false)} disabled={busy}>ยกเลิก</Button><Button onClick={saveLink} loading={busy}>เสนอ proposal</Button></>}>
         <div className="space-y-4">
-          <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
-            <Select value={lType} onValueChange={setLType}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{LINK_TYPE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
-          </label>
+          <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ประเภท</span>
+            <Select value={lType} onValueChange={setLType}><SelectTrigger className="w-full" aria-label="ประเภทการเปลี่ยนแปลง"><SelectValue /></SelectTrigger><SelectContent>{LINK_TYPE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select>
+          </span>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ชื่อ *</span><input value={lTitle} onChange={(e) => setLTitle(e.target.value)} placeholder="เช่น เพิ่มจุดตรวจสอบแบริ่ง X ใน PM-014" className={inputCls} /></label>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">คำอธิบาย</span><textarea value={lDesc} onChange={(e) => setLDesc(e.target.value)} rows={2} className={textareaCls} /></label>
           <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียดการเปลี่ยนแปลงที่เสนอ *</span><textarea value={lProposed} onChange={(e) => setLProposed(e.target.value)} rows={3} placeholder="ระบุให้ชัดเจนว่าต้องแก้อะไร ที่ไหน เมื่อไหร่" className={textareaCls} /></label>
-          <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">เชื่อมกับ Action (ถ้ามี)</span>
-            <Select value={lActionId} onValueChange={setLActionId}><SelectTrigger className="w-full"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger><SelectContent><SelectItem value="0">ไม่ระบุ</SelectItem>{(d?.actions || []).map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.title}</SelectItem>)}</SelectContent></Select>
-          </label>
+          <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">เชื่อมกับ Action (ถ้ามี)</span>
+            <Select value={lActionId} onValueChange={setLActionId}><SelectTrigger className="w-full" aria-label="เชื่อมกับ Action"><SelectValue placeholder="ไม่ระบุ" /></SelectTrigger><SelectContent><SelectItem value="0">ไม่ระบุ</SelectItem>{(d?.actions || []).map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.title}</SelectItem>)}</SelectContent></Select>
+          </span>
         </div>
       </Dialog>
 
       <Dialog open={effectOpen} onClose={() => setEffectOpen(false)} title="บันทึกผลการทบทวน" description="ใช้ตัวเลขจริงจากประวัติเท่านั้น" footer={<><Button variant="ghost" onClick={() => setEffectOpen(false)} disabled={busy}>ยกเลิก</Button><Button onClick={saveEffect} loading={busy}>บันทึก</Button></>}>
         <div className="space-y-4">
-          <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ผลการทบทวน</span>
-            <Select value={effValue} onValueChange={setEffValue}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{RCA_EFFECTIVENESS_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
-          </label>
+          <span className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ผลการทบทวน</span>
+            <Select value={effValue} onValueChange={setEffValue}><SelectTrigger className="w-full" aria-label="ผลการทบทวน"><SelectValue /></SelectTrigger><SelectContent>{RCA_EFFECTIVENESS_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
+          </span>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ครั้งก่อนเริ่ม (12 เดือน)*</span><input type="number" min={0} value={effBefore} onChange={(e) => setEffBefore(e.target.value)} className={inputCls} /></label>
             <label className="block"><span className="mb-1.5 block text-sm font-medium text-[var(--cmms-text-primary)]">ครั้งหลังเริ่ม *</span><input type="number" min={0} value={effAfter} onChange={(e) => setEffAfter(e.target.value)} className={inputCls} /></label>
