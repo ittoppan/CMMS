@@ -77,5 +77,19 @@
     </div>
     <button class="btn" onclick="location.reload()">ลองเชื่อมต่อใหม่</button>
   </div>
+  <script>
+    window.addEventListener('online', function () { window.location.reload(); });
+    async function checkNetworkAndReload() {
+      try {
+        const response = await fetch('.', { cache: 'no-store' });
+        if (response.status >= 200 && response.status < 500) {
+          window.location.reload();
+          return;
+        }
+      } catch (e) { /* still offline */ }
+      window.setTimeout(checkNetworkAndReload, 3000);
+    }
+    window.setTimeout(checkNetworkAndReload, 3000);
+  </script>
 </body>
 </html>

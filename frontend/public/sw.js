@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v262-20261126-1153";
+const SW_VERSION = "v263-20261127-pwa-bestpractices";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -104,16 +104,18 @@ self.addEventListener("message", (event) => {
 /* ---------- Activate: ล้าง cache เวอร์ชันเก่า ---------- */
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE && key !== PAGE_CACHE)
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      if ("navigationPreload" in self.registration) {
+        try { await self.registration.navigationPreload.enable(); } catch (e) { /* ignore */ }
+      }
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE && key !== PAGE_CACHE)
+          .map((key) => caches.delete(key))
+      );
+      await self.clients.claim();
+    })()
   );
 });
 
@@ -172,24 +174,35 @@ self.addEventListener("fetch", (event) => {
     const isOfflineRoute = OFFLINE_ROUTES.some((r) => url.pathname === r || url.pathname.startsWith(r + "/"));
     if (!isOfflineRoute) {
       event.respondWith(
-        fetch(request).catch(() =>
-          caches.match("/offline.html").then((res) => res || offlineFallback())
-        )
+        (async () => {
+          try {
+            const preloadResponse = await event.preloadResponse;
+            if (preloadResponse) return preloadResponse;
+            return await fetch(request);
+          } catch (error) {
+            return (await caches.match("/offline.html")) || offlineFallback();
+          }
+        })()
       );
       return;
     }
     // offline route — network-first, เก็บ HTML ลง PAGE_CACHE, offline เสิร์ฟจาก cache
     event.respondWith(
-      fetch(request)
-        .then((response) => {
+      (async () => {
+        try {
+          const preloadResponse = await event.preloadResponse;
+          if (preloadResponse) {
+            cachePut(PAGE_CACHE, request, preloadResponse.clone());
+            return preloadResponse;
+          }
+          const response = await fetch(request);
           cachePut(PAGE_CACHE, request, response.clone());
           return response;
-        })
-        .catch(() =>
-          caches
-            .match(request, { cacheName: PAGE_CACHE })
-            .then((cached) => cached || caches.match("/offline.html").then((res) => res || offlineFallback()))
-        )
+        } catch (error) {
+          const cached = await caches.match(request, { cacheName: PAGE_CACHE });
+          return cached || (await caches.match("/offline.html")) || offlineFallback();
+        }
+      })()
     );
     return;
   }
