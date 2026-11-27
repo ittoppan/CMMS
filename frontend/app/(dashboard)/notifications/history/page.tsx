@@ -7,6 +7,7 @@ import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Grid, PageHeader } from "@/components/layout";
+import { SettingsShell } from "@/components/settings/SettingsShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -210,7 +211,8 @@ export default function LineDeliveryHistoryPage() {
   ];
 
   return (
-    <>
+    <SettingsShell>
+      <>
       <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATION HISTORY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ประวัติการส่ง LINE" }]}
       title="ประวัติการส่ง LINE"
@@ -376,6 +378,7 @@ export default function LineDeliveryHistoryPage() {
         </p>
       </div>
           </div>
-    </>
+      </>
+    </SettingsShell>
   );
 }
