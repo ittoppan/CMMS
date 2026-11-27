@@ -451,6 +451,24 @@ export default function ProfilePage() {
             <HStack gap={2} vAlign="center" wrap="wrap">
               <MessageSquare className="h-4 w-4 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
               <span className="text-sm text-muted-foreground">
+                การแจ้งเตือนของฉัน / Web Push / เปลี่ยนรหัสผ่าน
+              </span>
+              <Button variant="secondary" size="sm" onClick={() => router.push("/settings/notification-prefs")}>
+                การแจ้งเตือนของฉัน
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => router.push("/settings/push")}>
+                Web Push
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => router.push("/change-password")}>
+                เปลี่ยนรหัสผ่าน
+              </Button>
+            </HStack>
+          </Card>
+
+          <Card className="p-4">
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              <MessageSquare className="h-4 w-4 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+              <span className="text-sm text-muted-foreground">
                 ต้องการรับการแจ้งเตือนทาง LINE หรือไม่? ไปที่หน้า
               </span>
               <Button variant="secondary" size="sm" onClick={() => router.push("/register")}>
