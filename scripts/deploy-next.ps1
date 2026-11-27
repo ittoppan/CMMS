@@ -43,14 +43,40 @@ function Stop-NextServer {
 }
 
 function Start-NextServer {
-    Write-Host "Starting node server (PORT=$Port) from $standalone ..."
-    # PORT must be inherited by node via the environment (server.js reads process.env.PORT)
-    $env:PORT = "$Port"
-    $proc = Start-Process -FilePath $nodeExe -ArgumentList "server.js" `
-        -WorkingDirectory $standalone -WindowStyle Hidden -PassThru
-    $pidFile = Join-Path $logDir "nextjs.pid"
-    $proc.Id | Out-File -FilePath $pidFile -Encoding ascii
-    Write-Host "Started PID $($proc.Id) (saved to $pidFile)"
+    # Start via the Scheduled Task "CMMS-NextJS" instead of a direct Start-Process:
+    # node started from an interactive/agent session can bind 127.0.0.1 only, which
+    # makes the site unreachable from the LAN even though localhost keeps answering.
+    $taskName = "CMMS-NextJS"
+    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    if (-not $task) {
+        Write-Host "FAIL scheduled task '$taskName' not found - cannot start the Next.js server" -ForegroundColor Red
+        Send-Telegram "[CMMS] DEPLOY FAIL scheduled task $taskName not found"
+        exit 1
+    }
+    Write-Host "Starting node server via scheduled task '$taskName' (PORT=$Port) ..."
+    Start-ScheduledTask -TaskName $taskName
+    for ($i = 0; $i -lt 20; $i++) {
+        Start-Sleep -Seconds 1
+        if ((Get-ScheduledTask -TaskName $taskName).State -ne "Running") { break }
+    }
+    Write-Host "Scheduled task '$taskName' triggered"
+}
+
+function Test-BoundAllInterfaces {
+    # localhost:3001 ตอบ 200 ไม่ได้แปลว่า LAN เข้าได้ — ต้องมี listener บน 0.0.0.0
+    param([int]$ListenPort = 3001)
+    $listeners = Get-NetTCPConnection -LocalPort $ListenPort -State Listen -ErrorAction SilentlyContinue
+    if (-not $listeners) { return $false }
+    return [bool]($listeners | Where-Object { $_.LocalAddress -eq "0.0.0.0" -or $_.LocalAddress -eq "::" })
+}
+
+function Get-LanBaseUrl {
+    param([int]$ListenPort = 3001)
+    $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+        Where-Object { $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" } |
+        Select-Object -First 1).IPAddress
+    if (-not $ip) { return "" }
+    return "http://$($ip):$ListenPort"
 }
 
 function Wait-ServerReady {
@@ -85,40 +111,84 @@ function Send-Telegram([string]$message) {
     }
 }
 
+function Assert-DeployableNextDir {
+    # ตรวจว่า .next ที่จะเอาไป deploy มี layout ของ output:standalone ปกติ
+    # คืนข้อความปัญหา (ว่าง = ใช้ได้) — ต้องเรียกก่อนหยุด server เสมอ
+    param([string]$NextDir)
+    $sa = Join-Path $NextDir "standalone"
+    if (-not (Test-Path -LiteralPath (Join-Path $sa "server.js"))) {
+        return "server.js not found at $sa (build/prebuilt ยังไม่สมบูรณ์)"
+    }
+    $alien = @(Get-ChildItem -LiteralPath $sa -Directory -Filter ".next-*" -ErrorAction SilentlyContinue)
+    if ($alien.Count -gt 0) {
+        return "standalone ถูก build ด้วย NEXT_DIST_DIR ($($alien[0].Name)) - runtime/static อยู่ใต้ชื่อ distDir ทำให้ asset 404; ให้ build ด้วย distDir ปกติ (.next)"
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $sa ".next"))) {
+        return "standalone\.next missing - layout ไม่ใช่ output:standalone ปกติ"
+    }
+    return ""
+}
+
 Write-Host "=== CMMS-TPT Next.js deploy ==="
 
-# 0. fail fast: ถ้า -SkipBuild โดยไม่มี prebuilt ที่มี server.js จริง → หยุดเลย
-#    (กัน deploy .next ที่พัง/เก่าเงียบ ๆ — เหตุการณ์ 2026-08-30)
+# 0. fail fast — ตรวจทุกเงื่อนไข “ก่อน” แตะ server ที่รันอยู่
+#    (เดิม: หยุด server ก่อนแล้วค่อย throw → เว็บ down ฟรี)
+if ($env:NEXT_DIST_DIR) {
+    Write-Host "FAIL: NEXT_DIST_DIR=$($env:NEXT_DIST_DIR) ใช้กับ deploy ไม่ได้" -ForegroundColor Red
+    Write-Host "      build ด้วย distDir ที่ไม่ใช่ .next ทำให้ standalone เก็บไฟล์ใต้ชื่อ distDir และ static/BUILD_ID ตรวจไม่เจอ (asset 404)" -ForegroundColor Red
+    Write-Host "      ให้ unset NEXT_DIST_DIR แล้ว build ด้วย distDir ปกติ (หรือส่ง -Prebuilt ที่ build แบบปกติ)" -ForegroundColor Red
+    exit 1
+}
+
+# 0b. -SkipBuild ต้องมี -Prebuilt (กัน deploy .next ที่พัง/เก่าเงียบ ๆ — เหตุการณ์ 2026-08-30)
 if ($SkipBuild -and -not $Prebuilt) {
     Write-Host "FAIL: -SkipBuild ต้องระบุ -Prebuilt <dir> ที่มี .next\standalone\server.js ด้วย" -ForegroundColor Red
     exit 1
 }
 
-# 1. stop current server (releases the standalone folder lock)
-Stop-NextServer
-
-if (-not $SkipBuild) {
-    # 2. clean + build
-    Remove-Item -Recurse -Force -LiteralPath (Join-Path $frontend ".next") -ErrorAction SilentlyContinue
-    $prebuiltServer = ""
-    if ($Prebuilt) { $prebuiltServer = Join-Path $Prebuilt ".next\standalone\server.js" }
-    if ($Prebuilt -and (Test-Path -LiteralPath $prebuiltServer)) {
-        # fast-deploy: copy the prebuilt bundle (already built in the worktree)
-        Write-Host "Reusing prebuilt .next from $Prebuilt (fast deploy)..."
-        Copy-Item -Recurse -Force -LiteralPath (Join-Path $Prebuilt ".next") -Destination (Join-Path $frontend ".next")
-    } else {
-        Write-Host "Building (npm run build)..."
-        Push-Location $frontend
-        try {
-            npm run build
-            if ($LASTEXITCODE -ne 0) { throw "npm run build failed (exit $LASTEXITCODE)" }
-        } finally {
-            Pop-Location
-        }
+$prebuiltNext = ""
+if ($Prebuilt) {
+    if (-not (Test-Path -LiteralPath $Prebuilt)) {
+        Write-Host "FAIL: -Prebuilt path not found: $Prebuilt" -ForegroundColor Red
+        exit 1
+    }
+    $Prebuilt = (Resolve-Path -LiteralPath $Prebuilt).Path
+    $prebuiltNext = Join-Path $Prebuilt ".next"
+    if (-not (Test-Path -LiteralPath $prebuiltNext)) {
+        Write-Host "FAIL: -Prebuilt ต้องมี .next อยู่ข้างใน: $prebuiltNext" -ForegroundColor Red
+        exit 1
+    }
+    $prebuiltIssue = Assert-DeployableNextDir -NextDir $prebuiltNext
+    if ($prebuiltIssue) {
+        Write-Host "FAIL: prebuilt ใช้ไม่ได้ — $prebuiltIssue" -ForegroundColor Red
+        Write-Host "      (ยังไม่หยุด server; build ใหม่แบบปกติหรือแก้ prebuilt ก่อน)" -ForegroundColor Red
+        exit 1
     }
 }
 
-# 2b. post-build sanity: ต้องมี standalone/server.js + BUILD_ID เสมอ (กัน deploy เก่า)
+# 1. stop current server (releases the standalone folder lock)
+Stop-NextServer
+
+# 2. clean + (build หรือ copy prebuilt)
+Remove-Item -Recurse -Force -LiteralPath (Join-Path $frontend ".next") -ErrorAction SilentlyContinue
+if ($Prebuilt) {
+    # fast-deploy: copy the prebuilt bundle (ใช้ได้ทั้งมีและไม่มี -SkipBuild)
+    Write-Host "Reusing prebuilt .next from $Prebuilt (skip build=$SkipBuild)..."
+    Copy-Item -Recurse -Force -LiteralPath $prebuiltNext -Destination (Join-Path $frontend ".next")
+} else {
+    Write-Host "Building (npm run build)..."
+    Push-Location $frontend
+    try {
+        npm run build
+        if ($LASTEXITCODE -ne 0) { throw "npm run build failed (exit $LASTEXITCODE)" }
+    } finally {
+        Pop-Location
+    }
+}
+
+# 2b. post-build sanity: layout ต้องเป็น output:standalone ปกติ + มี BUILD_ID เสมอ (กัน deploy เก่า)
+$layoutIssue = Assert-DeployableNextDir -NextDir (Join-Path $frontend ".next")
+if ($layoutIssue) { throw "deploy ไม่ได้: $layoutIssue" }
 if (-not (Test-Path (Join-Path $standalone "server.js"))) {
     throw "server.js not found at $standalone - build ยังไม่สมบูรณ์ (output:standalone/ turbopack.root)"
 }
@@ -139,7 +209,7 @@ if (-not (Test-Path (Join-Path $standalone "server.js"))) {
     throw "server.js not found at $standalone - check next.config turbopack.root / output layout"
 }
 
-# 4. start server
+# 4. start server via the scheduled task (binds 0.0.0.0, reachable from the LAN)
 Start-NextServer
 
 # 5. verify (wait until the server actually starts listening)
@@ -148,6 +218,17 @@ if (-not (Wait-ServerReady)) {
     Write-Host "FAIL server did not become ready on port $Port within 30s"
     exit 1
 }
+
+# 5a. ต้องผูก 0.0.0.0 จริง — กันเคส server ตอบ localhost แต่ LAN เข้าไม่ได้
+Write-Host "Checking port $Port is bound to all interfaces (LAN reachable)..."
+if (-not (Test-BoundAllInterfaces -ListenPort $Port)) {
+    $bound = (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty LocalAddress) -join ", "
+    Write-Host "FAIL port $Port bound to [$bound] only - LAN clients cannot connect (expected 0.0.0.0)" -ForegroundColor Red
+    Send-Telegram "[CMMS] DEPLOY FAIL :$Port not bound to 0.0.0.0 (LAN unreachable)"
+    exit 1
+}
+Write-Host "OK port $Port is bound to 0.0.0.0"
 
 # 5b. ยืนยัน server ที่รันอยู่เสิร์ฟ BUILD_ID ตัวที่ deploy (กันรันของเก่า/พัง)
 #     Next 16 Turbopack: static paths ใช้ hash ต่อไฟล์ (ไม่ฝัง BUILD_ID)
@@ -161,6 +242,19 @@ if ((Test-Url $buildManifestUrl) -ne 200) {
 Write-Host "OK live server serves BUILD_ID=$deployedBuildId"
 $hostUrl = "http://localhost:$Port"
 $ok = 0; $total = 0
+
+# ยืนยันเส้นทาง LAN จริง (ไม่ใช่แค่ loopback) — ยิงผ่าน IP ของเครื่อง
+$lanBaseUrl = Get-LanBaseUrl -ListenPort $Port
+if ($lanBaseUrl) {
+    foreach ($page in @("/login", "/dashboard")) {
+        $total++
+        $code = Test-Url "$lanBaseUrl$page"
+        if ($code -eq 200) { $ok++; Write-Host "OK  LAN $lanBaseUrl$page -> 200" } else { Write-Host "FAIL LAN $lanBaseUrl$page -> $code" }
+    }
+} else {
+    Write-Host "WARN no non-loopback IPv4 found - skipped LAN HTTP check"
+}
+
 foreach ($page in @("/login", "/dashboard")) {
     $total++
     $code = Test-Url "$hostUrl$page"
