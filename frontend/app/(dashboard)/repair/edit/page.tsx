@@ -559,6 +559,7 @@ function EditWorkOrderContent() {
                 accept="image/*"
                 multiple
                 capture="environment"
+                aria-label="อัปโหลดรูปหลังซ่อม"
                 className="hidden"
                 onChange={(e) => {
                   addAfterImages(e.target.files);
