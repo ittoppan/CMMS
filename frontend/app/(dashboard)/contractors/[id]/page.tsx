@@ -201,13 +201,16 @@ export default function ContractorDetailPage() {
       </Card>
 
       {/* tabs */}
-      <div className="flex flex-wrap gap-1.5 border-b border-[var(--cmms-border)] pb-2">
+      <div role="tablist" aria-label="แท็บข้อมูลผู้รับเหมา" className="flex flex-wrap gap-1.5 border-b border-[var(--cmms-border)] pb-2">
         {TABS.map((t) => {
           const Icon = t.icon;
           const active = tab === t.key;
           return (
             <button
               key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
               onClick={() => setTab(t.key)}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
