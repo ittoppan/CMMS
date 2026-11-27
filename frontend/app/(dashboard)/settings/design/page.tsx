@@ -385,6 +385,7 @@ export default function PageDesignerPage() {
           <button
             key={s.id}
             type="button"
+            aria-label={`${s.label} — ${s.desc}`}
             aria-current={active ? "page" : undefined}
             onClick={() => {
               setActiveSection(s.id);
