@@ -275,9 +275,9 @@ export default function MyDashboardPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { key: "assigned", label: tr("mydash.assigned"), value: assigned, icon: <ClipboardList className="h-5 w-5 text-blue-600" />, sub: tr("mydash.assigned_hint"), bg: "bg-blue-100", arrow: "bg-blue-100 text-blue-600", href: "/repair/my_tasks" },
-            { key: "in_progress", label: tr("mydash.in_progress"), value: inProgress, icon: <Wrench className="h-5 w-5 text-orange-600" />, sub: tr("mydash.in_progress_hint"), bg: "bg-orange-100", arrow: "bg-orange-100 text-orange-600", href: "/repair/my_tasks" },
-            { key: "completed", label: tr("mydash.completed"), value: completed, icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />, sub: tr("mydash.completed_hint"), bg: "bg-emerald-100", arrow: "bg-emerald-100 text-emerald-600", href: "/repair/tracking" },
+            { key: "assigned", label: tr("mydash.assigned"), value: assigned, icon: <ClipboardList className="h-5 w-5 text-blue-600" />, sub: tr("mydash.assigned_hint"), bg: "bg-blue-100", arrow: "bg-blue-100 text-blue-600", href: "/repair/my_tasks?tab=new" },
+            { key: "in_progress", label: tr("mydash.in_progress"), value: inProgress, icon: <Wrench className="h-5 w-5 text-orange-600" />, sub: tr("mydash.in_progress_hint"), bg: "bg-orange-100", arrow: "bg-orange-100 text-orange-600", href: "/repair/my_tasks?tab=in_progress" },
+            { key: "completed", label: tr("mydash.completed"), value: completed, icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />, sub: tr("mydash.completed_hint"), bg: "bg-emerald-100", arrow: "bg-emerald-100 text-emerald-600", href: "/repair/my_tasks?tab=completed" },
             { key: "overdue", label: tr("mydash.overdue"), value: overdue, icon: <AlertTriangle className="h-5 w-5 text-red-600" />, sub: tr("mydash.overdue_hint"), bg: "bg-red-100", arrow: "bg-red-100 text-red-600", href: "/repair/tracking" },
           ].map((c) => (
             <Card key={c.key}>
