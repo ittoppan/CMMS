@@ -41,7 +41,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           >
             {label}
-            {required && <span className="text-destructive"> *</span>}
+            {required && <span className="text-destructive" aria-hidden="true"> *</span>}
           </label>
         )}
         <input

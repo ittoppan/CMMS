@@ -73,7 +73,7 @@ export function FormField<T extends FieldValues>({
           )}
         >
           {label}
-          {required && <span className="text-destructive"> *</span>}
+          {required && <span className="text-destructive" aria-hidden="true"> *</span>}
         </label>
       )}
       {child}
