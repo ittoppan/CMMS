@@ -1,7 +1,6 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
-import { SettingsShell } from "@/components/settings/SettingsShell";
 import { usePageHero } from "@/lib/i18n";
 // roles — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Alert)
 // business logic ครบเดิม: fetch/delete roles.php, client search filter
@@ -119,9 +118,8 @@ export default function RolesPage() {
   ];
 
   return (
-    <SettingsShell>
-      <>
-        <PageHeader
+    <>
+      <PageHeader
         breadcrumbs={[
           { label: "หน้าแรก", href: "/dashboard" },
           { label: "บุคลากร", href: "/roles" },
@@ -207,7 +205,6 @@ export default function RolesPage() {
         </CardContent>
       </Card>
       </div>
-      </>
-    </SettingsShell>
+    </>
   );
 }

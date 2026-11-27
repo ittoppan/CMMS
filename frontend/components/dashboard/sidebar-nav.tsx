@@ -190,6 +190,11 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "pages", labelKey: "menu.pages", href: "/pages", icon: FileText, secondary: true },
       { perm: "editor/builder", labelKey: "menu.builder", href: "/editor/builder", icon: LayoutGrid, secondary: true },
       { perm: "forms/designer", labelKey: "menu.forms_designer", href: "/forms/designer", icon: FileText, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_menus", href: "/settings/menus", icon: ShieldCheck, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_services", href: "/settings/services", icon: Server, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush, secondary: true },
+      { perm: "settings", label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง", href: "/settings/repair-options", icon: Wrench, secondary: true },
     ],
   },
   {
