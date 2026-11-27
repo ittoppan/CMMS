@@ -45,6 +45,13 @@ jobs:
         with:
           # ต้องมี history เพื่อให้ scan-mode: diff เทียบ base branch ได้
           fetch-depth: 0
+          # repo มีไฟล์อัปโหลดชื่อไทยยาว 265 ไบต์ (เกิน 255 ของ Linux) อยู่ที่
+          # public/uploads/iso_forms → checkout บน runner ล้มด้วย "File name too long"
+          # ข้ามเฉพาะโฟลเดอร์อัปโหลด (ไม่ใช่ไฟล์ที่จะสแกน)
+          sparse-checkout: |
+            /*
+            !/public/uploads/
+          sparse-checkout-cone-mode: false
 
       - name: Open Code Review
         uses: raye-deng/open-code-review@v2.1.5
