@@ -16,7 +16,6 @@ import { DetailHeader } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Progress } from "@/components/ui/progress";
@@ -465,9 +464,9 @@ export default function InspectionRunPage() {
       <Card>
         <CardContent className="p-4">
           <div className="max-w-[640px] space-y-1.5">
-            <Label>เลือกรอบตรวจ *</Label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกรอบตรวจ *</span>
             <Select value={selectedId || "__none__"} onValueChange={(v) => handleSelect(v === "__none__" ? "" : v)} disabled={schedules.length === 0}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="เลือกรอบตรวจ">
                 <SelectValue placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ…"} />
               </SelectTrigger>
               <SelectContent>
@@ -581,7 +580,7 @@ export default function InspectionRunPage() {
                             {item.type === "dropdown" && (
                               <div className="max-w-[320px] pt-1">
                                 <Select value={item.value || "__none__"} onValueChange={(v) => updateItem(index, { value: v === "__none__" ? "" : v, status: v === "__none__" ? null : item.status ?? "pass" })}>
-                                  <SelectTrigger><SelectValue placeholder="เลือกตัวเลือก…" /></SelectTrigger>
+                                  <SelectTrigger aria-label={item.task || "ตัวเลือก"}><SelectValue placeholder="เลือกตัวเลือก…" /></SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="__none__" disabled>เลือกตัวเลือก…</SelectItem>
                                     {item.options.map((op) => <SelectItem key={op} value={op}>{op}</SelectItem>)}

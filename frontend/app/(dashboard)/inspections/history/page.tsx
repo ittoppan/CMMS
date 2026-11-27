@@ -8,7 +8,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
@@ -117,9 +116,9 @@ export default function InspectionHistoryPage() {
       <Card>
         <CardContent className="flex flex-wrap items-end gap-4 p-4">
           <div className="w-[200px] space-y-1.5">
-            <Label>ผลตรวจ</Label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผลตรวจ</span>
             <Select value={resultFilter || "__all__"} onValueChange={(v) => setResultFilter(v === "__all__" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="ผลทั้งหมด" /></SelectTrigger>
+              <SelectTrigger aria-label="ผลตรวจ"><SelectValue placeholder="ผลทั้งหมด" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">ผลทั้งหมด</SelectItem>
                 <SelectItem value="pass">ผ่าน</SelectItem>
@@ -130,12 +129,12 @@ export default function InspectionHistoryPage() {
             </Select>
           </div>
           <div className="w-[200px] space-y-1.5">
-            <Label>จากวันที่</Label>
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">จากวันที่</span>
+            <Input type="date" aria-label="จากวันที่" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
           </div>
           <div className="w-[200px] space-y-1.5">
-            <Label>ถึงวันที่</Label>
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ถึงวันที่</span>
+            <Input type="date" aria-label="ถึงวันที่" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
           </div>
           <Button variant="secondary" onClick={fetchHistory}>กรอง</Button>
         </CardContent>

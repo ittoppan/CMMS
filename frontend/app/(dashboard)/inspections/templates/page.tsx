@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DetailHeader } from "@/components/layout";
@@ -269,9 +268,9 @@ export default function InspectionTemplatesPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="รหัส Template * (เช่น CHK-CCTV-D)" placeholder="CHK-CCTV-D" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
             <div className="space-y-1.5">
-              <Label>ความถี่ *</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ความถี่ *</span>
               <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v })}>
-                <SelectTrigger>
+                <SelectTrigger aria-label="ความถี่">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -317,9 +316,9 @@ export default function InspectionTemplatesPage() {
                     </div>
                     <div className="w-[190px]">
                       <div className="space-y-1.5">
-                        <Label className="sr-only">ประเภท</Label>
+                        <span className="sr-only">ประเภท</span>
                         <Select value={it.type} onValueChange={(v) => updateItem(idx, { type: v })}>
-                          <SelectTrigger>
+                          <SelectTrigger aria-label="ประเภท">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -404,9 +403,9 @@ export default function InspectionTemplatesPage() {
                     </label>
                     <div className="w-[180px]">
                       <div className="space-y-1.5">
-                        <Label className="sr-only">การจัดการเมื่อไม่ผ่าน</Label>
+                        <span className="sr-only">การจัดการเมื่อไม่ผ่าน</span>
                         <Select value={it.failure_action || "none"} onValueChange={(v) => updateItem(idx, { failure_action: v === "none" ? "" : v })}>
-                          <SelectTrigger>
+                          <SelectTrigger aria-label="การจัดการเมื่อไม่ผ่าน">
                             <SelectValue placeholder="ผลเมื่อไม่ผ่าน…" />
                           </SelectTrigger>
                           <SelectContent>

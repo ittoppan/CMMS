@@ -12,7 +12,6 @@ import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DetailHeader } from "@/components/layout";
@@ -287,18 +286,18 @@ export default function InspectionsPage() {
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
           <div className="space-y-1.5">
-            <Label>สถานะ</Label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานะ</span>
             <Select value={scope} onValueChange={setScope}>
-              <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[170px]" aria-label="สถานะ"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>แผนก</Label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">แผนก</span>
             <Select value={deptId || "__all__"} onValueChange={(v) => setDeptId(v === "__all__" ? "" : v)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="ทุกแผนก" /></SelectTrigger>
+              <SelectTrigger className="w-[180px]" aria-label="แผนก"><SelectValue placeholder="ทุกแผนก" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">ทุกแผนก</SelectItem>
                 {departments.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
@@ -306,9 +305,9 @@ export default function InspectionsPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>ที่ตั้ง</Label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ที่ตั้ง</span>
             <Select value={locId || "__all__"} onValueChange={(v) => setLocId(v === "__all__" ? "" : v)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="ทุกที่ตั้ง" /></SelectTrigger>
+              <SelectTrigger className="w-[180px]" aria-label="ที่ตั้ง"><SelectValue placeholder="ทุกที่ตั้ง" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">ทุกที่ตั้ง</SelectItem>
                 {locations.map((l) => <SelectItem key={l.id} value={String(l.id)}>{l.name}</SelectItem>)}
@@ -316,12 +315,12 @@ export default function InspectionsPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>จาก</Label>
-            <Input type="date" className="w-[150px]" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">จาก</span>
+            <Input type="date" aria-label="จาก" className="w-[150px]" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>ถึง</Label>
-            <Input type="date" className="w-[150px]" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ถึง</span>
+            <Input type="date" aria-label="ถึง" className="w-[150px]" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
           </div>
           <Button variant="secondary" onClick={fetchAll} className="h-9">กรอง</Button>
         </CardContent>
@@ -334,9 +333,9 @@ export default function InspectionsPage() {
             <h4 className="font-bold">สร้างรอบตรวจใหม่</h4>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1.5">
-                <Label>เทมเพลต *</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เทมเพลต *</span>
                 <Select value={cf.template_id || "__none__"} onValueChange={(v) => setCf({ ...cf, template_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกเทมเพลต…" /></SelectTrigger>
+                  <SelectTrigger aria-label="เทมเพลต"><SelectValue placeholder="เลือกเทมเพลต…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกเทมเพลต…</SelectItem>
                     {templates.map((tpl) => <SelectItem key={tpl.id} value={String(tpl.id)}>{tpl.title} ({tpl.code})</SelectItem>)}
@@ -344,9 +343,9 @@ export default function InspectionsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>เครื่องจักร / อุปกรณ์ *</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักร / อุปกรณ์ *</span>
                 <Select value={cf.asset_id || "__none__"} onValueChange={(v) => setCf({ ...cf, asset_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกเครื่อง…" /></SelectTrigger>
+                  <SelectTrigger aria-label="เครื่องจักร / อุปกรณ์"><SelectValue placeholder="เลือกเครื่อง…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกเครื่อง…</SelectItem>
                     {assets.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.name}{a.code ? ` (${a.code})` : ""}</SelectItem>)}
@@ -354,9 +353,9 @@ export default function InspectionsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>ความสำคัญ</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ความสำคัญ</span>
                 <Select value={cf.priority || "normal"} onValueChange={(v) => setCf({ ...cf, priority: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="ความสำคัญ"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="normal">ปกติ</SelectItem>
                     <SelectItem value="high">สูง</SelectItem>
@@ -366,9 +365,9 @@ export default function InspectionsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>ผู้รับผิดชอบ</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ</span>
                 <Select value={cf.assignee_id || "__none__"} onValueChange={(v) => setCf({ ...cf, assignee_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกผู้รับผิดชอบ…" /></SelectTrigger>
+                  <SelectTrigger aria-label="ผู้รับผิดชอบ"><SelectValue placeholder="เลือกผู้รับผิดชอบ…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกผู้รับผิดชอบ…</SelectItem>
                     {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name || u.username || `ผู้ใช้ #${u.id}`}</SelectItem>)}
@@ -376,9 +375,9 @@ export default function InspectionsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>แผนก</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">แผนก</span>
                 <Select value={cf.department_id || "__none__"} onValueChange={(v) => setCf({ ...cf, department_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกแผนก…" /></SelectTrigger>
+                  <SelectTrigger aria-label="แผนก"><SelectValue placeholder="เลือกแผนก…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกแผนก…</SelectItem>
                     {departments.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
@@ -386,9 +385,9 @@ export default function InspectionsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>ที่ตั้ง</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ที่ตั้ง</span>
                 <Select value={cf.location_id || "__none__"} onValueChange={(v) => setCf({ ...cf, location_id: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="เลือกที่ตั้ง…" /></SelectTrigger>
+                  <SelectTrigger aria-label="ที่ตั้ง"><SelectValue placeholder="เลือกที่ตั้ง…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">เลือกที่ตั้ง…</SelectItem>
                     {locations.map((l) => <SelectItem key={l.id} value={String(l.id)}>{l.name}</SelectItem>)}
