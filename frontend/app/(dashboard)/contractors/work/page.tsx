@@ -277,35 +277,35 @@ export default function ContractorWorkPage() {
         <Card>
           <CardHeader><CardTitle>มอบหมายงานภายนอกใหม่</CardTitle><CardDescription>งานใหม่เริ่มต้นที่สถานะ requested — บังคับผู้รับเหมาต้องไม่ถูกบล็อก</CardDescription></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="block">
+            <span className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">ผู้รับเหมา *</span>
               <Select value={aContractor} onValueChange={setAContractor}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="เลือกผู้รับเหมา" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ผู้รับเหมา"><SelectValue placeholder="เลือกผู้รับเหมา" /></SelectTrigger>
                 <SelectContent>
                   {(contractors || []).map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.company_name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">ใบแจ้งซ่อม (ไม่บังคับ)</span>
               <Select value={aWo} onValueChange={setAWo}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ไม่ผูก WO" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ใบแจ้งซ่อม (ไม่บังคับ)"><SelectValue placeholder="ไม่ผูก WO" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">ไม่ผูก WO</SelectItem>
                   {(wos || []).map((w) => <SelectItem key={w.id} value={String(w.id)}>{w.work_order_no || w.title}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">หมวดงาน</span>
               <Select value={aCategory} onValueChange={setACategory}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="เลือกหมวด" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="หมวดงาน"><SelectValue placeholder="เลือกหมวด" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">ไม่ระบุ</SelectItem>
                   {(cats || []).filter((c: ServiceCategory) => c.enabled !== false).map((c: ServiceCategory) => <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
             <label className="block sm:col-span-2 lg:col-span-1">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">หัวข้อ / ชื่องาน *</span>
               <input className={inputCls} value={aTitle} onChange={(e) => setATitle(e.target.value)} placeholder="เช่น เปลี่ยนสายพานสายการผลิต A" />
@@ -322,25 +322,25 @@ export default function ContractorWorkPage() {
               <span className="mb-1 block text-xs font-medium text-muted-foreground">ราคาเสนองาน (บาท)</span>
               <input className={inputCls} type="number" min="0" value={aAmount} onChange={(e) => setAAmount(e.target.value)} />
             </label>
-            <label className="block">
+            <span className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">ความเร่งด่วน</span>
               <Select value={aPriority} onValueChange={setAPriority}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ความเร่งด่วน"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(PRIORITY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v.th}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
-            <label className="block">
+            </span>
+            <span className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">ผู้ดูแลภายใน</span>
               <Select value={aOwner} onValueChange={setAOwner}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="เลือกผู้ดูแล" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ผู้ดูแลภายใน"><SelectValue placeholder="เลือกผู้ดูแล" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">— ยังไม่ระบุ —</SelectItem>
                   {(users || []).map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </label>
+            </span>
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-muted-foreground">เริ่มงาน</span>
               <input className={inputCls} type="date" value={aStart} onChange={(e) => setAStart(e.target.value)} />
@@ -362,7 +362,7 @@ export default function ContractorWorkPage() {
               <input className={inputCls} value={aEndCond} onChange={(e) => setAEndCond(e.target.value)} />
             </label>
             <label className="flex items-end gap-2 pb-2">
-              <Checkbox checked={aPermit} onCheckedChange={(v) => setAPermit(v === true)} />
+              <Checkbox checked={aPermit} onCheckedChange={(v) => setAPermit(v === true)} aria-label="ต้องใช้ใบอนุญาตทำงาน (PTW)" />
               <span className="text-sm">ต้องใช้ใบอนุญาตทำงาน (PTW)</span>
             </label>
             <label className="block sm:col-span-2 lg:col-span-3">
@@ -383,24 +383,24 @@ export default function ContractorWorkPage() {
       <div style={layoutStyle("filters")} className="flex flex-wrap items-center gap-2">
         <div className="relative">
           <Search size={15} aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }} placeholder="ค้นหาเลขที่งาน / หัวข้อ" className="w-[260px] pl-8" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }} placeholder="ค้นหาเลขที่งาน / หัวข้อ" aria-label="ค้นหางานภายนอก" className="w-[260px] pl-8" />
         </div>
         <Select value={status} onValueChange={(v) => { setStatus(v === "all" ? "" : v); }}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-48" aria-label="กรองตามสถานะ"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">สถานะทั้งหมด</SelectItem>
             {Object.entries(ASSIGNMENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={contractor} onValueChange={(v) => { setContractor(v === "all" ? "" : v); }}>
-          <SelectTrigger className="w-52"><SelectValue placeholder="ผู้รับเหมาทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-52" aria-label="กรองตามผู้รับเหมา"><SelectValue placeholder="ผู้รับเหมาทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">ผู้รับเหมาทั้งหมด</SelectItem>
             {(contractors || []).map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.company_name}</SelectItem>)}
           </SelectContent>
         </Select>
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={onlyActive} onCheckedChange={(v) => setOnlyActive(v === true)} />
+          <Checkbox checked={onlyActive} onCheckedChange={(v) => setOnlyActive(v === true)} aria-label="เฉพาะงานที่ยังไม่ปิด" />
           เฉพาะงานที่ยังไม่ปิด
         </label>
         <Button variant="secondary" onClick={applyFilters}><Search size={15} aria-hidden="true" /> ค้นหา</Button>
@@ -427,6 +427,7 @@ export default function ContractorWorkPage() {
                     {group.map((a: Assignment) => {
                       const tone = PRIORITY_LABELS[a.priority]?.tone || "neutral";
                       const trans = nextOptions(a.status);
+                      const aLabel = a.assignment_no || `AST${a.id}`;
                       return (
                         <Card key={a.id} className={cn("flex flex-col", a.status === "rework" && "ring-1 ring-[var(--cmms-danger)]")}>
                           <CardContent className="flex flex-1 flex-col gap-3 p-4">
@@ -454,22 +455,22 @@ export default function ContractorWorkPage() {
                                 inspectId === a.id ? (
                                   <div className="space-y-2 rounded-lg bg-[var(--cmms-bg-muted)]/40 p-2">
                                     <Select value={iResult} onValueChange={setIResult}>
-                                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                                      <SelectTrigger className="w-full" aria-label={`ผลตรวจรับของ ${aLabel}`}><SelectValue /></SelectTrigger>
                                       <SelectContent>
                                         {Object.entries(ACCEPTANCE_RESULT_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                                       </SelectContent>
                                     </Select>
-                                    <input aria-label="รายละเอียดข้อบกพร่อง" className={inputCls} value={iDefect} onChange={(e) => setIDefect(e.target.value)} placeholder={iResult === "pass" ? "บันทึกผลการตรวจ (พบนิดหน่อย)" : "จุดบกพร่อง / ข้อกำหนดแก้ไข"} />
-                                    {iResult === "reject" && <input aria-label="กำหนดแก้ไข" className={inputCls} type="date" value={iReworkDue} onChange={(e) => setIReworkDue(e.target.value)} placeholder="กำหนดส่งงานใหม่" />}
+                                    <input aria-label={`รายละเอียดข้อบกพร่องของ ${aLabel}`} className={inputCls} value={iDefect} onChange={(e) => setIDefect(e.target.value)} placeholder={iResult === "pass" ? "บันทึกผลการตรวจ (พบนิดหน่อย)" : "จุดบกพร่อง / ข้อกำหนดแก้ไข"} />
+                                    {iResult === "reject" && <input aria-label={`กำหนดแก้ไขของ ${aLabel}`} className={inputCls} type="date" value={iReworkDue} onChange={(e) => setIReworkDue(e.target.value)} placeholder="กำหนดส่งงานใหม่" />}
                                     <div className="flex justify-end gap-2">
-                                      <Button variant="ghost" size="sm" onClick={() => setInspectId(0)}><X size={14} aria-hidden="true" /> ปิด</Button>
-                                      <Button variant="primary" size="sm" onClick={() => inspect(a)} disabled={busy === `in-${a.id}`}>
+                                      <Button variant="ghost" size="sm" aria-label={`ปิดฟอร์มตรวจรับของ ${aLabel}`} onClick={() => setInspectId(0)}><X size={14} aria-hidden="true" /> ปิด</Button>
+                                      <Button variant="primary" size="sm" aria-label={`บันทึกผลตรวจรับของ ${aLabel}`} onClick={() => inspect(a)} disabled={busy === `in-${a.id}`}>
                                         <ClipboardCheck size={14} aria-hidden="true" /> {busy === `in-${a.id}` ? "…" : "บันทึกผลตรวจรับ"}
                                       </Button>
                                     </div>
                                   </div>
                                 ) : (
-                                  <Button variant="secondary" size="sm" className="w-full" onClick={() => setInspectId(a.id)}>
+                                  <Button variant="secondary" size="sm" className="w-full" aria-label={`ตรวจรับงานนี้ ${aLabel}`} onClick={() => setInspectId(a.id)}>
                                     <ClipboardCheck size={14} aria-hidden="true" /> ตรวจรับงานนี้
                                   </Button>
                                 )
@@ -477,15 +478,15 @@ export default function ContractorWorkPage() {
                               {trans.length > 0 && (
                                 <div className="flex flex-wrap items-center gap-2">
                                   <Select value={transTo[a.id] || ""} onValueChange={(v) => setTransTo((p) => ({ ...p, [a.id]: v }))}>
-                                    <SelectTrigger className="w-full"><SelectValue placeholder={`เปลี่ยนเป็น… (${trans.length} ขั้นถัดไป)`} /></SelectTrigger>
+                                    <SelectTrigger className="w-full" aria-label={`สถานะถัดไปของ ${aLabel}`}><SelectValue placeholder={`เปลี่ยนเป็น… (${trans.length} ขั้นถัดไป)`} /></SelectTrigger>
                                     <SelectContent>
                                       {trans.map((t) => <SelectItem key={t} value={t}>{ASSIGNMENT_STATUS_LABELS[t] || t}</SelectItem>)}
                                     </SelectContent>
                                   </Select>
                                   {a.status === "rework" || a.status === "cancelled" ? (
-                                    <input aria-label="หมายเหตุการเปลี่ยนสถานะ" className={inputCls + " h-9 text-xs"} value={transNote[a.id] || ""} onChange={(e) => setTransNote((p) => ({ ...p, [a.id]: e.target.value }))} placeholder="เหตุผลบังคับ" />
+                                    <input aria-label={`หมายเหตุการเปลี่ยนสถานะของ ${aLabel}`} className={inputCls + " h-9 text-xs"} value={transNote[a.id] || ""} onChange={(e) => setTransNote((p) => ({ ...p, [a.id]: e.target.value }))} placeholder="เหตุผลบังคับ" />
                                   ) : null}
-                                  <Button variant="secondary" size="sm" onClick={() => transTo[a.id] && transition(a, transTo[a.id])} disabled={!transTo[a.id] || busy === `tr-${a.id}`}>
+                                  <Button variant="secondary" size="sm" aria-label={`เปลี่ยนสถานะของ ${aLabel}`} onClick={() => transTo[a.id] && transition(a, transTo[a.id])} disabled={!transTo[a.id] || busy === `tr-${a.id}`}>
                                     <ArrowRight size={14} aria-hidden="true" /> {busy === `tr-${a.id}` ? "เปลี่ยนสถานะ…" : "เปลี่ยนสถานะ"}
                                   </Button>
                                 </div>

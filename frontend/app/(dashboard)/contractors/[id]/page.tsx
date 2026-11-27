@@ -179,17 +179,17 @@ export default function ContractorDetailPage() {
       {/* status change */}
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
-          <label className="block">
+          <span className="block">
             <span className="mb-1 block text-xs font-medium text-muted-foreground">เปลี่ยนสถานะผู้รับเหมา</span>
             <Select value={toStatus} onValueChange={setToStatus}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="เลือกสถานะปลายทาง" /></SelectTrigger>
+              <SelectTrigger className="w-56" aria-label="เปลี่ยนสถานะผู้รับเหมา"><SelectValue placeholder="เลือกสถานะปลายทาง" /></SelectTrigger>
               <SelectContent>
                 {Object.entries(CTR_STATUS_LABELS).filter(([k]) => k !== c.status).map(([k, v]) => (
                   <SelectItem key={k} value={k}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </label>
+          </span>
           <label className="block grow">
             <span className="mb-1 block text-xs font-medium text-muted-foreground">เหตุผล / หลักฐาน</span>
             <input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="ระบุเหตุผลประกอบการเปลี่ยนสถานะ" />
@@ -350,7 +350,7 @@ export default function ContractorDetailPage() {
             <CardHeader><CardTitle>ประเมินรอบปัจจุบัน</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <Select value={decision} onValueChange={setDecision}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="ผลการประเมิน" /></SelectTrigger>
+                <SelectTrigger className="w-full" aria-label="ผลการประเมินคุณสมบัติ"><SelectValue placeholder="ผลการประเมิน" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="approved">ผ่าน</SelectItem>
                   <SelectItem value="conditional">ผ่านมีเงื่อนไข</SelectItem>

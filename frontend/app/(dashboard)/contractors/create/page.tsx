@@ -165,26 +165,26 @@ export default function ContractorCreatePage() {
             <span className="mb-1 block text-xs font-medium text-muted-foreground">วันหมดอายุอบรมความปลอดภัย</span>
             <input className={inputCls} type="date" value={safetyTrainingExpiry} onChange={(e) => setSafetyTrainingExpiry(e.target.value)} />
           </label>
-          <label className="block">
+          <span className="block">
             <span className="mb-1 block text-xs font-medium text-muted-foreground">ผู้ดูแลภายใน (Internal Owner)</span>
             <Select value={ownerId} onValueChange={setOwnerId}>
-              <SelectTrigger className="w-full"><SelectValue placeholder="เลือกผู้ดูแล" /></SelectTrigger>
+              <SelectTrigger className="w-full" aria-label="ผู้ดูแลภายใน (Internal Owner)"><SelectValue placeholder="เลือกผู้ดูแล" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">— ยังไม่ระบุ —</SelectItem>
                 {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
               </SelectContent>
             </Select>
-          </label>
-          <label className="block">
+          </span>
+          <span className="block">
             <span className="mb-1 block text-xs font-medium text-muted-foreground">สถานะเริ่มต้น</span>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full" aria-label="สถานะเริ่มต้น"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">ร่าง</SelectItem>
                 <SelectItem value="pending_qualification">รอประเมินคุณสมบัติ</SelectItem>
               </SelectContent>
             </Select>
-          </label>
+          </span>
           <label className="block sm:col-span-2 lg:col-span-3">
             <span className="mb-1 block text-xs font-medium text-muted-foreground">หมายเหตุ</span>
             <textarea className={inputCls + " h-20 resize-none"} value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -231,14 +231,14 @@ export default function ContractorCreatePage() {
         <CardContent className="space-y-3">
           {contacts.map((c, i) => (
             <div key={i} className="grid gap-3 rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/40 p-3 sm:grid-cols-2 lg:grid-cols-5">
-              <input aria-label="ชื่อ-นามสกุลผู้ติดต่อ" className={inputCls} value={c.full_name} onChange={(e) => setContact(i, "full_name", e.target.value)} placeholder="ชื่อ-นามสกุล" />
-              <input aria-label="ตำแหน่ง" className={inputCls} value={c.role} onChange={(e) => setContact(i, "role", e.target.value)} placeholder="ตำแหน่ง" />
-              <input aria-label="เบอร์โทร" className={inputCls} value={c.phone} onChange={(e) => setContact(i, "phone", e.target.value)} placeholder="โทรศัพท์" />
-              <input aria-label="อีเมล" className={inputCls} value={c.email} onChange={(e) => setContact(i, "email", e.target.value)} placeholder="อีเมล" />
+              <input aria-label={`ชื่อ-นามสกุลผู้ติดต่อ แถว ${i + 1}`} className={inputCls} value={c.full_name} onChange={(e) => setContact(i, "full_name", e.target.value)} placeholder="ชื่อ-นามสกุล" />
+              <input aria-label={`ตำแหน่ง แถว ${i + 1}`} className={inputCls} value={c.role} onChange={(e) => setContact(i, "role", e.target.value)} placeholder="ตำแหน่ง" />
+              <input aria-label={`เบอร์โทร แถว ${i + 1}`} className={inputCls} value={c.phone} onChange={(e) => setContact(i, "phone", e.target.value)} placeholder="โทรศัพท์" />
+              <input aria-label={`อีเมล แถว ${i + 1}`} className={inputCls} value={c.email} onChange={(e) => setContact(i, "email", e.target.value)} placeholder="อีเมล" />
               <div className="flex items-center gap-2">
-                <input aria-label="LINE ID" className={inputCls} value={c.line_id} onChange={(e) => setContact(i, "line_id", e.target.value)} placeholder="LINE ID" />
+                <input aria-label={`LINE ID แถว ${i + 1}`} className={inputCls} value={c.line_id} onChange={(e) => setContact(i, "line_id", e.target.value)} placeholder="LINE ID" />
                 {contacts.length > 1 && (
-                  <Button variant="ghost" size="icon" aria-label="ลบผู้ติดต่อ" onClick={() => setContacts((p) => p.filter((_, idx) => idx !== i))} title="ลบผู้ติดต่อ">
+                  <Button variant="ghost" size="icon" aria-label={c.full_name ? `ลบผู้ติดต่อ ${c.full_name}` : `ลบผู้ติดต่อ แถว ${i + 1}`} onClick={() => setContacts((p) => p.filter((_, idx) => idx !== i))} title="ลบผู้ติดต่อ">
                     <Trash2 size={15} aria-hidden="true" />
                   </Button>
                 )}

@@ -167,25 +167,26 @@ export default function ContractorsPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
             placeholder="ค้นหาชื่อ / รหัส / เลขผู้เสียภาษี"
+            aria-label="ค้นหาผู้รับเหมา"
             className="w-[280px] pl-8"
           />
         </div>
         <Select value={status} onValueChange={(v) => { setStatus(v === "all" ? "" : v); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-44" aria-label="กรองตามสถานะ"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">สถานะทั้งหมด</SelectItem>
             {Object.entries(CTR_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={category} onValueChange={(v) => { setCategory(v === "all" ? "" : v); }}>
-          <SelectTrigger className="w-52"><SelectValue placeholder="หมวดงานทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-52" aria-label="กรองตามหมวดงาน"><SelectValue placeholder="หมวดงานทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">หมวดงานทั้งหมด</SelectItem>
             {catsEnabled.map((c) => <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={owner} onValueChange={(v) => { setOwner(v === "all" ? "" : v); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="ผู้ดูแลทั้งหมด" /></SelectTrigger>
+          <SelectTrigger className="w-44" aria-label="กรองตามผู้ดูแล"><SelectValue placeholder="ผู้ดูแลทั้งหมด" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">ผู้ดูแลทั้งหมด</SelectItem>
             {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
@@ -277,7 +278,7 @@ export default function ContractorsPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <Link href={`/contractors/${c.id}`} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--cmms-primary)] hover:underline">
+                            <Link href={`/contractors/${c.id}`} aria-label={`ดูโปรไฟล์ ${c.company_name}`} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--cmms-primary)] hover:underline">
                               โปรไฟล์ <ArrowRight size={13} aria-hidden="true" />
                             </Link>
                           </td>
