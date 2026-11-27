@@ -2,12 +2,16 @@
 # https://github.com/marketplace/actions/open-code-review
 #
 # หมายเหตุการตั้งค่า:
-#  - รันเฉพาะ pull_request + สั่งมือ (workflow_dispatch) — repo นี้ push ตรงเข้า main เป็นหลัก
-#    ถ้าต้องการกั้นทุก push ให้เพิ่ม `push: branches: [main]` ใน on: (ยังไม่เปิด เพราะยังไม่รู้ว่า
-#    action คำนวณ base diff ของ push event ได้ถูกต้องหรือไม่)
+#  - trigger: pull_request + push(main) + สั่งมือ (workflow_dispatch)
+#  - action v2.1.5 คำนวณ diff ได้เฉพาะตอนมี pull_request ใน event payload
+#    (อ่านรายชื่อไฟล์จาก pulls.listFiles + `git diff base...head`)
+#    บน push event ไม่มี payload.pull_request → `scan-mode: diff` จะเงียบ ๆ
+#    กลายเป็นสแกนทั้ง repo และไม่มีการคอมเมนต์ (ไม่มี PR ให้คอมเมนต์)
+#    จึงเลือก scan-mode ตาม event: PR = diff, push/สั่งมือ = full (ตรงไปตรงมา)
+#    ผลของ push ดูได้จาก job log + Step Summary + artifact ocr-report-*
 #  - sla: L1 = ตรวจเชิงโครงสร้าง ไม่ต้องใช้ LLM (เหมาะกับ CI ที่ไม่มี Ollama)
 #    L2/L3 ต้องมี Ollama หรือ OpenAI-compatible endpoint — ยังไม่ตั้งใน workflow นี้
-#  - fail-on-low-score: false = คอมเมนต์รายงานก่อน ยังไม่บล็อก merge
+#  - fail-on-low-score: false = รายงานก่อน ยังไม่บล็อก (ทั้ง PR และ push เข้า main)
 #    เปิดเป็น "true" ได้เมื่อดูผลรอบแรกแล้วว่าคะแนนไม่ต่ำเกินไป
 #  - ตัวสแกนรองรับ TS/JS, Python, Java, Go, Kotlin — ไฟล์ PHP ของโปรเจกต์นี้จะถูกข้าม
 #  - LICENSE ของ action = BUSL-1.1: ฟรีสำหรับ personal/non-commercial,
@@ -17,10 +21,12 @@ name: Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: code-review-${{ github.ref }}
+  group: code-review-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -31,7 +37,7 @@ jobs:
   review:
     name: AI Code Review (Open Code Review)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -45,6 +51,27 @@ jobs:
         with:
           sla: L1
           threshold: '60'
-          scan-mode: diff
+          # diff ใช้ได้เฉพาะ pull_request — push/สั่งมือสแกนเต็ม
+          scan-mode: ${{ github.event_name == 'pull_request' && 'diff' || 'full' }}
           fail-on-low-score: 'false'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # push ไม่มี PR ให้คอมเมนต์ — สรุปผลลง Step Summary ของ run แทน
+      # (สคริปต์แยกไฟล์เพื่อเลี่ยง heredoc ใน YAML ซึ่งพังง่ายกับไฟล์ CRLF)
+      - name: Publish result summary
+        if: always()
+        run: |
+          if [ -f ocr-report.json ]; then
+            node scripts/ocr-summary.mjs ocr-report.json >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'ocr-report.json not produced — the action failed before writing a report (see the step log above).' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload review report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocr-report-${{ github.event_name }}-${{ github.run_attempt }}
+          path: ocr-report.json
+          if-no-files-found: ignore
+          retention-days: 14
