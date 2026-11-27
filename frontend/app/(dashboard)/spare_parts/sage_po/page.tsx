@@ -286,12 +286,12 @@ export default function SagePOReceiptPage() {
               </div>
               <div className="min-w-[240px] flex-[2]">
                 <div className="space-y-1.5">
-                  <Label className="sr-only">เลือกอะไหล่</Label>
+                  <Label htmlFor="po-part-select" className="sr-only">เลือกอะไหล่</Label>
                   <Select
                     value={selectedPart || "__none__"}
                     onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="po-part-select" aria-label="เลือกอะไหล่">
                       <SelectValue placeholder="เลือกอะไหล่…" />
                     </SelectTrigger>
                     <SelectContent>

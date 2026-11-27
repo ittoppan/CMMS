@@ -312,7 +312,7 @@ export default function SageShipmentsPage() {
           </div>
 
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as typeof filterStatus)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger aria-label="กรองตามสถานะ Sage" className="w-[180px]">
               <SelectValue placeholder="สถานะ Sage" />
             </SelectTrigger>
             <SelectContent>
@@ -610,6 +610,8 @@ function RequestShipmentModal({
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
         <Input
+          label="เลขที่ Shipment"
+          isLabelHidden
           value={shipmentNo}
           onChange={(e) => setShipmentNo(e.target.value)}
           placeholder="เช่น SHP-2024-00123"
@@ -667,6 +669,8 @@ function ItemQtyModal({
           step="0.01"
           min="0"
           max={item.qty}
+          label="จำนวนที่ตัดสต็อก Sage"
+          isLabelHidden
           value={qty}
           onChange={(e) => setQty(e.target.value)}
           placeholder={`สูงสุด ${fmt(item.qty)} ${item.unit}`}
@@ -717,6 +721,8 @@ function ItemShipmentModal({
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
         <Input
+          label="เลขที่ Shipment"
+          isLabelHidden
           value={shipmentNo}
           onChange={(e) => setShipmentNo(e.target.value)}
           placeholder="เช่น SHP-2024-00123"

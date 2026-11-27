@@ -316,6 +316,8 @@ function ReturnEntryCard({
             type="number"
             min={0}
             step="0.01"
+            label="จำนวนคืนซาก"
+            isLabelHidden
             placeholder={String(item.remaining)}
             value={qty}
             onChange={(e) => setQty(e.target.value)}
@@ -324,6 +326,8 @@ function ReturnEntryCard({
         <div className="w-full max-w-[280px] space-y-1">
           <p className="text-xs font-semibold text-muted-foreground">เหตุผลคืนซาก</p>
           <Input
+            label="เหตุผลคืนซาก"
+            isLabelHidden
             placeholder="เช่น สึกเดียวไม่สามารถซ่อมได้ / ของเสียตามการตรวจสอบ"
             value={reason}
             onChange={(e) => setReason(e.target.value)}

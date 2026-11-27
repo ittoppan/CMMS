@@ -692,6 +692,7 @@ function ItemsCard({
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                      aria-label={`อัปโหลดรูปอะไหล่ ${p.code}`}
                       className="hidden"
                       onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
                     />
@@ -702,7 +703,7 @@ function ItemsCard({
                   {chosen && (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img loading="lazy" decoding="async" src={chosen.preview} alt="preview" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
+                      <img loading="lazy" decoding="async" src={chosen.preview} alt={`ตัวอย่างรูป ${p.code}`} width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
                       <span className="max-w-[160px] truncate text-sm text-muted-foreground">
                         {chosen.file.name}
                       </span>

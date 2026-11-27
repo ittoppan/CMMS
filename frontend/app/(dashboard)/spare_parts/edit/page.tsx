@@ -200,12 +200,12 @@ function EditSparePartContent() {
                   />
 
                   <div className="space-y-1.5">
-                    <Label>{t("field.category")}</Label>
+                    <Label htmlFor="category">{t("field.category")}</Label>
                     <Select
                       value={form.category}
                       onValueChange={(v) => update("category", v)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="category" aria-label={t("field.category")}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

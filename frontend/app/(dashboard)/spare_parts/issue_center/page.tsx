@@ -341,6 +341,7 @@ export default function SageIssueCenterPage() {
         <button
           type="button"
           onClick={() => handleRemove(row.original.id)}
+          aria-label={t("action.delete")}
           className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border px-3 py-1.5 text-sm font-semibold transition"
           style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
         >
@@ -409,12 +410,12 @@ export default function SageIssueCenterPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>ใบสั่งงานซ่อม (Work Order) *</Label>
+                <Label htmlFor="issue-work-order">ใบสั่งงานซ่อม (Work Order) *</Label>
                 <Select
                   value={workOrder || "__none__"}
                   onValueChange={(v) => setWorkOrder(v === "__none__" ? "" : v)}
                 >
-                  <SelectTrigger size="lg">
+                  <SelectTrigger id="issue-work-order" size="lg" aria-label="ใบสั่งงานซ่อม (Work Order)">
                     <SelectValue placeholder="เลือกใบสั่งงาน…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -426,12 +427,12 @@ export default function SageIssueCenterPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>ช่างผู้เบิก / ผู้รับผิดชอบ *</Label>
+                <Label htmlFor="issue-technician">ช่างผู้เบิก / ผู้รับผิดชอบ *</Label>
                 <Select
                   value={technician || "__none__"}
                   onValueChange={(v) => setTechnician(v === "__none__" ? "" : v)}
                 >
-                  <SelectTrigger size="lg">
+                  <SelectTrigger id="issue-technician" size="lg" aria-label="ช่างผู้เบิก / ผู้รับผิดชอบ">
                     <SelectValue placeholder="เลือกช่าง…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -471,7 +472,8 @@ export default function SageIssueCenterPage() {
                 </button>
               </div>
               <div className="space-y-2">
-                <Label>รายการอะไหล่ (คลิกเพื่อเพิ่ม)</Label>
+                {/* ไม่ใช่ <label> เพราะคุมรายการทั้งกล่อง ไม่ใช่ control เดียว */}
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายการอะไหล่ (คลิกเพื่อเพิ่ม)</span>
                 <div className="max-h-[360px] overflow-y-auto rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-surface)]">
                   {partOptions.length === 0 ? (
                     <p className="p-4 text-sm text-[var(--cmms-text-secondary)]">ไม่พบอะไหล่ที่ตรงกับคำค้น</p>
