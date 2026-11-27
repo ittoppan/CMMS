@@ -402,6 +402,7 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "30", label: "30 นาที" },
     { value: "60", label: "60 นาที (แนะนำ)" },
     { value: "120", label: "120 นาที" },
+    { value: "0", label: "ไม่หมดอายุ (ปิด timeout)" },
   ],
   max_login_attempts: [
     { value: "3", label: "3 ครั้ง" },
