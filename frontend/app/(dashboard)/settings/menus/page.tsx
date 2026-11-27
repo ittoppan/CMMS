@@ -569,9 +569,9 @@ export default function MenuPermissionsPage() {
                             </span>
                             {hidden && <span style={{ fontSize: "0.75rem", color: "var(--cmms-warning-dark)", fontWeight: 700 }}>ปิดสิทธิ์</span>}
                             <div data-card-ignore style={{ display: "flex", gap: 1, marginLeft: 2 }}>
-                              <button type="button" className="bn-chip-btn" disabled={i === 0} onClick={() => bnMove(r.id, i, -1)} title="เลื่อนซ้าย (ก่อนหน้า)" aria-label="เลื่อนซ้าย (ก่อนหน้า)">▲</button>
-                              <button type="button" className="bn-chip-btn" disabled={i === list.length - 1} onClick={() => bnMove(r.id, i, 1)} title="เลื่อนขวา (ถัดไป)" aria-label="เลื่อนขวา (ถัดไป)">▼</button>
-                              <button type="button" className="bn-chip-btn danger" onClick={() => bnRemove(r.id, i)} title="ลบปุ่ม" aria-label="ลบปุ่ม">✕</button>
+                              <button type="button" className="bn-chip-btn" disabled={i === 0} onClick={() => bnMove(r.id, i, -1)} title="เลื่อนซ้าย (ก่อนหน้า)" aria-label={`เลื่อนซ้าย (ก่อนหน้า): ${bnLabelOf(k)}`}>▲</button>
+                              <button type="button" className="bn-chip-btn" disabled={i === list.length - 1} onClick={() => bnMove(r.id, i, 1)} title="เลื่อนขวา (ถัดไป)" aria-label={`เลื่อนขวา (ถัดไป): ${bnLabelOf(k)}`}>▼</button>
+                              <button type="button" className="bn-chip-btn danger" onClick={() => bnRemove(r.id, i)} title="ลบปุ่ม" aria-label={`ลบปุ่ม: ${bnLabelOf(k)}`}>✕</button>
                             </div>
                           </div>
                         );
