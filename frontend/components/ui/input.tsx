@@ -48,6 +48,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           aria-invalid={!!error || undefined}
+          aria-required={required || undefined}
           aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
           autoComplete={props.autoComplete ?? (props.type === "email" ? "email" : props.type === "tel" ? "tel" : props.type === "url" ? "url" : props.type === "password" ? "current-password" : "off")}
           className={cn(

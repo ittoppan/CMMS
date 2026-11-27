@@ -55,6 +55,7 @@ export function FormField<T extends FieldValues>({
         {
           id: fieldId,
           "aria-invalid": errorMessage ? true : undefined,
+          "aria-required": required ? true : undefined,
           "aria-describedby":
             [errorId, hintId].filter(Boolean).join(" ") || undefined,
         } as Record<string, unknown>
