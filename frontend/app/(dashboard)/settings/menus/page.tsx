@@ -166,6 +166,22 @@ export default function MenuPermissionsPage() {
     });
   };
 
+  const toggleSectionAll = (roleId: number, section: string, granted: boolean) => {
+    setPerms((prev) => {
+      const nextRole = { ...(prev[roleId] || {}) };
+      menus.filter((m) => m.section === section).forEach((m) => { nextRole[m.key] = granted ? 1 : 0; });
+      return { ...prev, [roleId]: nextRole };
+    });
+  };
+
+  const sectionChangeCount = (roleId: number, section: string, granted: boolean): number => {
+    const target = granted ? 1 : 0;
+    return menus
+      .filter((m) => m.section === section)
+      .filter((m) => (perms[roleId]?.[m.key] ?? 0) !== target)
+      .length;
+  };
+
   // ═══════════ ปุ่มล่าง: เพิ่ม / ลบ / เลื่อน ═══════════
   const bnLabelOf = (key: string): string => bnKeys.find((b) => b.key === key)?.label || key;
 
@@ -359,12 +375,51 @@ export default function MenuPermissionsPage() {
                 {sections.map((section) => (
                   <div key={section}>
                     <div style={{
-                      display: "flex", alignItems: "center", fontWeight: 700, fontSize: "0.8rem",
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      fontWeight: 700, fontSize: "0.8rem",
                       color: "var(--cmms-primary)", margin: "14px 0 4px", padding: "6px 8px",
                       background: "var(--cmms-primary-light)", borderRadius: "var(--cmms-radius)",
                     }}>
-                      <ShieldCheckIcon width={14} height={14} style={{ marginRight: 6 }} />
-                      {section}
+                      <span style={{ display: "flex", alignItems: "center" }}>
+                        <ShieldCheckIcon width={14} height={14} style={{ marginRight: 6 }} />
+                        {section}
+                      </span>
+                      <span style={{ display: "flex", gap: 4 }}>
+                        {roles.map((r) => {
+                          const cnt = sectionChangeCount(r.id, section, true);
+                          const clearCnt = sectionChangeCount(r.id, section, false);
+                          return (
+                            <span key={r.id} style={{ display: "inline-flex", gap: 2 }}>
+                              <button
+                                type="button"
+                                disabled={cnt === 0}
+                                onClick={() => toggleSectionAll(r.id, section, true)}
+                                title={`${r.name}: ติ๊กทั้งกลุ่ม ${section} (${cnt} รายการที่จะเปลี่ยน)`}
+                                style={{
+                                  border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-card)",
+                                  borderRadius: 4, cursor: cnt === 0 ? "default" : "pointer",
+                                  fontSize: "0.68rem", padding: "2px 6px", opacity: cnt === 0 ? 0.5 : 1,
+                                }}
+                              >
+                                {r.name} ✓{cnt > 0 ? `(${cnt})` : ""}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={clearCnt === 0}
+                                onClick={() => toggleSectionAll(r.id, section, false)}
+                                title={`${r.name}: ล้างทั้งกลุ่ม ${section} (${clearCnt} รายการที่จะเปลี่ยน)`}
+                                style={{
+                                  border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-card)",
+                                  borderRadius: 4, cursor: clearCnt === 0 ? "default" : "pointer",
+                                  fontSize: "0.68rem", padding: "2px 6px", opacity: clearCnt === 0 ? 0.5 : 1,
+                                }}
+                              >
+                                {r.name} ✕{clearCnt > 0 ? `(${clearCnt})` : ""}
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </span>
                     </div>
                     {menus
                       .filter((m) => m.section === section)
