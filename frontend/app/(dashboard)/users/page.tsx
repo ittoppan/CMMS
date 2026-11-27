@@ -9,6 +9,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Grid, PageHeader } from "@/components/layout";
+import { SettingsShell } from "@/components/settings/SettingsShell";
 import {
   Card,
   CardContent,
@@ -478,7 +479,8 @@ export default function UsersPage() {
   });
 
   return (
-    <>
+    <SettingsShell>
+      <>
       <PageHeader
         breadcrumbs={[
           { label: "หน้าแรก", href: "/dashboard" },
@@ -686,6 +688,7 @@ export default function UsersPage() {
         )}
       </Dialog>
       </div>
-    </>
+      </>
+    </SettingsShell>
   );
 }
