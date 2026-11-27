@@ -312,6 +312,9 @@ export function DataTable<TData extends RowData>({
               {group.headers.map((header) => {
                 const sorted = header.column.getIsSorted();
                 const canSort = header.column.getCanSort();
+                // ทิศทางที่จะเกิดเมื่อกด (asc/desc/ยกเลิก) — ขึ้นกับชนิดข้อมูลของคอลัมน์
+                const nextSort = canSort ? header.column.getNextSortingOrder() : false;
+                const sortLabel = headerLabels.get(header.column.id) ?? header.column.id;
                 return (
                   <th
                     key={header.id}
@@ -334,7 +337,17 @@ export function DataTable<TData extends RowData>({
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                         disabled={!canSort}
-                        aria-label={canSort ? `เรียงตาม ${headerLabels.get(header.column.id) ?? header.column.id}` : undefined}
+                        aria-label={
+                          canSort
+                            ? `เรียงตาม ${sortLabel} ${
+                                nextSort === "asc"
+                                  ? "จากน้อยไปมาก (asc)"
+                                  : nextSort === "desc"
+                                    ? "จากมากไปน้อย (desc)"
+                                    : "— ยกเลิกการเรียง"
+                              }${sorted ? ` · กำลังเรียง ${sorted}` : ""}`
+                            : undefined
+                        }
                       >
                         <span className="whitespace-nowrap">
                           <table.FlexRender header={header} />
