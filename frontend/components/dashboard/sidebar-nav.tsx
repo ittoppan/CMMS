@@ -171,6 +171,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
       { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
       { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
+      { perm: "pm_am", labelKey: "menu.predictive_maintenance", href: "/predictive-maintenance", icon: Hourglass, secondary: true },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },
       { perm: "inspections/templates", labelKey: "menu.inspections_templates", href: "/inspections/templates", icon: ListChecks, secondary: true },
@@ -194,7 +195,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone, secondary: true },
       { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush, secondary: true },
       { perm: "settings", label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง", href: "/settings/repair-options", icon: Wrench, secondary: true },
-      { perm: "pm_am", labelKey: "menu.predictive_maintenance", href: "/predictive-maintenance", icon: Hourglass },
     ],
   },
   {
