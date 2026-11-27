@@ -34,6 +34,15 @@ const STATUS_CLS: Record<string, string> = {
   breakdown: "bg-rose-100 text-rose-700",
 };
 
+// ชื่อสถานะภาษาไทย — ใช้เป็นข้อความให้ screen reader เพราะสีอย่างเดียวสื่อความหมายไม่ได้
+const STATUS_LABEL: Record<string, string> = {
+  active: "ใช้งาน",
+  inactive: "ไม่ใช้งาน",
+  under_repair: "กำลังซ่อม",
+  maintenance: "กำลังทำซ่อมบำรุง",
+  breakdown: "เครื่องเสีย",
+};
+
 export default function PlantMapPage() {
   const hero = usePageHero("asset_registry");
   const router = useRouter();
@@ -101,10 +110,12 @@ export default function PlantMapPage() {
                 <CardContent>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                     {items.map((r) => {
-                      const cls = STATUS_CLS[(() => {
+                      const statusKey = (() => {
                         if (Number(r.active_repairs) > 0) return "under_repair";
                         return r.status || "inactive";
-                      })()] || "bg-slate-100 text-slate-500";
+                      })();
+                      const cls = STATUS_CLS[statusKey] || "bg-slate-100 text-slate-500";
+                      const statusText = STATUS_LABEL[statusKey] || statusKey;
                       const hot = String(r.max_priority || "") === "critical" && Number(r.active_repairs) > 0;
                       const layoutHref = r.location_id ? `/facility-layout?room=${r.location_id}&asset=${r.id}` : "";
                       return (
@@ -113,10 +124,13 @@ export default function PlantMapPage() {
                           className={`text-left rounded-lg border-2 ${hot ? "border-rose-400" : "border-transparent"} ${cls} p-3`}
                         >
                           <button
+                            type="button"
                             onClick={() => router.push(`/asset_registry/view?id=${r.id}`)}
                             className="w-full text-left hover:opacity-85 transition-shadow"
                             title="ดูรายละเอียดเครื่องจักร"
                           >
+                            {/* สถานะสื่อด้วยสีอย่างเดียวไม่ได้ — ให้ screen reader อ่านเป็นข้อความ */}
+                            <span className="sr-only">สถานะ: {statusText}</span>
                             <div className="font-mono text-xs font-bold">{r.code}</div>
                             <div className="text-sm font-semibold leading-snug line-clamp-2">{r.name}</div>
                             <div className="mt-1 text-xs opacity-70 flex items-center gap-1"><MapPinned className="w-3 h-3" aria-hidden="true" />{r.location_name || "ไม่ระบุตำแหน่ง"}</div>

@@ -278,7 +278,8 @@ function EditAssetContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>รูปภาพเครื่องจักร</Label>
+                  {/* ไม่ใช่ <label> เพราะไม่ได้ผูกกับ control ตัวเดียว — ใช้ข้อความกลุ่มแทน */}
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">รูปภาพเครื่องจักร</span>
                   <ImageUploadField
                     value={form.image_path || null}
                     onChange={(url) => update("image_path", url || "")}
