@@ -634,7 +634,7 @@ export default function MyTasksPage() {
               {task.status === "completed" ? (
                 <span className="text-xs text-muted-foreground">ทำเสร็จแล้ว</span>
               ) : (
-                <Button variant="primary" size="sm" onClick={() => goPM(task)} className="gap-1.5">
+                <Button variant="primary" size="sm" onClick={() => goPM(task)} className="gap-1.5" aria-label={`ไปทำ PM ${task.woNumber}`}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>ไปทำ PM</span>
                 </Button>
@@ -648,14 +648,14 @@ export default function MyTasksPage() {
               currentUserId !== null &&
               (task.assignedTo === currentUserId || (task.teamIds || []).includes(currentUserId)) &&
               !task.team?.some((m: any) => m.user_id === currentUserId && m.status === "accepted") && (
-                <Button variant="outline" size="sm" onClick={() => handleAcceptTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50">
+                <Button variant="outline" size="sm" onClick={() => handleAcceptTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50" aria-label={`รับงาน ${task.woNumber}`}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>รับงาน</span>
                 </Button>
               )}
 
             {task.status === "new" && (
-              <Button variant="primary" size="sm" onClick={() => handleStartTask(task)} loading={actionLoading[task.id]} className="gap-1.5">
+              <Button variant="primary" size="sm" onClick={() => handleStartTask(task)} loading={actionLoading[task.id]} className="gap-1.5" aria-label={`เริ่มซ่อม ${task.woNumber}`}>
                 <Play className="w-3.5 h-3.5" />
                 <span>เริ่มซ่อม</span>
               </Button>
@@ -663,11 +663,11 @@ export default function MyTasksPage() {
 
             {task.status === "in_progress" && (
               <>
-                <Button variant="outline" size="sm" onClick={() => handleWaitParts(task)} loading={actionLoading[task.id]} className="gap-1.5 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100">
+                <Button variant="outline" size="sm" onClick={() => handleWaitParts(task)} loading={actionLoading[task.id]} className="gap-1.5 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100" aria-label={`แจ้งรออะไหล่ ${task.woNumber}`}>
                   <Clock className="w-3.5 h-3.5" />
                   <span>รออะไหล่</span>
                 </Button>
-                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5">
+                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5" aria-label={`ปิดใบงานซ่อม ${task.woNumber}`}>
                   <Check className="w-3.5 h-3.5" />
                   <span>ปิดใบงานซ่อม</span>
                 </Button>
@@ -676,11 +676,11 @@ export default function MyTasksPage() {
 
             {task.status === "pending_parts" && (
               <>
-                <Button variant="outline" size="sm" onClick={() => handleResumeTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-sky-600 border-sky-300 hover:bg-sky-50">
+                <Button variant="outline" size="sm" onClick={() => handleResumeTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-sky-600 border-sky-300 hover:bg-sky-50" aria-label={`กลับมาซ่อมต่อ ${task.woNumber}`}>
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>กลับมาซ่อมต่อ</span>
                 </Button>
-                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5">
+                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5" aria-label={`ปิดใบงานซ่อม ${task.woNumber}`}>
                   <Check className="w-3.5 h-3.5" />
                   <span>ปิดใบงานซ่อม</span>
                 </Button>
@@ -693,6 +693,7 @@ export default function MyTasksPage() {
                 size="sm"
                 onClick={() => setSpareModalTask(task)}
                 className="gap-1.5"
+                aria-label={`เบิกอะไหล่ ${task.woNumber}`}
               >
                 <PackagePlus className="w-3.5 h-3.5" />
                 <span>เบิกอะไหล่</span>
@@ -704,6 +705,7 @@ export default function MyTasksPage() {
               size="sm"
               onClick={() => router.push(`/repair/view?id=${task.rawId}`)}
               className="gap-1.5"
+              aria-label={`ดูรายละเอียดปิดงาน ${task.woNumber}`}
             >
               <Eye className="w-3.5 h-3.5" />
               <span>ดูรายละเอียดปิดงาน</span>
@@ -751,6 +753,7 @@ export default function MyTasksPage() {
                 key={opt.v}
                 type="button"
                 onClick={() => setOutsourceFilter(opt.v)}
+                aria-pressed={outsourceFilter === opt.v}
                 className={cn(
                   "inline-flex min-h-10 items-center rounded-[var(--cmms-radius-sm)] px-3 py-2 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
                   outsourceFilter === opt.v
@@ -848,7 +851,7 @@ export default function MyTasksPage() {
                 value={failureCode || "__none__"}
                 onValueChange={(v) => setFailureCode(v === "__none__" ? "" : v)}
               >
-                <SelectTrigger id="close-failure-code">
+                <SelectTrigger id="close-failure-code" aria-label="กลุ่มอาการเสีย (รหัส F)">
                   <SelectValue placeholder="เลือกกลุ่มอาการเสีย (รหัส F)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -868,7 +871,7 @@ export default function MyTasksPage() {
                 value={repairCode || "__none__"}
                 onValueChange={(v) => setRepairCode(v === "__none__" ? "" : v)}
               >
-                <SelectTrigger id="close-repair-code">
+                <SelectTrigger id="close-repair-code" aria-label="กลุ่มงานซ่อม (รหัส R)">
                   <SelectValue placeholder="เลือกกลุ่มงานซ่อม (รหัส R)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -917,7 +920,7 @@ export default function MyTasksPage() {
               value={contaminateChecking || "__none__"}
               onValueChange={(v) => setContaminateChecking(v === "__none__" ? "" : v)}
             >
-              <SelectTrigger id="close-contaminate">
+              <SelectTrigger id="close-contaminate" aria-label="ผลตรวจการปนเปื้อน">
                 <SelectValue placeholder="เลือกผลตรวจการปนเปื้อน (บังคับ)" />
               </SelectTrigger>
               <SelectContent>
@@ -1012,11 +1015,13 @@ export default function MyTasksPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">
                 ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) <span className="text-destructive">*</span>
-              </Label>
+              </span>
               <canvas
                 ref={canvasRef}
+                role="img"
+                aria-label="ลายเซ็นผู้รับมอบงาน"
                 width={280}
                 height={90}
                 onMouseDown={startDrawing}
