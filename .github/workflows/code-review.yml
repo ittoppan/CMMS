@@ -53,8 +53,20 @@ jobs:
             !/public/uploads/
           sparse-checkout-cone-mode: false
 
+      # action v2.1.5 มีบั๊ก: dist/index.js เรียก require('web-tree-sitter') ตอน import
+      # แต่ไม่ได้แพ็กโมดูลนี้มา (ประกาศไว้ใน devDeps ของ @opencodereview/core เท่านั้น)
+      # → รันแล้วล้มทันที "Cannot find module 'web-tree-sitter'"
+      # จึงติดตั้งเวอร์ชันเดียวกับที่ core ประกาศ และชี้ NODE_PATH ให้ createRequire หาเจอ
+      # (tree-sitter-wasms ต้องอยู่ที่ cwd/node_modules เพราะสคริปต์หา grammar จาก process.cwd())
+      - name: Install action runtime deps
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund \
+            web-tree-sitter@0.24.7 tree-sitter-wasms@0.1.13
+
       - name: Open Code Review
         uses: raye-deng/open-code-review@v2.1.5
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
         with:
           sla: L1
           threshold: '60'
