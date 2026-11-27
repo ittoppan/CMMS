@@ -1,0 +1,211 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Anonymous function has an unused use \$uid\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: public/api/v1/cost.php
+
+		-
+			message: '#^Function doc_impact_remove not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: public/api/v1/document.php
+
+		-
+			message: '#^Anonymous function has an unused use \$uid\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: public/api/v1/failure.php
+
+		-
+			message: '#^Variable \$book might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: public/api/v1/import_excel.php
+
+		-
+			message: '#^Variable \$failedXml might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: public/api/v1/import_excel.php
+
+		-
+			message: '#^Variable \$inserted might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/import_excel.php
+
+		-
+			message: '#^Variable \$skipped might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/import_excel.php
+
+		-
+			message: '#^Variable \$updated might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/import_excel.php
+
+		-
+			message: '#^Variable \$sample might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/line_notify.php
+
+		-
+			message: '#^Constant nl not found\.$#'
+			identifier: constant.notFound
+			count: 2
+			path: public/api/v1/line_webhook.php
+
+		-
+			message: '#^Variable \$reply on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: public/api/v1/line_webhook.php
+
+		-
+			message: '#^Variable \$method might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/repair_options.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 6
+			path: public/api/v1/repair_options.php
+
+		-
+			message: '#^Anonymous function has an unused use \$pdo\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: public/api/v1/report_schedule.php
+
+		-
+			message: '#^Function isWorkAssignee invoked with 3 parameters, 4 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: public/api/v1/supervisor.php
+
+		-
+			message: '#^Function wf_candidates invoked with 5 parameters, 2\-3 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: public/api/v1/supervisor.php
+
+		-
+			message: '#^Undefined variable\: \$dur$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/api/v1/supervisor.php
+
+		-
+			message: '#^Variable \$dur in isset\(\) is never defined\.$#'
+			identifier: isset.variable
+			count: 1
+			path: public/api/v1/supervisor.php
+
+		-
+			message: '#^Anonymous function has an unused use \$pdo\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: public/api/v1/system_health.php
+
+		-
+			message: '#^Anonymous function has an unused use \$action\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: public/api/v1/workforce.php
+
+		-
+			message: '#^Function mb_str_contains not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: public/api/v1/workforce.php
+
+		-
+			message: '#^Offset ''note'' does not exist on array\{work_order_id\: int, required\: array, unmapped\: array, candidates\: array\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: public/api/v1/workforce.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''status'' \(''status'', ''status''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: src/helpers/calibration.php
+
+		-
+			message: '#^Anonymous function has an unused use \$from\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/helpers/contractor.php
+
+		-
+			message: '#^Anonymous function has an unused use \$to\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/helpers/contractor.php
+
+		-
+			message: '#^Function failure_next_code invoked with 5 parameters, 4 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/helpers/failure.php
+
+		-
+			message: '#^Variable \$groups on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/helpers/iot_condition.php
+
+		-
+			message: '#^Function liff_verify_id_token\(\) should return array\{ok\: bool, line_user_id\: string, profile\: array\{name\: string, picture\: string\}, error\: string, code\: string\} but returns array\{ok\: false, line_user_id\: '''', profile\: array\{\}, error\: string, code\: string\}\.$#'
+			identifier: return.type
+			count: 11
+			path: src/helpers/liff.php
+
+		-
+			message: '#^Binary operation "\." between array\{string, ''availability_pct''\|''downtime_hours''\|''emergency_wo_count''\|''failure_count''\|''failure_rate_per…''\|''maintenance_cost''\|''mttr_hours''\|''repeat_failure_count'', ''eq''\|''gt''\|''gte''\|''lt''\|''lte'', float, string, float, int, int, \.\.\.\} and array\{int\} results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/helpers/reliability_analysis.php
+
+		-
+			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/helpers/xlsx_read.php
+
+		-
+			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getAttributeNS\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/helpers/xlsx_read.php
+
+		-
+			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getElementsByTagNameNS\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/helpers/xlsx_read.php
+
+		-
+			message: '#^Variable \$currentLang on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 6
+			path: src/includes/header.php
+
+		-
+			message: '#^Variable \$token in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/services/NotificationService.php
+
+		-
+			message: '#^Variable \$http_response_header in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/services/WebPushService.php

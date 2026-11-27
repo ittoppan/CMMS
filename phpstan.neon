@@ -1,0 +1,40 @@
+# PHPStan — static analysis สำหรับ PHP procedural ของ repo นี้
+#
+# ทำไม PHPStan ไม่ใช่ Psalm:
+#  - โค้ดส่วนใหญ่เป็น procedural + require_once + PDO arrays (Psalm ถนัด typed OOP
+#    และมีค่า maintenance สูงกว่าเมื่อไม่มี type declarations เดิมอยู่เลย)
+#  - PHPStan ไล่ `require_once` ที่เป็น path คงที่ได้ ทำให้ฟังก์ชันใน src/helpers
+#    เป็นที่รู้จักเมื่อวิเคราะห์ public/api/v1/*.php พร้อมกัน (สแกนแยกโฟลเดอร์
+#    จะได้ error ปลอม "function not found" พุ่งเป็นพัน)
+#
+# ระดับ strictness: 3
+#  - level 3 = ตรวจ signature/return type/arity/undefined variable/undefined method
+#    ซึ่งจับบั๊กจริงในโค้ดเดิมได้ (เช่น mb_str_contains ที่ไม่มีใน PHP,
+#    ฟังก์ชันที่ถูกเรียกแต่ไม่ประกาศ, duplicate array key)
+#  - level 4-5 ต้องมี type declaration ครบทั้ง repo (346/377 error จาก type ที่
+#    ไม่ประกาศ) — ไต่ขึ้นทีละขั้นได้เมื่อเคลียร์ baseline หมด
+#
+# ขอบเขต: src/ + public/ (โค้ดที่รันจริง)
+#  - ไม่รวม scripts/ (test harness/CLI ใช้ตัวแปรจาก argv จำนวนมาก, +537 error)
+#  - ไม่รวม public/uploads/ (ไฟล์ผู้ใช้อัปโหลด)
+#  - ไม่รวม frontend/ (TypeScript ตรวจด้วย tsc อยู่แล้ว)
+#
+# baseline: phpstan-baseline.neon ล็อกหนี้เดิม 60 รายการไว้
+#  - โค้ดใหม่/ที่แก้ ต้องผ่าน level 3 โดยไม่เพิ่มเข้า baseline
+#  - ถ้าแก้ error เดิมจนหมด PHPStan จะฟ้อง "Ignored error pattern ... not matched"
+#    → ลบรายการนั้นออกจาก baseline (ตั้งใจให้เป็นแบบนั้น)
+#  - สร้างใหม่ทั้งไฟล์: vendor/bin/phpstan analyse --generate-baseline
+parameters:
+    level: 3
+    phpVersion: 80300
+    paths:
+        - src
+        - public
+    excludePaths:
+        - public/uploads/*
+    # โค้ดเดิมไม่มี phpdoc ที่แม่นยำ — ไม่ต้องถือว่า @var/@param คือความจริง
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
+
+includes:
+    - phpstan-baseline.neon

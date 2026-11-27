@@ -26,6 +26,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # needed for design-audit diff
+          # repo มีไฟล์อัปโหลดชื่อไทยยาว 265 ไบต์ (เกินลิมิต 255 ของ Linux) ที่
+          # public/uploads/iso_forms → checkout บน runner ล้ม "File name too long"
+          # (ทุก job แดงตั้งแต่ checkout) จึงข้ามเฉพาะโฟลเดอร์อัปโหลด
+          sparse-checkout: |
+            /*
+            !/public/uploads/
+          sparse-checkout-cone-mode: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -62,6 +69,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /*
+            !/public/uploads/
+          sparse-checkout-cone-mode: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -76,6 +88,33 @@ jobs:
       # ชุดทดสอบ PHP ที่ไม่ต้องใช้ DB — รายการเดียวกับที่ pre-push hook เรียก
       - name: PHP unit tests (no DB)
         run: bash scripts/php-unit-tests.sh
+
+  phpstan:
+    name: PHPStan (level 3 + baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /*
+            !/public/uploads/
+          sparse-checkout-cone-mode: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      # phpstan.neon (level 3) + phpstan-baseline.neon — หนี้เดิมถูกล็อกไว้
+      - name: Install dev dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: PHPStan analyse
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
   phpdb:
     name: PHP DB tests (MySQL)
@@ -100,6 +139,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /*
+            !/public/uploads/
+          sparse-checkout-cone-mode: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

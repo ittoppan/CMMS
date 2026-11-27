@@ -68,6 +68,21 @@ else
   echo "[pre-push] ⚠️ ไม่พบ php ใน PATH — ข้ามการตรวจชุดทดสอบ PHP"
 fi
 
+# ── PHP static analysis: PHPStan level 3 + baseline (phpstan.neon) ──
+# ต้องมี vendor/bin/phpstan (composer install) — ไม่มีจะข้ามพร้อมคำเตือน
+# หนี้เดิม 60 รายการถูกล็อกใน phpstan-baseline.neon; โค้ดใหม่ต้องสะอาด
+PHPSTAN_CHECK="$REPO_ROOT/scripts/phpstan-check.sh"
+if [ -f "$PHPSTAN_CHECK" ]; then
+  echo ""
+  echo "[pre-push] phpstan (level 3 + baseline)"
+  if ! bash "$PHPSTAN_CHECK"; then
+    echo "[pre-push] ❌ BLOCKED: PHPStan พบ error — แก้โค้ดก่อน push"
+    FAILED=1
+  fi
+else
+  echo "[pre-push] ⚠️ ไม่พบ scripts/phpstan-check.sh — ข้ามการตรวจ PHPStan"
+fi
+
 # ── TypeScript check: บังคับ 0 error (ล้าง debt ครบแล้ว ไม่มี baseline) ──
 TSC_CHECK="$REPO_ROOT/scripts/tsc-check.sh"
 if [ -f "$TSC_CHECK" ]; then
