@@ -53,7 +53,7 @@ import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, liffAuthHeaders, useLiffSession } from "@/lib/liff-session";
 import { clearRepairDraft, hasDraftContent, loadRepairDraft, saveRepairDraft } from "@/lib/repair-draft";
-import { canAdvanceFrom, firstIncompleteStep, REPAIR_STEP_COUNT } from "@/lib/repair-form-steps";
+import { canAdvanceFrom, firstIncompleteStep } from "@/lib/repair-form-steps";
 import { serverResponds } from "@/lib/server-check";
 import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, VERIFY_FAILED_BODY, VERIFY_FAILED_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
 import { useSupportContact } from "@/lib/use-support-contact";
@@ -834,16 +834,14 @@ const flushQueue = async (notifyOnAuthFail = false) => {
   // ความครบของแต่ละขั้นมาจาก lib/repair-form-steps ที่เดียว (ใช้ร่วมกับการกู้คืนร่าง)
   const canNext = () => canAdvanceFrom(step, form, machineChosen);
 
-  // D1: ลดจำนวนคลิก — ตั้งค่าเริ่มต้นที่ปลอดภัยจาก repair_options (job description แรกเมื่อเลือก job type)
-  // และเลื่อนขั้นอัตโนมัติเมื่อขั้นปัจจุบันครบ เพื่อไม่ต้องกด "ถัดไป" เอง
+  // D1: ตั้งค่าเริ่มต้นที่ปลอดภัยจาก repair_options (job description แรกเมื่อเลือก job type)
+  // ไม่เลื่อนขั้นอัตโนมัติ: effect เดิมดีดไปขั้นถัดไปทันทีที่ข้อมูลขั้นปัจจุบันครบ
+  // ทำให้พิมพ์อาการยังไม่จบก็ถูกพาไปหน้าถัดไป และกด "ย้อนกลับ" ไม่ได้ (effect ดีดกลับทันที)
   useEffect(() => {
     if (form.jobType && !form.jobDescription && jobDescriptionOptions.length > 0) {
       setForm((prev) => (prev.jobDescription ? prev : { ...prev, jobDescription: jobDescriptionOptions[0].value }));
     }
-    const next = firstIncompleteStep(form, machineChosen);
-    const target = Math.min(next, REPAIR_STEP_COUNT - 1);
-    if (target > step) setStep(target);
-  }, [form, machineChosen, jobDescriptionOptions, step]);
+  }, [form.jobType, form.jobDescription, jobDescriptionOptions]);
 
   const addPhotos = async (files: FileList | null) => {
     if (!files || files.length === 0) return;

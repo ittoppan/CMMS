@@ -81,6 +81,12 @@ export default function MyTasksPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"new" | "in_progress" | "completed">("new");
+  // รองรับ ?tab=... จากการ์ดแดชบอร์ดส่วนบุคคล (งานที่ได้รับมอบ/กำลังซ่อม/เสร็จสิ้น)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab === "new" || tab === "in_progress" || tab === "completed") setActiveTab(tab as "new" | "in_progress" | "completed");
+  }, []);
   const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
