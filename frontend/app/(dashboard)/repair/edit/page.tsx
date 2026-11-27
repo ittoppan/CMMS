@@ -392,7 +392,7 @@ function EditWorkOrderContent() {
                 <div className="space-y-1.5">
                   <Label htmlFor="wo-edit-status">สถานะงาน (Job Status)<span className="text-destructive"> *</span></Label>
                   <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="wo-edit-status" className="w-full">
+                    <SelectTrigger id="wo-edit-status" className="w-full" aria-label="สถานะงาน (Job Status)">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -408,7 +408,7 @@ function EditWorkOrderContent() {
                 <div className="space-y-1.5">
                   <Label htmlFor="wo-edit-priority">ความสำคัญ (Priority)<span className="text-destructive"> *</span></Label>
                   <Select value={priority} onValueChange={setPriority}>
-                    <SelectTrigger id="wo-edit-priority" className="w-full">
+                    <SelectTrigger id="wo-edit-priority" className="w-full" aria-label="ความสำคัญ (Priority)">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -463,7 +463,7 @@ function EditWorkOrderContent() {
                   {closing && <span className="text-destructive"> *</span>}
                 </Label>
                 <Select value={contaminateChecking} onValueChange={setContaminateChecking} disabled={!closing}>
-                  <SelectTrigger id="wo-edit-contam" className="w-full" aria-invalid={contaminateError ? true : undefined}>
+                  <SelectTrigger id="wo-edit-contam" className="w-full" aria-label="Contaminate Checking (ตรวจสอบการปนเปื้อน)" aria-invalid={contaminateError ? true : undefined}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -506,14 +506,14 @@ function EditWorkOrderContent() {
             <CardContent className="space-y-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Start Date/Time (วันที่เริ่มซ่อม)</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">Start Date/Time (วันที่เริ่มซ่อม)</span>
                   <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
                     {formatStamp(downtimeStart || actualStartAt)}
                   </div>
                   <p className="text-xs text-muted-foreground">ประทับอัตโนมัติตามสถานะงาน แก้ไขไม่ได้</p>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Finish Date/Time (วันที่เสร็จซ่อม)</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">Finish Date/Time (วันที่เสร็จซ่อม)</span>
                   <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
                     {formatStamp(downtimeEnd || completedAt)}
                   </div>
@@ -617,12 +617,14 @@ function EditWorkOrderContent() {
                 onChange={(e) => setReceiverName(e.target.value)}
               />
               <div className="space-y-2">
-                <Label>ลายเซ็นผู้แจ้ง{status === "completed" ? <span className="text-destructive"> *</span> : null}</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้แจ้ง{status === "completed" ? <span className="text-destructive"> *</span> : null}</span>
                 <div className="rounded-md border border-input bg-white p-2">
                   <canvas
                     ref={signatureCanvasRef}
                     width={600}
                     height={180}
+                    role="img"
+                    aria-label="ลายเซ็นผู้แจ้ง"
                     className="h-[180px] w-full touch-none rounded bg-white"
                     style={{ touchAction: "none" }}
                     onMouseDown={startSignature}

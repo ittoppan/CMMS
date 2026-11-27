@@ -447,12 +447,12 @@ export default function RepairAssignPage() {
       cell: ({ row }: { row: { original: AssignWO } }) => {
         const item = row.original;
         return item.assigneeId ? (
-          <Button size="sm" variant="secondary" onClick={() => handleAssignClick(item)} className="gap-1.5">
+          <Button size="sm" variant="secondary" onClick={() => handleAssignClick(item)} className="gap-1.5" aria-label={`เปลี่ยนช่าง ${item.woNumber}`}>
             <RefreshCw size={14} strokeWidth={2} aria-hidden="true" />
             เปลี่ยนช่าง
           </Button>
         ) : (
-          <Button size="sm" onClick={() => handleAssignClick(item)} className="gap-1.5">
+          <Button size="sm" onClick={() => handleAssignClick(item)} className="gap-1.5" aria-label={`จ่ายงาน ${item.woNumber}`}>
             <UserPlus size={14} strokeWidth={2} aria-hidden="true" />
             จ่ายงาน
           </Button>
