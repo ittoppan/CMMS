@@ -177,14 +177,14 @@ export default function RcaEventsPage() {
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
-                    <th className="px-4 py-3">เหตุการณ์</th>
-                    <th className="px-4 py-3">เครื่องจักร</th>
-                    <th className="px-4 py-3">อาการ / โหมด</th>
-                    <th className="px-4 py-3">ความรุนแรง</th>
-                    <th className="px-4 py-3">Downtime</th>
-                    <th className="px-4 py-3">RCA</th>
-                    <th className="px-4 py-3">วันที่</th>
-                    <th className="px-4 py-3" />
+                    <th scope="col" className="px-4 py-3">เหตุการณ์</th>
+                    <th scope="col" className="px-4 py-3">เครื่องจักร</th>
+                    <th scope="col" className="px-4 py-3">อาการ / โหมด</th>
+                    <th scope="col" className="px-4 py-3">ความรุนแรง</th>
+                    <th scope="col" className="px-4 py-3">Downtime</th>
+                    <th scope="col" className="px-4 py-3">RCA</th>
+                    <th scope="col" className="px-4 py-3">วันที่</th>
+                    <th scope="col" className="px-4 py-3"><span className="sr-only">การกระทำ</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -221,7 +221,7 @@ export default function RcaEventsPage() {
                         <span className="inline-flex items-center gap-1"><CalendarDays size={12} aria-hidden="true" />{fmtDate(ev.failure_date)}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <a href={ev.rca_id ? `/rca/${ev.rca_id}` : `/rca/new?event_id=${ev.id}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label={`ดูรายละเอียด ${ev.event_code}`}>
+                        <a href={ev.rca_id ? `/rca/${ev.rca_id}` : `/rca/new?event_id=${ev.id}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label={ev.rca_id ? `ดู RCA ของ ${ev.event_code}` : `เปิด RCA สำหรับ ${ev.event_code}`}>
                           <PlusCircle size={15} aria-hidden="true" />
                         </a>
                       </td>
