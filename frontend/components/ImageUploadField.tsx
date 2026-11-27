@@ -87,6 +87,7 @@ export default function ImageUploadField({
           type="file"
           accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
           aria-label={label}
+          tabIndex={-1}
           className="sr-only"
           onChange={(e) => {
             const selected = e.target.files?.[0] ?? null;
