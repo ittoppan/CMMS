@@ -4,6 +4,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero, t, useLang } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout";
+import { SettingsShell } from "@/components/settings/SettingsShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,7 +218,8 @@ export default function AuditLogPage() {
   const currentPage = Math.min(page, pages);
 
   return (
-    <>
+    <SettingsShell>
+      <>
       <PageHeader eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={crumbs}
       title={hero.title}
@@ -528,6 +530,7 @@ export default function AuditLogPage() {
         )}
       </Dialog>
           </div>
-    </>
+      </>
+    </SettingsShell>
   );
 }
