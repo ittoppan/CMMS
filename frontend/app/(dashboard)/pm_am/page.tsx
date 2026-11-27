@@ -664,6 +664,7 @@ export default function PMSchedulePage() {
                 placeholder="ค้นหาเลข PM, เครื่องจักร, ชื่องาน, ผู้รับผิดชอบ…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                enterKeyHint="search"
                 className="pl-9"
               />
             </div>

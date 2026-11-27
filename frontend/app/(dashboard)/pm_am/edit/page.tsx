@@ -285,7 +285,7 @@ function EditPMContent() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</span>
                 <div className="flex flex-wrap gap-2">
                   {[{label:"มิเตอร์ไฟฟ้า",unit:"kWh"},{label:"มิเตอร์น้ำ",unit:"m³"},{label:"ชั่วโมงเดินเครื่อง",unit:"ชั่วโมง"}].map((p)=>(
                     <Button key={p.unit} type="button" variant={meterUnit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setMeterUnit(p.unit)}>{p.label} ({p.unit})</Button>
@@ -312,10 +312,10 @@ function EditPMContent() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex min-h-10 cursor-pointer items-center gap-2">
-                  <Checkbox checked={isOutsource} onCheckedChange={(v) => setIsOutsource(v === true)} />
+                <span className="inline-flex min-h-10 items-center gap-2">
+                  <Checkbox checked={isOutsource} aria-label="งานภายนอก (Outsource)" onCheckedChange={(v) => setIsOutsource(v === true)} />
                   <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
-                </label>
+                </span>
                 <span className="text-sm text-[var(--cmms-text-secondary)]">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM</span>
               </div>
 
@@ -336,6 +336,7 @@ function EditPMContent() {
                   type="file"
                   multiple
                   accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.txt"
+                  aria-label="แนบเอกสาร (ใบแจ้งหนี้ / ใบเสนอราคา)"
                   disabled={attUploading}
                   onChange={(e) => uploadAttachments(e.target.files)}
                   className="text-[13px]"
@@ -353,7 +354,7 @@ function EditPMContent() {
                           {a.file_name}
                         </a>
                         <span className="text-sm text-[var(--cmms-text-secondary)]">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB</span>
-                        <button type="button" onClick={() => deleteAttachment(a.id)} className="ml-auto cursor-pointer border-none bg-transparent text-xs font-semibold" style={{ color: "var(--cmms-danger)" }}>
+                        <button type="button" onClick={() => deleteAttachment(a.id)} aria-label={`ลบไฟล์ ${a.file_name}`} className="ml-auto cursor-pointer border-none bg-transparent text-xs font-semibold" style={{ color: "var(--cmms-danger)" }}>
                           ลบ
                         </button>
                       </div>

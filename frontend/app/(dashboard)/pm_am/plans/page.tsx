@@ -368,7 +368,7 @@ export default function PMPlansPage() {
             </div>
             <div className="relative min-w-0 max-w-[280px]">
               <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
-              <Input aria-label="ค้นหา" className="pl-9" placeholder="ค้นหารหัส / ชื่อแผน…" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input aria-label="ค้นหา" className="pl-9" placeholder="ค้นหารหัส / ชื่อแผน…" enterKeyHint="search" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
 

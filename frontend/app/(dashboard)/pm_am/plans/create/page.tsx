@@ -364,7 +364,7 @@ export default function PMPlanFormPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทแผน</label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทแผน</span>
               <Select value={form.plan_type} onValueChange={(v) => setForm({ ...form, plan_type: v })}>
                 <SelectTrigger aria-label="ประเภทแผน"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -375,7 +375,7 @@ export default function PMPlanFormPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ความเร่งด่วน</label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ความเร่งด่วน</span>
               <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
                 <SelectTrigger aria-label="ความเร่งด่วน"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -391,7 +391,7 @@ export default function PMPlanFormPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ความถี่ *</label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ความถี่ *</span>
               <Select value={form.frequency_type} onValueChange={(v) => setForm({ ...form, frequency_type: v })}>
                 <SelectTrigger aria-label="ความถี่"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -409,7 +409,7 @@ export default function PMPlanFormPage() {
             {isMeter && (
               <div className="space-y-3 sm:col-span-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ลิงก์มิเตอร์จากทะเบียน/รายการที่เตรียมไว้ (ถ้ามี)</label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลิงก์มิเตอร์จากทะเบียน/รายการที่เตรียมไว้ (ถ้ามี)</span>
                   {assetIds.length === 0 ? (
                     <p className="text-xs text-[var(--cmms-text-muted)]">เลือกเครื่องจักรในแผนก่อนเพื่อโหลดรายการมิเตอร์ของเครื่อง</p>
                   ) : metersLoading ? (
@@ -445,7 +445,7 @@ export default function PMPlanFormPage() {
                   </p>
                 </div>
 
-                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset) / หน่วย</label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset) / หน่วย</span>
                 <div className="flex flex-wrap gap-2">
                   {[{label:"มิเตอร์ไฟฟ้า",unit:"kWh"},{label:"มิเตอร์น้ำ",unit:"m³"},{label:"ชั่วโมงเดินเครื่อง",unit:"ชั่วโมง"}].map((p)=>(
                     <Button key={p.unit} type="button" variant={form.meter_unit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:p.unit, meter_id: ""})}>{p.label} ({p.unit})</Button>
@@ -481,7 +481,7 @@ export default function PMPlanFormPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (Responsible)</label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (Responsible)</span>
               <Select value={form.responsible_user_id || "__none__"} onValueChange={(v) => setForm({ ...form, responsible_user_id: v === "__none__" ? "" : v })}>
                 <SelectTrigger aria-label="ผู้รับผิดชอบ"><SelectValue placeholder="เลือกผู้รับผิดชอบ…" /></SelectTrigger>
                 <SelectContent>
@@ -493,7 +493,7 @@ export default function PMPlanFormPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานะ</label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานะ</span>
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                 <SelectTrigger aria-label="สถานะ"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -520,11 +520,11 @@ export default function PMPlanFormPage() {
               {assets.map((a) => {
                 const checked = assetIds.includes(a.id);
                 return (
-                  <label key={a.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5"
+                  <span key={a.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5"
                     style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                    <Checkbox checked={checked} onCheckedChange={() => toggleAsset(a.id)} />
+                    <Checkbox checked={checked} aria-label={`เครื่องจักร: ${a.code} - ${a.name}`} onCheckedChange={() => toggleAsset(a.id)} />
                     <span className={`truncate text-sm ${checked ? "font-semibold" : ""}`}>{a.code} - {a.name}</span>
-                  </label>
+                  </span>
                 );
               })}
               {assets.length === 0 && <p className="text-sm text-[var(--cmms-text-muted)]">ยังไม่มีเครื่องจักรในระบบ</p>}
@@ -542,11 +542,11 @@ export default function PMPlanFormPage() {
               {templates.map((tpl) => {
                 const checked = templateIds.includes(tpl.id);
                 return (
-                  <label key={tpl.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5"
+                  <span key={tpl.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5"
                     style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                    <Checkbox checked={checked} onCheckedChange={() => toggleTemplate(tpl.id)} />
+                    <Checkbox checked={checked} aria-label={`Checklist Template: ${tpl.code} - ${tpl.name}`} onCheckedChange={() => toggleTemplate(tpl.id)} />
                     <span className={`truncate text-sm ${checked ? "font-semibold" : ""}`}>{tpl.code} - {tpl.name}</span>
-                  </label>
+                  </span>
                 );
               })}
               {templates.length === 0 && <p className="text-sm text-[var(--cmms-text-muted)]">ยังไม่มี Checklist Template</p>}
@@ -570,6 +570,7 @@ export default function PMPlanFormPage() {
                 placeholder="ค้นหา Item Code / ชื่ออะไหล่ใน Sage 300 (เช่น SUP001 · O-RING) และกด + เพื่อเพิ่ม…"
                 value={ppSearch}
                 onChange={(e) => setPpSearch(e.target.value)}
+                enterKeyHint="search"
                 aria-label="ค้นหาอะไหล่ตามแผน"
               />
             </div>
@@ -629,7 +630,7 @@ export default function PMPlanFormPage() {
                         <td className="py-2 pr-2">{p.item_description || "-"}</td>
                         <td className="py-2 pr-2 text-right">
                           <input
-                            aria-label="จำนวนอะไหล่"
+                            aria-label={`จำนวนอะไหล่ ${p.sage_item_code}`}
                             type="number" min={1}
                             className="w-20 rounded-lg border px-2 py-1 text-right text-sm"
                             style={{ borderColor: "var(--cmms-border)" }}

@@ -193,9 +193,9 @@ export default function BatchSchedulePage() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
                 <div className="space-y-1.5">
-                  <Label>รอบความถี่ *</Label>
+                  <Label htmlFor="batch-frequency">รอบความถี่ *</Label>
                   <Select value={formData.frequency} onValueChange={(v) => setFormData({ ...formData, frequency: v })}>
-                    <SelectTrigger aria-label="รอบความถี่">
+                    <SelectTrigger id="batch-frequency" aria-label="รอบความถี่">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,9 +214,9 @@ export default function BatchSchedulePage() {
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 />
                 <div className="space-y-1.5">
-                  <Label>มอบหมายผู้รับผิดชอบ (ไม่บังคับ)</Label>
+                  <Label htmlFor="batch-assignee">มอบหมายผู้รับผิดชอบ (ไม่บังคับ)</Label>
                   <Select value={formData.assignee || "__none__"} onValueChange={(v) => setFormData({ ...formData, assignee: v === "__none__" ? "" : v })}>
-                    <SelectTrigger aria-label="ผู้รับผิดชอบ">
+                    <SelectTrigger id="batch-assignee" aria-label="ผู้รับผิดชอบ">
                       <SelectValue placeholder="เลือกช่าง / ทีม…" />
                     </SelectTrigger>
                     <SelectContent>
@@ -266,7 +266,7 @@ export default function BatchSchedulePage() {
               </div>
 
               <div className="mb-2 mt-4 flex items-center justify-between border-b pb-2" style={{ borderColor: "var(--cmms-border)" }}>
-                <label className="flex min-h-10 cursor-pointer items-center gap-2">
+                <span className="flex min-h-10 items-center gap-2">
                   <Checkbox
                     id="select-all"
                     aria-label="เลือกทั้งหมด"
@@ -274,16 +274,16 @@ export default function BatchSchedulePage() {
                     onCheckedChange={() => handleSelectAll()}
                   />
                   <span className="text-sm font-semibold">เลือกทั้งหมด</span>
-                </label>
+                </span>
                 <span className="text-sm text-[var(--cmms-text-secondary)]">เลือกแล้ว {selectedAssets.length} รายการ</span>
               </div>
 
               <div className="mt-2 min-h-0 flex-1 overflow-y-auto">
                 <div className="space-y-2">
                   {filteredAssets.map((asset) => (
-                    <label
+                    <span
                       key={asset.rawId}
-                      className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md border p-3"
+                      className="flex min-h-10 items-center gap-3 rounded-md border p-3"
                       style={{
                         backgroundColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary-wash)" : "var(--cmms-bg-card)",
                         borderColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary)" : "var(--cmms-border)",
@@ -298,7 +298,7 @@ export default function BatchSchedulePage() {
                         <p className="font-semibold">{asset.code}</p>
                         <p className="text-sm text-[var(--cmms-text-secondary)]">{asset.name}</p>
                       </div>
-                    </label>
+                    </span>
                   ))}
                   {filteredAssets.length === 0 && (
                     <p className="mt-6 text-center text-[var(--cmms-text-secondary)]">

@@ -425,12 +425,12 @@ export default function PMCalendarPage() {
             <span className="cmms-count-pill">{filteredTasks.length} งาน</span>
             <div className="ml-auto relative w-full sm:w-64">
               <Search size={15} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาชื่องาน / เครื่องจักร / เลข PM…" className="pl-9" aria-label="ค้นหางาน PM" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาชื่องาน / เครื่องจักร / เลข PM…" className="pl-9" enterKeyHint="search" aria-label="ค้นหางาน PM" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-7">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">เครื่องจักร</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">เครื่องจักร</span>
               <Select value={fAsset} onValueChange={(v) => setFAsset(v)}>
                 <SelectTrigger aria-label="กรองเครื่องจักร"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>
@@ -440,7 +440,7 @@ export default function PMCalendarPage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">ตำแหน่ง</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">ตำแหน่ง</span>
               <Select value={fLoc} onValueChange={(v) => setFLoc(v)}>
                 <SelectTrigger aria-label="กรองตำแหน่ง"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>
@@ -450,7 +450,7 @@ export default function PMCalendarPage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">แผนก</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">แผนก</span>
               <Select value={fDept} onValueChange={(v) => setFDept(v)}>
                 <SelectTrigger aria-label="กรองแผนก"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>
@@ -460,7 +460,7 @@ export default function PMCalendarPage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">ผู้รับผิดชอบ</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">ผู้รับผิดชอบ</span>
               <Select value={fTech} onValueChange={(v) => setFTech(v)}>
                 <SelectTrigger aria-label="กรองผู้รับผิดชอบ"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>
@@ -470,7 +470,7 @@ export default function PMCalendarPage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">สถานะ</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">สถานะ</span>
               <Select value={fStatus} onValueChange={(v) => setFStatus(v)}>
                 <SelectTrigger aria-label="กรองสถานะ"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>
@@ -479,7 +479,7 @@ export default function PMCalendarPage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[var(--cmms-text-secondary)]">ความถี่</label>
+              <span className="text-xs font-medium text-[var(--cmms-text-secondary)]">ความถี่</span>
               <Select value={fFreq} onValueChange={(v) => setFFreq(v)}>
                 <SelectTrigger aria-label="กรองความถี่"><SelectValue placeholder="ทั้งหมด" /></SelectTrigger>
                 <SelectContent>

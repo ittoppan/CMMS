@@ -530,6 +530,8 @@ export default function PMChecksheetPage() {
   const renderSigCanvas = (which: "inspector" | "operator") => (
     <canvas
       ref={which === "inspector" ? inspectorCanvasRef : operatorCanvasRef}
+      role="img"
+      aria-label={which === "inspector" ? "พื้นที่วาดลายเซ็นผู้ตรวจเช็ค" : "พื้นที่วาดลายเซ็นผู้ควบคุมเครื่อง"}
       width={280}
       height={90}
       onMouseDown={startSig(which)}
@@ -774,7 +776,7 @@ export default function PMChecksheetPage() {
                             {item.type === "value" && (
                               <div className="mt-1.5 w-[200px] max-w-full">
                                 <Input
-                                  label="ค่า"
+                                  label={`ค่าที่วัดได้: ${item.task}`}
                                   isLabelHidden
                                   placeholder="ระบุค่าตัวเลข…"
                                   value={item.value}
@@ -898,9 +900,9 @@ export default function PMChecksheetPage() {
           <div className="max-h-[70vh] space-y-4 overflow-y-auto p-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">
                   {!!Number(selectedPlan.is_outsource) ? `ลายเซ็นผู้ตรวจเช็ค (บริษัทภายนอก: ${selectedPlan.outsource_by || "-"}) *` : `ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`}
-                </label>
+                </span>
                 {renderSigCanvas("inspector")}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[var(--cmms-text-secondary)]">วาดด้วยเมาส์/นิ้ว</span>
@@ -909,7 +911,7 @@ export default function PMChecksheetPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="operator-name-input" className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้ควบคุมเครื่อง *</label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้ควบคุมเครื่อง *</span>
                 {renderSigCanvas("operator")}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[var(--cmms-text-secondary)]">วาดด้วยเมาส์/นิ้ว</span>

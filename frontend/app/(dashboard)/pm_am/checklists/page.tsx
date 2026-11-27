@@ -321,7 +321,7 @@ export default function PMChecklistsPage() {
               <Input label="รหัส Template *" placeholder="เช่น CHK-PUMP-01" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
               <Input label="ชื่อ Template *" placeholder="เช่น เช็คชีทปั๊มน้ำประจำเดือน" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">หมวดหมู่</label>
+                <span className="text-sm font-medium">หมวดหมู่</span>
                 <select
                   aria-label="หมวดหมู่"
                   className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
@@ -358,7 +358,7 @@ export default function PMChecklistsPage() {
             <div className="space-y-3">
               <Input label="รายการตรวจ *" placeholder="เช่น เช็ครอยรั่วของวาล์ว" value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">ประเภทรายการ</label>
+                <span className="text-sm font-medium">ประเภทรายการ</span>
                 <select
                   aria-label="ประเภทรายการ"
                   className="w-full rounded-[var(--cmms-radius)] border px-3 py-2 text-sm outline-none focus-visible:border-[var(--cmms-border-focus)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"

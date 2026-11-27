@@ -216,10 +216,14 @@ export default function PMCreatePage() {
                   const tid = Number(u.id);
                   const checked = teamMembers.includes(tid);
                   return (
-                    <label key={u.id} className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                      <Checkbox checked={checked} onCheckedChange={() => setTeamMembers((prev) => checked ? prev.filter((x) => x !== tid) : [...prev, tid])} />
+                    <span key={u.id} className="flex min-h-10 items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
+                      <Checkbox
+                        checked={checked}
+                        aria-label={`ทีมผู้ปฏิบัติงาน: ${u.full_name || u.username || `#${u.id}`}`}
+                        onCheckedChange={() => setTeamMembers((prev) => checked ? prev.filter((x) => x !== tid) : [...prev, tid])}
+                      />
                       <span className={`text-sm ${checked ? "font-semibold" : ""}`}>{u.full_name || u.username || `#${u.id}`}</span>
-                    </label>
+                    </span>
                   );
                 })}
             </div>
@@ -258,7 +262,7 @@ export default function PMCreatePage() {
             <div className="space-y-3 rounded-[10px] border p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
               <p className="text-sm font-semibold">ข้อมูลตามมิเตอร์ {frequency === "meter_based" ? "*" : "(ถ้ามี)"}</p>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</span>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "มิเตอร์ไฟฟ้า", unit: "kWh", desc: "หน่วยไฟฟ้าสะสม" },
@@ -297,10 +301,10 @@ export default function PMCreatePage() {
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="inline-flex min-h-10 cursor-pointer items-center gap-2">
-              <Checkbox checked={isOutsource} onCheckedChange={(v) => setIsOutsource(v === true)} />
+            <span className="inline-flex min-h-10 items-center gap-2">
+              <Checkbox checked={isOutsource} aria-label="งานภายนอก (Outsource)" onCheckedChange={(v) => setIsOutsource(v === true)} />
               <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
-            </label>
+            </span>
             <span className="text-sm text-[var(--cmms-text-secondary)]">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM (เช่น ผู้ผลิตเครื่องจักร)</span>
           </div>
 
