@@ -10,6 +10,7 @@ import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Grid, PageHeader } from "@/components/layout";
+import { SettingsShell } from "@/components/settings/SettingsShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -219,7 +220,8 @@ export default function NotificationCenterPage() {
   }, [meta]);
 
   return (
-    <>
+    <SettingsShell>
+      <>
       <PageHeader eyebrow={<p className="cmms-eyebrow">NOTIFICATIONS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ศูนย์แจ้งเตือน" }]}
       title={
@@ -442,6 +444,7 @@ export default function NotificationCenterPage() {
         </section>
       </div>
           </div>
-    </>
+      </>
+    </SettingsShell>
   );
 }
