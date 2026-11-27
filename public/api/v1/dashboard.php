@@ -72,6 +72,9 @@ try {
         'source_type' => (string)($_GET['source_type'] ?? ''),
         'priority' => (string)($_GET['priority'] ?? ''),
         'status' => (string)($_GET['status'] ?? ''),
+        // แดชบอร์ดส่วนบุคคล (/dashboard/my): ส่ง personal=1 มาเอง — endpoint นี้ใช้ร่วมกับ
+        // wallboard / pm-compliance / backlog-aging ที่ต้องเห็นภาพรวมทั้งระบบ ห้ามบังคับ scope เอง
+        'personal_scope' => (string)($_GET['personal'] ?? '') === '1',
     ];
 
     $base = [

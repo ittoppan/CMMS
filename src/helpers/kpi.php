@@ -166,7 +166,14 @@ function kpi_filters(PDO $pdo, array $opts): array {
 /* ───────────────────────── 3. การกำหนดขอบเขตตาม role ───────────────────────── */
 
 /** ปรับ scope ตาม role — คืน SQL + params เพิ่ม โดยไม่ให้ role ธรรมดาเห็นข้อมูลนอกสิทธิ์ */
-function kpi_scope(PDO $pdo, int $roleId, int $uid, string $tableAlias = 'r'): array {
+function kpi_scope(PDO $pdo, int $roleId, int $uid, string $tableAlias = 'r', bool $personal = false): array {
+    // personal dashboard (/dashboard/my): นับเฉพาะงานที่ผู้ใช้เป็น lead/ทีม — แม้ role ที่เห็นภาพรวม (manager/asst manager) ก็ต้องแสดงงานของตัวเองในหน้าส่วนบุคคล
+    if ($personal) {
+        return [
+            'sql' => ' AND (' . $tableAlias . '.assigned_to = ? OR ' . $tableAlias . '.id IN (SELECT ref_id FROM work_assignees WHERE ref_type = "repair" AND user_id = ?))',
+            'params' => [$uid, $uid],
+        ];
+    }
     if ($roleId === 3) { // Technician
         return [
             'sql' => ' AND (' . $tableAlias . '.assigned_to = ? OR ' . $tableAlias . '.id IN (SELECT ref_id FROM work_assignees WHERE ref_type = "repair" AND user_id = ?))',
@@ -299,7 +306,7 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     $flt = kpi_filters($pdo, $opts);
     $roleId = (int)($opts['role_id'] ?? 0);
     $uid = (int)($opts['user_id'] ?? 0);
-    $scope = kpi_scope($pdo, $roleId, $uid);
+    $scope = kpi_scope($pdo, $roleId, $uid, 'r', !empty($opts['personal_scope']));
 
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $createdRange = kpi_range_sql($range, 'r.created_at');
@@ -494,7 +501,7 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
 function kpi_alerts(PDO $pdo, array $opts): array {
     $roleId = (int)($opts['role_id'] ?? 0);
     $uid = (int)($opts['user_id'] ?? 0);
-    $scope = kpi_scope($pdo, $roleId, $uid);
+    $scope = kpi_scope($pdo, $roleId, $uid, 'r', !empty($opts['personal_scope']));
     $flt = kpi_filters($pdo, $opts);
 
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
@@ -607,7 +614,7 @@ function kpi_top_overdue(PDO $pdo, array $opts, int $limit = 5): array {
 function kpi_wo_list(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);
-    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0), 'r', !empty($opts['personal_scope']));
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
 
     // group ลงลึก: overdue / critical / waiting_parts / pending_verification / all / open
@@ -773,7 +780,7 @@ function kpi_pm_list(PDO $pdo, array $opts): array {
 function kpi_downtime(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);
-    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0), 'r', !empty($opts['personal_scope']));
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $dateSql = kpi_range_sql($range, 'r.created_at');
     $params = array_merge($flt['params'], $scope['params'], $range ? [$range['start'], $range['end']] : []);
@@ -831,7 +838,7 @@ function kpi_downtime(PDO $pdo, array $opts): array {
 function kpi_trend(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);
-    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0), 'r', !empty($opts['personal_scope']));
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $baseParams = array_merge($flt['params'], $scope['params']);
 
@@ -881,7 +888,7 @@ function kpi_trend(PDO $pdo, array $opts): array {
 function kpi_cost(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);
-    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0), 'r', !empty($opts['personal_scope']));
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $dateSql = kpi_range_sql($range, 'r.created_at');
     $params = array_merge($flt['params'], $scope['params'], $range ? [$range['start'], $range['end']] : []);
@@ -941,7 +948,7 @@ function kpi_cost(PDO $pdo, array $opts): array {
 function kpi_failure(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);
-    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0), 'r', !empty($opts['personal_scope']));
     $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
     $dateSql = kpi_range_sql($range, 'r.created_at');
     $params = array_merge($flt['params'], $scope['params'], $range ? [$range['start'], $range['end']] : []);

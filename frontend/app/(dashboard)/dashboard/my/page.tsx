@@ -138,8 +138,8 @@ export default function MyDashboardPage() {
     try {
       const [profRes, ovRes, woRes] = await Promise.all([
         fetch("/api/v1/profile.php", { credentials: "include" }),
-        fetch("/api/v1/dashboard.php?action=overview", { credentials: "include" }),
-        fetch("/api/v1/dashboard.php?action=wo&group=all&limit=5", { credentials: "include" }),
+        fetch("/api/v1/dashboard.php?action=overview&personal=1", { credentials: "include" }),
+        fetch("/api/v1/dashboard.php?action=wo&group=all&limit=5&personal=1", { credentials: "include" }),
       ]);
       const profJson = await profRes.json().catch(() => null);
       const ovJson = await ovRes.json().catch(() => null);
