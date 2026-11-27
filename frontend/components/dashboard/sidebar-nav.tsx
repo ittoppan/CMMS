@@ -75,6 +75,7 @@ import {
   Hash,
   SlidersHorizontal,
   Workflow,
+  Factory,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight, X } from "lucide-react";
@@ -108,7 +109,7 @@ export interface NavItemDef {
  */
 export const SECTION_ACCENTS = {
   work_orders:        '#0068B5', // งานซ่อม — น้ำเงิน brand
-  pm_machines:        '#7C3AED', // บำรุงรักษา+เครื่องจักร — ม่วง
+  pm_machines:        '#7C3AED', // เครื่องจักร/สินทรัพย์ — ม่วง
   calibration:        '#0E7490', // สอบเทียบ — คราม
   parts_external:     '#B45309', // อะไหล่/ผู้รับจ้าง — ทองแดง
   planning:           '#15803D', // วางแผน — เขียว
@@ -132,7 +133,7 @@ export function sectionAccent(titleKey: string): string {
  */
 export const SECTION_ICONS: Record<string, LucideIcon> = {
   work_orders: Wrench,
-  pm_machines: CalendarDays,
+  pm_machines: Factory,
   calibration: Gauge,
   parts_external: Boxes,
   planning: CalendarClock,
