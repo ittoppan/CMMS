@@ -202,7 +202,7 @@ try {
                 if (!empty($_GET['q'])) {
                     $q = mb_strtolower((string)$_GET['q']);
                     $rows = array_values(array_filter($rows, fn($s) =>
-                        mb_str_contains(mb_strtolower($s['code'] . ' ' . $s['name_th'] . ' ' . $s['category']), $q)));
+                        str_contains(mb_strtolower($s['code'] . ' ' . $s['name_th'] . ' ' . $s['category']), $q)));
                 }
                 echo json_encode(['skills' => $rows], JSON_UNESCAPED_UNICODE);
                 break;

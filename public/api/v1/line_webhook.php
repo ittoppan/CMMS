@@ -152,7 +152,7 @@ try {
                     continue;
                 }
                 $verb = $decision === 'approved' ? "อนุมัติ" : "ไม่อนุมัติ";
-                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเบิกอะไหล่ของ {$row['work_order_no']} เรียบร้อยแล้ว" . nl . "ผู้พิจารณา: {$approver['full_name']}", $token);
+                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเบิกอะไหล่ของ {$row['work_order_no']} เรียบร้อยแล้ว" . "\n" . "ผู้พิจารณา: {$approver['full_name']}", $token);
                 // แจ้งช่างผู้ขอเบิก (ถ้าผูก LINE)
                 if (!empty($row['assigned_to'])) {
                     $tech = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
@@ -190,7 +190,7 @@ try {
                     continue;
                 }
                 $verb = $decision === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
-                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเลื่อนกำหนด PM \"{$pm['title']}\"" . ($decision === 'approved' ? " เป็น {$pm['reschedule_to']}" : '') . nl . "ผู้พิจารณา: {$approver['full_name']}", $token);
+                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเลื่อนกำหนด PM \"{$pm['title']}\"" . ($decision === 'approved' ? " เป็น {$pm['reschedule_to']}" : '') . "\n" . "ผู้พิจารณา: {$approver['full_name']}", $token);
                 // แจ้งผู้ขอเลื่อน (ถ้าผูก LINE)
                 if (!empty($pm['assigned_to'])) {
                     $tech = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");

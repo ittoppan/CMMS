@@ -918,6 +918,24 @@ function doc_impact_update(PDO $pdo, int $impactId, array $in, int $uid): array 
     return ['id' => $impactId, 'status' => $st ?: $row['status']];
 }
 
+function doc_impact_remove(PDO $pdo, int $impactId, int $uid): array {
+    $row = doc_impact_get($pdo, $impactId);
+    $rev = doc_rev_get($pdo, (int)$row['revision_id']);
+    if (in_array($rev['status'], ['obsolete', 'rejected', 'superseded'], true)) {
+        throw new DomainException('revision ปิดแล้ว - ลบผลกระทบไม่ได้', 409);
+    }
+    $pdo->prepare('DELETE FROM document_impacts WHERE id = ?')->execute([$impactId]);
+    $areas = doc_impact_areas();
+    $areaKey = (string)($row['impact_area'] ?? '');
+    $areaLabel = $areas[$areaKey] ?? $areaKey;
+    doc_activity($pdo, (int)$rev['document_id'], (int)$row['revision_id'], 'impact_removed',
+        'ลบผลกระทบ: ' . $areaLabel, null, null, $uid);
+    audit_log($pdo, 'document.impact.remove', 'document_impact', $impactId,
+        'ลบผลกระทบ ' . $areaKey . '/' . ($row['severity'] ?? '') . ' ของ revision ' . ($rev['revision_no'] ?? ''),
+        $row, null, 'warning');
+    return ['id' => $impactId, 'removed' => true];
+}
+
 function doc_impact_get(PDO $pdo, int $id): array {
     $st = $pdo->prepare('SELECT * FROM document_impacts WHERE id = ?');
     $st->execute([$id]);

@@ -289,7 +289,6 @@ function cal_plan_save(PDO $pdo, array $in, int $uid): array {
         'next_calibration_date' => $nextDate,
         'reminder_days'         => max(0, (int)($in['reminder_days'] ?? 30)),
         'required_accuracy'     => $in['required_accuracy'] ?? null,
-        'status'                => (function ($s) { return in_array($s, ['draft','active','suspended','completed','cancelled'], true) ? $s : 'active'; })($in['status'] ?? 'active'),
         'notes'                 => $in['notes'] ?? null,
     ];
 
