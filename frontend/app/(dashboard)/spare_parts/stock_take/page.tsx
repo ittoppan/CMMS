@@ -302,6 +302,7 @@ export default function StockTakePage() {
                   label="ค้นหาอะไหล่"
                   isLabelHidden
                   placeholder="ค้นหา: รหัส / ชื่อ / ตำแหน่ง…"
+                  enterKeyHint="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />

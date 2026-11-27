@@ -460,6 +460,7 @@ function ItemsCard({
               label="ค้นหา"
               isLabelHidden
               placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ…"
+              enterKeyHint="search"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               onBlur={onSearchBlur}
@@ -554,7 +555,7 @@ function ItemsCard({
                   >
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img loading="lazy" decoding="async" src={thumb} alt={item.name} width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                      <img loading="lazy" decoding="async" src={thumb} alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                     ) : (
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                         <Box size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -678,7 +679,7 @@ function ItemsCard({
                 <div key={p.rawId} className="flex flex-wrap items-center gap-3 rounded-[10px] border border-border p-2.5">
                   {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img loading="lazy" decoding="async" src={thumb} alt={p.name} width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                    <img loading="lazy" decoding="async" src={thumb} alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                       <Box size={16} strokeWidth={1.75} aria-hidden="true" />

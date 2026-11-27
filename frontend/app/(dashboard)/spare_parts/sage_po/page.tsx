@@ -271,7 +271,7 @@ export default function SagePOReceiptPage() {
             onChange={(e) => setPoNumber(e.target.value)}
           />
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกอะไหล่ที่รับเข้าคลัง</label>
+            <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกอะไหล่ที่รับเข้าคลัง</span>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative min-w-[200px] flex-1">
                 <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
@@ -279,6 +279,7 @@ export default function SagePOReceiptPage() {
                   label="ค้นหาอะไหล่"
                   isLabelHidden
                   placeholder="ค้นหารหัส / ชื่ออะไหล่…"
+                  enterKeyHint="search"
                   value={partSearch}
                   onChange={(e) => setPartSearch(e.target.value)}
                   className="pl-9"

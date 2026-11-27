@@ -305,6 +305,7 @@ export default function SageShipmentsPage() {
               label="ค้นหา"
               isLabelHidden
               placeholder="ค้นหา WO, ช่าง, เลขที่ Sage Shipment…"
+              enterKeyHint="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -371,7 +372,9 @@ export default function SageShipmentsPage() {
                           type="button"
                           onClick={() => toggleExpand(req.id)}
                           aria-label={expandedId === req.id ? "ยุบ" : "ขยาย"}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent"
+                          aria-expanded={!!req.items && req.items.length > 0 ? expandedId === req.id : undefined}
+                          disabled={!req.items || req.items.length === 0}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
                         >
                           {req.items && req.items.length > 0 ? (
                             expandedId === req.id ? (

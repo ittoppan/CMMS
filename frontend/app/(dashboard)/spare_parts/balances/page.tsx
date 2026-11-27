@@ -239,6 +239,7 @@ export default function SpareBalancesPage() {
             label="ค้นหา"
             isLabelHidden
             placeholder="ค้นหารหัส, ชื่อ, หมวดหมู่ หรือสถานที่…"
+            enterKeyHint="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
