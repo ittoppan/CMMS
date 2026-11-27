@@ -397,7 +397,17 @@ export function SidebarNav({
   })).filter((g) => g.visibleItems.length > 0);
 
   // เมนูที่ผ่านสิทธิ์และตรงคำค้น — ใช้กับตัวนับข้างช่องค้นหา
-  const totalVisible = groups.reduce((n, g) => n + g.visibleItems.length, 0);
+  // ต้องนับเป็น "จำนวนเมนูจริง" (href ไม่ซ้ำ) ไม่ใช่ผลรวมของทุกบล็อกที่วาด:
+  // เมนูใน "ใช้บ่อย" ถูกวาดซ้ำในหมวดของมันโดยตั้งใจ (หมวดต้องครบเสมอ) ถ้าบวกกันตรง ๆ
+  // ตัวเลขจะเกินจริงได้ถึง 5 รายการ (เท่าจำนวนสูงสุดของบล็อก "ใช้บ่อย")
+  const shownHrefs = new Set<string>();
+  if (!searching) {
+    for (const item of freq) shownHrefs.add(item.href);
+  }
+  for (const g of groups) {
+    for (const item of g.visibleItems) shownHrefs.add(item.href);
+  }
+  const totalVisible = shownHrefs.size;
 
   // Accordion: เปิดได้ทีละหมวด — เก็บ openKey ที่ SidebarNav
   const [openKey, setOpenKey] = React.useState<string | null>(() => {
