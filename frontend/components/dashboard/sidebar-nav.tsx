@@ -107,20 +107,7 @@ export interface NavItemDef {
  * section accent — palette แยกสีเห็นชัดบน light ช่วยแยกโซนเมนู
  * ใช้กับ chip จำนวนรายการ + icon tile
  */
-export const SECTION_ACCENTS = {
-  work_orders:        '#0068B5', // งานซ่อม — น้ำเงิน brand
-  pm_machines:        '#7C3AED', // เครื่องจักร/สินทรัพย์ — ม่วง
-  calibration:        '#0E7490', // สอบเทียบ — คราม
-  parts_external:     '#B45309', // อะไหล่/ผู้รับจ้าง — ทองแดง
-  planning:           '#15803D', // วางแผน — เขียว
-  supervisor:         '#0F766E', // หัวหน้างาน — ทีล
-  workforce:          '#0369A1', // กำลังคน — ฟ้า
-  analytics_reports:  '#0E7490', // วิเคราะห์/รายงาน — ฟ้าเข้ม
-  reliability:        '#DC2626', // ความเชื่อถือได้ — แดง
-  knowledge_ops:      '#6D28D9', // องค์ความรู้/ปฏิบัติการ — ม่วงโท้ก
-  system:             '#475569', // ระบบ — สลาเต้
-} as const;
-
+export const SECTION_ACCENTS = {  overview:           '#0068B5',  work_orders:        '#0068B5',  pm_check:           '#7C3AED',  machines:           '#7C3AED',  spare_parts:        '#B45309',  safety:             '#DC2626',  analytics:          '#0E7490',  reliability:        '#DC2626',  calibration:        '#0E7490',  workforce_contractors: '#0369A1',  docs_knowledge:     '#6D28D9',  system:             '#475569',} as const;
 export type SectionKey = keyof typeof SECTION_ACCENTS;
 
 export function sectionAccent(titleKey: string): string {
@@ -131,20 +118,7 @@ export function sectionAccent(titleKey: string): string {
  * ไอคอนประจำหมวดเมนู — ใช้แทน "จำนวนเมนู" ที่เดิมแสดงเป็นตัวเลขในชิป
  * (ตัวเลขในชิปอ่านเหมือน badge แจ้งเตือน/งานค้าง ทำให้เข้าใจผิด)
  */
-export const SECTION_ICONS: Record<string, LucideIcon> = {
-  work_orders: Wrench,
-  pm_machines: Factory,
-  calibration: Gauge,
-  parts_external: Boxes,
-  planning: CalendarClock,
-  supervisor: BadgeCheck,
-  workforce: Users,
-  analytics_reports: BarChart3,
-  reliability: ShieldCheck,
-  knowledge_ops: BookOpen,
-  system: Settings,
-};
-
+export const SECTION_ICONS: Record<string, LucideIcon> = {  overview: Home,  work_orders: Wrench,  pm_check: Factory,  machines: Network,  spare_parts: Boxes,  safety: ShieldAlert,  analytics: BarChart3,  reliability: ShieldCheck,  calibration: Gauge,  workforce_contractors: Users,  docs_knowledge: BookOpen,  system: Settings,};
 export function sectionIcon(titleKey: string): LucideIcon {
   return SECTION_ICONS[titleKey.replace('nav.', '')] ?? LayoutGrid;
 }
@@ -159,27 +133,34 @@ export const NAV_GROUPS: NavGroupDef[] = [
     titleKey: "nav.overview",
     items: [
       { perm: "dashboard", labelKey: "menu.dashboard", href: "/dashboard", icon: Home },
-      { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
       { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
       { perm: "notifications", labelKey: "menu.alert_center", href: "/alert-center", icon: ShieldAlert },
+      { perm: "register", labelKey: "menu.register", href: "/register", icon: MessageSquareText },
+      { perm: "feedback", labelKey: "menu.feedback", href: "/feedback", icon: MessageSquareText, secondary: true },
     ],
   },
   {
     titleKey: "nav.work_orders",
     items: [
-      { perm: "repair", labelKey: "menu.repairs", href: "/repair", icon: Wrench },
       { perm: "repair/request", labelKey: "menu.repair_request", href: "/repair/request", icon: FilePlus2 },
+      { perm: "repair/my_tasks", labelKey: "menu.my_tasks", href: "/repair/my_tasks", icon: ClipboardCheck },
+      { perm: "repair", labelKey: "menu.repairs", href: "/repair", icon: Wrench },
       { perm: "repair/assign", labelKey: "menu.repair_assign", href: "/repair/assign", icon: UserCheck },
+      { perm: "repair/kanban", labelKey: "menu.kanban", href: "/repair/kanban", icon: LayoutGrid, secondary: true },
       { perm: "repair/tracking", labelKey: "menu.tracking", href: "/repair/tracking", icon: Route },
       { perm: "field", labelKey: "menu.field_work", href: "/field", icon: ScanLine, secondary: true },
-      { perm: "repair/workload", labelKey: "menu.workload", href: "/repair/workload", icon: Activity, secondary: true },
-      { perm: "repair/kanban", labelKey: "menu.kanban", href: "/repair/kanban", icon: LayoutGrid, secondary: true },
-      { perm: "repair/history", labelKey: "menu.history", href: "/repair/history", icon: History, secondary: true },
+      { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck },
+      { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck },
+      { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck },
+      { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks },
+      { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays },
       { perm: "approval", labelKey: "menu.approval", href: "/approval", icon: BadgeCheck, secondary: true },
+      { perm: "repair/history", labelKey: "menu.history", href: "/repair/history", icon: History, secondary: true },
+      { perm: "repair/workload", labelKey: "menu.workload", href: "/repair/workload", icon: Activity, secondary: true },
     ],
   },
   {
-    titleKey: "nav.planning",
+    titleKey: "nav.pm_check",
     items: [
       { perm: "pm_am", labelKey: "menu.pm_am", href: "/pm_am", icon: CalendarDays },
       { perm: "pm_am/calendar", labelKey: "menu.pm_calendar", href: "/pm_am/calendar", icon: CalendarDays },
@@ -190,22 +171,63 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
       { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
       { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
-      { perm: "pm_am", labelKey: "menu.predictive_maintenance", href: "/predictive-maintenance", icon: Hourglass },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },
       { perm: "inspections/templates", labelKey: "menu.inspections_templates", href: "/inspections/templates", icon: ListChecks, secondary: true },
-      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
     ],
   },
   {
-    titleKey: "nav.pm_machines",
+    titleKey: "nav.system",
+    items: [
+      { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
+      { perm: "users", labelKey: "menu.users", href: "/users", icon: Users },
+      { perm: "roles", labelKey: "menu.roles", href: "/roles", icon: UsersRound, secondary: true },
+      { perm: "audit_log", labelKey: "menu.audit_log", href: "/audit-log", icon: History, secondary: true },
+      { perm: "system_health", labelKey: "menu.system_health", href: "/settings/health", icon: Activity, secondary: true },
+      { perm: "settings/notifications", labelKey: "menu.settings_notifications", href: "/settings/notifications", icon: Bell, secondary: true },
+      { perm: "notifications/history", labelKey: "menu.notifications_history", href: "/notifications/history", icon: ClipboardList, secondary: true },
+      { perm: "pages", labelKey: "menu.pages", href: "/pages", icon: FileText, secondary: true },
+      { perm: "editor/builder", labelKey: "menu.builder", href: "/editor/builder", icon: LayoutGrid, secondary: true },
+      { perm: "forms/designer", labelKey: "menu.forms_designer", href: "/forms/designer", icon: FileText, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_menus", href: "/settings/menus", icon: ShieldCheck, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_services", href: "/settings/services", icon: Server, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone, secondary: true },
+      { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush, secondary: true },
+      { perm: "settings", label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง", href: "/settings/repair-options", icon: Wrench, secondary: true },
+      { perm: "pm_am", labelKey: "menu.predictive_maintenance", href: "/predictive-maintenance", icon: Hourglass },
+    ],
+  },
+  {
+    titleKey: "nav.docs_knowledge",
+    items: [
+      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
+      { perm: "knowledge", labelKey: "menu.knowledge", href: "/knowledge", icon: GraduationCap },
+      { perm: "knowledge/search", labelKey: "menu.knowledge_search", href: "/knowledge/search", icon: Search },
+      { perm: "knowledge/articles", labelKey: "menu.knowledge_articles", href: "/knowledge/articles", icon: BookMarked },
+      { perm: "document_control/overview", labelKey: "menu.documents", href: "/documents", icon: BookMarked },
+      { perm: "engineering_change/overview", labelKey: "menu.engineering_changes", href: "/engineering-changes", icon: GitPullRequest },
+      { perm: "knowledge/articles/create", labelKey: "menu.knowledge_articles_create", href: "/knowledge/articles/create", icon: FilePlus2, secondary: true },
+      { perm: "knowledge/gaps", labelKey: "menu.knowledge_gaps", href: "/knowledge/gaps", icon: CircleAlert, secondary: true },
+      { perm: "knowledge/reviews", labelKey: "menu.knowledge_reviews", href: "/knowledge/reviews", icon: GraduationCap, secondary: true },
+      { perm: "knowledge/categories", labelKey: "menu.knowledge_categories", href: "/knowledge/taxonomy", icon: ListChecks, secondary: true },
+      { perm: "knowledge/usage", labelKey: "menu.knowledge_usage", href: "/knowledge/usage", icon: ChartPie, secondary: true },
+      { perm: "manuals", labelKey: "menu.manuals", href: "/manuals", icon: BookOpen, secondary: true },
+      { perm: "forms", labelKey: "menu.forms", href: "/forms", icon: FileDown, secondary: true },
+    ],
+  },
+  {
+    titleKey: "nav.machines",
     items: [
       { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
       { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
       { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: QrCode },
       { perm: "asset_registry/bom_tree", labelKey: "menu.bom_tree", href: "/asset_registry/bom_tree", icon: Box, secondary: true },
       { perm: "asset_registry/criticality", labelKey: "menu.criticality", href: "/asset_registry/criticality", icon: Scale, secondary: true },
-      // สินทรัพย์เชิงความน่าเชื่อถือ (ย้ายมาจากหมวดวิศวกรรมความเสียหาย — เป็นเรื่องเครื่องจักรตัวเดียวกัน)
+    ],
+  },
+  {
+    titleKey: "nav.reliability",
+    items: [
       { perm: "asset_reliability", labelKey: "menu.asset_reliability", href: "/asset-reliability", icon: Gauge },
       { perm: "asset_reliability/critical", labelKey: "menu.asset_reliability_critical", href: "/asset-reliability/critical", icon: Flame, secondary: true },
       { perm: "asset_reliability/lifecycle", labelKey: "menu.asset_reliability_lifecycle", href: "/asset-reliability/lifecycle", icon: CircleDot, secondary: true },
@@ -215,6 +237,22 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "asset_reliability/data-quality", labelKey: "menu.asset_reliability_data_quality", href: "/asset-reliability/data-quality", icon: BadgeCheck, secondary: true },
       { perm: "asset_reliability/reports", labelKey: "menu.asset_reliability_reports", href: "/asset-reliability/reports", icon: BarChart3, secondary: true },
       { perm: "asset_reliability/config", labelKey: "menu.asset_reliability_config", href: "/asset-reliability/config", icon: Settings, secondary: true },
+      { perm: "reliability", labelKey: "menu.reliability", href: "/reliability", icon: Gauge },
+      { perm: "reliability/assets", labelKey: "menu.reliability_assets", href: "/reliability/assets", icon: Boxes },
+      { perm: "reliability/failure-modes", labelKey: "menu.reliability_failure_modes", href: "/reliability/failure-modes", icon: Flame },
+      { perm: "reliability/bad-actors", labelKey: "menu.reliability_bad_actors", href: "/reliability/bad-actors", icon: ShieldAlert },
+      { perm: "mtbf_mttr", labelKey: "menu.mtbf_mttr", href: "/mtbf_mttr", icon: FlaskConical },
+      { perm: "mtbf_mttr", labelKey: "menu.production_hours", href: "/mtbf_mttr/production_hours", icon: Hourglass },
+      { perm: "rca", labelKey: "menu.rca", href: "/rca", icon: Activity },
+      { perm: "reliability/trend", labelKey: "menu.reliability_trend", href: "/reliability/trend", icon: BarChart3, secondary: true },
+      { perm: "reliability/weibull", labelKey: "menu.reliability_weibull", href: "/reliability/weibull", icon: ChartPie, secondary: true },
+      { perm: "reliability/pm-effectiveness", labelKey: "menu.reliability_pm_effectiveness", href: "/reliability/pm-effectiveness", icon: CalendarDays, secondary: true },
+      { perm: "reliability/growth", labelKey: "menu.reliability_growth", href: "/reliability/growth", icon: GitPullRequest, secondary: true },
+      { perm: "reliability/studies", labelKey: "menu.reliability_studies", href: "/reliability/studies", icon: BookOpenCheck, secondary: true },
+      { perm: "reliability/data-quality", labelKey: "menu.reliability_data_quality", href: "/reliability/data-quality", icon: CircleAlert, secondary: true },
+      { perm: "reliability/config", labelKey: "menu.reliability_config", href: "/reliability/config", icon: SlidersHorizontal, secondary: true },
+      { perm: "rca/events", labelKey: "menu.rca_events", href: "/rca/events", icon: History, secondary: true },
+      { perm: "rca/taxonomy", labelKey: "menu.rca_taxonomy", href: "/rca/taxonomy", icon: ListChecks, secondary: true },
     ],
   },
   {
@@ -238,38 +276,10 @@ export const NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
-    titleKey: "nav.parts_external",
+    titleKey: "nav.workforce_contractors",
     items: [
-      { perm: "spare_parts", labelKey: "menu.spare_parts", href: "/spare_parts", icon: Box },
-      { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
-      { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },
-      { perm: "spare_parts", labelKey: "menu.spare_reorder", href: "/spare-reorder", icon: ShoppingCart },
-      { perm: "suppliers", labelKey: "menu.suppliers", href: "/suppliers", icon: Truck },
-      { perm: "spare_parts/overview", labelKey: "menu.spare_overview", href: "/spare_parts/overview", icon: ChartPie, secondary: true },
-      { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History, secondary: true },
-      { perm: "spare_parts/stock_take", labelKey: "menu.stock_take", href: "/spare_parts/stock_take", icon: ClipboardCheck, secondary: true },
-      { perm: "spare_parts/sage_shipments", labelKey: "menu.sage_shipments", href: "/spare_parts/sage_shipments", icon: Truck, secondary: true },
-      { perm: "spare_parts/sage_po", labelKey: "menu.sage_po", href: "/spare_parts/sage_po", icon: FileCheck2, secondary: true },
-      { perm: "spare_parts/sage_sync", labelKey: "menu.sage_sync", href: "/spare_parts/sage_sync", icon: Database, secondary: true },
-      { perm: "spare_parts/optimization", labelKey: "menu.optimization", href: "/spare_parts/optimization", icon: Sparkles, secondary: true },
       { perm: "contractor", labelKey: "menu.contractors", href: "/contractors", icon: HardHat, secondary: true },
       { perm: "contractor/work", labelKey: "menu.contractors_work", href: "/contractors/work", icon: ClipboardList, secondary: true },
-      { perm: "equipment_borrowing", labelKey: "menu.equipment_borrowing", href: "/equipment_borrowing", icon: ArrowLeftRight, secondary: true },
-    ],
-  },
-  {
-    titleKey: "nav.supervisor",
-    items: [
-      { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck },
-      { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks },
-      { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck },
-      { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays },
-      { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck },
-    ],
-  },
-  {
-    titleKey: "nav.workforce",
-    items: [
       { perm: "workforce", labelKey: "menu.workforce", href: "/workforce", icon: Users },
       { perm: "workforce/technicians", labelKey: "menu.workforce_people", href: "/workforce/technicians", icon: UserCog },
       { perm: "workforce/skills", labelKey: "menu.workforce_skills", href: "/workforce/skills", icon: GraduationCap },
@@ -283,7 +293,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
-    titleKey: "nav.analytics_reports",
+    titleKey: "nav.analytics",
     items: [
       { perm: "analytics", labelKey: "menu.analytics_bi", href: "/analytics", icon: BarChart3 },
       { perm: "analytics", labelKey: "menu.analytics_kpi", href: "/analytics/kpi", icon: ChartPie },
@@ -300,64 +310,27 @@ export const NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
-    titleKey: "nav.reliability",
+    titleKey: "nav.safety",
     items: [
-      { perm: "reliability", labelKey: "menu.reliability", href: "/reliability", icon: Gauge },
-      { perm: "reliability/assets", labelKey: "menu.reliability_assets", href: "/reliability/assets", icon: Boxes },
-      { perm: "reliability/failure-modes", labelKey: "menu.reliability_failure_modes", href: "/reliability/failure-modes", icon: Flame },
-      { perm: "reliability/bad-actors", labelKey: "menu.reliability_bad_actors", href: "/reliability/bad-actors", icon: ShieldAlert },
-      { perm: "mtbf_mttr", labelKey: "menu.mtbf_mttr", href: "/mtbf_mttr", icon: FlaskConical },
-      { perm: "mtbf_mttr", labelKey: "menu.production_hours", href: "/mtbf_mttr/production_hours", icon: Hourglass },
-      { perm: "rca", labelKey: "menu.rca", href: "/rca", icon: Activity },
-      { perm: "reliability/trend", labelKey: "menu.reliability_trend", href: "/reliability/trend", icon: BarChart3, secondary: true },
-      { perm: "reliability/weibull", labelKey: "menu.reliability_weibull", href: "/reliability/weibull", icon: ChartPie, secondary: true },
-      { perm: "reliability/pm-effectiveness", labelKey: "menu.reliability_pm_effectiveness", href: "/reliability/pm-effectiveness", icon: CalendarDays, secondary: true },
-      { perm: "reliability/growth", labelKey: "menu.reliability_growth", href: "/reliability/growth", icon: GitPullRequest, secondary: true },
-      { perm: "reliability/studies", labelKey: "menu.reliability_studies", href: "/reliability/studies", icon: BookOpenCheck, secondary: true },
-      { perm: "reliability/data-quality", labelKey: "menu.reliability_data_quality", href: "/reliability/data-quality", icon: CircleAlert, secondary: true },
-      { perm: "reliability/config", labelKey: "menu.reliability_config", href: "/reliability/config", icon: SlidersHorizontal, secondary: true },
-      { perm: "rca/events", labelKey: "menu.rca_events", href: "/rca/events", icon: History, secondary: true },
-      { perm: "rca/taxonomy", labelKey: "menu.rca_taxonomy", href: "/rca/taxonomy", icon: ListChecks, secondary: true },
-    ],
-  },
-  {
-    titleKey: "nav.knowledge_ops",
-    items: [
-      { perm: "knowledge", labelKey: "menu.knowledge", href: "/knowledge", icon: GraduationCap },
-      { perm: "knowledge/search", labelKey: "menu.knowledge_search", href: "/knowledge/search", icon: Search },
-      { perm: "knowledge/articles", labelKey: "menu.knowledge_articles", href: "/knowledge/articles", icon: BookMarked },
-      { perm: "document_control/overview", labelKey: "menu.documents", href: "/documents", icon: BookMarked },
-      { perm: "engineering_change/overview", labelKey: "menu.engineering_changes", href: "/engineering-changes", icon: GitPullRequest },
       { perm: "safety/work_permit", labelKey: "menu.loto", href: "/safety/work_permit", icon: ShieldCheck },
-      { perm: "knowledge/articles/create", labelKey: "menu.knowledge_articles_create", href: "/knowledge/articles/create", icon: FilePlus2, secondary: true },
-      { perm: "knowledge/gaps", labelKey: "menu.knowledge_gaps", href: "/knowledge/gaps", icon: CircleAlert, secondary: true },
-      { perm: "knowledge/reviews", labelKey: "menu.knowledge_reviews", href: "/knowledge/reviews", icon: GraduationCap, secondary: true },
-      { perm: "knowledge/categories", labelKey: "menu.knowledge_categories", href: "/knowledge/taxonomy", icon: ListChecks, secondary: true },
-      { perm: "knowledge/usage", labelKey: "menu.knowledge_usage", href: "/knowledge/usage", icon: ChartPie, secondary: true },
-      { perm: "manuals", labelKey: "menu.manuals", href: "/manuals", icon: BookOpen, secondary: true },
     ],
   },
   {
-    titleKey: "nav.system",
+    titleKey: "nav.spare_parts",
     items: [
-      { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
-      { perm: "users", labelKey: "menu.users", href: "/users", icon: Users },
-      { perm: "register", labelKey: "menu.register", href: "/register", icon: MessageSquareText },
-      { perm: "roles", labelKey: "menu.roles", href: "/roles", icon: UsersRound, secondary: true },
-      { perm: "notifications/history", labelKey: "menu.notifications_history", href: "/notifications/history", icon: ClipboardList, secondary: true },
-      { perm: "audit_log", labelKey: "menu.audit_log", href: "/audit-log", icon: History, secondary: true },
-      { perm: "feedback", labelKey: "menu.feedback", href: "/feedback", icon: MessageSquareText, secondary: true },
-      { perm: "settings/notifications", labelKey: "menu.settings_notifications", href: "/settings/notifications", icon: Bell, secondary: true },
-      { perm: "settings", labelKey: "menu.settings_menus", href: "/settings/menus", icon: ShieldCheck, secondary: true },
-      { perm: "settings", labelKey: "menu.settings_services", href: "/settings/services", icon: Server, secondary: true },
-      { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone, secondary: true },
-      { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush, secondary: true },
-      { perm: "settings", label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง", href: "/settings/repair-options", icon: Wrench, secondary: true },
-      { perm: "system_health", labelKey: "menu.system_health", href: "/settings/health", icon: Activity, secondary: true },
-      { perm: "forms", labelKey: "menu.forms", href: "/forms", icon: FileDown, secondary: true },
-      { perm: "forms/designer", labelKey: "menu.forms_designer", href: "/forms/designer", icon: FileText, secondary: true },
-      { perm: "editor/builder", labelKey: "menu.builder", href: "/editor/builder", icon: LayoutGrid, secondary: true },
-      { perm: "pages", labelKey: "menu.pages", href: "/pages", icon: FileText, secondary: true },
+      { perm: "spare_parts", labelKey: "menu.spare_parts", href: "/spare_parts", icon: Box },
+      { perm: "spare_parts/overview", labelKey: "menu.spare_overview", href: "/spare_parts/overview", icon: ChartPie, secondary: true },
+      { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
+      { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },
+      { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History, secondary: true },
+      { perm: "spare_parts/stock_take", labelKey: "menu.stock_take", href: "/spare_parts/stock_take", icon: ClipboardCheck, secondary: true },
+      { perm: "suppliers", labelKey: "menu.suppliers", href: "/suppliers", icon: Truck },
+      { perm: "spare_parts/sage_po", labelKey: "menu.sage_po", href: "/spare_parts/sage_po", icon: FileCheck2, secondary: true },
+      { perm: "spare_parts/sage_shipments", labelKey: "menu.sage_shipments", href: "/spare_parts/sage_shipments", icon: Truck, secondary: true },
+      { perm: "spare_parts/sage_sync", labelKey: "menu.sage_sync", href: "/spare_parts/sage_sync", icon: Database, secondary: true },
+      { perm: "spare_parts/optimization", labelKey: "menu.optimization", href: "/spare_parts/optimization", icon: Sparkles, secondary: true },
+      { perm: "equipment_borrowing", labelKey: "menu.equipment_borrowing", href: "/equipment_borrowing", icon: ArrowLeftRight, secondary: true },
+      { perm: "spare_parts", labelKey: "menu.spare_reorder", href: "/spare-reorder", icon: ShoppingCart },
     ],
   },
 ];
