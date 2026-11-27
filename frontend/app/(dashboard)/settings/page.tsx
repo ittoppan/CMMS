@@ -1228,9 +1228,10 @@ export default function SettingsPage() {
                             </span>
                           )}
                           {canReset && !isReadonly && canManage && (
-                            <button
+                                                          <button
                               type="button"
                               title={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}${String(defaultValue).length > 80 ? "…" : ""}`}
+                              aria-label={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}`}
                               onClick={() => handleResetDefault(row)}
                               style={{
                                 display: "inline-flex", alignItems: "center", gap: 4,

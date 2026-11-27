@@ -156,6 +156,7 @@ function ColorField({
       <HStack gap={2} vAlign="center">
         <input
           type="color"
+          aria-label={label}
           value={safe}
           onChange={(e) => onChange(e.target.value)}
           style={{

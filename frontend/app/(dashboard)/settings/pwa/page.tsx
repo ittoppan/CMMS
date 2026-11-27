@@ -238,6 +238,7 @@ export default function PwaSettingsPage() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/png,image/jpeg,image/webp"
+                  aria-label="เลือกไฟล์ไอคอน PWA"
                   style={{ display: "none" }}
                   onChange={(e) => handleFile(e.target.files?.[0])}
                 />
