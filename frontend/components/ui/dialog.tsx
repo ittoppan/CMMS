@@ -34,7 +34,6 @@ function Dialog({
   className?: string;
   showCloseButton?: boolean;
 }) {
-  const titleId = React.useId();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogPrimitive.Portal>
@@ -50,10 +49,7 @@ function Dialog({
             <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-4">
               <div className="min-w-0">
                 {title && (
-                  <DialogPrimitive.Title
-                    id={titleId}
-                    asChild
-                  >
+                  <DialogPrimitive.Title asChild>
                     <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
                   </DialogPrimitive.Title>
                 )}

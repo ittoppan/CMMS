@@ -97,7 +97,7 @@ function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | nul
       // eslint-disable-next-line @next/next/no-img-element
       <img loading="lazy" decoding="async"
         src={src}
-        alt={name}
+        alt=""
         width={size}
         height={size}
         className="shrink-0 rounded-full border border-[var(--cmms-border)] object-cover"
@@ -504,7 +504,7 @@ export default function RepairAssignPage() {
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]"
           />
           <Input
-            aria-label="ค้นหา"
+            aria-label="ค้นหาเลขงานหรือเครื่องจักร"
             placeholder="ค้นหาเลขงาน, เครื่องจักร…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -515,7 +515,7 @@ export default function RepairAssignPage() {
           value={statusFilter || "__all__"}
           onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}
         >
-          <SelectTrigger aria-label="สถานะ" className="sm:w-64">
+          <SelectTrigger aria-label="กรองตามสถานะ" className="sm:w-64">
             <SelectValue placeholder={t("action.filter_all_status")} />
           </SelectTrigger>
           <SelectContent>
@@ -571,12 +571,14 @@ export default function RepairAssignPage() {
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-sm font-bold">หัวหน้าชุด (ผู้รับผิดชอบหลัก) *</p>
+            <label htmlFor="assign-tech" className="block text-sm font-bold">
+              หัวหน้าชุด (ผู้รับผิดชอบหลัก) <span aria-hidden="true">*</span>
+            </label>
             <Select
               value={selectedTech || "__none__"}
               onValueChange={(v) => setSelectedTech(v === "__none__" ? "" : v)}
             >
-              <SelectTrigger aria-label="เลือกหัวหน้าชุด">
+              <SelectTrigger id="assign-tech" aria-required="true">
                 <SelectValue placeholder="เลือกหัวหน้าชุด…" />
               </SelectTrigger>
               <SelectContent>
@@ -649,7 +651,7 @@ export default function RepairAssignPage() {
 
           <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
             <label htmlFor="assign-due-at" className="block text-sm font-bold">
-              เวลาคาดเสร็จ (SLA) <span style={{ color: "var(--cmms-danger)" }}>*</span>
+              เวลาคาดเสร็จ (SLA) <span aria-hidden="true" style={{ color: "var(--cmms-danger)" }}>*</span>
             </label>
             <input
               id="assign-due-at"

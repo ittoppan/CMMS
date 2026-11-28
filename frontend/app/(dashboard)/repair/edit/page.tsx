@@ -392,7 +392,7 @@ function EditWorkOrderContent() {
                 <div className="space-y-1.5">
                   <Label htmlFor="wo-edit-status">สถานะงาน (Job Status)<span className="text-destructive" aria-hidden="true"> *</span></Label>
                   <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="wo-edit-status" className="w-full" aria-label="สถานะงาน (Job Status)">
+                    <SelectTrigger id="wo-edit-status" className="w-full" aria-required="true">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -408,7 +408,7 @@ function EditWorkOrderContent() {
                 <div className="space-y-1.5">
                   <Label htmlFor="wo-edit-priority">ความสำคัญ (Priority)<span className="text-destructive" aria-hidden="true"> *</span></Label>
                   <Select value={priority} onValueChange={setPriority}>
-                    <SelectTrigger id="wo-edit-priority" className="w-full" aria-label="ความสำคัญ (Priority)">
+                    <SelectTrigger id="wo-edit-priority" className="w-full" aria-required="true">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -425,6 +425,7 @@ function EditWorkOrderContent() {
               <Textarea
                 label={closing ? "Root Cause (สาเหตุของปัญหา) *" : "Root Cause (สาเหตุของปัญหา)"}
                 disabled={!closing}
+                aria-required={closing || undefined}
                 hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
                 placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ…"
                 value={rootCause}
@@ -438,6 +439,7 @@ function EditWorkOrderContent() {
               <Textarea
                 label={closing ? "Maintenance Description (รายละเอียดการซ่อม) *" : "Maintenance Description (รายละเอียดการซ่อม)"}
                 disabled={!closing}
+                aria-required={closing || undefined}
                 hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
                 placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด…"
                 value={maintenanceDesc}
@@ -463,7 +465,13 @@ function EditWorkOrderContent() {
                   {closing && <span className="text-destructive" aria-hidden="true"> *</span>}
                 </Label>
                 <Select value={contaminateChecking} onValueChange={setContaminateChecking} disabled={!closing}>
-                  <SelectTrigger id="wo-edit-contam" className="w-full" aria-label="Contaminate Checking (ตรวจสอบการปนเปื้อน)" aria-invalid={contaminateError ? true : undefined}>
+                  <SelectTrigger
+                    id="wo-edit-contam"
+                    className="w-full"
+                    aria-required={closing || undefined}
+                    aria-invalid={contaminateError ? true : undefined}
+                    aria-describedby={contaminateError ? "wo-edit-contam-error" : undefined}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
