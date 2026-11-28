@@ -339,13 +339,9 @@ export function DataTable<TData extends RowData>({
                         disabled={!canSort}
                         aria-label={
                           canSort
-                            ? `เรียงตาม ${sortLabel} ${
-                                nextSort === "asc"
-                                  ? "จากน้อยไปมาก (asc)"
-                                  : nextSort === "desc"
-                                    ? "จากมากไปน้อย (desc)"
-                                    : "— ยกเลิกการเรียง"
-                              }${sorted ? ` · กำลังเรียง ${sorted}` : ""}`
+                            ? nextSort
+                              ? `เรียงตาม ${sortLabel} จาก${nextSort === "asc" ? "น้อยไปมาก" : "มากไปน้อย"}`
+                              : `ยกเลิกการเรียงตาม ${sortLabel}`
                             : undefined
                         }
                       >
