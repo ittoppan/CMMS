@@ -132,6 +132,7 @@ requireLogin($pdo);
                 SELECT rsp.id, rsp.spare_part_id, rsp.sage_item_code, rsp.item_description, rsp.unit, rsp.quantity_used, rsp.unit_price,
                        (rsp.quantity_used * rsp.unit_price) AS total_cost, rsp.created_at,
                        sp.stock_qty, sp.reserved_qty, sp.last_synced_at,
+                       sp.code AS spare_code, sp.name AS spare_name, sp.image_url AS spare_image_url,
                        siri.issued_qty, siri.returned_qty, sir.status AS request_status, sir.id AS request_id, sir.sage_doc_no
                 FROM repair_spare_parts rsp
                 LEFT JOIN spare_parts sp ON sp.id = rsp.spare_part_id
@@ -147,7 +148,9 @@ requireLogin($pdo);
                 $r['issued_qty'] = (float)($r['issued_qty'] ?? 0);
                 $r['returned_qty'] = (float)($r['returned_qty'] ?? 0);
                 $r['remaining'] = $r['issued_qty'] - $r['returned_qty'];
-                $r['item_code'] = $r['sage_item_code'] ?: ($r['spare_part_id'] ? '#' . $r['spare_part_id'] : '-');
+                $r['item_code'] = $r['sage_item_code'] ?: ($r['spare_code'] ?: ($r['spare_part_id'] ? '#' . $r['spare_part_id'] : '-'));
+                $r['item_description'] = $r['item_description'] ?: $r['spare_name'];
+                $r['image_url'] = $r['image_url'] ?? $r['spare_image_url'];
             }
             echo json_encode(['success' => true, 'work_order_id' => $woId, 'stock_source_label' => 'Stock from Sage 300', 'parts' => $rows]);
             exit;

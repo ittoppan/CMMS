@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
+import SagePartAddModal from "@/components/spare/SagePartAddModal";
 import { EmployeeAvatar } from "@/components/ui/employee-avatar";
 import { assetUrl } from "@/lib/utils";
 import { useInlineValidation } from "@/lib/use-inline-validation";
@@ -66,6 +67,7 @@ interface RepairData {
   receiver_name: string;
   video_path: string | null;
   attachment_path: string | null;
+  requested_parts: string;
   creator_name?: string;
   receiver_signature_path: string;
   root_cause: string;
@@ -120,7 +122,11 @@ function EditWorkOrderContent() {
   const [downtimeMinutes, setDowntimeMinutes] = useState(0);
   const [costParts, setCostParts] = useState(0);
   const [costLabor, setCostLabor] = useState(0);
+  const [costOutsource, setCostOutsource] = useState(0);
   const [afterImages, setAfterImages] = useState<string[]>([]);
+  const [spareModalOpen, setSpareModalOpen] = useState(false);
+  const [partRows, setPartRows] = useState<any[]>([]);
+  const [partsMsg, setPartsMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [actualStartAt, setActualStartAt] = useState("");
   const [completedAt, setCompletedAt] = useState("");
   const [receiverName, setReceiverName] = useState("");
@@ -173,8 +179,9 @@ function EditWorkOrderContent() {
           setDowntimeStart(json.downtime_start || "");
           setDowntimeEnd(json.downtime_end || "");
           setDowntimeMinutes(json.downtime_minutes || 0);
-          setCostParts(json.cost_parts || 0);
-          setCostLabor(json.cost_labor || 0);
+          setCostParts(Number(json.cost_parts) || 0);
+          setCostLabor(Number(json.cost_labor) || 0);
+          setCostOutsource(Number(json.cost_outsource) || 0);
           setActualStartAt(json.actual_start_at || "");
           setCompletedAt(json.completed_at || "");
           setReceiverName(json.receiver_name || "");
@@ -183,6 +190,7 @@ function EditWorkOrderContent() {
           if (json.after_image_path) {
             setAfterImages(splitPaths(json.after_image_path));
           }
+          void loadParts();
         } else {
           setError("ไม่พบข้อมูลใบแจ้งซ่อม");
         }
@@ -213,6 +221,29 @@ function EditWorkOrderContent() {
       reader.onerror = () => reject(new Error("file read failed"));
       reader.readAsDataURL(file);
     });
+  };
+
+  const loadParts = async () => {
+    if (!woId) return;
+    try {
+      const res = await fetch(`/api/v1/spare_usage.php?work_order_id=${woId}`, { credentials: "include" });
+      const json = await res.json();
+      if (json && Array.isArray(json.parts)) {
+        const mapped = json.parts.map((p: any) => ({
+          id: Number(p.id) || 0,
+          spare_part_id: Number(p.spare_part_id) || 0,
+          code: p.item_code || p.sage_item_code || "",
+          name: p.item_description || "",
+          quantity_used: Number(p.quantity_used) || Number(p.qty) || 0,
+          unit_price: Number(p.unit_price) || 0,
+          image_url: p.image_url || null,
+          request_status: String(p.request_status || ""),
+        }));
+        setPartRows(mapped);
+      }
+    } catch {
+      /* ignore */
+    }
   };
 
   const addAfterImages = async (files: FileList | null) => {
@@ -313,6 +344,7 @@ function EditWorkOrderContent() {
         downtime_minutes: downtimeMinutes || null,
         cost_parts: costParts || 0,
         cost_labor: costLabor || 0,
+        cost_outsource: costOutsource || 0,
         after_image_path: afterImages.length > 0 ? afterImages.join("|") : null,
       };
       if (receiverName) payload.receiver_name = receiverName;
@@ -612,7 +644,7 @@ function EditWorkOrderContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Input
                   type="number"
                   label="BD. Time (เวลาหยุดเครื่อง — นาที)"
@@ -630,6 +662,12 @@ function EditWorkOrderContent() {
                   label="Cost Labor (ค่าแรง — บาท)"
                   value={costLabor || ""}
                   onChange={(e) => setCostLabor(Number(e.target.value) || 0)}
+                />
+                <Input
+                  type="number"
+                  label="Cost Outsource (ค่าจ้างภายนอก — บาท)"
+                  value={costOutsource || ""}
+                  onChange={(e) => setCostOutsource(Number(e.target.value) || 0)}
                 />
               </div>
             </CardContent>
@@ -683,6 +721,87 @@ function EditWorkOrderContent() {
                   </button>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* ── อะไหล่ที่เบิกใช้ซ่อม (Spare Parts) ── */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Wrench className="w-5 h-5 text-sky-600" />
+                <span>อะไหล่ที่เบิกใช้ซ่อม</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">รายการอะไหล่ที่เบิกจากคลัง (Sage 300) — แสดงรูปและยอดรวม</p>
+                <Button type="button" variant="primary" size="sm" onClick={() => setSpareModalOpen(true)}>
+                  + เบิกอะไหล่
+                </Button>
+              </div>
+              {partsMsg && (
+                <Alert variant={partsMsg.kind === "ok" ? "success" : "danger"}>
+                  {partsMsg.text}
+                </Alert>
+              )}
+              {partRows.length === 0 ? (
+                <p className="text-sm text-muted-foreground">ยังไม่มีการเบิกอะไหล่ในใบงานนี้</p>
+              ) : (
+                <div className="space-y-3">
+                  {partRows.map((r) => (
+                    <div key={r.id} className="flex items-center gap-3 rounded-xl border border-border p-2">
+                      <img
+                        src={r.image_url ? assetUrl(r.image_url) : `/api/v1/spare_image.php?code=${encodeURIComponent(r.code)}&name=${encodeURIComponent(r.name)}`}
+                        alt={r.code}
+                        className="h-14 w-14 rounded-lg object-cover border border-border bg-muted"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold truncate">{r.code}</p>
+                        <p className="text-xs text-muted-foreground truncate">{r.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          จำนวน {r.quantity_used} · ราคา {Number(r.unit_price).toLocaleString()} บาท
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums">
+                        {(r.quantity_used * r.unit_price).toLocaleString()} บาท
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-semibold">
+                    <span>รวมค่าอะไหล่</span>
+                    <span>{partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0).toLocaleString()} บาท</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── สรุปค่าใช้จ่ายสุดท้าย ── */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="w-5 h-5 text-sky-600" />
+                <span>สรุปค่าใช้จ่ายสุดท้าย</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span>ค่าอะไหล่</span>
+                <span className="tabular-nums">{Number(costParts || 0).toLocaleString()} บาท</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>ค่าแรง</span>
+                <span className="tabular-nums">{Number(costLabor || 0).toLocaleString()} บาท</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>ค่าจ้างภายนอก</span>
+                <span className="tabular-nums">{Number(costOutsource || 0).toLocaleString()} บาท</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-border pt-2 font-semibold">
+                <span>รวมทั้งสิ้น</span>
+                <span className="tabular-nums">{(Number(costParts || 0) + Number(costLabor || 0) + Number(costOutsource || 0)).toLocaleString()} บาท</span>
+              </div>
+              <p className="text-xs text-muted-foreground">* Downtime {downtimeMinutes || 0} นาที</p>
             </CardContent>
           </Card>
 
@@ -766,6 +885,13 @@ function EditWorkOrderContent() {
         </div>
       )}
       </div>
+      <SagePartAddModal
+        open={spareModalOpen}
+        onClose={() => setSpareModalOpen(false)}
+        workOrderId={woData?.id ?? (woId ? Number(woId) : null)}
+        woNumber={woData?.work_order_no}
+        onAdded={() => { void loadParts(); setPartsMsg({ kind: "ok", text: "เพิ่มอะไหล่แล้ว" }); }}
+      />
     </>
   );
 }
