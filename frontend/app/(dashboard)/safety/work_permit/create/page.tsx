@@ -9,7 +9,6 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -129,7 +128,7 @@ export default function WorkPermitCreatePage() {
             <CardContent className="space-y-5 p-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>ประเภทงานเสี่ยง <span className="text-destructive">*</span></Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทงานเสี่ยง <span className="text-destructive">*</span></span>
                   <Select value={form.permit_type_code} onValueChange={(v) => set("permit_type_code", v)}>
                     <SelectTrigger aria-label="ประเภทงานเสี่ยง"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -150,7 +149,7 @@ export default function WorkPermitCreatePage() {
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <Label>งานที่อ้างอิง (ใบสั่งงาน)</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">งานที่อ้างอิง (ใบสั่งงาน)</span>
                   <Select value={form.repair_id} onValueChange={(v) => set("repair_id", v)}>
                     <SelectTrigger aria-label="ใบสั่งงาน"><SelectValue placeholder="ไม่บังคับ" /></SelectTrigger>
                     <SelectContent>
@@ -167,7 +166,7 @@ export default function WorkPermitCreatePage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>เครื่องจักร / อุปกรณ์</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักร / อุปกรณ์</span>
                   <Select value={form.asset_id} onValueChange={(v) => set("asset_id", v)}>
                     <SelectTrigger aria-label="เครื่องจักร"><SelectValue placeholder="ไม่บังคับ" /></SelectTrigger>
                     <SelectContent>
@@ -182,24 +181,24 @@ export default function WorkPermitCreatePage() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>สถานที่ปฏิบัติงาน</Label>
-                  <Input placeholder="เช่น ไลน์ 1 ฝั่งคนงานอัด" value={form.location} onChange={(e) => set("location", e.target.value)} />
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานที่ปฏิบัติงาน</span>
+                  <Input placeholder="เช่น ไลน์ 1 ฝั่งคนงานอัด" value={form.location} onChange={(e) => set("location", e.target.value)} aria-label="สถานที่ปฏิบัติงาน" />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>แนะนำเริ่มงาน</Label>
-                  <Input type="datetime-local" value={form.start_at} onChange={(e) => set("start_at", e.target.value)} />
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">แนะนำเริ่มงาน</span>
+                  <Input type="datetime-local" value={form.start_at} onChange={(e) => set("start_at", e.target.value)} aria-label="แนะนำเริ่มงาน" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>สิ้นสุด (หมดอายุใบอนุญาต)</Label>
-                  <Input type="datetime-local" value={form.end_at} onChange={(e) => set("end_at", e.target.value)} />
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">สิ้นสุด (หมดอายุใบอนุญาต)</span>
+                  <Input type="datetime-local" value={form.end_at} onChange={(e) => set("end_at", e.target.value)} aria-label="สิ้นสุด (หมดอายุใบอนุญาต)" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label>รายละเอียดงาน <span className="text-destructive">*</span></Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียดงาน <span className="text-destructive">*</span></span>
                 <Textarea
                   rows={3}
                   placeholder="อธิบายลักษณะงานที่จะทำ — สิ่งที่เกี่ยวข้องกับความเสี่ยง เช่น ตัด/เชื่อม/ปีน/เข้าอับอากาศ…"
@@ -218,7 +217,7 @@ export default function WorkPermitCreatePage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>หัวหน้างาน (Supervisor)</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">หัวหน้างาน (Supervisor)</span>
                   <Select value={form.supervisor_id} onValueChange={(v) => set("supervisor_id", v)}>
                     <SelectTrigger aria-label="หัวหน้างาน"><SelectValue placeholder="เลือก" /></SelectTrigger>
                     <SelectContent>
@@ -230,7 +229,7 @@ export default function WorkPermitCreatePage() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>เจ้าหน้าที่ความปลอดภัย (Safety Reviewer)</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เจ้าหน้าที่ความปลอดภัย (Safety Reviewer)</span>
                   <Select value={form.safety_reviewer_id} onValueChange={(v) => set("safety_reviewer_id", v)}>
                     <SelectTrigger aria-label="เจ้าหน้าที่ความปลอดภัย"><SelectValue placeholder="เลือก" /></SelectTrigger>
                     <SelectContent>
@@ -243,7 +242,7 @@ export default function WorkPermitCreatePage() {
                 </div>
                 {selectedType?.requires_area_owner ? (
                   <div className="space-y-1.5">
-                    <Label>เจ้าของพื้นที่ (Area Owner)</Label>
+                    <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เจ้าของพื้นที่ (Area Owner)</span>
                     <Select value={form.area_owner_id} onValueChange={(v) => set("area_owner_id", v)}>
                       <SelectTrigger aria-label="เจ้าของพื้นที่"><SelectValue placeholder="เลือก" /></SelectTrigger>
                       <SelectContent>
@@ -256,7 +255,7 @@ export default function WorkPermitCreatePage() {
                   </div>
                 ) : null}
                 <div className="space-y-1.5">
-                  <Label>ลักษณะผู้ทำงาน</Label>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลักษณะผู้ทำงาน</span>
                   <Select value={form.work_source} onValueChange={(v) => set("work_source", v)}>
                     <SelectTrigger aria-label="ลักษณะผู้ทำงาน"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -267,7 +266,7 @@ export default function WorkPermitCreatePage() {
                 </div>
                 {form.work_source === "contractor" && (
                   <div className="space-y-1.5">
-                    <Label>บริษัทผู้รับจ้าง</Label>
+                    <span className="text-sm font-medium text-[var(--cmms-text-primary)]">บริษัทผู้รับจ้าง</span>
                     <Select value={form.contractor_id} onValueChange={(v) => set("contractor_id", v)}>
                       <SelectTrigger aria-label="บริษัทผู้รับจ้าง"><SelectValue placeholder="เลือกบริษัท" /></SelectTrigger>
                       <SelectContent>

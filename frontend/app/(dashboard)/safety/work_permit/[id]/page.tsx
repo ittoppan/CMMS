@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -718,9 +717,9 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title={`ตัดสินใจขั้น ${step} (${a?.step_label || a?.step_key})`}>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>ผลการตัดสินใจ</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผลการตัดสินใจ</span>
               <Select value={decision} onValueChange={setDecision}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="ผลการตัดสินใจ"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="approved">อนุมัติ</SelectItem>
                   <SelectItem value="rejected">ไม่อนุมัติ</SelectItem>
@@ -729,8 +728,8 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>หมายเหตุ</Label>
-              <Textarea rows={2} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="บันทึกเหตุผลการตัดสินใจ (audit)" />
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">หมายเหตุ</span>
+              <Textarea rows={2} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="บันทึกเหตุผลการตัดสินใจ (audit)" aria-label="หมายเหตุ" />
             </div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
@@ -766,11 +765,11 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
                 <tbody>
                   {rows.map((r, i) => (
                     <tr key={i} className="border-b border-[var(--cmms-border)]">
-                      <td className="px-2 py-1.5"><Input className="w-40" value={r.hazard} onChange={(e) => mut(i, "hazard", e.target.value)} placeholder="เช่น ไฟฟ้ารั่วระหว่างตัด" /></td>
+                      <td className="px-2 py-1.5"><Input className="w-40" aria-label="อันตราย" value={r.hazard} onChange={(e) => mut(i, "hazard", e.target.value)} placeholder="เช่น ไฟฟ้ารั่วระหว่างตัด" /></td>
                       <td className="px-2 py-1.5"><SelNum value={r.likelihood} onChange={(v) => mut(i, "likelihood", v)} /></td>
                       <td className="px-2 py-1.5"><SelNum value={r.severity} onChange={(v) => mut(i, "severity", v)} /></td>
-                      <td className="px-2 py-1.5"><Input className="w-40" value={r.cause} onChange={(e) => mut(i, "cause", e.target.value)} /></td>
-                      <td className="px-2 py-1.5"><Input className="w-40" value={r.consequence} onChange={(e) => mut(i, "consequence", e.target.value)} /></td>
+                      <td className="px-2 py-1.5"><Input className="w-40" aria-label="สาเหตุ" value={r.cause} onChange={(e) => mut(i, "cause", e.target.value)} /></td>
+                      <td className="px-2 py-1.5"><Input className="w-40" aria-label="ผลกระทบ" value={r.consequence} onChange={(e) => mut(i, "consequence", e.target.value)} /></td>
                       <td className="px-2 py-1.5">
                         <div className="flex items-center gap-1">
                           <SelNum value={r.residual_likelihood} onChange={(v) => mut(i, "residual_likelihood", v)} small />
@@ -816,23 +815,23 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="เพิ่มจุดตัดพลังงาน (LOTO)">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>จุดตัดพลังงาน *</Label>
-              <Input value={ln} onChange={(e) => setLn(e.target.value)} placeholder="เช่น สวิตช์จ่ายไฟหลักไลน์ 1" />
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">จุดตัดพลังงาน *</span>
+              <Input value={ln} onChange={(e) => setLn(e.target.value)} placeholder="เช่น สวิตช์จ่ายไฟหลักไลน์ 1" aria-label="จุดตัดพลังงาน *" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>ประเภทพลังงาน</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทพลังงาน</span>
                 <Select value={en} onValueChange={setEn}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="ประเภทพลังงาน"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(ENERGY_TYPE_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>วิธีแยกพลังงาน</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">วิธีแยกพลังงาน</span>
                 <Select value={method} onValueChange={setMethod}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="วิธีแยกพลังงาน"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(ISOLATION_METHOD_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                   </SelectContent>
@@ -840,8 +839,8 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>Lock เลข</Label><Input value={lock} onChange={(e) => setLock(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Tag เลข</Label><Input value={tag} onChange={(e) => setTag(e.target.value)} /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">Lock เลข</span><Input value={lock} onChange={(e) => setLock(e.target.value)} aria-label="Lock เลข" /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">Tag เลข</span><Input value={tag} onChange={(e) => setTag(e.target.value)} aria-label="Tag เลข" /></div>
             </div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
@@ -860,8 +859,8 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="ล็อกจุดตัดพลังงาน">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>Lock เลข *</Label><Input value={lock} onChange={(e) => setLock(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>Tag เลข *</Label><Input value={tag} onChange={(e) => setTag(e.target.value)} /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">Lock เลข *</span><Input value={lock} onChange={(e) => setLock(e.target.value)} aria-label="Lock เลข *" /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">Tag เลข *</span><Input value={tag} onChange={(e) => setTag(e.target.value)} aria-label="Tag เลข *" /></div>
             </div>
             <p className="text-xs text-[var(--cmms-text-secondary)]">ต้องระบุ Lock หรือ Tag อย่างน้อยหนึ่งรายการ — backend บังคับ</p>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
@@ -881,12 +880,12 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
       return (
         <Dialog open onClose={onClose} title="ตรวจ Zero Energy">
           <div className="space-y-4">
-            <div className="space-y-1.5"><Label>วิธีตรวจ</Label><Input value={method} onChange={(e) => setMethod(e.target.value)} placeholder="เช่น voltage check / pressure check" /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">วิธีตรวจ</span><Input value={method} onChange={(e) => setMethod(e.target.value)} placeholder="เช่น voltage check / pressure check" aria-label="วิธีตรวจ" /></div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>ผล</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผล</span>
                 <Select value={result} onValueChange={setResult}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="ผล"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pass">ผ่าน (ไม่มีพลังงาน)</SelectItem>
                     <SelectItem value="fail">ยังมีพลังงาน</SelectItem>
@@ -895,7 +894,7 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
                 </Select>
               </div>
             </div>
-            <div className="space-y-1.5"><Label>หมายเหตุ</Label><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หมายเหตุ</span><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-label="หมายเหตุ" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button onClick={() => wrap(() => run("loto_verify", { id, loto_point_id: pointId, verification_method: method.trim(), result, note: note || undefined }, "บันทึกผลตรวจแล้ว"))}>
@@ -918,22 +917,22 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="บันทึกตรวจแก๊ส">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>ชนิดแก๊ส</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ชนิดแก๊ส</span>
               <Select value={gasType} onValueChange={setGasType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="ชนิดแก๊ส"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(GAS_TYPE_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5"><Label>อ่านค่า</Label><Input value={reading} onChange={(e) => setReading(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>หน่วย</Label><Input value={unit} onChange={(e) => setUnit(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>ผล</Label><Select value={result} onValueChange={setResult}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pass">ผ่าน</SelectItem><SelectItem value="fail">ไม่ผ่าน</SelectItem><SelectItem value="na">N/A</SelectItem></SelectContent></Select></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">อ่านค่า</span><Input value={reading} onChange={(e) => setReading(e.target.value)} aria-label="อ่านค่า" /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หน่วย</span><Input value={unit} onChange={(e) => setUnit(e.target.value)} aria-label="หน่วย" /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผล</span><Select value={result} onValueChange={setResult}><SelectTrigger aria-label="ผล"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pass">ผ่าน</SelectItem><SelectItem value="fail">ไม่ผ่าน</SelectItem><SelectItem value="na">N/A</SelectItem></SelectContent></Select></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>ค่าต่ำสุดที่ยอมรับ</Label><Input value={accMin} onChange={(e) => setAccMin(e.target.value)} /></div>
-              <div className="space-y-1.5"><Label>ค่าสูงสุดที่ยอมรับ</Label><Input value={accMax} onChange={(e) => setAccMax(e.target.value)} /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">ค่าต่ำสุดที่ยอมรับ</span><Input value={accMin} onChange={(e) => setAccMin(e.target.value)} aria-label="ค่าต่ำสุดที่ยอมรับ" /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">ค่าสูงสุดที่ยอมรับ</span><Input value={accMax} onChange={(e) => setAccMax(e.target.value)} aria-label="ค่าสูงสุดที่ยอมรับ" /></div>
             </div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
@@ -951,15 +950,15 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="เพิ่มผู้ปฏิบัติงาน">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>พนักงาน (ภายใน)</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">พนักงาน (ภายใน)</span>
               <Select value={uid} onValueChange={setUid}>
-                <SelectTrigger><SelectValue placeholder="เลือกพนักงาน" /></SelectTrigger>
+                <SelectTrigger aria-label="พนักงาน (ภายใน)"><SelectValue placeholder="เลือกพนักงาน" /></SelectTrigger>
                 <SelectContent>
                   {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label>หน้าที่ในงานนี้</Label><Input value={task} onChange={(e) => setTask(e.target.value)} placeholder="เช่น ช่างไฟฟ้า ประจำจุด X" /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หน้าที่ในงานนี้</span><Input value={task} onChange={(e) => setTask(e.target.value)} placeholder="เช่น ช่างไฟฟ้า ประจำจุด X" aria-label="หน้าที่ในงานนี้" /></div>
             <p className="text-xs text-[var(--cmms-text-secondary)]">{p.worker_auth_required ? "ระบบตรวจ certification ของพนักงาน — ห้ามผู้ไม่ผ่านปฏิบัติงาน" : "งานนี้ไม่บังคับตรวจ certification"}</p>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
@@ -1047,15 +1046,15 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="ระงับงานชั่วคราว">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>สาเหตุ</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">สาเหตุ</span>
               <Select value={reasonType} onValueChange={setReasonType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="สาเหตุ"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(SUSPEND_REASON_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label>รายละเอียด *</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียด *</span><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} aria-label="รายละเอียด *" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button disabled={!reason.trim()} onClick={() => wrap(() => run("suspend", { id, reason_type: reasonType, reason: reason.trim() }, "ระงับงานแล้ว"))}>ระงับ</Button>
@@ -1071,7 +1070,7 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="กลับมาทำงานต่อ">
           <div className="space-y-4">
             <p className="text-sm text-[var(--cmms-text-secondary)]">ระบบจะตรวจ re-verification จุดตัดพลังงาน (ถ้าจำเป็น) ก่อนให้กลับมาทำงาน</p>
-            <div className="space-y-1.5"><Label>หมายเหตุ</Label><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หมายเหตุ</span><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-label="หมายเหตุ" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button onClick={() => wrap(() => run("resume", { id, resume_note: note || undefined }, "กลับมาทำงานแล้ว"))}>กลับมาทำงาน</Button>
@@ -1086,7 +1085,7 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
       return (
         <Dialog open onClose={onClose} title="ยกเลิกใบอนุญาต">
           <div className="space-y-4">
-            <div className="space-y-1.5"><Label>เหตุผล *</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">เหตุผล *</span><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} aria-label="เหตุผล *" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>กลับ</Button>
               <Button variant="danger" disabled={!reason.trim()} onClick={() => wrap(() => run("cancel", { id, reason: reason.trim() }, "ยกเลิกใบอนุญาตแล้ว"))}>ยกเลิกใบอนุญาต</Button>
@@ -1104,16 +1103,16 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="Stop Work (หยุดงานฉุกเฉิน)">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>ประเภทสาเหตุ</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทสาเหตุ</span>
               <Select value={reasonType} onValueChange={setReasonType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="ประเภทสาเหตุ"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(STOP_REASON_LABELS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label>เหตุผล *</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>สภาพ/ข้อมูลเพิ่มเติม</Label><Textarea rows={2} value={cond} onChange={(e) => setCond(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">เหตุผล *</span><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} aria-label="เหตุผล *" /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">สภาพ/ข้อมูลเพิ่มเติม</span><Textarea rows={2} value={cond} onChange={(e) => setCond(e.target.value)} aria-label="สภาพ/ข้อมูลเพิ่มเติม" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button variant="danger" disabled={!reason.trim()} onClick={() => wrap(() => run("stop_work", { id, reason_type: reasonType, reason: reason.trim(), condition_desc: cond || undefined }, "สั่งหยุดงานฉุกเฉินแล้ว"))}>หยุดงาน</Button>
@@ -1132,17 +1131,17 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
         <Dialog open onClose={onClose} title="ทบทวน Stop Work">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>ผลการทบทวน</Label>
+              <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ผลการทบทวน</span>
               <Select value={decision} onValueChange={(v) => setDecision(v as "resolved" | "cancel")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="ผลการทบทวน"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="resolved">แก้ไขแล้ว — อนุญาตให้ทำงานต่อ</SelectItem>
                   <SelectItem value="cancel">ไม่สามารถแก้ไขได้ — ยกเลิกงาน</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label>มาตรการแก้ไข</Label><Textarea rows={2} value={corrective} onChange={(e) => setCorrective(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>หมายเหตุ</Label><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">มาตรการแก้ไข</span><Textarea rows={2} value={corrective} onChange={(e) => setCorrective(e.target.value)} aria-label="มาตรการแก้ไข" /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หมายเหตุ</span><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-label="หมายเหตุ" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button onClick={() => wrap(() => run("stop_work_review", { stop_id: stopId, decision, corrective_action: corrective || undefined, review_note: note || undefined }, "บันทึกผลทบทวน Stop Work แล้ว"))}>บันทึก</Button>
@@ -1160,12 +1159,12 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
       return (
         <Dialog open onClose={onClose} title="เพิ่ม Safety Action">
           <div className="space-y-4">
-            <div className="space-y-1.5"><Label>รายละเอียด *</Label><Textarea rows={2} value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียด *</span><Textarea rows={2} value={desc} onChange={(e) => setDesc(e.target.value)} aria-label="รายละเอียด *" /></div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label>ระดับ</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ระดับ</span>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="ระดับ"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">ต่ำ</SelectItem>
                     <SelectItem value="medium">ปานกลาง</SelectItem>
@@ -1175,16 +1174,16 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>เจ้าของ</Label>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">เจ้าของ</span>
                 <Select value={owner} onValueChange={setOwner}>
-                  <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                  <SelectTrigger aria-label="เจ้าของ"><SelectValue placeholder="เลือก" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— ไม่ระบุ —</SelectItem>
                     {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5"><Label>ครบกำหนด</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>
+              <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">ครบกำหนด</span><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} aria-label="ครบกำหนด" /></div>
             </div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
@@ -1202,7 +1201,7 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
       return (
         <Dialog open onClose={onClose} title={`เปลี่ยนสถานะ action → ${to}`}>
           <div className="space-y-4">
-            <div className="space-y-1.5"><Label>หลักฐาน/หมายเหตุ</Label><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></div>
+            <div className="space-y-1.5"><span className="text-sm font-medium text-[var(--cmms-text-primary)]">หลักฐาน/หมายเหตุ</span><Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-label="หลักฐาน/หมายเหตุ" /></div>
             <div className="flex justify-end gap-2 border-t border-border pt-4">
               <Button variant="secondary" onClick={onClose}>ยกเลิก</Button>
               <Button onClick={() => wrap(() => run("action_transition", { action_id: actionId, to, note: note || undefined }, "อัปเดตสถานะ action แล้ว"))}>ยืนยัน</Button>
@@ -1234,7 +1233,7 @@ function Modals({ modal, setModal, p, cfg, opts, run, users, userById, canRunWor
 function SelNum({ value, onChange, small }: { value: string; onChange: (v: string) => void; small?: boolean }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={small ? "w-12 px-1 text-center" : "w-16"}><SelectValue /></SelectTrigger>
+      <SelectTrigger aria-label="ระดับ" className={small ? "w-12 px-1 text-center" : "w-16"}><SelectValue /></SelectTrigger>
       <SelectContent>
         {SCALE.map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
       </SelectContent>

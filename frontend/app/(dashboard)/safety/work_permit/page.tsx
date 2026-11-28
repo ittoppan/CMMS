@@ -148,21 +148,21 @@ export default function WorkPermitPage() {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v === "all" ? "" : v })}>
-              <SelectTrigger className="w-44"><SelectValue placeholder="ทุกสถานะ" /></SelectTrigger>
+              <SelectTrigger className="w-44" aria-label="สถานะ"><SelectValue placeholder="ทุกสถานะ" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">ทุกสถานะ</SelectItem>
                 {STATUS_ORDER.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filters.risk} onValueChange={(v) => setFilters({ ...filters, risk: v === "all" ? "" : v })}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="ทุกระดับเสี่ยง" /></SelectTrigger>
+              <SelectTrigger className="w-40" aria-label="ระดับเสี่ยง"><SelectValue placeholder="ทุกระดับเสี่ยง" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">ทุกระดับเสี่ยง</SelectItem>
                 {Object.entries(RISK_LEVEL_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filters.type} onValueChange={(v) => setFilters({ ...filters, type: v === "all" ? "" : v })}>
-              <SelectTrigger className="w-52"><SelectValue placeholder="ทุกประเภทงาน" /></SelectTrigger>
+              <SelectTrigger className="w-52" aria-label="ประเภทงาน"><SelectValue placeholder="ทุกประเภทงาน" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">ทุกประเภทงาน</SelectItem>
                 {types.map((t) => <SelectItem key={t.code} value={t.code}>{t.name_th}</SelectItem>)}
