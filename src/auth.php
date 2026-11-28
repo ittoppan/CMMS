@@ -25,10 +25,12 @@ function cmms_secure_session(): void {
     if (session_status() !== PHP_SESSION_NONE) return;
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-    // อายุ cookie/session file มาจาก public/.user.ini — ไม่ hardcode ซ้ำที่นี่
+    // อายุ cookie/GC 30 วัน (2592000) — ต้องตรงกับ public/.user.ini
     // idle timeout ฝั่งแอปยังบังคับตาม cmms_enforce_session_lifecycle() เมื่อค่า > 0
     @ini_set('session.use_strict_mode', '1');
+    @ini_set('session.gc_maxlifetime', '2592000');
     @session_set_cookie_params([
+        'lifetime' => 2592000,
         'httponly' => true,
         'samesite' => 'Lax',
         'secure'   => $https,
