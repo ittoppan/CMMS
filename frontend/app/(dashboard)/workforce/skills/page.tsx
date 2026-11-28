@@ -539,7 +539,7 @@ function SkillDialog({
         <div>
           <Label htmlFor="sk-min">ระดับขั้นต่ำที่ยอมรับได้</Label>
           <Select value={String(minLevel)} onValueChange={(v) => setMinLevel(Number(v))}>
-            <SelectTrigger id="sk-min" className="mt-1 w-[9rem]">
+            <SelectTrigger id="sk-min" className="mt-1 w-[9rem]" aria-label="ระดับขั้นต่ำที่ยอมรับได้">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

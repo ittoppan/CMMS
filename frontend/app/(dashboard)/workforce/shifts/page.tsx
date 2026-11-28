@@ -408,7 +408,7 @@ export default function WorkforceShiftsPage() {
                     value={shiftUser === "" ? "__none__" : String(shiftUser)}
                     onValueChange={(v) => setShiftUser(v === "__none__" ? "" : Number(v))}
                   >
-                    <SelectTrigger id="shift-user" className="mt-1">
+                    <SelectTrigger id="shift-user" className="mt-1" aria-label="ช่าง">
                       <SelectValue placeholder="เลือกช่าง" />
                     </SelectTrigger>
                     <SelectContent>
@@ -468,7 +468,7 @@ export default function WorkforceShiftsPage() {
                     value={leaveUser === "" ? "__none__" : String(leaveUser)}
                     onValueChange={(v) => setLeaveUser(v === "__none__" ? "" : Number(v))}
                   >
-                    <SelectTrigger id="leave-user" className="mt-1">
+                    <SelectTrigger id="leave-user" className="mt-1" aria-label="ช่าง">
                       <SelectValue placeholder="เลือกช่าง" />
                     </SelectTrigger>
                     <SelectContent>
@@ -787,7 +787,7 @@ function LeaveDialog({
           <div>
             <Label htmlFor="lv-type">ประเภท</Label>
             <Select value={type} onValueChange={(v) => setType(v as LeaveRow["leave_type"])}>
-              <SelectTrigger id="lv-type">
+              <SelectTrigger id="lv-type" aria-label="ประเภท">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -802,7 +802,7 @@ function LeaveDialog({
           <div>
             <Label htmlFor="lv-status">สถานะ</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as LeaveRow["status"])}>
-              <SelectTrigger id="lv-status">
+              <SelectTrigger id="lv-status" aria-label="สถานะ">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

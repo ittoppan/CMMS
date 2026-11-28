@@ -625,7 +625,7 @@ function AssignSkillDialog({
             ทักษะ <span className="text-red-600">*</span>
           </Label>
           <Select value={skillId === "" ? "__none__" : String(skillId)} onValueChange={(v) => setSkillId(v === "__none__" ? "" : Number(v))}>
-            <SelectTrigger id="as-skill" className="mt-1">
+            <SelectTrigger id="as-skill" className="mt-1" aria-label="ทักษะ *">
               <SelectValue placeholder="เลือกทักษะ" />
             </SelectTrigger>
             <SelectContent>
@@ -647,7 +647,7 @@ function AssignSkillDialog({
           <div>
             <Label htmlFor="as-level">ระดับที่มี</Label>
             <Select value={String(level)} onValueChange={(v) => setLevel(Number(v))}>
-              <SelectTrigger id="as-level" className="mt-1">
+              <SelectTrigger id="as-level" className="mt-1" aria-label="ระดับที่มี">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

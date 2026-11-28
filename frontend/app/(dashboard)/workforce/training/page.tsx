@@ -610,7 +610,7 @@ function CourseDialog({
                 value={grantsSkill === "" ? "__none__" : String(grantsSkill)}
                 onValueChange={(v) => setGrantsSkill(v === "__none__" ? "" : Number(v))}
               >
-                <SelectTrigger id="cs-skill" className="mt-1">
+                <SelectTrigger id="cs-skill" className="mt-1" aria-label="ทักษะ">
                   <SelectValue placeholder="ไม่ให้ทักษะ" />
                 </SelectTrigger>
                 <SelectContent>
@@ -630,7 +630,7 @@ function CourseDialog({
                 onValueChange={(v) => setGrantsLevel(Number(v))}
                 disabled={!grantsSkill}
               >
-                <SelectTrigger id="cs-level" className="mt-1">
+                <SelectTrigger id="cs-level" className="mt-1" aria-label="ระดับที่ให้">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -745,7 +745,7 @@ function RecordDialog({
               ช่าง <span className="text-red-600">*</span>
             </Label>
             <Select value={userId === "" ? "__none__" : String(userId)} onValueChange={(v) => setUserId(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="tr-user" className="mt-1">
+              <SelectTrigger id="tr-user" className="mt-1" aria-label="ช่าง *">
                 <SelectValue placeholder="เลือกช่าง" />
               </SelectTrigger>
               <SelectContent>
@@ -762,7 +762,7 @@ function RecordDialog({
               หลักสูตร <span className="text-red-600">*</span>
             </Label>
             <Select value={courseId === "" ? "__none__" : String(courseId)} onValueChange={(v) => setCourseId(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="tr-course" className="mt-1">
+              <SelectTrigger id="tr-course" className="mt-1" aria-label="หลักสูตร *">
                 <SelectValue placeholder="เลือกหลักสูตร" />
               </SelectTrigger>
               <SelectContent>
@@ -794,7 +794,7 @@ function RecordDialog({
           <div>
             <Label htmlFor="tr-status">สถานะ</Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger id="tr-status" className="mt-1">
+              <SelectTrigger id="tr-status" className="mt-1" aria-label="สถานะ">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -338,7 +338,7 @@ function AddCertDialog({
             ช่าง <span className="text-red-600">*</span>
           </Label>
           <Select value={userId === "" ? "__none__" : String(userId)} onValueChange={(v) => setUserId(v === "__none__" ? "" : Number(v))}>
-            <SelectTrigger id="ct-user" className="mt-1">
+            <SelectTrigger id="ct-user" className="mt-1" aria-label="ช่าง *">
               <SelectValue placeholder="เลือกช่าง" />
             </SelectTrigger>
             <SelectContent>
@@ -426,7 +426,7 @@ function AddCertDialog({
         <div>
           <Label htmlFor="ct-status">สถานะ</Label>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger id="ct-status" className="mt-1">
+            <SelectTrigger id="ct-status" className="mt-1" aria-label="สถานะ">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -410,7 +410,7 @@ function CrewDialog({
           <div>
             <Label htmlFor="cr-dept">แผนก</Label>
             <Select value={dept === "" ? "__none__" : String(dept)} onValueChange={(v) => setDept(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="cr-dept">
+              <SelectTrigger id="cr-dept" aria-label="แผนก">
                 <SelectValue placeholder="ทุกแผนก" />
               </SelectTrigger>
               <SelectContent>
@@ -426,7 +426,7 @@ function CrewDialog({
           <div>
             <Label htmlFor="cr-lead">หัวหน้าทีม</Label>
             <Select value={lead === "" ? "__none__" : String(lead)} onValueChange={(v) => setLead(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="cr-lead">
+              <SelectTrigger id="cr-lead" aria-label="หัวหน้าทีม">
                 <SelectValue placeholder="ยังไม่กำหนด" />
               </SelectTrigger>
               <SelectContent>
@@ -587,7 +587,7 @@ function MembersDialog({
         <div>
           <Label htmlFor="cm-lead">หัวหน้าทีม (ต้องเป็นสมาชิกด้วย)</Label>
           <Select value={lead === "" ? "__none__" : String(lead)} onValueChange={(v) => setLead(v === "__none__" ? "" : Number(v))}>
-            <SelectTrigger id="cm-lead">
+            <SelectTrigger id="cm-lead" aria-label="หัวหน้าทีม (ต้องเป็นสมาชิกด้วย)">
               <SelectValue placeholder="ไม่ระบุ" />
             </SelectTrigger>
             <SelectContent>
