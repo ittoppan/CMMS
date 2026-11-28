@@ -862,6 +862,7 @@ export default function FacilityLayoutPage() {
                     ref={roomPlanFileRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
+                    tabIndex={-1}
                     className="sr-only"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPlanImage("room", f); e.target.value = ""; }}
                   />
@@ -1390,6 +1391,7 @@ export default function FacilityLayoutPage() {
                 ref={floorPlanFileRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                tabIndex={-1}
                 className="sr-only"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPlanImage("floor", f); e.target.value = ""; }}
               />
