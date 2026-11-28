@@ -49,17 +49,18 @@ export function FormField<T extends FieldValues>({
   const errorId = errorMessage ? `${fieldId}-error` : undefined;
   const hintId = hint ? `${fieldId}-hint` : undefined;
 
+  const injected: Record<string, unknown> = {
+    id: fieldId,
+    "aria-invalid": errorMessage ? true : undefined,
+    "aria-describedby":
+      [errorId, hintId].filter(Boolean).join(" ") || undefined,
+  };
+  // Only set aria-required when the wrapper is required; otherwise leave the
+  // child's own value untouched instead of overwriting it with undefined.
+  if (required) injected["aria-required"] = true;
+
   const child = isValidElement(children)
-    ? cloneElement(
-        children as ReactElement<Record<string, unknown>>,
-        {
-          id: fieldId,
-          "aria-invalid": errorMessage ? true : undefined,
-          "aria-required": required ? true : undefined,
-          "aria-describedby":
-            [errorId, hintId].filter(Boolean).join(" ") || undefined,
-        } as Record<string, unknown>
-      )
+    ? cloneElement(children as ReactElement<Record<string, unknown>>, injected)
     : children;
 
   return (
