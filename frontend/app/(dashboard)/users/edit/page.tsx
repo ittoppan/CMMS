@@ -283,7 +283,7 @@ function EditUserContent() {
                     onChange={(e) => update("username", e.target.value)}
                     onBlur={() => iv.touch("username")}
                     error={iv.errorFor("username", !form.username.trim() ? t("msg.username_required") : "")}
-                    aria-required="true"
+                    required
                   />
                 </div>
 
@@ -297,7 +297,7 @@ function EditUserContent() {
                     onChange={(e) => update("fullName", e.target.value)}
                     onBlur={() => iv.touch("fullName")}
                     error={iv.errorFor("fullName", !form.fullName.trim() ? t("msg.full_name_required") : "")}
-                    aria-required="true"
+                    required
                   />
                 </div>
 

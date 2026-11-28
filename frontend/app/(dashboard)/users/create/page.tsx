@@ -247,7 +247,7 @@ export default function CreateUserPage() {
                   onChange={(e) => update("username", e.target.value)}
                   onBlur={() => iv.touch("username")}
                   error={iv.errorFor("username", !form.username.trim() ? t("msg.username_required") : "")}
-                  aria-required="true"
+                  required
                 />
             </div>
 
@@ -262,7 +262,7 @@ export default function CreateUserPage() {
                   onChange={(e) => update("fullName", e.target.value)}
                   onBlur={() => iv.touch("fullName")}
                   error={iv.errorFor("fullName", !form.fullName.trim() ? t("msg.full_name_required") : "")}
-                  aria-required="true"
+                  required
                 />
             </div>
 
@@ -277,7 +277,7 @@ export default function CreateUserPage() {
                   onChange={(e) => update("employeeCode", e.target.value.toUpperCase())}
                   onBlur={() => iv.touch("employeeCode")}
                   error={iv.errorFor("employeeCode", !form.employeeCode.trim() ? t("msg.employee_code_required") : "")}
-                  aria-required="true"
+                  required
                 />
             </div>
 
@@ -293,7 +293,7 @@ export default function CreateUserPage() {
                   onChange={(e) => update("password", e.target.value)}
                   onBlur={() => iv.touch("password")}
                   error={iv.errorFor("password", !form.password ? t("msg.password_required") : "")}
-                  aria-required="true"
+                  required
                 />
             </div>
 
