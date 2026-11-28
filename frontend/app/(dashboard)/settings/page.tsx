@@ -608,7 +608,7 @@ export default function SettingsPage() {
       if (Array.isArray(json)) {
         setSettings(json);
         const next: Record<string, string> = {};
-        json.forEach((s: SettingRow) => { next[s.setting_key] = s.setting_value ?? ""; });
+        json.forEach((s: SettingRow) => { next[s.setting_key] = String(s.setting_value ?? ""); });
         setForm(next);
       } else {
         setError("ไม่สามารถโหลดการตั้งค่าได้ (response ไม่ใช่ array)");
@@ -1402,7 +1402,7 @@ export default function SettingsPage() {
                     disabled={changedRows.length === 0}
                     onClick={() => {
                       const next: Record<string, string> = {};
-                      settings.forEach((s) => { next[s.setting_key] = s.setting_value ?? ""; });
+                      settings.forEach((s) => { next[s.setting_key] = String(s.setting_value ?? ""); });
                       setForm(next);
                       setNewSecrets({});
                     }}
