@@ -622,10 +622,10 @@ function AssignSkillDialog({
       <div className="space-y-4">
         <div>
           <Label htmlFor="as-skill">
-            ทักษะ <span className="text-red-600">*</span>
+            ทักษะ <span className="text-red-600" aria-hidden="true">*</span>
           </Label>
           <Select value={skillId === "" ? "__none__" : String(skillId)} onValueChange={(v) => setSkillId(v === "__none__" ? "" : Number(v))}>
-            <SelectTrigger id="as-skill" className="mt-1" aria-label="ทักษะ *">
+            <SelectTrigger id="as-skill" className="mt-1" aria-label="ทักษะ" aria-required="true">
               <SelectValue placeholder="เลือกทักษะ" />
             </SelectTrigger>
             <SelectContent>
@@ -734,10 +734,11 @@ function RemoveSkillDialog({
         </p>
         <div>
           <Label htmlFor="rs-reason">
-            เหตุผล {requireReason && <span className="text-red-600">*</span>}
+            เหตุผล {requireReason && <span className="text-red-600" aria-hidden="true">*</span>}
           </Label>
           <Input
             id="rs-reason"
+            aria-required={requireReason || undefined}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="mt-1"

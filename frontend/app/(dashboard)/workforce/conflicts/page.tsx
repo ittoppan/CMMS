@@ -504,10 +504,11 @@ function AssignDialog({
         </div>
         <div>
           <Label htmlFor="as-reason">
-            เหตุผล <span className="text-red-600">*</span>
+            เหตุผล <span className="text-red-600" aria-hidden="true">*</span>
           </Label>
           <Input
             id="as-reason"
+            aria-required="true"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="เช่น คนที่มีคุณสมบัติตรงกับงานนี้และยังไม่เกินความจุ"

@@ -335,10 +335,10 @@ function AddCertDialog({
       <div className="space-y-4">
         <div>
           <Label htmlFor="ct-user">
-            ช่าง <span className="text-red-600">*</span>
+            ช่าง <span className="text-red-600" aria-hidden="true">*</span>
           </Label>
           <Select value={userId === "" ? "__none__" : String(userId)} onValueChange={(v) => setUserId(v === "__none__" ? "" : Number(v))}>
-            <SelectTrigger id="ct-user" className="mt-1" aria-label="ช่าง *">
+            <SelectTrigger id="ct-user" className="mt-1" aria-label="ช่าง" aria-required="true">
               <SelectValue placeholder="เลือกช่าง" />
             </SelectTrigger>
             <SelectContent>
@@ -353,10 +353,11 @@ function AddCertDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="ct-code">
-              รหัสใบรับรอง <span className="text-red-600">*</span>
+              รหัสใบรับรอง <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Input
               id="ct-code"
+              aria-required="true"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="mt-1 uppercase"
@@ -368,10 +369,11 @@ function AddCertDialog({
           </div>
           <div>
             <Label htmlFor="ct-name">
-              ชื่อใบรับรอง <span className="text-red-600">*</span>
+              ชื่อใบรับรอง <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Input
               id="ct-name"
+              aria-required="true"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1"
@@ -446,13 +448,14 @@ function AddCertDialog({
           <Label htmlFor="ct-reason">
             เหตุผลการบันทึก{" "}
             {requireReason ? (
-              <span className="text-red-600">*</span>
+              <span className="text-red-600" aria-hidden="true">*</span>
             ) : (
               <span className="font-normal text-muted-foreground">(ไม่บังคับ)</span>
             )}
           </Label>
           <Input
             id="ct-reason"
+            aria-required={requireReason || undefined}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="เช่น แนบหนังสือรับรองฉบับใหม่จากหน่วยงาน"

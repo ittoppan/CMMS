@@ -533,10 +533,11 @@ function CourseDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="cs-code">
-              รหัส <span className="text-red-600">*</span>
+              รหัส <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Input
               id="cs-code"
+              aria-required="true"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="mt-1 uppercase"
@@ -555,9 +556,9 @@ function CourseDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="cs-nameth">
-              ชื่อหลักสูตร (ไทย) <span className="text-red-600">*</span>
+              ชื่อหลักสูตร (ไทย) <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
-            <Input id="cs-nameth" value={nameTh} onChange={(e) => setNameTh(e.target.value)} className="mt-1" />
+            <Input id="cs-nameth" aria-required="true" value={nameTh} onChange={(e) => setNameTh(e.target.value)} className="mt-1" />
           </div>
           <div>
             <Label htmlFor="cs-nameen">ชื่อหลักสูตร (อังกฤษ)</Label>
@@ -742,10 +743,10 @@ function RecordDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="tr-user">
-              ช่าง <span className="text-red-600">*</span>
+              ช่าง <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Select value={userId === "" ? "__none__" : String(userId)} onValueChange={(v) => setUserId(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="tr-user" className="mt-1" aria-label="ช่าง *">
+              <SelectTrigger id="tr-user" className="mt-1" aria-label="ช่าง" aria-required="true">
                 <SelectValue placeholder="เลือกช่าง" />
               </SelectTrigger>
               <SelectContent>
@@ -759,10 +760,10 @@ function RecordDialog({
           </div>
           <div>
             <Label htmlFor="tr-course">
-              หลักสูตร <span className="text-red-600">*</span>
+              หลักสูตร <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Select value={courseId === "" ? "__none__" : String(courseId)} onValueChange={(v) => setCourseId(v === "__none__" ? "" : Number(v))}>
-              <SelectTrigger id="tr-course" className="mt-1" aria-label="หลักสูตร *">
+              <SelectTrigger id="tr-course" className="mt-1" aria-label="หลักสูตร" aria-required="true">
                 <SelectValue placeholder="เลือกหลักสูตร" />
               </SelectTrigger>
               <SelectContent>
@@ -858,13 +859,14 @@ function RecordDialog({
           <Label htmlFor="tr-reason">
             เหตุผล / หมายเหตุ{" "}
             {requireReason ? (
-              <span className="text-red-600">*</span>
+              <span className="text-red-600" aria-hidden="true">*</span>
             ) : (
               <span className="font-normal text-muted-foreground">(ไม่บังคับ)</span>
             )}
           </Label>
           <Textarea
             id="tr-reason"
+            aria-required={requireReason || undefined}
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

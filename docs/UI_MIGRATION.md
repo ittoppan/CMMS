@@ -271,16 +271,16 @@
 | /(dashboard)/users/leaderboard | list | done | PageShell → PageHeader (2026-11-20) |
 | /(dashboard)/users | list | done | PageShell → PageHeader (2026-11-20) |
 | /(dashboard)/workforce/capacity | list | done |  |
-| /(dashboard)/workforce/certifications | list | done |  |
-| /(dashboard)/workforce/conflicts | list | done |  |
-| /(dashboard)/workforce/crews | list | done |  |
+| /(dashboard)/workforce/certifications | list | done | a11y forms/labels/aria (2026-11-28) |
+| /(dashboard)/workforce/conflicts | list | done | a11y forms/labels/aria (2026-11-28) |
+| /(dashboard)/workforce/crews | list | done | a11y forms/labels/aria (2026-11-28) |
 | /(dashboard)/workforce/mine | dashboard | done |  |
-| /(dashboard)/workforce | hub | done |  |
-| /(dashboard)/workforce/shifts | list | done |  |
-| /(dashboard)/workforce/skills | list | done |  |
-| /(dashboard)/workforce/technicians/[userId] | detail | done |  |
+| /(dashboard)/workforce | hub | done | a11y icon aria-hidden (2026-11-28) |
+| /(dashboard)/workforce/shifts | list | done | a11y forms/labels/aria (2026-11-28) |
+| /(dashboard)/workforce/skills | list | done | a11y forms/labels/aria (2026-11-28) |
+| /(dashboard)/workforce/technicians/[userId] | detail | done | a11y forms/labels/aria (2026-11-28) |
 | /(dashboard)/workforce/technicians | list | done |  |
-| /(dashboard)/workforce/training | list | done |  |
+| /(dashboard)/workforce/training | list | done | a11y forms/labels/aria (2026-11-28) |
 | /change-password | form | done | outside shell — auth gate (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header; PageHeader ไม่เหมาะกับ gate layout |
 | /install | form | done | outside shell — public PWA install page (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
 | /login | form | done | outside shell — full-screen auth (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |

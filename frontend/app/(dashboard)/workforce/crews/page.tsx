@@ -386,10 +386,11 @@ function CrewDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="cr-code">
-              รหัสทีม <span className="text-red-600">*</span>
+              รหัสทีม <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Input
               id="cr-code"
+              aria-required="true"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="uppercase"
@@ -397,9 +398,9 @@ function CrewDialog({
           </div>
           <div>
             <Label htmlFor="cr-nameth">
-              ชื่อทีม (ไทย) <span className="text-red-600">*</span>
+              ชื่อทีม (ไทย) <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
-            <Input id="cr-nameth" value={nameTh} onChange={(e) => setNameTh(e.target.value)} />
+            <Input id="cr-nameth" aria-required="true" value={nameTh} onChange={(e) => setNameTh(e.target.value)} />
           </div>
         </div>
         <div>
@@ -605,10 +606,11 @@ function MembersDialog({
 
         <div>
           <Label htmlFor="cm-reason">
-            เหตุผล <span className="text-red-600">*</span>
+            เหตุผล <span className="text-red-600" aria-hidden="true">*</span>
           </Label>
           <Textarea
             id="cm-reason"
+            aria-required="true"
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

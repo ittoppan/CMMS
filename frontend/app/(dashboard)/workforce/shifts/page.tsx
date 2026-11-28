@@ -44,13 +44,13 @@ import AndonLamp from "@/components/AndonLamp";
  */
 
 const DOW = [
-  { v: 1, label: "จ" },
-  { v: 2, label: "อ" },
-  { v: 3, label: "พ" },
-  { v: 4, label: "พฤ" },
-  { v: 5, label: "ศ" },
-  { v: 6, label: "ส" },
-  { v: 7, label: "อา" },
+  { v: 1, label: "จ", full: "วันจันทร์" },
+  { v: 2, label: "อ", full: "วันอังคาร" },
+  { v: 3, label: "พ", full: "วันพุธ" },
+  { v: 4, label: "พฤ", full: "วันพฤหัสบดี" },
+  { v: 5, label: "ศ", full: "วันศุกร์" },
+  { v: 6, label: "ส", full: "วันเสาร์" },
+  { v: 7, label: "อา", full: "วันอาทิตย์" },
 ];
 
 const LEAVE_TYPES: Array<{ v: LeaveRow["leave_type"]; label: string }> = [
@@ -677,8 +677,15 @@ function ShiftDialog({
           </p>
         </div>
         <div>
-          <Label>วันทำงาน</Label>
-          <div className="mt-1 flex flex-wrap gap-2">
+          <p id="sh-days-label" className="text-sm font-medium text-[var(--cmms-text-primary)]">
+            วันทำงาน
+          </p>
+          <div
+            role="group"
+            aria-labelledby="sh-days-label"
+            aria-describedby={invalidDays ? "sh-days-error" : undefined}
+            className="mt-1 flex flex-wrap gap-2"
+          >
             {DOW.map((d) => {
               const on = days.includes(d.v);
               return (
@@ -688,6 +695,7 @@ function ShiftDialog({
                   size="sm"
                   variant={on ? "primary" : "outline"}
                   aria-pressed={on}
+                  aria-label={d.full}
                   onClick={() =>
                     setDays((prev) => (on ? prev.filter((x) => x !== d.v) : [...prev, d.v].sort()))
                   }
@@ -697,7 +705,7 @@ function ShiftDialog({
               );
             })}
           </div>
-          {invalidDays && <p className="mt-1 text-xs text-red-600">ต้องเลือกอย่างน้อย 1 วัน</p>}
+          {invalidDays && <p id="sh-days-error" className="mt-1 text-xs text-red-600">ต้องเลือกอย่างน้อย 1 วัน</p>}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -715,10 +723,11 @@ function ShiftDialog({
         </label>
         <div>
           <Label htmlFor="sh-reason">
-            เหตุผล {requireReason && <span className="text-red-600">*</span>}
+            เหตุผล {requireReason && <span className="text-red-600" aria-hidden="true">*</span>}
           </Label>
           <Textarea
             id="sh-reason"
+            aria-required={requireReason || undefined}
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

@@ -370,6 +370,7 @@ export default function WorkforceSkillsPage() {
                                   <td key={s.id} className="px-2 py-1.5 text-center">
                                     <span
                                       className="inline-block h-5 w-5 rounded bg-muted"
+                                      role="img"
                                       title="ยังไม่มีข้อมูล"
                                       aria-label={`${p.full_name} / ${s.name_th}: ยังไม่มีข้อมูล`}
                                     />
@@ -500,10 +501,11 @@ function SkillDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="sk-code">
-              รหัส <span className="text-red-600">*</span>
+              รหัส <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
             <Input
               id="sk-code"
+              aria-required="true"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="uppercase"
@@ -527,9 +529,9 @@ function SkillDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label htmlFor="sk-nameth">
-              ชื่อทักษะ (ไทย) <span className="text-red-600">*</span>
+              ชื่อทักษะ (ไทย) <span className="text-red-600" aria-hidden="true">*</span>
             </Label>
-            <Input id="sk-nameth" value={nameTh} onChange={(e) => setNameTh(e.target.value)} />
+            <Input id="sk-nameth" aria-required="true" value={nameTh} onChange={(e) => setNameTh(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="sk-nameen">ชื่อทักษะ (อังกฤษ)</Label>

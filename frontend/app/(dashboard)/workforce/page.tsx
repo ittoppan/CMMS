@@ -110,7 +110,7 @@ export default function WorkforcePage() {
       />
       {error && (
         <Alert variant="danger">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           <div>{error}</div>
         </Alert>
       )}
