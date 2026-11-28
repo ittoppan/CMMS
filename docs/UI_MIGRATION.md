@@ -283,7 +283,7 @@
 | /(dashboard)/workforce/training | list | done | a11y forms/labels/aria (2026-11-28) |
 | /change-password | form | done | outside shell — auth gate (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header; PageHeader ไม่เหมาะกับ gate layout |
 | /install | form | done | outside shell — public PWA install page (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
-| /login | form | done | outside shell — full-screen auth (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
+| /login | form | done | outside shell — full-screen auth (standalone); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header; tablet/mobile panel center (2026-11-28) |
 | /my-repairs | list | done | outside shell — standalone component (MyRepairs); ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
 | / | redirect | skipped | redirect/re-export — ข้าม |
 | /qr-sheet | detail | done | outside shell — print page (standalone); ลบ usePageHero ที่ไม่ได้ใช้; ไม่ใช้ PageShell/cmms-page-hero/ui/page-header |
