@@ -375,7 +375,7 @@ export default function RcaDetailPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[560px] text-left text-sm">
-                    <thead><tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]"><th className="px-3 py-2">ประเภท</th><th className="px-3 py-2">ค่า</th><th className="px-3 py-2">เครื่องมือ</th><th className="px-3 py-2">บันทึกโดย</th><th className="px-3 py-2">วันเวลา</th></tr></thead>
+                    <thead><tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]"><th scope="col" className="px-3 py-2">ประเภท</th><th scope="col" className="px-3 py-2">ค่า</th><th scope="col" className="px-3 py-2">เครื่องมือ</th><th scope="col" className="px-3 py-2">บันทึกโดย</th><th scope="col" className="px-3 py-2">วันเวลา</th></tr></thead>
                     <tbody>
                       {d.measurements.map((m: RcaMeasurement) => (
                         <tr key={m.id} className="border-b border-[var(--cmms-border)] last:border-0">

@@ -282,12 +282,12 @@ export default function RcaDashboardPage() {
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead>
                       <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
-                        <th className="px-3 py-2">เหตุการณ์</th>
-                        <th className="px-3 py-2">เครื่องจักร</th>
-                        <th className="px-3 py-2">โหมด</th>
-                        <th className="px-3 py-2">ครั้งในหน้าต่าง</th>
-                        <th className="px-3 py-2">Downtime</th>
-                        <th className="px-3 py-2" />
+                        <th scope="col" className="px-3 py-2">เหตุการณ์</th>
+                        <th scope="col" className="px-3 py-2">เครื่องจักร</th>
+                        <th scope="col" className="px-3 py-2">โหมด</th>
+                        <th scope="col" className="px-3 py-2">ครั้งในหน้าต่าง</th>
+                        <th scope="col" className="px-3 py-2">Downtime</th>
+                        <th scope="col" className="px-3 py-2"><span className="sr-only">การกระทำ</span></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -326,13 +326,13 @@ export default function RcaDashboardPage() {
                   <table className="w-full min-w-[760px] text-left text-sm">
                     <thead>
                       <tr className="border-b border-[var(--cmms-border)] text-xs  text-[var(--cmms-text-secondary)]">
-                        <th className="px-3 py-2">RCA</th>
-                        <th className="px-3 py-2">หัวข้อ/เครื่องจักร</th>
-                        <th className="px-3 py-2">สถานะ</th>
-                        <th className="px-3 py-2">Actions ค้าง</th>
-                        <th className="px-3 py-2">กำหนดเสร็จ</th>
-                        <th className="px-3 py-2">ผู้รับผิดชอบ</th>
-                        <th className="px-3 py-2" />
+                        <th scope="col" className="px-3 py-2">RCA</th>
+                        <th scope="col" className="px-3 py-2">หัวข้อ/เครื่องจักร</th>
+                        <th scope="col" className="px-3 py-2">สถานะ</th>
+                        <th scope="col" className="px-3 py-2">Actions ค้าง</th>
+                        <th scope="col" className="px-3 py-2">กำหนดเสร็จ</th>
+                        <th scope="col" className="px-3 py-2">ผู้รับผิดชอบ</th>
+                        <th scope="col" className="px-3 py-2"><span className="sr-only">การกระทำ</span></th>
                       </tr>
                     </thead>
                     <tbody>
