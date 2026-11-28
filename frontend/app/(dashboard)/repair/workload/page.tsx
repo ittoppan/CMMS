@@ -349,6 +349,7 @@ export default function WorkloadPage() {
             >
               ข้อมูลจริงจากงานซ่อม
             </span>
+            <Button key="ai" variant="secondary" onClick={() => (window.location.href = "/ai-assistant")}>AI Assistant</Button>
             {tv.enabled && (
               <span
                 className="cmms-andon-chip inline-flex items-center gap-2"
@@ -502,6 +503,18 @@ export default function WorkloadPage() {
                       )}
                     </div>
                   </div>
+                  {tech.userId > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const q = encodeURIComponent(`สรุปงานค้างของช่าง ${tech.name}`);
+                        window.location.href = `/ai-assistant?ask=${q}&technician_id=${tech.userId}`;
+                      }}
+                    >
+                      AI สรุป
+                    </Button>
+                  )}
                   <AndonLamp
                     status={tech.overdueCount > 0 ? "down" : tech.openCount > 0 ? "warn" : "ok"}
                     size="sm"

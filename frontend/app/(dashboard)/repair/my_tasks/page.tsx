@@ -727,6 +727,7 @@ export default function MyTasksPage() {
         eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         title={hero.title}
         description={hero.desc}
+        actions={[<Button key="ai" variant="secondary" onClick={() => (window.location.href = "/ai-assistant")}>AI Assistant</Button>]}
       />
       <div className="space-y-6">
       {/* Filter: status tabs + outsource segmented control */}

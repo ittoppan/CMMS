@@ -34,6 +34,7 @@ const API_SECRET_KEYS = [
     'sage300_db_pass',
     'sage300_db_user',
     'sage300_odbc_dsn',
+    'ai_api_key',
 ];
 
 /** ค่าลับถูกส่งกลับมาแบบ mask หรือไม่ (ไม่ควรเปิดเผยค่าจริงใน response) */

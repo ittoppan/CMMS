@@ -920,6 +920,8 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
   "/documents/create": { th: "สร้างเอกสารควบคุม", en: "Register Controlled Document" },
   "/documents/[id]": { th: "รายละเอียดเอกสาร", en: "Controlled Document Detail" },
+  // ── AI Assistant ──
+  "/ai-assistant": { th: "ผู้ช่วย AI", en: "AI Assistant" },
   // ── PHASE 38: Knowledge Center ──
   "/knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
   "/knowledge/search": { th: "ค้นหาความรู้", en: "Knowledge Search" },
@@ -1171,6 +1173,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   settings: {
     th: { eyebrow: "Settings · CMMS-TOPPAN", title: "ตั้งค่าระบบ (System Settings)", desc: "จัดการพารามิเตอร์ของระบบ CMMS จากตาราง settings จริง — แก้ไขแล้วบันทึกลงฐานข้อมูลทันที" },
     en: { eyebrow: "Settings · CMMS-TOPPAN", title: "System Settings", desc: "Manage CMMS parameters from the real settings table — save straight to the database" },
+  },
+  "ai-assistant": {
+    th: { eyebrow: "AI Assistant · CMMS-TOPPAN", title: "ผู้ช่วย AI", desc: "ผู้ช่วยอัจฉริยะสำหรับงานซ่อมบำรุง — วินิจฉัยอาการ สรุปงานช่าง และค้นบริบทตาม scope ที่คุณเข้าถึงได้" },
+    en: { eyebrow: "AI Assistant · CMMS-TOPPAN", title: "AI Assistant", desc: "Maintenance copilot for symptom diagnosis, technician workload summaries and scoped answers" },
   },
   asset_registry: {
     th: { eyebrow: "Asset registry · CMMS-TOPPAN", title: "ทะเบียนเครื่องจักรและทรัพย์สิน", desc: "ฐานข้อมูลเครื่องจักร อุปกรณ์ และสายการผลิตทั้งหมดของโรงงาน TOPPAN" },

@@ -745,6 +745,9 @@ export default function WorkOrdersPage() {
           <Button variant="primary" onClick={() => router.push("/repair/create")}>
             <PlusIcon className="h-4 w-4" />{t("action.create_wo")}
           </Button>
+          <Button variant="secondary" onClick={() => router.push("/ai-assistant")}>
+            AI Assistant
+          </Button>
         </>
       ]}
     />
