@@ -8,13 +8,16 @@
  *
  * ข้อบังคับ:
  *  - ห้ามเก็บ secret (token / password / .env) ลง technical_message — ผ่าน redact_error_message()
+ *  - ห้ามเก็บชื่อ/อีเมล/เบอร์โทรแบบเต็ม — mask ด้วย src/helpers/pii.php
  *  - ห้าม throw — เขียนล้ม = error_log อย่างเดียว ห้ามกระทบงานหลัก
  *  - user_id/user_name อ่านจาก session จริง (ไม่ใช่ client-provided)
- *
- * เรียกใช้:
- *   require_once __DIR__ . '/../helpers/errors.php';
- *   api_log_error($e, 'api', 'เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่ภายหลัง');
  */
+
+require_once __DIR__ . '/pii.php';
+
+// เรียกใช้:
+//   require_once __DIR__ . '/../helpers/errors.php';
+//   api_log_error($e, 'api', 'เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่ภายหลัง');
 
 /** สร้าง/อ่าน request id สำหรับติดตามรายการ error ข้ามระบบ ให้ค่าคงที่ใน request เดียว */
 function cmms_request_id(): string {
@@ -34,12 +37,22 @@ function redact_error_message(string $message): string {
     $out = preg_replace('/((?:token|secret|api_key|apikey|pass)\s*[=:]\s*)([^\s,;"\']+)/i', '$1••••••', $out) ?? $out;
     // ลิ้งก์ bot token รูป https://api.telegram.org/bot<TOKEN>/... — เก็บแค่ prefix
     $out = preg_replace('/(bot\d{5,}:)[A-Za-z0-9_-]+/', '$1••••••', $out) ?? $out;
-    return $out;
+    // PII ที่อาจหลุดมากับข้อความ exception (email / เบอร์โทร / เลขบัตร)
+    return pii_mask_text($out);
 }
 
 /** บันทึก error ลง system_errors (เรียกผ่าน api_log_error) — เขียนล้มห้ามรบกวนงานหลัก */
 function record_error(PDO $pdo, array $ctx): ?int {
     try {
+        $rawUserName = !empty($ctx['user_name']) ? (string)$ctx['user_name'] : '';
+        $maskedUserName = $rawUserName !== '' ? pii_mask_name($rawUserName) : null;
+        $knownNames = $rawUserName !== '' ? [$rawUserName] : [];
+        $technical = !empty($ctx['technical_message']) ? (string)$ctx['technical_message'] : '';
+        if ($technical !== '') $technical = pii_mask_text($technical, $knownNames);
+        $endpoint = !empty($ctx['endpoint']) ? (string)$ctx['endpoint'] : '';
+        if ($endpoint !== '') $endpoint = pii_mask_text($endpoint, $knownNames);
+        $userMessage = !empty($ctx['user_message']) ? (string)$ctx['user_message'] : '';
+        if ($userMessage !== '') $userMessage = pii_mask_text($userMessage, $knownNames);
         $stmt = $pdo->prepare(
             "INSERT INTO system_errors
                 (module, endpoint, method, user_id, user_name, category, error_code,
@@ -48,20 +61,20 @@ function record_error(PDO $pdo, array $ctx): ?int {
         );
         $stmt->execute([
             mb_substr((string)($ctx['module'] ?? 'api'), 0, 60),
-            !empty($ctx['endpoint']) ? mb_substr((string)$ctx['endpoint'], 0, 255) : null,
+            $endpoint !== '' ? mb_substr($endpoint, 0, 255) : null,
             !empty($ctx['method']) ? mb_substr((string)$ctx['method'], 0, 10) : null,
             isset($ctx['user_id']) ? (int)$ctx['user_id'] : null,
-            !empty($ctx['user_name']) ? mb_substr((string)$ctx['user_name'], 0, 150) : null,
+            $maskedUserName !== null ? mb_substr($maskedUserName, 0, 150) : null,
             mb_substr((string)($ctx['category'] ?? 'EXCEPTION'), 0, 50),
             !empty($ctx['error_code']) ? mb_substr((string)$ctx['error_code'], 0, 100) : null,
-            !empty($ctx['technical_message']) ? mb_substr((string)$ctx['technical_message'], 0, 2000) : null,
-            !empty($ctx['user_message']) ? mb_substr((string)$ctx['user_message'], 0, 500) : null,
+            $technical !== '' ? mb_substr($technical, 0, 2000) : null,
+            $userMessage !== '' ? mb_substr($userMessage, 0, 500) : null,
             (!empty($ctx['request_id'])) ? mb_substr((string)$ctx['request_id'], 0, 64) : null,
             !empty($ctx['ip_address']) ? mb_substr((string)$ctx['ip_address'], 0, 45) : null,
         ]);
         return (int)$pdo->lastInsertId();
     } catch (Throwable $e) {
-        error_log('[record_error] write failed: ' . $e->getMessage());
+        error_log('[record_error] write failed: ' . pii_mask_text($e->getMessage()));
         return null;
     }
 }
@@ -114,6 +127,6 @@ function api_log_error(Throwable $e, string $module = 'api', string $userMessage
         $pdo = getDb();
         record_error($pdo, $ctx);
     } catch (Throwable $e2) {
-        error_log('[api_log_error] wrapper failed: ' . get_class($e2) . ': ' . $e2->getMessage());
+        error_log('[api_log_error] wrapper failed: ' . get_class($e2) . ': ' . pii_mask_text($e2->getMessage()));
     }
 }

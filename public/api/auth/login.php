@@ -160,7 +160,7 @@ try {
         error_log('[login.php] reset rate counter failed: ' . $e->getMessage());
     }
 
-    audit_log($pdo, 'LOGIN', 'auth', (int)$user['id'], 'เข้าสู่ระบบสำเร็จ: ' . $user['full_name'], null, ['role_id' => (int)$user['role_id']]);
+    audit_log($pdo, 'LOGIN', 'auth', (int)$user['id'], 'เข้าสู่ระบบสำเร็จ', null, ['role_id' => (int)$user['role_id']]);
 
     // ชื่อบทบาท (สำหรับ frontend mapping หน้าแรกต่อ role)
     $roleName = '';

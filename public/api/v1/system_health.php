@@ -109,6 +109,7 @@ $errorsGroup = health_group('errors', function () use ($pdo) {
         "SELECT id, created_at, module, endpoint, method, user_name, category, error_code, user_message, request_id
          FROM system_errors ORDER BY id DESC LIMIT 10"
     )->fetchAll(PDO::FETCH_ASSOC);
+    $recent = array_map(static fn(array $r): array => pii_mask_audit_row($r), $recent);
     return [
         'note' => 'system_errors collects from Phase 22 deployment onward; earlier exceptions exist only in logs/php-error.log',
         'by_category_30d' => array_map(fn($r) => ['category' => $r['category'], 'count' => (int)$r['c']], $byCategory),

@@ -7,8 +7,9 @@
  *
  * Covers: perm_default_granted, perm_allowed (role + user overrides),
  * canPerm, permModuleAliases, apiIsSecretKey, apiMaskSecret,
- * apiMaskSettingsRows, apiMaskSecretArray, cmms_request_id,
- * redact_error_message, cmms_error_context, record_error, api_log_error.
+ * apiMaskSettingsRows, apiMaskSecretArray, PII masking, audit write masking,
+ * cmms_request_id, redact_error_message, cmms_error_context, record_error,
+ * api_log_error.
  *
  * Runs against a THROWAWAY database whose name is the live DB name + "_sectest".
  *   php scripts/test_security.php [--keep]
@@ -245,6 +246,74 @@ $lrow = $pdo->query('SELECT * FROM system_errors ORDER BY id DESC LIMIT 1')->fet
 check('api_log_error redacts secret', !str_contains((string)$lrow['technical_message'], 'abcd1234'), (string)$lrow['technical_message']);
 check('api_log_error keeps user_message', $lrow['user_message'] === 'safe msg');
 check('api_log_error module', $lrow['module'] === 'asset');
+
+/* ================================================================= 11. PII masking + audit sanitization */
+echo "\n[11] PII masking + audit sanitization\n";
+check('mask name', pii_mask_name('Somchai Jaidee') === 'S*** J***', pii_mask_name('Somchai Jaidee'));
+check('mask Thai name', pii_mask_name('สมชาย ใจดี') === 'ส*** ใ***', pii_mask_name('สมชาย ใจดี'));
+check('name mask idempotent', pii_mask_name('S*** J***') === 'S*** J***');
+check('mask employee id', pii_mask_employee_id('E01117') === 'E0****17', pii_mask_employee_id('E01117'));
+check('mask email', pii_mask_email('somchai@example.com') === 'so***@example.com', pii_mask_email('somchai@example.com'));
+check('mask phone', pii_mask_phone('081-234-5678') === '***-***-5678', pii_mask_phone('081-234-5678'));
+$piiText = pii_mask_text('ติดต่อ Somchai Jaidee somchai@example.com โทร 081-234-5678', ['Somchai Jaidee']);
+check('text hides name', !str_contains($piiText, 'Somchai Jaidee'), $piiText);
+check('text hides email', !str_contains($piiText, 'somchai@example.com'), $piiText);
+check('text hides phone', !str_contains($piiText, '081-234-5678'), $piiText);
+check('text email keeps consistent mask', str_contains($piiText, 'so***@example.com'), $piiText);
+check('username masked', pii_mask_value('admin', 'username') === 'ad****in', (string)pii_mask_value('admin', 'username'));
+check('text keeps asset code', pii_mask_text('AST-2026-001234') === 'AST-2026-001234');
+check('text keeps ISO date', pii_mask_text('2026-11-28') === '2026-11-28');
+$payload = pii_mask_value([
+    'full_name' => 'Somchai Jaidee',
+    'employee_code' => 'E01117',
+    'email' => 'somchai@example.com',
+    'phone' => '0812345678',
+    'company_name' => 'TPT Co., Ltd.',
+]);
+check('payload name', $payload['full_name'] === 'S*** J***', (string)$payload['full_name']);
+check('payload employee', $payload['employee_code'] === 'E0****17', (string)$payload['employee_code']);
+check('payload email', $payload['email'] === 'so***@example.com', (string)$payload['email']);
+check('payload phone', $payload['phone'] === '***-***-5678', (string)$payload['phone']);
+check('payload keeps company', $payload['company_name'] === 'TPT Co., Ltd.', (string)$payload['company_name']);
+
+$_SESSION = ['user_id' => $U9, 'user_name' => 'Somchai Jaidee'];
+audit_log($pdo, 'TEST_PII', 'user', 'somchai@example.com',
+    'แก้ไข Somchai Jaidee somchai@example.com 081-234-5678',
+    ['email' => 'old@example.com'],
+    ['full_name' => 'Somchai Jaidee', 'email' => 'somchai@example.com', 'phone' => '0812345678', 'employee_code' => 'E01117', 'password' => 'Secret123'],
+    'info');
+$aRow = $pdo->query("SELECT * FROM audit_logs WHERE action = 'TEST_PII' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+check('audit row written', is_array($aRow));
+check('audit actor masked', ($aRow['user_name'] ?? '') === 'S*** J***', (string)($aRow['user_name'] ?? ''));
+check('audit description masked', !str_contains((string)($aRow['description'] ?? ''), 'Somchai Jaidee') && !str_contains((string)($aRow['description'] ?? ''), 'somchai@example.com'), (string)($aRow['description'] ?? ''));
+check('audit resource masked', ($aRow['resource_id'] ?? '') === 'so***@example.com', (string)($aRow['resource_id'] ?? ''));
+$aNew = json_decode((string)($aRow['new_value'] ?? ''), true);
+check('audit new name masked', ($aNew['full_name'] ?? '') === 'S*** J***', (string)($aNew['full_name'] ?? ''));
+check('audit new email masked', ($aNew['email'] ?? '') === 'so***@example.com', (string)($aNew['email'] ?? ''));
+check('audit new phone masked', ($aNew['phone'] ?? '') === '***-***-5678', (string)($aNew['phone'] ?? ''));
+check('audit new employee masked', ($aNew['employee_code'] ?? '') === 'E0****17', (string)($aNew['employee_code'] ?? ''));
+check('audit removes password', !isset($aNew['password']) && !str_contains((string)($aRow['new_value'] ?? ''), 'Secret123'));
+$aLegacy = pii_mask_audit_row([
+    'user_name' => 'Somchai Jaidee',
+    'description' => 'แก้ไข Somchai Jaidee somchai@example.com',
+    'old_value' => json_encode(['phone' => '0812345678', 'full_name' => 'Somchai Jaidee'], JSON_UNESCAPED_UNICODE),
+    'new_value' => null,
+], true);
+check('legacy row actor masked', $aLegacy['user_name'] === 'S*** J***');
+check('legacy row description masked', !str_contains($aLegacy['description'], 'Somchai Jaidee') && !str_contains($aLegacy['description'], 'somchai@example.com'));
+check('legacy row old_value masked', ($aLegacy['old_value']['phone'] ?? '') === '***-***-5678' && ($aLegacy['old_value']['full_name'] ?? '') === 'S*** J***');
+
+$eid2 = record_error($pdo, [
+    'module' => 'api', 'endpoint' => '/x?email=somchai@example.com', 'method' => 'GET',
+    'user_id' => $U9, 'user_name' => 'Somchai Jaidee', 'category' => 'EXCEPTION',
+    'technical_message' => 'failed for Somchai Jaidee somchai@example.com 081-234-5678',
+    'user_message' => 'ติดต่อ somchai@example.com', 'request_id' => 'pii-err', 'ip_address' => '127.0.0.1',
+]);
+$erow2 = $pdo->query("SELECT * FROM system_errors WHERE id = " . (int)$eid2)->fetch(PDO::FETCH_ASSOC);
+check('error actor masked', ($erow2['user_name'] ?? '') === 'S*** J***', (string)($erow2['user_name'] ?? ''));
+check('error endpoint masked', !str_contains((string)($erow2['endpoint'] ?? ''), 'somchai@example.com'), (string)($erow2['endpoint'] ?? ''));
+check('error technical masked', !str_contains((string)($erow2['technical_message'] ?? ''), 'somchai@example.com') && !str_contains((string)($erow2['technical_message'] ?? ''), '081-234-5678'), (string)($erow2['technical_message'] ?? ''));
+check('error user message masked', !str_contains((string)($erow2['user_message'] ?? ''), 'somchai@example.com'), (string)($erow2['user_message'] ?? ''));
 
 /* ------------------------------------------------------------------ done */
 $pdo->exec('SET FOREIGN_KEY_CHECKS=1');

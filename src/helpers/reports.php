@@ -18,6 +18,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/roles.php';
 require_once __DIR__ . '/kpi.php';
 require_once __DIR__ . '/xlsx.php';
+require_once __DIR__ . '/pii.php';
 
 /* ───────────────────────── 0. Indexes (performance) ───────────────────────── */
 
@@ -213,7 +214,7 @@ function rpt_audit_filter_json(): string {
 function rpt_log_audit(PDO $pdo, int $uid, string $name, string $report, string $exportType, int $rows): void {
     try {
         $st = $pdo->prepare('INSERT INTO report_audit_log (user_id, user_name, report, filters, export_type, row_count) VALUES (?,?,?,?,?,?)');
-        $st->execute([$uid ?: null, $name, $report, rpt_audit_filter_json(), $exportType, $rows]);
+        $st->execute([$uid ?: null, pii_mask_name($name), $report, rpt_audit_filter_json(), $exportType, $rows]);
     } catch (Throwable $e) {
         error_log('[reports] audit: ' . $e->getMessage());
     }

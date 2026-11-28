@@ -9,7 +9,9 @@
  *
  * ข้อบังคับ:
  *  - ห้ามเก็บรหัสผ่าน / hash / token / API key ลงใน old_value / new_value
- *    (caller ต้องกรองออกก่อนส่งมา)
+ *    (ตัด key ลับทุกชั้นด้วย apiIsSecretKey ก่อนเขียน)
+ *  - ห้ามเก็บชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทรศัพท์แบบเต็ม — mask ที่จุดเขียนนี้
+ *    (caller ไม่ต้องทำซ้ำ; ดู src/helpers/pii.php)
  *  - append-only: ไม่มี UPDATE/DELETE API สำหรับตารางนี้ในระบบ — ดูได้อย่างเดียว
  *  - เขียนพังห้ามทำให้งานหลักล้ม (try/catch + error_log)
  *  - เก็บ user_id จาก session จริง (ถ้ามี) ไม่ใช่ client-provided
@@ -18,6 +20,8 @@
  *   require_once __DIR__ . '/../helpers/audit.php';
  *   audit_log($pdo, 'LOGIN', 'auth', $userId, 'เข้าสู่ระบบสำเร็จ', null, null, 'info');
  */
+
+require_once __DIR__ . '/pii.php';
 
 /**
  * @param PDO        $pdo
@@ -32,8 +36,10 @@
 function audit_log(PDO $pdo, string $action, string $resourceType, string|int $resourceId = '', string $description = '', mixed $oldValue = null, mixed $newValue = null, string $severity = 'info'): void {
     try {
         $userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
-        $userName = isset($_SESSION['user_name']) && is_string($_SESSION['user_name'])
+        $rawUserName = isset($_SESSION['user_name']) && is_string($_SESSION['user_name'])
             ? mb_substr($_SESSION['user_name'], 0, 150) : null;
+        $userName = ($rawUserName !== null && trim($rawUserName) !== '') ? pii_mask_name($rawUserName) : null;
+        $knownNames = ($rawUserName !== null && trim($rawUserName) !== '') ? [$rawUserName] : [];
 
         $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
         // ผ่าน proxy เดียว (IIS/Cloudflare) — นำค่าแรกสุดใน X-Forwarded-For ที่สมเหตุสมผล
@@ -51,12 +57,15 @@ function audit_log(PDO $pdo, string $action, string $resourceType, string|int $r
             $reqId = bin2hex(random_bytes(16));
         }
 
-        $oldJson = encodeAuditValue($oldValue);
-        $newJson = encodeAuditValue($newValue);
+        $oldJson = encodeAuditValue($oldValue, $knownNames);
+        $newJson = encodeAuditValue($newValue, $knownNames);
 
         // กันข้อมูลเกิน — เฉพาะเมื่อ asset ถูกจงใจบันทึก (ไม่ทำให้ INSERT ล้ม)
-        $desc = mb_substr((string)$description, 0, 500);
+        $desc = mb_substr(pii_mask_text((string)$description, $knownNames), 0, 500);
         $resType = mb_substr((string)$resourceType, 0, 60);
+        $resId = $resourceId === '' || $resourceId === null
+            ? null
+            : mb_substr(pii_mask_text((string)$resourceId, $knownNames), 0, 64);
 
         $stmt = $pdo->prepare(
             "INSERT INTO audit_logs
@@ -66,26 +75,36 @@ function audit_log(PDO $pdo, string $action, string $resourceType, string|int $r
         );
         $stmt->execute([
             $userId, $userName, mb_substr($action, 0, 60), $resType,
-            $resourceId === '' || $resourceId === null ? null : mb_substr((string)$resourceId, 0, 64),
-            $desc, $oldJson, $newJson, $ip, $ua, $reqId, in_array($severity, ['info', 'warning', 'security'], true) ? $severity : 'info',
+            $resId, $desc, $oldJson, $newJson, $ip, $ua, $reqId,
+            in_array($severity, ['info', 'warning', 'security'], true) ? $severity : 'info',
         ]);
     } catch (Throwable $e) {
-        error_log("[audit_log] write failed: " . $e->getMessage());
+        error_log("[audit_log] write failed: " . pii_mask_text($e->getMessage()));
     }
 }
 
-/** เก็บเฉพาะฟิลด์ที่เปลี่ยนจริง + JSON encode — ตัดข้อมูลซ้ำ ๆ และลบ key ลับ */
-function encodeAuditValue(mixed $value): ?string {
+/** ลบ key ลับทุกชั้นใน array ก่อนเขียน audit */
+function audit_strip_secret_keys(mixed $value): mixed {
+    if (is_object($value)) $value = (array)$value;
+    if (!is_array($value)) return $value;
+
+    $out = [];
+    foreach ($value as $k => $v) {
+        if (is_string($k) && apiIsSecretKey($k)) continue;
+        $out[$k] = audit_strip_secret_keys($v);
+    }
+    return $out;
+}
+
+/** เก็บเฉพาะฟิลด์ที่เปลี่ยนจริง + JSON encode — ตัด key ลับและ mask PII */
+function encodeAuditValue(mixed $value, array $knownNames = []): ?string {
     if ($value === null || $value === '') return null;
+    $value = audit_strip_secret_keys($value);
     if (is_array($value)) {
-        foreach ($value as $k => $v) {
-            if (is_string($k) && apiIsSecretKey((string)$k)) {
-                unset($value[$k]);
-            }
-        }
         $value = array_filter($value, fn($v) => $v !== null && $v !== '');
         if ($value === []) return null;
     }
+    $value = pii_mask_value($value, null, $knownNames);
     $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($json === false) return null;
     return mb_substr($json, 0, 4000);

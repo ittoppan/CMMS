@@ -42,7 +42,12 @@ try {
             if (apiIsSecretKey((string)($r['setting_key'] ?? ''))) {
                 $rows[$i]['old_value'] = !empty($r['old_value']) ? SETTING_MASKED : '';
                 $rows[$i]['new_value'] = !empty($r['new_value']) ? SETTING_MASKED : '';
+            } else {
+                $settingKey = (string)($r['setting_key'] ?? '');
+                $rows[$i]['old_value'] = pii_mask_value($r['old_value'] ?? '', $settingKey);
+                $rows[$i]['new_value'] = pii_mask_value($r['new_value'] ?? '', $settingKey);
             }
+            $rows[$i] = pii_mask_audit_row($rows[$i]);
         }
         echo json_encode($rows, JSON_UNESCAPED_UNICODE);
         exit;
@@ -68,7 +73,7 @@ try {
         case 'PUT':
             requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขการตั้งค่า');
             $userId = (int)($_SESSION['user_id'] ?? 0);
-            $userName = mb_substr((string)($_SESSION['user_name'] ?? ''), 0, 150);
+            $userName = pii_mask_name(mb_substr((string)($_SESSION['user_name'] ?? ''), 0, 150));
 
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             if (!is_array($data)) { api_fail(400, 'VALIDATION_ERROR', 'ข้อมูลไม่ถูกต้อง'); }
@@ -102,8 +107,8 @@ try {
 
                     if (isset($data['setting_value']) && $old && $old['setting_value'] !== (string)$data['setting_value']
                         && !$skipMasked($effKey, $data['setting_value'])) {
-                        $oldVal = $isSecret ? SETTING_MASKED : $old['setting_value'];
-                        $newVal = $isSecret ? SETTING_MASKED : (string)$data['setting_value'];
+                        $oldVal = $isSecret ? SETTING_MASKED : (string)pii_mask_value($old['setting_value'], $effKey);
+                        $newVal = $isSecret ? SETTING_MASKED : (string)pii_mask_value($data['setting_value'], $effKey);
                         try {
                             $pdo->prepare("INSERT INTO settings_audit_log (user_id, user_name, setting_key, old_value, new_value) VALUES (?, ?, ?, ?, ?)")
                                 ->execute([

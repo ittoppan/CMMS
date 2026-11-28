@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/settings.php';
+require_once __DIR__ . '/pii.php';
 
 function facility_layout_default(): array {
     return [
@@ -33,6 +34,7 @@ function facility_layout_load(?PDO $pdo = null): array {
 }
 
 function facility_layout_save(PDO $pdo, array $config, int $userId = 0, string $userName = ''): bool {
+    $userName = pii_mask_name($userName);
     $config['version'] = (int)($config['version'] ?? 1);
     $config['updated_at'] = date('c');
     if (!isset($config['rooms']) || !is_array($config['rooms'])) $config['rooms'] = [];
@@ -51,8 +53,18 @@ function facility_layout_save(PDO $pdo, array $config, int $userId = 0, string $
         $up->execute([$json, 'facility', 'Facility/building layout and port registry config (JSON)', (int)$row['id']]);
         if ($old !== $json) {
             try {
+                $auditValues = pii_mask_audit_row([
+                    'old_value' => mb_substr($old, 0, 2000),
+                    'new_value' => mb_substr($json, 0, 2000),
+                ]);
                 $pdo->prepare("INSERT INTO settings_audit_log (user_id, user_name, setting_key, old_value, new_value) VALUES (?, ?, ?, ?, ?)")
-                    ->execute([$userId ?: null, $userName ?: null, $key, mb_substr($old, 0, 2000), mb_substr($json, 0, 2000)]);
+                    ->execute([
+                        $userId ?: null,
+                        $userName ?: null,
+                        $key,
+                        $auditValues['old_value'] ?? '',
+                        $auditValues['new_value'] ?? '',
+                    ]);
             } catch (Throwable $e) { /* ignore */ }
         }
         return true;
@@ -60,8 +72,9 @@ function facility_layout_save(PDO $pdo, array $config, int $userId = 0, string $
     $ins = $pdo->prepare('INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?, ?, ?, ?)');
     $ins->execute([$key, $json, 'facility', 'Facility/building layout and port registry config (JSON)']);
     try {
+        $auditValues = pii_mask_audit_row(['old_value' => '', 'new_value' => mb_substr($json, 0, 2000)]);
         $pdo->prepare("INSERT INTO settings_audit_log (user_id, user_name, setting_key, old_value, new_value) VALUES (?, ?, ?, ?, ?)")
-            ->execute([$userId ?: null, $userName ?: null, $key, '', mb_substr($json, 0, 2000)]);
+            ->execute([$userId ?: null, $userName ?: null, $key, '', $auditValues['new_value'] ?? '']);
     } catch (Throwable $e) { /* ignore */ }
     return true;
 }

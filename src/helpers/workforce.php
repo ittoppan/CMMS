@@ -350,7 +350,7 @@ function wf_assign_skill(PDO $pdo, int $userId, array $data, int $actorId): arra
             'id' => $existingId,
         ]);
         audit_log($pdo, 'WORKFORCE_SKILL_ASSIGN', 'technician_skills', $existingId,
-            'ปรับทักษะ ' . $resolvedName . ' ของ user #' . $userId, $beforeRow, [
+            'ปรับทักษะ ' . pii_mask_name($resolvedName) . ' ของ user #' . $userId, $beforeRow, [
                 'skill_level' => $level, 'valid_until' => $validUntil, 'reason' => $reason,
             ]);
         return ['id' => $existingId, 'created' => false];
@@ -376,7 +376,7 @@ function wf_assign_skill(PDO $pdo, int $userId, array $data, int $actorId): arra
     ]);
     $newId = (int)$pdo->lastInsertId();
     audit_log($pdo, 'WORKFORCE_SKILL_ASSIGN', 'technician_skills', $newId,
-        'บันทึกทักษะ ' . $resolvedName . ' ให้ user #' . $userId, null, [
+        'บันทึกทักษะ ' . pii_mask_name($resolvedName) . ' ให้ user #' . $userId, null, [
             'skill_level' => $level, 'evidence_type' => $evidenceType, 'reason' => $reason,
         ]);
     wf_add_evidence($pdo, 'user', $userId, 'skill', 'technician_skills', $newId, 'info',

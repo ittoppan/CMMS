@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/pii.php';
 
 /**
  * Sage 300 ERP Integration Helper for CMMS-TPT
@@ -307,6 +308,9 @@ class Sage300Service {
                 $userName = $uStmt->fetchColumn();
             }
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $userName = $userName !== false && $userName !== null ? pii_mask_name($userName) : null;
+            $oldValue = pii_mask_value($oldValue);
+            $newValue = pii_mask_value($newValue);
             $stmt = $pdo->prepare("INSERT INTO audit_trail (user_id, user_name, module, action, old_value, new_value, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$userId, $userName, $module, $action, is_array($oldValue) ? json_encode($oldValue) : $oldValue, is_array($newValue) ? json_encode($newValue) : $newValue, $ip]);
         } catch (Exception $e) {}

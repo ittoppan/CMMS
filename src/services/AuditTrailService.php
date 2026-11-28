@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../helpers/pii.php';
 
 class AuditTrailService {
 
@@ -46,6 +47,9 @@ class AuditTrailService {
             $userId = $_SESSION['user_id'] ?? 1;
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             $resourceType = $module !== '' ? $module : 'system';
+            $masked = pii_mask_audit_row(['old_value' => $oldVal, 'new_value' => $newVal]);
+            $oldVal = (string)($masked['old_value'] ?? '');
+            $newVal = (string)($masked['new_value'] ?? '');
 
             $stmt = $pdo->prepare("
                 INSERT INTO audit_logs (user_id, action, module, doc_no, resource_type, resource_id, old_value, new_value, ip_address)

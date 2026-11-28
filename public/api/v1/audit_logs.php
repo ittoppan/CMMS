@@ -43,6 +43,14 @@ try {
     if (isset($_GET['filters'])) {
         $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")->fetchAll(PDO::FETCH_COLUMN);
         $users = $pdo->query("SELECT DISTINCT user_id, user_name FROM audit_logs WHERE user_id IS NOT NULL ORDER BY user_name")->fetchAll(PDO::FETCH_ASSOC);
+        $maskedUsers = [];
+        foreach ($users as $u) {
+            $u['user_name'] = ($u['user_name'] !== null && $u['user_name'] !== '')
+                ? pii_mask_name($u['user_name'])
+                : null;
+            $maskedUsers[(string)$u['user_id'] . '|' . (string)$u['user_name']] = $u;
+        }
+        $users = array_values($maskedUsers);
         $resources = $pdo->query("SELECT DISTINCT resource_type FROM audit_logs WHERE resource_type <> '' ORDER BY resource_type")->fetchAll(PDO::FETCH_COLUMN);
         $severities = ['info', 'warning', 'security'];
         echo json_encode(['actions' => $actions, 'users' => $users, 'resources' => $resources, 'severities' => $severities], JSON_UNESCAPED_UNICODE);
@@ -56,13 +64,9 @@ try {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) { api_fail(404, 'NOT_FOUND', 'ไม่พบบันทึกที่ขอ'); }
+        // Mask ทั้งข้อมูลใหม่และข้อมูลเก่า (แถวเก่าอาจยังมี PII ดิบใน DB)
         // JSON field → object (อ่านง่ายสำหรับการแสดงผล)
-        foreach (['old_value', 'new_value'] as $f) {
-            if (!empty($row[$f])) {
-                $decoded = json_decode($row[$f], true);
-                $row[$f] = ($decoded === null && $row[$f] !== 'null') ? $row[$f] : $decoded;
-            }
-        }
+        $row = pii_mask_audit_row($row, true);
         echo json_encode($row, JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -111,6 +115,7 @@ try {
     );
     $stmt->execute([...$args, $limit, $offset]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $items = array_map(static fn(array $r): array => pii_mask_audit_row($r), $items);
 
     echo json_encode([
         'items' => $items,
