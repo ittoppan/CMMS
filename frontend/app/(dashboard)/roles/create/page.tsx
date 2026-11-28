@@ -98,7 +98,7 @@ export default function RoleCreatePage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="role-create-name">
-              {t("form.role_name")} <span className="text-destructive">*</span>
+              {t("form.role_name")} <span className="text-destructive" aria-hidden="true">*</span>
             </Label>
             <Input
               id="role-create-name"

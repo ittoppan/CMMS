@@ -166,7 +166,7 @@ function EditAssetContent() {
 
               <Grid columns={{ minWidth: 260, max: 2 }} gap={4}>
                 <div className="space-y-1.5">
-                  <Label htmlFor="code">รหัสเครื่องจักร <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="code">รหัสเครื่องจักร <span className="text-destructive" aria-hidden="true">*</span></Label>
                   <Input
                     id="code"
                     label="รหัสเครื่องจักร"
@@ -177,7 +177,7 @@ function EditAssetContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="name">ชื่อเครื่องจักร / อุปกรณ์ <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="name">ชื่อเครื่องจักร / อุปกรณ์ <span className="text-destructive" aria-hidden="true">*</span></Label>
                   <Input
                     id="name"
                     label="ชื่อเครื่องจักร"

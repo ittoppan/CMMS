@@ -390,7 +390,7 @@ function EditWorkOrderContent() {
               {/* Status + Priority */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="wo-edit-status">สถานะงาน (Job Status)<span className="text-destructive"> *</span></Label>
+                  <Label htmlFor="wo-edit-status">สถานะงาน (Job Status)<span className="text-destructive" aria-hidden="true"> *</span></Label>
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger id="wo-edit-status" className="w-full" aria-label="สถานะงาน (Job Status)">
                       <SelectValue />
@@ -406,7 +406,7 @@ function EditWorkOrderContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="wo-edit-priority">ความสำคัญ (Priority)<span className="text-destructive"> *</span></Label>
+                  <Label htmlFor="wo-edit-priority">ความสำคัญ (Priority)<span className="text-destructive" aria-hidden="true"> *</span></Label>
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger id="wo-edit-priority" className="w-full" aria-label="ความสำคัญ (Priority)">
                       <SelectValue />
@@ -460,7 +460,7 @@ function EditWorkOrderContent() {
               <div className="space-y-1.5">
                 <Label htmlFor="wo-edit-contam">
                   Contaminate Checking (ตรวจสอบการปนเปื้อน)
-                  {closing && <span className="text-destructive"> *</span>}
+                  {closing && <span className="text-destructive" aria-hidden="true"> *</span>}
                 </Label>
                 <Select value={contaminateChecking} onValueChange={setContaminateChecking} disabled={!closing}>
                   <SelectTrigger id="wo-edit-contam" className="w-full" aria-label="Contaminate Checking (ตรวจสอบการปนเปื้อน)" aria-invalid={contaminateError ? true : undefined}>
@@ -601,7 +601,7 @@ function EditWorkOrderContent() {
               <CardTitle className="flex items-center gap-2 text-base">
                 <Check className="w-5 h-5 text-sky-600" />
                 <span>ลายเซ็นรับงานจากผู้แจ้ง</span>
-                {status === "completed" && <span className="text-destructive text-sm">*</span>}
+                {status === "completed" && <span className="text-destructive text-sm" aria-hidden="true">*</span>}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -617,7 +617,7 @@ function EditWorkOrderContent() {
                 onChange={(e) => setReceiverName(e.target.value)}
               />
               <div className="space-y-2">
-                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้แจ้ง{status === "completed" ? <span className="text-destructive"> *</span> : null}</span>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้แจ้ง{status === "completed" ? <span className="text-destructive" aria-hidden="true"> *</span> : null}</span>
                 <div className="rounded-md border border-input bg-white p-2">
                   <canvas
                     ref={signatureCanvasRef}

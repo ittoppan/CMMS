@@ -125,7 +125,7 @@ export default function ProductionHoursCreatePage() {
 
             <div className="space-y-1.5">
               <Label>
-                เครื่องจักร/อุปกรณ์ <span className="text-destructive">*</span>
+                เครื่องจักร/อุปกรณ์ <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
               <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                 <SelectTrigger>
@@ -144,7 +144,7 @@ export default function ProductionHoursCreatePage() {
             <Grid columns={{ minWidth: 220, max: 2 }} gap={4}>
               <div className="space-y-1.5">
                 <Label htmlFor="ph-date">
-                  วันที่ <span className="text-destructive">*</span>
+                  วันที่ <span className="text-destructive" aria-hidden="true">*</span>
                 </Label>
                 <Input
                   id="ph-date"

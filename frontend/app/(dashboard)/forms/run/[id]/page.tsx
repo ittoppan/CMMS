@@ -164,7 +164,7 @@ export default function FormRunPage() {
     const name = fieldName(f, i);
     const value = (values[name] ?? "") as string;
     const bind = fieldBind(f);
-    const required = f.required ? <span className="text-destructive"> *</span> : null;
+    const required = f.required ? <span className="text-destructive" aria-hidden="true"> *</span> : null;
     const label = f.label ? (
       <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={name}>
         {f.label}

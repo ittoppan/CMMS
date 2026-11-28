@@ -238,7 +238,7 @@ export default function CreateUserPage() {
           <div className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="create-username">
-                {t("field.username")} <span className="text-destructive">*</span>
+                {t("field.username")} <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
                 <Input
                   id="create-username"
@@ -253,7 +253,7 @@ export default function CreateUserPage() {
 
             <div className="space-y-1.5">
               <Label htmlFor="create-full-name">
-                {t("field.full_name")} <span className="text-destructive">*</span>
+                {t("field.full_name")} <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
                 <Input
                   id="create-full-name"
@@ -268,7 +268,7 @@ export default function CreateUserPage() {
 
             <div className="space-y-1.5">
               <Label htmlFor="create-employee-code">
-                {t("field.employee_code")} <span className="text-destructive">*</span>
+                {t("field.employee_code")} <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
                 <Input
                   id="create-employee-code"
@@ -283,7 +283,7 @@ export default function CreateUserPage() {
 
             <div className="space-y-1.5">
               <Label htmlFor="create-password">
-                {t("field.password")} <span className="text-destructive">*</span>
+                {t("field.password")} <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
                 <Input
                   id="create-password"

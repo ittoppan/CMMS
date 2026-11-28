@@ -127,7 +127,7 @@ function EditRoleContent() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="role-edit-name">
-                  {t("form.role_name")} <span className="text-destructive">*</span>
+                  {t("form.role_name")} <span className="text-destructive" aria-hidden="true">*</span>
                 </Label>
                 <Input
                   id="role-edit-name"

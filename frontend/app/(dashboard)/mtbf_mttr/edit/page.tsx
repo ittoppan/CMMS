@@ -174,7 +174,7 @@ function EditMtbfMttrContent() {
 
               <div className="space-y-1.5">
                 <Label>
-                  เครื่องจักร/อุปกรณ์ <span className="text-destructive">*</span>
+                  เครื่องจักร/อุปกรณ์ <span className="text-destructive" aria-hidden="true">*</span>
                 </Label>
                 <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                   <SelectTrigger>
@@ -193,7 +193,7 @@ function EditMtbfMttrContent() {
               <Grid columns={{ minWidth: 220, max: 2 }} gap={4}>
                 <div className="space-y-1.5">
                   <Label htmlFor="mtbf-year">
-                    ปี <span className="text-destructive">*</span>
+                    ปี <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Input
                     id="mtbf-year"
@@ -204,7 +204,7 @@ function EditMtbfMttrContent() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>
-                    เดือน <span className="text-destructive">*</span>
+                    เดือน <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Select value={month} onValueChange={(v) => setMonth(v)}>
                     <SelectTrigger>

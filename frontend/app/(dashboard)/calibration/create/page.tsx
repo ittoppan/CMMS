@@ -113,7 +113,7 @@ export default function CalibrationCreatePage() {
           {error && <Alert variant="danger">{error}</Alert>}
 
           <div className="space-y-1.5">
-            <Label htmlFor="cal-create-asset">{t("form.measuring_tool_req")}<span className="text-destructive"> *</span></Label>
+            <Label htmlFor="cal-create-asset">{t("form.measuring_tool_req")}<span className="text-destructive" aria-hidden="true"> *</span></Label>
             <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
               <SelectTrigger id="cal-create-asset">
                 <SelectValue placeholder={t("placeholder.select_tool")} />
@@ -129,7 +129,7 @@ export default function CalibrationCreatePage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="cal-create-type">{t("form.cal_type_req")}<span className="text-destructive"> *</span></Label>
+            <Label htmlFor="cal-create-type">{t("form.cal_type_req")}<span className="text-destructive" aria-hidden="true"> *</span></Label>
             <Select value={calType} onValueChange={(v) => setCalType(v)}>
               <SelectTrigger id="cal-create-type">
                 <SelectValue />
@@ -143,7 +143,7 @@ export default function CalibrationCreatePage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="cal-create-last-date">{t("form.last_cal_date_req")}<span className="text-destructive"> *</span></Label>
+              <Label htmlFor="cal-create-last-date">{t("form.last_cal_date_req")}<span className="text-destructive" aria-hidden="true"> *</span></Label>
               <Input
                 id="cal-create-last-date"
                 type="date"
@@ -154,7 +154,7 @@ export default function CalibrationCreatePage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="cal-create-due-date">{t("form.due_date_req")}<span className="text-destructive"> *</span></Label>
+              <Label htmlFor="cal-create-due-date">{t("form.due_date_req")}<span className="text-destructive" aria-hidden="true"> *</span></Label>
               <Input
                 id="cal-create-due-date"
                 type="date"

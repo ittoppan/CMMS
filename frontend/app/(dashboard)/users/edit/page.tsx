@@ -275,7 +275,7 @@ function EditUserContent() {
               <div className="space-y-5">
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-username">
-                    {t("field.username")} <span className="text-destructive">*</span>
+                    {t("field.username")} <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Input
                     id="edit-username"
@@ -289,7 +289,7 @@ function EditUserContent() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-full-name">
-                    {t("field.full_name")} <span className="text-destructive">*</span>
+                    {t("field.full_name")} <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Input
                     id="edit-full-name"

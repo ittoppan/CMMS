@@ -474,7 +474,7 @@ export default function ImportExcelPage() {
                 <div className="space-y-2">
                   <div className="overflow-x-auto rounded-xl border border-[var(--cmms-border)]">
                     <table className="w-full min-w-[720px] text-sm">
-                      <thead><tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left"><th className="px-3 py-2 font-semibold">คอลัมน์ในแม่แบบ</th>{meta.columns.map((c) => (<th key={c} className={"whitespace-nowrap px-3 py-2 font-semibold " + (meta.required.includes(c) ? "text-[var(--cmms-danger)]" : "")}>{c}{meta.required.includes(c) ? " *" : ""}</th>))}</tr></thead>
+                      <thead><tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left"><th className="px-3 py-2 font-semibold">คอลัมน์ในแม่แบบ</th>{meta.columns.map((c) => (<th key={c} className={"whitespace-nowrap px-3 py-2 font-semibold " + (meta.required.includes(c) ? "text-[var(--cmms-danger)]" : "")}>{c}{meta.required.includes(c) ? <span className="text-destructive" aria-hidden="true"> *</span> : null}</th>))}</tr></thead>
                       <tbody><tr className="bg-[var(--cmms-bg-card)]"><td className="px-3 py-2 font-semibold text-[var(--cmms-text-secondary)]">ตัวอย่าง</td>{meta.columns.map((c) => (<td key={c} className={"max-w-[180px] truncate px-3 py-2 " + (meta.required.includes(c) ? "font-medium text-[var(--cmms-text-primary)]" : "text-[var(--cmms-text-secondary)]")}>{meta.sample[c] ?? (meta.required.includes(c) ? "ต้องระบุ" : "—")}</td>))}</tr></tbody>
                     </table>
                   </div>
@@ -551,7 +551,7 @@ export default function ImportExcelPage() {
 
             <div className="overflow-x-auto rounded-xl border border-[var(--cmms-border)]">
               <table className="w-full min-w-[720px] text-sm">
-                <thead><tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left"><th className="px-3 py-2 font-semibold">แถว</th><th className="px-3 py-2 font-semibold">สถานะ</th><th className="px-3 py-2 font-semibold">การดำเนินการ</th>{val.headers.map((h) => (<th key={h.label} className="px-3 py-2 font-semibold">{h.label}{h.required ? " *" : ""}</th>))}<th className="px-3 py-2 font-semibold">ข้อผิดพลาด/หมายเหตุ</th></tr></thead>
+                <thead><tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left"><th className="px-3 py-2 font-semibold">แถว</th><th className="px-3 py-2 font-semibold">สถานะ</th><th className="px-3 py-2 font-semibold">การดำเนินการ</th>{val.headers.map((h) => (<th key={h.label} className="px-3 py-2 font-semibold">{h.label}{h.required ? <span className="text-destructive" aria-hidden="true"> *</span> : null}</th>))}<th className="px-3 py-2 font-semibold">ข้อผิดพลาด/หมายเหตุ</th></tr></thead>
                 <tbody>
                   {pageRows.map((r) => (
                     <tr key={r.row} className={"border-b border-[var(--cmms-border)] last:border-0 " + (r.ok ? "bg-[var(--cmms-bg-card)]" : "bg-[var(--cmms-danger-light)]")}>

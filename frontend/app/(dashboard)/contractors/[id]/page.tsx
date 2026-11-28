@@ -210,8 +210,35 @@ export default function ContractorDetailPage() {
               key={t.key}
               type="button"
               role="tab"
+              id={`tab-${t.key}`}
               aria-selected={active}
+              aria-controls={`panel-${t.key}`}
+              tabIndex={active ? 0 : -1}
               onClick={() => setTab(t.key)}
+              onKeyDown={(e) => {
+                const idx = TABS.findIndex((x) => x.key === t.key);
+                if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  const next = TABS[(idx + 1) % TABS.length].key;
+                  setTab(next);
+                  window.setTimeout(() => document.getElementById(`tab-${next}`)?.focus(), 0);
+                } else if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  const prev = TABS[(idx - 1 + TABS.length) % TABS.length].key;
+                  setTab(prev);
+                  window.setTimeout(() => document.getElementById(`tab-${prev}`)?.focus(), 0);
+                } else if (e.key === "Home") {
+                  e.preventDefault();
+                  const first = TABS[0].key;
+                  setTab(first);
+                  window.setTimeout(() => document.getElementById(`tab-${first}`)?.focus(), 0);
+                } else if (e.key === "End") {
+                  e.preventDefault();
+                  const last = TABS[TABS.length - 1].key;
+                  setTab(last);
+                  window.setTimeout(() => document.getElementById(`tab-${last}`)?.focus(), 0);
+                }
+              }}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active ? "bg-[var(--cmms-primary)]/10 text-[var(--cmms-primary)]" : "text-muted-foreground hover:bg-[var(--cmms-bg-muted)]",
@@ -228,7 +255,7 @@ export default function ContractorDetailPage() {
 
       {/* ── OVERVIEW ── */}
       {tab === "overview" && (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader><CardTitle>ข้อมูลทะเบียน</CardTitle></CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -299,7 +326,7 @@ export default function ContractorDetailPage() {
 
       {/* ── QUALIFICATION ── */}
       {tab === "qualification" && (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div role="tabpanel" id="panel-qualification" aria-labelledby="tab-qualification" className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>คุณสมบัติรอบที่ {q?.round ?? "—"}</CardTitle>
@@ -389,7 +416,7 @@ export default function ContractorDetailPage() {
 
       {/* ── DOCUMENTS ── */}
       {tab === "documents" && (
-        <Card>
+        <Card role="tabpanel" id="panel-documents" aria-labelledby="tab-documents">
           <CardHeader><CardTitle>เอกสารผู้รับเหมา ({d.documents?.length ?? 0})</CardTitle></CardHeader>
           <CardContent className="p-0">
             {(d.documents ?? []).length === 0 ? (
@@ -436,7 +463,7 @@ export default function ContractorDetailPage() {
 
       {/* ── WORKERS ── */}
       {tab === "workers" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div role="tabpanel" id="panel-workers" aria-labelledby="tab-workers" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(d.workers ?? []).length === 0 && (
             <div className="sm:col-span-2 lg:col-span-3"><EmptyState title="ยังไม่มีพนักงาน" description="เพิ่มพนักงานผ่าน API เพื่อตรวจใบรับรองก่อนเข้างาน" icon={<Users size={40} />} /></div>
           )}
@@ -478,7 +505,7 @@ export default function ContractorDetailPage() {
 
       {/* ── CONTRACTS ── */}
       {tab === "contracts" && (
-        <Card>
+        <Card role="tabpanel" id="panel-contracts" aria-labelledby="tab-contracts">
           <CardHeader><CardTitle>สัญญาจ้าง ({d.contracts?.length ?? 0})</CardTitle></CardHeader>
           <CardContent className="p-0">
             {(d.contracts ?? []).length === 0 ? (
@@ -526,7 +553,7 @@ export default function ContractorDetailPage() {
 
       {/* ── ASSIGNMENTS ── */}
       {tab === "assignments" && (
-        <Card>
+        <Card role="tabpanel" id="panel-assignments" aria-labelledby="tab-assignments">
           <CardHeader className="flex-row items-center justify-between">
             <div><CardTitle>ประวัติงานภายนอก ({d.assignments?.length ?? 0})</CardTitle><CardDescription>สถานะและราคาจากงานจริง</CardDescription></div>
             <a href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><HardHat size={15} aria-hidden="true" /> ไปที่ Work Board</a>
@@ -568,7 +595,7 @@ export default function ContractorDetailPage() {
 
       {/* ── SAFETY ── */}
       {tab === "safety" && (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div role="tabpanel" id="panel-safety" aria-labelledby="tab-safety" className="grid gap-4 lg:grid-cols-3">
           <Card>
             <CardHeader><CardTitle>สรุปความปลอดภัย</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm">
@@ -614,7 +641,7 @@ export default function ContractorDetailPage() {
 
       {/* ── PERFORMANCE ── */}
       {tab === "performance" && (
-        <div className="space-y-4">
+        <div role="tabpanel" id="panel-performance" aria-labelledby="tab-performance" className="space-y-4">
           {p?.status === "INSUFFICIENT_DATA" ? (
             <Alert variant="info" title="ข้อมูลไม่พอคำนวณผลงาน" description={p.note || "รอข้อมูลงานภายนอกที่เสร็จเรียบร้อยอย่างน้อยตามเกณฑ์ที่กำหนด"} />
           ) : null}
@@ -639,7 +666,7 @@ export default function ContractorDetailPage() {
 
       {/* ── ACTIVITY ── */}
       {tab === "activity" && (
-        <Card>
+        <Card role="tabpanel" id="panel-activity" aria-labelledby="tab-activity">
           <CardHeader><CardTitle>กิจกรรมย้อนหลัง ({d.activity?.length ?? 0})</CardTitle></CardHeader>
           <CardContent className="space-y-0">
             {(d.activity ?? []).length === 0 && <p className="text-sm text-muted-foreground">ยังไม่มีกิจกรรม</p>}

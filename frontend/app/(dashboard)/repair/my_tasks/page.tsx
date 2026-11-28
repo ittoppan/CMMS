@@ -888,7 +888,7 @@ export default function MyTasksPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="close-root-cause">
-              สาเหตุของปัญหา <span className="text-destructive">*</span>
+              สาเหตุของปัญหา <span className="text-destructive" aria-hidden="true">*</span>
             </Label>
             <Textarea
               id="close-root-cause"
@@ -901,7 +901,7 @@ export default function MyTasksPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="close-solution">
-              วิธีการแก้ไข <span className="text-destructive">*</span>
+              วิธีการแก้ไข <span className="text-destructive" aria-hidden="true">*</span>
             </Label>
             <Textarea
               id="close-solution"
@@ -914,7 +914,7 @@ export default function MyTasksPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="close-contaminate">
-              ผลตรวจการปนเปื้อน <span className="text-destructive">*</span>
+              ผลตรวจการปนเปื้อน <span className="text-destructive" aria-hidden="true">*</span>
             </Label>
             <Select
               value={contaminateChecking || "__none__"}
@@ -1004,7 +1004,7 @@ export default function MyTasksPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div className="space-y-1.5">
               <Label htmlFor="mytasks-receiver-name">
-                ชื่อผู้รับมอบงานซ่อมเสร็จ <span className="text-destructive">*</span>
+                ชื่อผู้รับมอบงานซ่อมเสร็จ <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
               <Input
                 id="mytasks-receiver-name"
@@ -1016,7 +1016,7 @@ export default function MyTasksPage() {
 
             <div className="space-y-1.5">
               <span className="text-sm font-medium text-[var(--cmms-text-primary)]">
-                ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) <span className="text-destructive">*</span>
+                ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) <span className="text-destructive" aria-hidden="true">*</span>
               </span>
               <canvas
                 ref={canvasRef}

@@ -430,7 +430,7 @@ export default function FormsPage() {
 
             <div className="space-y-1.5">
               <Label htmlFor="upFile">
-                ไฟล์แบบฟอร์ม <span className="text-destructive">*</span>
+                ไฟล์แบบฟอร์ม <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
               <Input
                 id="upFile"

@@ -147,7 +147,7 @@ function EditSupplierContent() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5 sm:col-span-1">
                   <Label htmlFor="supplier-edit-code">
-                    {t("form.reference_code")} <span className="text-destructive">*</span>
+                    {t("form.reference_code")} <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Input
                     id="supplier-edit-code"
@@ -157,7 +157,7 @@ function EditSupplierContent() {
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="supplier-edit-name">
-                    {t("field.company_name")} <span className="text-destructive">*</span>
+                    {t("field.company_name")} <span className="text-destructive" aria-hidden="true">*</span>
                   </Label>
                   <Input
                     id="supplier-edit-name"

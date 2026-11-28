@@ -158,7 +158,7 @@ function EditManualContent() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="manual-title">
-                  ชื่อเอกสาร <span className="text-destructive">*</span>
+                  ชื่อเอกสาร <span className="text-destructive" aria-hidden="true">*</span>
                 </Label>
                 <Input
                   id="manual-title"

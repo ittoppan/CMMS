@@ -295,7 +295,8 @@ function EditPMContent() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
-                  label={`หน่วยมิเตอร์${frequency === "meter_based" ? " *" : ""}`}
+                  label="หน่วยมิเตอร์"
+                  required={frequency === "meter_based"}
                   placeholder="เช่น kWh, m³, ชั่วโมง, กม., รอบ"
                   value={meterUnit}
                   onChange={(e) => setMeterUnit(e.target.value)}

@@ -128,7 +128,7 @@ export default function WorkPermitCreatePage() {
             <CardContent className="space-y-5 p-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทงานเสี่ยง <span className="text-destructive">*</span></span>
+                  <span className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทงานเสี่ยง <span className="text-destructive" aria-hidden="true">*</span></span>
                   <Select value={form.permit_type_code} onValueChange={(v) => set("permit_type_code", v)}>
                     <SelectTrigger aria-label="ประเภทงานเสี่ยง"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -198,7 +198,7 @@ export default function WorkPermitCreatePage() {
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียดงาน <span className="text-destructive">*</span></span>
+                <span className="text-sm font-medium text-[var(--cmms-text-primary)]">รายละเอียดงาน <span className="text-destructive" aria-hidden="true">*</span></span>
                 <Textarea
                   rows={3}
                   placeholder="อธิบายลักษณะงานที่จะทำ — สิ่งที่เกี่ยวข้องกับความเสี่ยง เช่น ตัด/เชื่อม/ปีน/เข้าอับอากาศ…"

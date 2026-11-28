@@ -22,7 +22,7 @@ import {
 
 const Field = ({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) => (
   <div className="space-y-1">
-    <label className="text-xs font-semibold">{label}{required ? " *" : ""}</label>
+    <label className="text-xs font-semibold">{label}{required ? <span className="text-destructive" aria-hidden="true"> *</span> : null}</label>
     {children}
     {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
   </div>

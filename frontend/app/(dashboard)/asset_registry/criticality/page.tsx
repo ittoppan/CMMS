@@ -209,7 +209,7 @@ export default function AssetCriticalityPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="f-asset">เลือกเครื่องจักรที่ต้องการประเมิน <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="f-asset">เลือกเครื่องจักรที่ต้องการประเมิน <span className="text-destructive" aria-hidden="true">*</span></Label>
                   <Select
                     value={selectedMachine}
                     onValueChange={handleSelect}
@@ -230,7 +230,7 @@ export default function AssetCriticalityPage() {
                 <div className="space-y-4">
                   {FACTORS.map((factor) => (
                     <div key={factor.key} className="space-y-1.5">
-                      <Label htmlFor={`f-${factor.key}`}>{factor.label} <span className="text-destructive">*</span></Label>
+                      <Label htmlFor={`f-${factor.key}`}>{factor.label} <span className="text-destructive" aria-hidden="true">*</span></Label>
                       <Select
                         value={scores[factor.key]}
                         onValueChange={(v) => setScores({ ...scores, [factor.key]: String(v) })}
