@@ -24,10 +24,10 @@ function csrfToken(): string {
     if (session_status() === PHP_SESSION_NONE) {
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-        @ini_set('session.gc_maxlifetime', '31536000');
-        @session_set_cookie_params(['lifetime' => 31536000, 'httponly' => true, 'samesite' => 'Lax', 'secure' => $https]);
-        session_start();
+        // อายุ cookie/session file มาจาก public/.user.ini — ไม่ hardcode ซ้ำที่นี่
         @ini_set('session.use_strict_mode', '1');
+        @session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => $https]);
+        session_start();
     }
     if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

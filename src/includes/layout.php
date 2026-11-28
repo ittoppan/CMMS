@@ -1,9 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
-    // Cookie hardening: HttpOnly + SameSite=Lax; อายุยาวรองรับโหมดไม่หมดอายุเซสชัน
-    @ini_set('session.gc_maxlifetime', '31536000');
+    // Cookie hardening: HttpOnly + SameSite=Lax; อายุ cookie/session file มาจาก public/.user.ini
     @session_set_cookie_params([
-        'lifetime' => 31536000,
         'httponly' => true,
         'samesite' => 'Lax',
     ]);

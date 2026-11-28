@@ -62,6 +62,15 @@ interface SettingRow {
   masked?: boolean;
 }
 
+// API อาจคืนค่าไม่เป็น string — normalize ครั้งเดียวที่ขอบข้อมูล
+function normalizeSettingRows(rows: SettingRow[]): SettingRow[] {
+  return rows.map((row) => ({ ...row, setting_value: String(row.setting_value ?? "") }));
+}
+
+function settingFormValues(rows: SettingRow[]): Record<string, string> {
+  return Object.fromEntries(rows.map((row) => [row.setting_key, row.setting_value]));
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // TOPIC-BASED GROUP METADATA - แบ่งการตั้งค่าตามหัวข้อฟังก์ชัน
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -606,10 +615,9 @@ export default function SettingsPage() {
       const res = await fetch("/api/v1/settings.php");
       const json = await res.json();
       if (Array.isArray(json)) {
-        setSettings(json);
-        const next: Record<string, string> = {};
-        json.forEach((s: SettingRow) => { next[s.setting_key] = String(s.setting_value ?? ""); });
-        setForm(next);
+        const rows = normalizeSettingRows(json as SettingRow[]);
+        setSettings(rows);
+        setForm(settingFormValues(rows));
       } else {
         setError("ไม่สามารถโหลดการตั้งค่าได้ (response ไม่ใช่ array)");
       }
@@ -1401,9 +1409,7 @@ export default function SettingsPage() {
                     variant="secondary"
                     disabled={changedRows.length === 0}
                     onClick={() => {
-                      const next: Record<string, string> = {};
-                      settings.forEach((s) => { next[s.setting_key] = String(s.setting_value ?? ""); });
-                      setForm(next);
+                      setForm(settingFormValues(settings));
                       setNewSecrets({});
                     }}
                   >

@@ -25,18 +25,15 @@ function cmms_secure_session(): void {
     if (session_status() !== PHP_SESSION_NONE) return;
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-    // อายุคุกกี้/GC ยาว (1 ปี) เพื่อรองรับโหมดไม่หมดอายุ (session_timeout_mins=0)
+    // อายุ cookie/session file มาจาก public/.user.ini — ไม่ hardcode ซ้ำที่นี่
     // idle timeout ฝั่งแอปยังบังคับตาม cmms_enforce_session_lifecycle() เมื่อค่า > 0
-    @ini_set('session.gc_maxlifetime', '31536000');
+    @ini_set('session.use_strict_mode', '1');
     @session_set_cookie_params([
-        'lifetime' => 31536000,
         'httponly' => true,
         'samesite' => 'Lax',
         'secure'   => $https,
     ]);
     session_start();
-    // บังคับใช้ strict mode: กัน session fixation (session id ที่ server ไม่รู้จัก)
-    @ini_set('session.use_strict_mode', '1');
 }
 
 /** อ่าน setting session_timeout_mins (cache 1 ครั้งต่อ request) */
