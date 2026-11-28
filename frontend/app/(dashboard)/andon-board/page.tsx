@@ -94,6 +94,7 @@ function Avatar({ name, src, size = 44 }: { name?: string | null; src?: string; 
   return (
     <div
       className="ab-avatar"
+      aria-hidden="true"
       style={{
         width: size, height: size, borderRadius: "50%", flexShrink: 0,
         background: "var(--ab-surface)",
@@ -105,7 +106,7 @@ function Avatar({ name, src, size = 44 }: { name?: string | null; src?: string; 
       title={name || "ยังไม่มอบหมาย"}
     >
       {showImg ? (
-        <img src={src} alt={name || "ผู้รับผิดชอบ"} width={size} height={size} onError={() => setErr(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src={src} alt="" width={size} height={size} onError={() => setErr(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
         <span>{initials(name)}</span>
       )}
@@ -260,7 +261,7 @@ export default function AndonBoardPage() {
     return (
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#0B1D33", color: "#E9F2FC" }}>
         <div style={{ textAlign: "center" }}>
-          <AndonLamp status="idle" size="lg" />
+          <AndonLamp status="idle" size="lg" decorative />
           <h2 style={{ marginTop: 12, fontSize: 22, fontWeight: 700 }}>ไม่มีสิทธิ์ดูจอ Andon</h2>
           <p style={{ color: "#A8BDD6" }}>ติดต่อผู้ดูแลระบบเพื่อเปิดสิทธิ์เมนู “จอ Andon TV (โรงงาน)”</p>
         </div>
@@ -390,7 +391,7 @@ export default function AndonBoardPage() {
 
         <header className="ab-top">
           <div className="ab-brand">
-            <span className="ab-brand-lamp" aria-hidden="true">
+            <span className="ab-brand-lamp">
               <AndonLamp status={overdueCnt > 0 ? "down" : openCnt > 0 ? "warn" : "ok"} size="lg" />
             </span>
             <div>
@@ -405,8 +406,8 @@ export default function AndonBoardPage() {
             </div>
             <div className="ab-side">
               <span className="ab-chip"><i className="ab-live" aria-hidden="true" /> รีเฟรชใน {countdown}s · ล่าสุด {lastSync}</span>
-              <Button variant="secondary" onClick={goFullscreen} aria-label="เต็มจอ">
-                <Maximize2 size={16} /> เต็มจอ (Smart TV)
+              <Button variant="secondary" onClick={goFullscreen}>
+                <Maximize2 size={16} aria-hidden="true" /> เต็มจอ (Smart TV)
               </Button>
             </div>
           </div>
@@ -418,7 +419,7 @@ export default function AndonBoardPage() {
             return (
               <div key={k.label} className="ab-kpi" style={{ ["--ab-kpi-tone" as any]: toneColor(k.tone) }}>
                 <div className="ab-kpi-head">
-                  <AndonLamp status={k.tone} size="sm" />
+                  <AndonLamp status={k.tone} size="sm" decorative />
                   <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
                   <span>{k.label}</span>
                 </div>
@@ -440,7 +441,7 @@ export default function AndonBoardPage() {
                 <div className="ab-empty">กำลังโหลดข้อมูล…</div>
               ) : urgentRepairs.length === 0 ? (
                 <div className="ab-empty">
-                  <AndonLamp status="ok" size="lg" />
+                  <AndonLamp status="ok" size="lg" decorative />
                   <div className="ab-empty-ok" style={{ marginTop: 10 }}>ทุกเครื่องพร้อมใช้งาน ไม่มีงานด่วน</div>
                 </div>
               ) : (
@@ -450,7 +451,7 @@ export default function AndonBoardPage() {
                     const av = avatarSrc(r);
                     return (
                       <div key={r.id} className={`ab-row ${tone === "down" ? "down" : "warn"}`}>
-                        <AndonLamp status={tone} size="sm" />
+                        <AndonLamp status={tone} size="sm" decorative />
                         <Avatar name={r.assigned_name} src={av} size={46} />
                         <div className="ab-row-body">
                           <div className="ab-row-title">{r.work_order_no || `#${r.id}`} — {r.title || "(ไม่มีหัวข้อ)"}</div>
@@ -480,17 +481,21 @@ export default function AndonBoardPage() {
                 <div className="ab-empty ab-empty-ok">สต็อกอะไหล่ปกติทั้งหมด</div>
               ) : (
                 <div className="ab-stock-grid">
-                  {lowStock.map((s) => (
-                    <div key={s.id} className={`ab-row ${Number(s.stock_qty ?? 0) === 0 ? "down" : "warn"}`}>
-                      <AndonLamp status={Number(s.stock_qty ?? 0) === 0 ? "down" : "warn"} size="sm" />
-                      <div className="ab-row-body">
-                        <div className="ab-row-title">{s.code} — {s.name}</div>
-                        <div className="ab-row-meta">
-                          คงเหลือ {Number(s.stock_qty ?? 0)} / ขั้นต่ำ {Number(s.min_stock ?? 0)}{s.location ? ` · ${s.location}` : ""}
+                  {lowStock.map((s) => {
+                    const qty = Number(s.stock_qty ?? 0);
+                    const isOut = qty === 0;
+                    return (
+                      <div key={s.id} className={`ab-row ${isOut ? "down" : "warn"}`}>
+                        <AndonLamp status={isOut ? "down" : "warn"} size="sm" decorative />
+                        <div className="ab-row-body">
+                          <div className="ab-row-title">{s.code} — {s.name}</div>
+                          <div className="ab-row-meta">
+                            คงเหลือ {qty} / ขั้นต่ำ {Number(s.min_stock ?? 0)} · {isOut ? "หมดสต็อก" : "ต่ำกว่าจุดสั่งซื้อ"}{s.location ? ` · ${s.location}` : ""}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -512,7 +517,7 @@ export default function AndonBoardPage() {
                     const av = avatarSrc(p);
                     return (
                       <div key={p.id} className="ab-row warn">
-                        <AndonLamp status="warn" size="sm" />
+                        <AndonLamp status="warn" size="sm" decorative />
                         <Avatar name={p.assigned_name} src={av} size={40} />
                         <div className="ab-row-body">
                           <div className="ab-row-title">{p.title || `PM #${p.id}`}</div>
@@ -565,7 +570,15 @@ export default function AndonBoardPage() {
 
         <footer className="ab-footer">
           <span>อัปเดตอัตโนมัติทุก {refreshSec} วินาที · ตั้งค่าได้ที่ ระบบ &amp; ตั้งค่า → “จอ Andon TV — รีเฟรชอัตโนมัติ”</span>
-          <div className="ab-progress" aria-label="นับถอยหลังรีเฟรช">
+          <div
+            className="ab-progress"
+            role="progressbar"
+            aria-label="นับถอยหลังรีเฟรช"
+            aria-valuemin={0}
+            aria-valuemax={refreshSec}
+            aria-valuenow={countdown}
+            aria-valuetext={`เหลือ ${countdown} วินาที`}
+          >
             <i style={{ width: `${Math.max(0, Math.min(100, (countdown / Math.max(1, refreshSec)) * 100))}%` }} />
           </div>
           <span>TOPPAN Andon Live Board</span>

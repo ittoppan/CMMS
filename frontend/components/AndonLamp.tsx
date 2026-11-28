@@ -18,19 +18,23 @@ export default function AndonLamp({
   status = "idle",
   size = "md",
   showLabel = false,
+  decorative = false,
 }: {
   status?: AndonStatus;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
+  /** ซ่อนจาก screen reader เมื่อมีข้อความสถานะอยู่ข้าง ๆ แล้ว */
+  decorative?: boolean;
 }) {
   const px = size === "sm" ? 6 : size === "lg" ? 12 : 9;
   const gap = size === "sm" ? 2 : 3;
   return (
     <span
       className={`cmms-andon lit-${status}`}
-      role="img"
-      aria-label={`สถานะ: ${LABELS[status]}`}
-      title={LABELS[status]}
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : `สถานะ: ${LABELS[status]}`}
+      aria-hidden={decorative || undefined}
+      title={decorative ? undefined : LABELS[status]}
       style={showLabel ? { flexDirection: "row", alignItems: "center", gap: 8, padding: "4px 10px 4px 6px" } : undefined}
     >
       <span
