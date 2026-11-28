@@ -312,18 +312,18 @@ export function DataTable<TData extends RowData>({
               {group.headers.map((header) => {
                 const sorted = header.column.getIsSorted();
                 const canSort = header.column.getCanSort();
-                // ทิศทางที่จะเกิดเมื่อกด (asc/desc/ยกเลิก) — ขึ้นกับชนิดข้อมูลของคอลัมน์
-                const nextSort = canSort ? header.column.getNextSortingOrder() : false;
                 const sortLabel = headerLabels.get(header.column.id) ?? header.column.id;
                 return (
                   <th
                     key={header.id}
                     aria-sort={
-                      sorted === "asc"
-                        ? "ascending"
-                        : sorted === "desc"
-                          ? "descending"
-                          : undefined
+                      canSort
+                        ? sorted === "asc"
+                          ? "ascending"
+                          : sorted === "desc"
+                            ? "descending"
+                            : "none"
+                        : undefined
                     }
                     scope="col"
                   >
@@ -339,9 +339,11 @@ export function DataTable<TData extends RowData>({
                         disabled={!canSort}
                         aria-label={
                           canSort
-                            ? nextSort
-                              ? `เรียงตาม ${sortLabel} จาก${nextSort === "asc" ? "น้อยไปมาก" : "มากไปน้อย"}`
-                              : `ยกเลิกการเรียงตาม ${sortLabel}`
+                            ? sorted === "asc"
+                              ? `เรียงตาม ${sortLabel} จากน้อยไปมาก`
+                              : sorted === "desc"
+                                ? `เรียงตาม ${sortLabel} จากมากไปน้อย`
+                                : `เรียงตาม ${sortLabel}`
                             : undefined
                         }
                       >
