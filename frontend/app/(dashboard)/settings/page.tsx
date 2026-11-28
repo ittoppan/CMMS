@@ -62,11 +62,6 @@ interface SettingRow {
   masked?: boolean;
 }
 
-// API อาจคืนค่าไม่เป็น string — normalize ครั้งเดียวที่ขอบข้อมูล
-function normalizeSettingRows(rows: SettingRow[]): SettingRow[] {
-  return rows.map((row) => ({ ...row, setting_value: String(row.setting_value ?? "") }));
-}
-
 function settingFormValues(rows: SettingRow[]): Record<string, string> {
   return Object.fromEntries(rows.map((row) => [row.setting_key, row.setting_value]));
 }
@@ -615,7 +610,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/v1/settings.php");
       const json = await res.json();
       if (Array.isArray(json)) {
-        const rows = normalizeSettingRows(json as SettingRow[]);
+        const rows = json as SettingRow[];
         setSettings(rows);
         setForm(settingFormValues(rows));
       } else {
@@ -1336,7 +1331,7 @@ export default function SettingsPage() {
                         ) : selectOptions ? (
                           <Select
                             value={form[row.setting_key] ?? ""}
-                            onValueChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
+                            onValueChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
                             disabled={isReadonly || !canManage}
                           >
                             <SelectTrigger aria-label={meta.label} className="sm:max-w-xs">
