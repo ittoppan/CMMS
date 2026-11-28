@@ -196,11 +196,11 @@
 | /(dashboard)/reliability/weibull | list | done | PageShell → PageHeader (2026-11-21) |
 | /(dashboard)/repair/assign | list | done | ย้าย hero → PageHeader (2026-11-20) |
 | /(dashboard)/repair/create | form | done | ย้าย sr-only eyebrow → PageHeader (2026-11-20) |
-| /(dashboard)/repair/edit | form | done | ย้าย PageShell → PageHeader (2026-11-20) |
+| /(dashboard)/repair/edit | form | done | ย้าย PageShell → PageHeader (2026-11-20) · 2026-11-28 ทำ avatar/สื่อให้ null-safe |
 | /(dashboard)/repair/history | list | done | ย้าย hero → PageHeader (2026-11-20) |
 | /(dashboard)/repair/kanban | list | done | ย้าย hero → PageHeader (kanban พิเศษ: เฉพาะ header/spacing) (2026-11-20) |
 | /(dashboard)/repair/my_tasks | list | done | ย้าย PageShell → PageHeader (2026-11-20) |
-| /(dashboard)/repair | list | done | ต้นแบบ (PageShell + Kpi + toolbar) — เสร็จแล้ว |
+| /(dashboard)/repair | list | done | ต้นแบบ (PageShell + Kpi + toolbar) — เสร็จแล้ว · 2026-11-28 ตัดคอลัมน์/แกลเลอรีสื่อซ้ำออก ใช้หลักฐานในหน้า edit |
 | /(dashboard)/repair/print | detail | done | ย้าย screen header → PageHeader (print document ไม่แตะ) (2026-11-20) |
 | /(dashboard)/repair/tracking | list | done | ย้าย hero → PageHeader (2026-11-20) |
 | /(dashboard)/repair/view | detail | done | ย้าย PageShell → DetailHeader (2026-11-20) |

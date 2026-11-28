@@ -8,15 +8,17 @@ export type EmployeeStatus = "online" | "offline" | "busy" | "away";
 export interface EmployeeAvatarProps {
   name: string;
   photoUrl?: string | null;
-  size?: 24 | 32 | 40 | 56 | 80;
+  size?: 24 | 28 | 32 | 40 | 48 | 56 | 80;
   status?: EmployeeStatus;
   className?: string;
 }
 
 const SIZE_CLASS: Record<number, string> = {
   24: "h-6 w-6 text-xs",
+  28: "h-7 w-7 text-xs",
   32: "h-8 w-8 text-xs",
   40: "h-10 w-10 text-sm",
+  48: "h-12 w-12 text-sm",
   56: "h-14 w-14 text-base",
   80: "h-20 w-20 text-xl",
 };

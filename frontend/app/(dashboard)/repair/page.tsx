@@ -30,10 +30,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { EmployeeAvatar } from "@/components/ui/employee-avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataTable, type DataTableProps } from "@/components/ui/table";
 import { useToast } from "@/components/ToastProvider";
 import { cn } from "@/lib/cn";
+import { assetUrl } from "@/lib/utils";
 import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -59,6 +61,7 @@ interface WorkOrder extends Record<string, unknown> {
   status: string;
   priority: string;
   assignee: string;
+  assigneeAvatar: string | null;
   date: string;
   overdue: boolean;
   /** ใกล้ครบกำหนดส่ง (ยังไม่เกิน) ตาม SLA */
@@ -246,7 +249,8 @@ export default function WorkOrdersPage() {
           asset: row.asset_name || row.asset_code || row.title || "ไม่ระบุ",
           status: row.status || "pending",
           priority: row.priority || "Medium",
-          assignee: row.assigned_name || row.assigned_to || "ยังไม่มอบหมาย",
+          assignee: row.assigned_name || row.assigned_to || "",
+          assigneeAvatar: row.assigned_avatar || row.assigned_avatar_legacy || null,
           date: row.created_at ? row.created_at.split(" ")[0] : "-",
           // กำหนดส่งจริง: sla_due_at ก่อน → estimated_completion_date (ตรงกับ kpi_is_overdue)
           overdue: isRepairOverdue(row.sla_due_at || row.estimated_completion_date, row.status),
@@ -348,7 +352,7 @@ export default function WorkOrdersPage() {
     };
     return workOrders.filter((wo) => {
       const q = search.toLowerCase();
-      const matchSearch = !q || wo.woNumber.toLowerCase().includes(q) || wo.asset.toLowerCase().includes(q) || wo.assignee.toLowerCase().includes(q);
+      const matchSearch = !q || wo.woNumber.toLowerCase().includes(q) || wo.asset.toLowerCase().includes(q) || (wo.assignee || "ยังไม่มอบหมาย").toLowerCase().includes(q);
       const matchStatus =
         !statusFilter ||
         (statusFilter === "overdue"
@@ -628,7 +632,27 @@ export default function WorkOrdersPage() {
         </Badge>
       ),
     },
-    { accessorKey: "assignee", header: t("tbl.assignee") },
+    {
+      accessorKey: "assignee",
+      header: t("tbl.assignee"),
+      cell: ({ row }) => {
+        const assignee = row.original.assignee.trim();
+        return (
+          <div className="flex items-center gap-2">
+            {assignee && (
+              <EmployeeAvatar
+                name={assignee}
+                photoUrl={row.original.assigneeAvatar ? assetUrl(row.original.assigneeAvatar) : null}
+                size={28}
+              />
+            )}
+            <span className={assignee ? "truncate text-sm" : "truncate text-sm text-muted-foreground"}>
+              {assignee || "ยังไม่มอบหมาย"}
+            </span>
+          </div>
+        );
+      },
+    },
     { accessorKey: "date", header: t("tbl.request_date") },
     {
       id: "actions",

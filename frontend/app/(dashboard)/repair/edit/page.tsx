@@ -24,7 +24,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout";
 import SuccessDialog from "@/components/SuccessDialog";
+import { EmployeeAvatar } from "@/components/ui/employee-avatar";
+import { assetUrl } from "@/lib/utils";
 import { useInlineValidation } from "@/lib/use-inline-validation";
+
+function splitPaths(value: string | null | undefined): string[] {
+  return (value ?? "").split("|").map((path) => path.trim()).filter(Boolean);
+}
+
+function isVideoPath(path: string): boolean {
+  return /^data:video\//i.test(path) || /\.(mp4|m4v|mov|ogv|webm)(?:[?#].*)?$/i.test(path);
+}
 
 /* ============================================================
    หน้าแก้ไขงานซ่อม F-EN-03 — ช่างเป็นคนกรอกข้อมูล
@@ -51,7 +61,11 @@ interface RepairData {
   status: string;
   priority: string;
   assigned_name: string;
+  assigned_avatar: string | null;
+  assigned_avatar_legacy: string | null;
   receiver_name: string;
+  video_path: string | null;
+  attachment_path: string | null;
   creator_name?: string;
   receiver_signature_path: string;
   root_cause: string;
@@ -67,8 +81,8 @@ interface RepairData {
   cost_parts: number;
   cost_labor: number;
   cost_outsource: number;
-  before_image_path: string;
-  after_image_path: string;
+  before_image_path: string | null;
+  after_image_path: string | null;
   actual_start_at: string;
   completed_at: string;
   machine_status: string;
@@ -167,7 +181,7 @@ function EditWorkOrderContent() {
           setReceiverSignature(json.receiver_signature_path || "");
           if (json.receiver_signature_path) setHasDrawnSignature(true);
           if (json.after_image_path) {
-            setAfterImages(json.after_image_path.split("|").filter(Boolean));
+            setAfterImages(splitPaths(json.after_image_path));
           }
         } else {
           setError("ไม่พบข้อมูลใบแจ้งซ่อม");
@@ -335,6 +349,14 @@ function EditWorkOrderContent() {
     );
   }
 
+  const assigneeName = woData?.assigned_name?.trim() || "";
+  const assigneePhoto = woData?.assigned_avatar || woData?.assigned_avatar_legacy || null;
+  const beforeImages = splitPaths(woData?.before_image_path);
+  const attachments = splitPaths(woData?.attachment_path);
+  const rawVideoPath = woData?.video_path?.trim() || "";
+  const videoSrc = isVideoPath(rawVideoPath) ? rawVideoPath : "";
+  const hasBeforeEvidence = beforeImages.length > 0 || attachments.length > 0 || !!videoSrc;
+
   return (
     <>
       <PageHeader
@@ -375,6 +397,67 @@ function EditWorkOrderContent() {
                 <InfoRow label="รายละเอียดปัญหา" value={woData?.description || "-"} />
                 <InfoRow label="Lot No." value={woData?.product_lot_no || "-"} />
               </div>
+
+              {/* ผู้รับผิดชอบ (assigned) + รูป */}
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3">
+                {assigneeName ? (
+                  <EmployeeAvatar
+                    name={assigneeName}
+                    photoUrl={assigneePhoto ? assetUrl(assigneePhoto) : null}
+                    size={48}
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cmms-info)] text-white font-bold">
+                    ?
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">ผู้รับผิดชอบ</p>
+                  <p className="text-sm font-semibold truncate">{assigneeName || "ยังไม่มอบหมาย"}</p>
+                </div>
+              </div>
+
+              {/* รูป/วิดีโอที่ผู้แจ้งแจ้งมาก่อนซ่อม */}
+              {hasBeforeEvidence && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm font-semibold">หลักฐานก่อนซ่อม (จากผู้แจ้ง)</p>
+                  {beforeImages.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {beforeImages.map((path, index) => (
+                        <div key={`before-${index}`} className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
+                          <img loading="lazy" decoding="async" src={assetUrl(path)} alt={`รูปก่อนซ่อม ${index + 1}`} className="cmms-img-fill" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((path, index) => (
+                        <a
+                          key={`attachment-${index}`}
+                          href={assetUrl(path)}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <FileText className="h-4 w-4" />
+                          ไฟล์แนบ {index + 1}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {videoSrc && (
+                    <video
+                      controls
+                      preload="metadata"
+                      playsInline
+                      className="max-h-72 w-full rounded-xl border border-border bg-black"
+                      src={assetUrl(videoSrc)}
+                    />
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
