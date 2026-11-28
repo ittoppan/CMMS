@@ -103,16 +103,16 @@ export default function LubricationPage() {
         <form onSubmit={addPoint} className="space-y-4">
           <FormSection title="เพิ่มจุดหล่อลื่น" columns={2}>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">ชื่อจุดหล่อลื่น</label>
+              <span className="text-sm font-medium text-foreground">ชื่อจุดหล่อลื่น</span>
               <input aria-label="ชื่อจุดหล่อลื่น" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">รอบเวลา (วัน)</label>
-              <input aria-label="รอบ (วัน)" type="number" min={1} value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} className={inputClass} />
+              <span className="text-sm font-medium text-foreground">รอบเวลา (วัน)</span>
+              <input aria-label="รอบเวลา (วัน)" type="number" min={1} value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} className={inputClass} />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">โน้ต</label>
-              <input aria-label="หมายเหตุ" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
+              <span className="text-sm font-medium text-foreground">โน้ต</span>
+              <input aria-label="โน้ต" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
             </div>
           </FormSection>
           <FormActions

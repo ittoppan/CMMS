@@ -97,30 +97,30 @@ export default function ShiftHandoverPage() {
         <form onSubmit={submit} className="space-y-4">
           <FormSection title="บันทึกส่งกะใหม่" columns={2}>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">วันที่</label>
+              <span className="text-sm font-medium text-foreground">วันที่</span>
               <input aria-label="วันที่" type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">กะ</label>
+              <span className="text-sm font-medium text-foreground">กะ</span>
               <select aria-label="กะ" value={shiftCode} onChange={(e) => setShiftCode(e.target.value)} className={inputClass}>
                 {Object.entries(SHIFT_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">งานค้างส่งต่อ</label>
-              <textarea aria-label="งานค้าง" value={pendingJobs} onChange={(e) => setPendingJobs(e.target.value)} rows={3} className={inputClass} placeholder="รายการงานที่ยังไม่เสร็จและต้องส่งต่อ" />
+              <span className="text-sm font-medium text-foreground">งานค้างส่งต่อ</span>
+              <textarea aria-label="งานค้างส่งต่อ" value={pendingJobs} onChange={(e) => setPendingJobs(e.target.value)} rows={3} className={inputClass} placeholder="รายการงานที่ยังไม่เสร็จและต้องส่งต่อ" />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">เหตุการณ์กะที่แล้ว</label>
-              <textarea aria-label="เหตุการณ์" value={incidents} onChange={(e) => setIncidents(e.target.value)} rows={3} className={inputClass} placeholder="เหตุการณ์/อุบัติการณ์ที่เกิดขึ้น" />
+              <span className="text-sm font-medium text-foreground">เหตุการณ์กะที่แล้ว</span>
+              <textarea aria-label="เหตุการณ์กะที่แล้ว" value={incidents} onChange={(e) => setIncidents(e.target.value)} rows={3} className={inputClass} placeholder="เหตุการณ์/อุบัติการณ์ที่เกิดขึ้น" />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">เครื่องที่ต้องจับตา</label>
-              <textarea aria-label="เครื่องที่ต้องเฝ้าระวัง" value={machinesWatch} onChange={(e) => setMachinesWatch(e.target.value)} rows={2} className={inputClass} placeholder="เครื่องจักรที่ต้องติดตาม" />
+              <span className="text-sm font-medium text-foreground">เครื่องที่ต้องจับตา</span>
+              <textarea aria-label="เครื่องที่ต้องจับตา" value={machinesWatch} onChange={(e) => setMachinesWatch(e.target.value)} rows={2} className={inputClass} placeholder="เครื่องจักรที่ต้องติดตาม" />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">โน้ตเพิ่มเติม</label>
-              <textarea aria-label="หมายเหตุ" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
+              <span className="text-sm font-medium text-foreground">โน้ตเพิ่มเติม</span>
+              <textarea aria-label="โน้ตเพิ่มเติม" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
             </div>
           </FormSection>
           <FormActions

@@ -87,26 +87,26 @@ export default function UtilityEnergyPage() {
         <form onSubmit={submit} className="space-y-4">
           <FormSection title="บันทึกค่ามิเตอร์" columns={2}>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">ประเภท</label>
+              <span className="text-sm font-medium text-foreground">ประเภท</span>
               <select aria-label="ประเภทสาธารณูปโภค" value={utilityType} onChange={(e) => setUtilityType(e.target.value)} className={inputClass}>
                 {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">วันที่</label>
+              <span className="text-sm font-medium text-foreground">วันที่</span>
               <input aria-label="วันที่อ่านค่า" type="date" value={readingDate} onChange={(e) => setReadingDate(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">ค่าที่อ่านได้</label>
+              <span className="text-sm font-medium text-foreground">ค่าที่อ่านได้</span>
               <input aria-label="ค่าที่อ่านได้" type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} className={inputClass} required />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">หน่วย</label>
+              <span className="text-sm font-medium text-foreground">หน่วย</span>
               <input aria-label="หน่วย" value={unit} onChange={(e) => setUnit(e.target.value)} className={inputClass} placeholder="kWh, m³" />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium text-foreground">โน้ต</label>
-              <textarea aria-label="หมายเหตุ" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
+              <span className="text-sm font-medium text-foreground">โน้ต</span>
+              <textarea aria-label="โน้ต" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
             </div>
           </FormSection>
           <FormActions
